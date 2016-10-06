@@ -1,0 +1,18 @@
+{
+  "name": "typescript-phaser",
+  "version": "0.0.0",
+  "dependencies": {},
+  "scripts": {
+    "tsc": "tsc",
+    "tsc:w": "tsc -w --outDir build",
+    "clean": "rm -rf build",
+    "lite": "lite-server",
+    "build": "tsc && concurrent \"cp src/index.html build\" \"cp -R src/vendor src/css src/assets build\"",
+    "start": "concurrent \"npm run tsc:w\" \"npm run lite\""
+  },
+  "devDependencies": {
+    "typescript": "^2.0.3",
+    "concurrently": "^1.0.0",
+    "lite-server": "*"
+  }
+}

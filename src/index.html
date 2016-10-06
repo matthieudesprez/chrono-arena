@@ -1,0 +1,24 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>Typescript phaser</title>
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+    <div id="content">
+        <div id="leftPanel">
+            <textarea id="script">this.players[0].goRandom();this.players[1].goRandom();</textarea>
+            <button type="button" class="btn btn-success" id="reload">RELOAD</button>
+        </div>
+        <div id="rightPanel">
+
+        </div>
+    </div>
+    <script src="vendor/easystarjs/bin/easystar-0.2.3.min.js"></script>
+    <script src="vendor/phaser-official/build/phaser.js"></script>
+    <script src="app.js"></script>
+    <script>window.onload = function() { new TypescriptPhaser.Game(); };</script>
+</body>
+</html>

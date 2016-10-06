@@ -1,0 +1,34 @@
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.32);
+  padding: 0;
+  margin: 0;
+  text-align: center;
+}
+#content {
+  margin: 0 auto;
+  display: table;
+}
+#content #leftPanel {
+  width: 30%;
+  float: left;
+  padding-top: 20px;
+}
+#content #leftPanel textarea {
+  width: 90%;
+  height: 300px;
+}
+#content #leftPanel button {
+  width: 90%;
+}
+#content #rightPanel {
+  width: 70%;
+  float: left;
+  padding-top: 20px;
+}
+#content #rightPanel canvas {
+  position: relative;
+}
