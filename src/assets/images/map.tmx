@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" renderorder="left-up" width="20" height="20" tilewidth="32" tileheight="32" nextobjectid="6">
+ <tileset firstgid="1" name="tiles-collection" tilewidth="32" tileheight="32">
+  <image source="../../../../../../../Applications/MAMP/htdocs/phaser_socket/client/assets/gameAssets/tile1.png" width="1024" height="2016"/>
+  <tile id="93" probability="0"/>
+ </tileset>
+ <layer name="Background" width="20" height="20">
+  <data encoding="base64" compression="zlib">
+   eJylk8ENwCAMA2E39p+pHx5VxZ2N+kAqDXacOFlzjDX2eX/TfR5ixkHYExdx0/0UIxz9++ohXaaV8JbzhDX+v7jU4+R/g6caTXMTb3Nar60eO/SWcpDuht/8Jt23u5t2xvym2U47kHxqZjLpsb1L85ZmuO1j6s2Nf+Zlq7GZC+pLqnu/eQBahWsB
+  </data>
+ </layer>
+ <layer name="Foreground" width="20" height="20">
+  <data encoding="base64" compression="zlib">
+   eJztk1EKgCAMhn3q3W7ibqI3sZvoQTtDChPWmGmjoIcGH0puHz+h1hjjCmvBFqDgGUH45rHX4qxja9vX2XjBhkTspfMg5Kq9iZEFEvbynMBy1d7ZyiwnkH/Tct0tmjMoc/VyNqeUa1/689JZIr6n6vd90+eEs7v3xZnznZacs0XfGkXj7Lk0zpGLOmGSkUuDf8lbOQBh9z6I
+  </data>
+ </layer>
+ <layer name="Decorations" width="20" height="20">
+  <data encoding="base64" compression="zlib">
+   eJxjYCANdLGRqAEIWFkhdDdQbw8Q90JxHxCvYkNVQwxQhapdDdS7BojXQvE6Nkw1hIAKCfYq4VHLhEPuIAt28SM4xImxixjASKF+dKCIxbxDBPyADgj5mR4AV3wMJTvwmU/vMB4McQoD9IjbUYAKAHnVEGw=
+  </data>
+ </layer>
+ <layer name="Decorations2" width="20" height="20">
+  <data encoding="base64" compression="zlib">
+   eJxjYBj6gBOKR8EoGAWjYBTQDwAAaNQAEw==
+  </data>
+ </layer>
+ <layer name="Decorations3" width="20" height="20">
+  <data encoding="base64" compression="zlib">
+   eJxjYBgFQwGcYyNPbhSMTDCaXkYBPQAAcG0DUQ==
+  </data>
+ </layer>
+</map>

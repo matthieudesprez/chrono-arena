@@ -8,6 +8,7 @@
     "clean": "rm -rf build",
     "lite": "lite-server",
     "build": "tsc && concurrent \"cp src/index.html build\" \"cp -R src/vendor src/css src/assets build\"",
+    "cp": "concurrent \"cp src/index.html build\" \"cp -R src/vendor src/css src/assets build\"",
     "start": "concurrent \"npm run tsc:w\" \"npm run lite\""
   },
   "devDependencies": {

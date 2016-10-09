@@ -4,10 +4,10 @@ module TypescriptPhaser {
     constructor() {
       super({
         width: 640,
-        height: 480,
+        height: 640,
         transparent: false,
         enableDebug: true,
-        parent: 'rightPanel' //
+        parent: 'rightPanel'
       });
 
       this.state.add('boot', State.Boot);

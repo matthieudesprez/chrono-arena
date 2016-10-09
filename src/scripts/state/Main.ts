@@ -1,7 +1,6 @@
+declare var EasyStar;
 /// <reference path="../definitions/easystarjs.d.ts"/>
-
 module TypescriptPhaser.State {
-    "use strict";
     export class Main extends Phaser.State {
         map:Phaser.Tilemap;
         layer:Phaser.TilemapLayer;
@@ -15,31 +14,34 @@ module TypescriptPhaser.State {
 
         create() {
             this.tileSize = 32;
-            var thing:String = 'code !';
-            this.add.text(10, 10, `Let's ${thing}`, {font: '65px Arial'});
             this.map = this.add.tilemap('map');
-            this.map.addTilesetImage('tiles');
-            this.layer = this.map.createLayer('Tile Layer 2');
+            this.map.addTilesetImage('tiles-collection');
+            this.map.createLayer('Background'); //
+            this.layer = this.map.createLayer('Foreground'); //
+            this.players = [];
+            this.map.createLayer('Decorations'); //
+            this.map.createLayer('Decorations2'); //
+            this.players.push(new Entity.Player(this, 7, 9, 'E'));
+            this.players.push(new Entity.Player(this, 12, 9, 'W'));
+            this.map.createLayer('Decorations3'); //
             this.marker = this.add.graphics(0,0);
             this.marker.lineStyle(2, 0xffffff, 1);
             this.marker.drawRect(0, 0, this.tileSize, this.tileSize);
             this.input.addMoveCallback(this.updateMarker, this);
             //console.log(this.map, this.layer);
             let me = this;
-            document.getElementById('reload').addEventListener('click', function() {
-                me.reload(me);
-            });
+            //document.getElementById('reload').addEventListener('click', function() {
+            //    me.reload(me);
+            //});
 
-            this.players = [];
-            this.players.push(new Entity.Player(this));
-            this.players.push(new Entity.Player(this)); //ooooioipoi
+            //this.players.push(new Entity.Player(this)); //ooooioipoi
 
             this.input.onDown.add(this.onGridClick, this);
 
-            //this.pathfinder = new EasyStar.js();
-            //this.pathfinder.setAcceptableTiles([1]);
-            //this.pathfinder.disableDiagonals();
-            //this.pathfinder.disableSync();
+            this.pathfinder = new EasyStar.js();
+            this.pathfinder.setAcceptableTiles([-1]);
+            this.pathfinder.disableDiagonals();
+            this.pathfinder.disableSync();
 
             this.grid = [];
             for(var i = 0; i < this.map.layers[1].data.length; i++) {
@@ -49,15 +51,15 @@ module TypescriptPhaser.State {
                 }
             }
             console.log(this.grid);
-            //this.pathfinder.setGrid(this.grid);
-            this.playerScript = document.getElementById('script').getAttribute('value');
+            this.pathfinder.setGrid(this.grid);
+            //this.playerScript = document.getElementById('script').getAttribute('value');
             this.tickTimer = this.time.events.loop(1000, this.gameLoop, this);
         }
 
         gameLoop() {
             //console.log(this.canMove(this.player.getPosition().x / 32 + 1, this.player.getPosition().y / 32));
-            //this.player.goRandom();
-            eval(this.playerScript);
+            //this.players[0].goRandom();
+            //eval(this.playerScript);
         }
 
         update() {
@@ -70,8 +72,8 @@ module TypescriptPhaser.State {
         }
 
         canMove(x, y) {
-            console.log(x, this.grid[x]);
             if(this.grid[y]) {
+                console.log(x, this.grid[y][x]);
                 return this.grid[y][x];
             }
             return false;
@@ -79,6 +81,7 @@ module TypescriptPhaser.State {
 
         onGridClick() {
             console.log(this.marker.x / this.tileSize, this.marker.y / this.tileSize);
+            this.preMoveTo(this.players[0], this.marker.x / this.tileSize, this.marker.y / this.tileSize);
         }
 
         preMoveTo(player, x, y) {
@@ -95,7 +98,7 @@ module TypescriptPhaser.State {
                 player.getPosition().y,
                 targetX,
                 targetY);
-            /*this.pathfinder.findPath(
+            this.pathfinder.findPath(
                 player.getPosition().x,
                 player.getPosition().y,
                 targetX,
@@ -108,7 +111,7 @@ module TypescriptPhaser.State {
                     }
                 }
             );
-            this.pathfinder.calculate();*/
+            this.pathfinder.calculate();
         }
 
         moveTo(player, x,y,path,callback) {
@@ -123,12 +126,12 @@ module TypescriptPhaser.State {
                 tile_x = Math.floor(x);
             }
             var tile = this.map.layers[1].data[tile_y][tile_x];
-            var newX = tile.x * this.tileSize;
-            var newY = tile.y * this.tileSize;
+            var newX = tile.x * this.tileSize - player.spriteSize / 4;
+            var newY = tile.y * this.tileSize - player.spriteSize / 2;
             player.faceTo(newX, newY);
             player.walk();
             var t = this.add.tween(
-                player.entity_sprite).to({x:newX,y:newY},
+                player.entity_sprite).to({x: newX,y: newY},
                 player.speed,
                 Phaser.Easing.Linear.None,
                 true

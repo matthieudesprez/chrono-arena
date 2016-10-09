@@ -3,56 +3,63 @@ module TypescriptPhaser.Entity {
         private entity_sprite:Phaser.Sprite;
         game;
         speed:number;
+        spriteSize;
         private ext:string;
 
-        constructor(game) {
+        constructor(game, x, y, ext) {
             this.game = game;
-            this.ext = 'down';
+            this.ext = ext;
             this.speed = 200;
-            this.entity_sprite = this.game.add.sprite(this.game.tileSize * 10, this.game.tileSize * 2, 'player');
-            this.entity_sprite.animations.add('stand_down', ["stand_down"], 5, true);
-            this.entity_sprite.animations.add('stand_up', ["stand_up"], 5, true);
-            this.entity_sprite.animations.add('stand_left', ["stand_left"], 5, true);
-            this.entity_sprite.animations.add('stand_right', ["stand_right"], 5, true);
-            this.entity_sprite.animations.add('walk_down', ["walk_down_01", "walk_down_02"], 5, true);
-            this.entity_sprite.animations.add('walk_up', ["walk_up_01", "walk_up_02"], 5, true);
-            this.entity_sprite.animations.add('walk_left', ["walk_left_01", "walk_left_02"], 5, true);
-            this.entity_sprite.animations.add('walk_right', ["walk_right_01", "walk_right_02"], 5, true);
+            this.spriteSize = 64;
+            this.entity_sprite = this.game.add.sprite(
+                this.game.tileSize * x - (this.spriteSize / 4),
+                this.game.tileSize * y - (this.spriteSize / 2),
+                'player');
+            this.entity_sprite.animations.add('standS', ["walkS1"], 6, true);
+            this.entity_sprite.animations.add('standN', ["walkN1"], 6, true);
+            this.entity_sprite.animations.add('standW', ["walkW1"], 6, true);
+            this.entity_sprite.animations.add('standE', ["walkE1"], 6, true);
+            this.entity_sprite.animations.add('walkS', ["walkS1","walkS2","walkS3","walkS4","walkS5","walkS6","walkS7","walkS8","walkS9"], 6, true);
+            this.entity_sprite.animations.add('walkN', ["walkN1","walkN2","walkN3","walkN4","walkN5","walkN6","walkN7","walkN8","walkN9"], 6, true);
+            this.entity_sprite.animations.add('walkW', ["walkW1","walkW2","walkW3","walkW4","walkW5","walkW6","walkW7","walkW8","walkW9"], 6, true);
+            this.entity_sprite.animations.add('walkE', ["walkE1","walkE2","walkE3","walkE4","walkE5","walkE6","walkE7","walkE8","walkE9"], 6, true);
+            this.stand();
         }
 
         getPosition() {
             return {
-                x: this.entity_sprite.position.x / this.game.tileSize,
-                y: this.entity_sprite.position.y / this.game.tileSize
+                x: (this.entity_sprite.position.x + this.spriteSize / 4) / this.game.tileSize,
+                y: (this.entity_sprite.position.y + this.spriteSize / 2) / this.game.tileSize
             };
         }
 
         play(animation:string) {
-            console.log(animation)
+            console.log(animation);
             this.entity_sprite.animations.play(animation);
         }
 
         faceTo(x:number, y:number) {
             if (this.entity_sprite.x < x) {
-                this.ext = 'right';
+                this.ext = 'E';
             }
-            else if (this.entity_sprite.x > y) {
-                this.ext = 'left';
+            else if (this.entity_sprite.x > x) {
+                this.ext = 'W';
             }
             if (this.entity_sprite.y < y) {
-                this.ext = 'down';
+                this.ext = 'S';
             }
             else if (this.entity_sprite.y > y) {
-                this.ext = 'up';
+                this.ext = 'N';
             }
+            console.log(this.entity_sprite.x, x, this.entity_sprite.y, y, this.ext);
         }
 
         walk() {
-            this.play('walk_' + this.ext);
+            this.play('walk' + this.ext);
         }
 
         stand() {
-            this.play('stand_' + this.ext);
+            this.play('stand' + this.ext);
         }
 
         goNorth() {

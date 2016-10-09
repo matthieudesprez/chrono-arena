@@ -6,6 +6,14 @@
     "outFile": "build/app.js",
     "rootDir": "src"
   },
+  "files": [
+    "./src/scripts/Game.ts",
+    "./src/scripts/state/Boot.ts",
+    "./src/scripts/state/Main.ts",
+    "./src/scripts/state/Preload.ts",
+    "./src/scripts/entity/Player.ts",
+    "./src/scripts/definitions/easystarjs.d.ts"
+  ],
   "include": [
     "src/*",
     "src/**/*"
