@@ -4,9 +4,9 @@
   "dependencies": {},
   "scripts": {
     "tsc": "tsc",
-    "tsc:w": "tsc -w --outDir build",
+    "watch": "tsc -w --outDir build",
     "clean": "rm -rf build",
-    "lite": "lite-server",
+    "serve": "lite-server",
     "build": "tsc && concurrent \"cp src/index.html build\" \"cp -R src/vendor src/css src/assets build\"",
     "cp": "concurrent \"cp src/index.html build\" \"cp -R src/vendor src/css src/assets build\"",
     "start": "concurrent \"npm run tsc:w\" \"npm run lite\""

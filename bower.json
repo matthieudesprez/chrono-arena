@@ -2,7 +2,15 @@
   "name": "typescript-phaser",
   "version": "0.0.0",
   "dependencies": {
-    "phaser-official": "2.4.6",
+    "phaser-official": "2.6.2",
     "easystarjs": "~0.2.3"
-  }
+  },
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "package.json",
+    "src"
+  ]
 }

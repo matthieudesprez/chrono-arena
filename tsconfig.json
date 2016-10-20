@@ -4,16 +4,9 @@
     "sourceMap": true,
     "outDir": "build",
     "outFile": "build/app.js",
-    "rootDir": "src"
+    "rootDir": "src",
+    "lib": ["es5", "es2015", "dom", "es2015.core", "es2015.collection", "es2015.generator", "es2015.iterable", "es2015.promise", "es2015.proxy", "es2015.reflect", "es2015.symbol", "es2015.symbol.wellknown"]
   },
-  "files": [
-    "./src/scripts/Game.ts",
-    "./src/scripts/state/Boot.ts",
-    "./src/scripts/state/Main.ts",
-    "./src/scripts/state/Preload.ts",
-    "./src/scripts/entity/Player.ts",
-    "./src/scripts/definitions/easystarjs.d.ts"
-  ],
   "include": [
     "src/*",
     "src/**/*"

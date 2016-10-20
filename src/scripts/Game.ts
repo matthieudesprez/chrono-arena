@@ -5,8 +5,7 @@ module TypescriptPhaser {
       super({
         width: 640,
         height: 640,
-        transparent: false,
-        enableDebug: true,
+        renderer: Phaser.AUTO,
         parent: 'rightPanel'
       });
 
