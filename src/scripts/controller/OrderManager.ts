@@ -22,10 +22,8 @@ module TypescriptPhaser.Controller {
             	for(var i = 0; i < this.orders.length; i++) {
             		var o = this.orders[i];
             		if(o.action == 'move') {
-            			console.log('yeah');
             			o.entity.ghost.preMoveTo(o.x, o.y).then((res) => {
-	                        console.log('ook');
-	                        //delete o.entity.ghost;
+	                        o.entity.ghost.sprite.destroy();
 	                    });
             		}
             	}

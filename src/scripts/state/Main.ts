@@ -99,7 +99,7 @@ module TypescriptPhaser.State {
                 activePlayer.getPosition().y,
                 activePlayer.ext
             );
-            activePlayer.ghost.entity_sprite.alpha = 0.5;
+            activePlayer.ghost.sprite.alpha = 0.5;
             var targetX = this.marker.x / this.tileSize;
             var targetY = this.marker.y / this.tileSize;
             activePlayer.preMoveTo(targetX, targetY);
