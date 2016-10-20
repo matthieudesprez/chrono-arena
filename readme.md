@@ -1,7 +1,7 @@
-#Tactic-Arena
+# Tactic-Arena
 A WIP turn based strategy game made with phaser and typescript.
 
-##Install project
+## Install project
 
 Run those following commands to install dependencies :
 
@@ -12,7 +12,7 @@ npm install
 bower install
 ```
 
-##Develop
+## Develop
 
 For creating the build folder with the compiled javascript + assets :
 
