@@ -1,11 +1,26 @@
-module TypescriptPhaser.Controller {
+module TacticArena.Controller {
     export class OrderManager {
-        players;
         orders;
 
-        constructor(game) {
-            this.players = game.players;  
+        constructor() {
             this.orders = [];     
+        }
+
+        removeEntityOrder(id) {
+            return function(element) {
+                if(this.entity) {
+                    return this.entity._id != id;
+                }
+            };
+        }
+
+        hasOrder(id) {
+            for(var i = 0; i < this.orders.length; i++) {
+                if (this.orders[i].entity._id == id) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         add(action, entity, x, y) {
@@ -17,19 +32,42 @@ module TypescriptPhaser.Controller {
             })
         }
 
-        resolveAll() {
+        createPromiseOrder(entity, x, y) {
             return new Promise((resolve, reject) => {
+                console.log(entity._id)
+                entity.ghost.preMoveTo(x, y).then((res) => {
+                    entity.destroyGhost();
+                    entity.show();
+                    resolve(true);
+                });
+            });
+        }
+
+        resolveAll() {
+            console.log(this.orders);
+            return new Promise((resolve, reject) => {
+                var promisesOrders = [];
             	for(var i = 0; i < this.orders.length; i++) {
             		var o = this.orders[i];
-            		if(o.action == 'move') {
-            			o.entity.ghost.preMoveTo(o.x, o.y).then((res) => {
-	                        o.entity.ghost.sprite.destroy();
-	                    });
+                    var p = null;
+                    var id = o.entity._id;
+            		if (o.action == 'move') {
+                        p = this.createPromiseOrder(o.entity, o.x, o.y);
             		}
+                     else if (o.action == 'stand') {
+                        p = new Promise((resolve, reject) => {
+                            o.entity.show();
+                            resolve(true);
+                        });
+                    }
+                    promisesOrders.push(p);
             	}
-            	this.orders = [];
-	        	resolve(true);
-        	});
+
+                Promise.all(promisesOrders).then((res) => {
+                    this.orders = [];
+                    resolve(true);
+                });
+            });
         }
     }
 }

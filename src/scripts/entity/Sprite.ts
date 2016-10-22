@@ -1,18 +1,18 @@
-module TypescriptPhaser.Entity {
+module TacticArena.Entity {
     export class Sprite extends Phaser.Sprite {
-        _entity;
+        _parent;
         _speed:number;
         _size;
         private _ext:string;
 
-        constructor(game, x, y, ext, entity, size) {
+        constructor(game, x, y, ext, parent, size) {
             super(
                 game.game, 
                 game.tileSize * x - (size / 4), 
                 game.tileSize * y - (size / 2), 
                 'player'
             );
-            this._entity = entity;
+            this._parent = parent;
             this._ext = ext;
             this._speed = 200;
             this._size = size;

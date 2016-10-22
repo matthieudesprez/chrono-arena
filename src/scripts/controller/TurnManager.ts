@@ -1,40 +1,41 @@
-module TypescriptPhaser.Controller {
+module TacticArena.Controller {
     export class TurnManager {
-        players;
+        pawns;
 
         constructor(game) {
-            this.players = game.players;         
+            this.pawns = game.pawns;         
         }
 
-        initTurn(player) {
+        initTurn(pawn) {
             return new Promise((resolve, reject) => {
-	        	for(var i = 0; i < this.players.length; i++) {
-	        		this.players[i].active = false;
+	        	for(var i = 0; i < this.pawns.length; i++) {
+	        		this.pawns[i].active = false;
 	        	}
-	        	player.active = true;
+	        	pawn.active = true;
 	        	resolve(true);
         	});
         }
 
-        endTurn(player) {
+        endTurn() {
             return new Promise((resolve, reject) => {
 	        	var nextIndex = 0;
-	        	for(var i = 0; i < this.players.length; i++) {
-	        		if(this.players[i].active && (i + 1) < this.players.length) {
+	        	for(var i = 0; i < this.pawns.length; i++) {
+	        		if(this.pawns[i].active && (i + 1) < this.pawns.length) {
 	        			nextIndex = i + 1;
 	        		}
 	        	}
-	        	resolve(nextIndex);
+	        	resolve(this.pawns[nextIndex]);
         	});
         }
 
-        getActivePlayer() {
-        	for(var i = 0; i < this.players.length; i++) {
-        		if(this.players[i].active) {
-        			return this.players[i];
+        getActivePawn():Entity.Pawn {
+            console.log(this.pawns);
+        	for(var i = 0; i < this.pawns.length; i++) {
+        		if(this.pawns[i].active) {
+        			return this.pawns[i];
         		}
         	}
-        	return false;
+        	return null;
         }
     }
 }

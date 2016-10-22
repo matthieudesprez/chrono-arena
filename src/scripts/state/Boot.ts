@@ -1,4 +1,4 @@
-module TypescriptPhaser.State {
+module TacticArena.State {
   export class Boot extends Phaser.State {
     preload() {
       this.load.image('preload-bar', 'assets/images/preloader.gif');

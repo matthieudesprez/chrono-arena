@@ -1,4 +1,4 @@
-module TypescriptPhaser.State {
+module TacticArena.State {
   export class Preload extends Phaser.State {
     private preloadBar:Phaser.Sprite;
 

@@ -1,12 +1,12 @@
 /// <reference path="./definitions/phaser.comments.d.ts"/>
-module TypescriptPhaser {
+module TacticArena {
   export class Game extends Phaser.Game {
     constructor() {
       super({
         width: 640,
         height: 640,
         renderer: Phaser.AUTO,
-        parent: 'rightPanel'
+        parent: 'game-container'
       });
 
       this.state.add('boot', State.Boot);

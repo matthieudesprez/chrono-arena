@@ -1,34 +1,70 @@
-html,
-body {
+*, ol, ul {
+  padding: 0;
+  margin: 0;
+}
+
+li {
+  list-style-type: none;
+}
+
+html, body {
   width: 100%;
   height: 100%;
   overflow: hidden;
   background: rgba(0, 0, 0, 0.32);
-  padding: 0;
-  margin: 0;
   text-align: center;
 }
 #content {
   margin: 0 auto;
   display: table;
-}
-#content #leftPanel {
-  width: 30%;
-  float: left;
-  padding-top: 20px;
-}
-#content #leftPanel textarea {
-  width: 90%;
-  height: 300px;
-}
-#content #leftPanel button {
-  width: 90%;
-}
-#content #rightPanel {
-  width: 70%;
-  float: left;
-  padding-top: 20px;
-}
-#content #rightPanel canvas {
   position: relative;
+}
+#content #game-container {
+  width: 100%;
+}
+#content #game-container canvas {
+  position: relative;
+}
+.ui-logs {
+  height: 96px;
+  width: 160px;
+  background-color: #e6c762;
+  color: #333;
+  padding: 5px;
+  bottom: 0px;
+  left: 0px;
+  overflow: auto;
+  position: absolute;
+}
+.ui-menu {
+  position: absolute;
+  bottom: 32px;
+  left: 256px;
+}
+.ui-menu li {
+  height: 32px;
+  width: 32px;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-color: #e6c762;
+  float: left;
+  cursor: pointer;
+  border: 1px solid #333;
+  background-size: 85%;
+}
+.ui-menu li:hover, .ui-menu li.selected {
+  border: 2px solid #fff;
+}
+.ui-menu li.cancel{
+  background-image: url('/assets/images/icons/icon-cancel.png');
+}
+.ui-menu li.walk{
+  background-image: url('/assets/images/icons/icon-walk.png');
+  background-size: 90%;
+}
+.ui-menu li.wait{
+  background-image: url('/assets/images/icons/icon-wait.png');
+}
+.ui-menu li.submit{
+  background-image: url('/assets/images/icons/icon-submit.png');
 }

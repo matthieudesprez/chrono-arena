@@ -8,17 +8,18 @@
 </head>
 <body>
     <div id="content">
-        <!-- <div id="leftPanel">
-            <textarea id="script">this.players[0].goRandom();this.players[1].goRandom();</textarea>
-            <button type="button" class="btn btn-success" id="reload">RELOAD</button>
-        </div> -->
-        <div id="rightPanel">
-
-        </div>
+        <div id="game-container"></div>
+        <div class="ui-logs"></div>
+        <ul class="ui-menu">
+            <li class="cancel"></li>
+            <li class="walk"></li>
+            <li class="wait"></li>
+            <li class="submit"></li>
+        </ul>
     </div>
     <script src="vendor/easystarjs/bin/easystar-0.2.3.min.js"></script>
     <script src="vendor/phaser-official/build/phaser.js"></script>
     <script src="app.js"></script>
-    <script>window.onload = function() { new TypescriptPhaser.Game(); };</script>
+    <script>window.onload = function() { new TacticArena.Game(); };</script>
 </body>
 </html>
