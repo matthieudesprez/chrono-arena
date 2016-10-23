@@ -2,7 +2,7 @@ module TacticArena.UI {
     export class UIManager {
         game:State.Main;
         element;
-        logsElement;
+        logsUI;
         directionUI;
         actionUI;
         endTurnKey;
@@ -11,17 +11,18 @@ module TacticArena.UI {
             this.game = game;
             this.element = document.querySelector('#content');
 
-            this.logsElement = this.element.querySelector('.ui-logs');
+            this.logsUI = new UI.Logs(this);
             this.directionUI = new UI.Direction(this);
             this.actionUI = new UI.Action(this);
 
-            this.game.pointer.dealWith(this.logsElement);
+            this.game.pointer.dealWith(this.logsUI.element);
             this.game.pointer.dealWith(this.actionUI.element);
             this.game.pointer.dealWith(this.directionUI.element);
 
             this.endTurnKey = this.game.input.keyboard.addKey(Phaser.KeyCode.SPACEBAR);
             this.endTurnKey.onDown.add(this.endTurn ,this);
 
+            this.logsUI.write('<b>Tactic Arena</b>');
             this.init();
         }
 
@@ -29,16 +30,13 @@ module TacticArena.UI {
             var activePawn = this.game.turnManager.getActivePawn();
             this.directionUI.init(activePawn.getDirection());
             this.actionUI.init();
-            this.write('au tour de Player_0' + activePawn._id);
-        }
-
-        write(msg) {
-            this.element.querySelector('.ui-logs').innerHTML += msg + '<br/>';
+            this.logsUI.write('au tour de Player_0' + activePawn._id);
         }
 
         cancelAction() {
             var activePawn = this.game.turnManager.getActivePawn();
             activePawn.resetToGhostPosition();
+            activePawn.ap = 2;
             this.game.orderManager.add('stand', activePawn, null, null);
         }
 

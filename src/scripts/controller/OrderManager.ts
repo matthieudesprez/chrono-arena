@@ -7,11 +7,13 @@ module TacticArena.Controller {
         }
 
         removeEntityOrder(id) {
-            return function(element) {
-                if(this.entity) {
-                    return this.entity._id != id;
+            var result = []
+            for(var i = 0; i < this.orders.length; i++) {
+                if(this.orders[i].entity._id != id) {
+                    result.push(this.orders[i]);
                 }
-            };
+            }
+            return result;
         }
 
         hasOrder(id) {
@@ -24,7 +26,7 @@ module TacticArena.Controller {
         }
 
         add(action, entity, x, y) {
-            //this.orders = this.orders.filter(this.removeEntityOrder(entity));
+            this.orders = this.removeEntityOrder(entity._id);
             this.orders.push({
             	'action': action,
             	'entity': entity,

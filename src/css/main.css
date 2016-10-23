@@ -35,6 +35,7 @@ html, body {
   left: 0px;
   overflow: auto;
   position: absolute;
+  text-align: left;
 }
 .ui-direction {
   height: 96px;

@@ -24,13 +24,24 @@ module TacticArena.UI {
                 var activePawn = this.game.turnManager.getActivePawn();
                 var targetX = this.marker.x / this.game.tileSize;
                 var targetY = this.marker.y / this.game.tileSize;
-                if(targetX != activePawn.getPosition().x || targetY != activePawn.getPosition().y) {
-                    this.game.process = true;
-                    activePawn.createGhost();
-                    activePawn.preMoveTo(targetX, targetY).then((res) => {
-                        this.game.orderManager.add('move', activePawn, targetX, targetY);
-                        this.game.process = false;
-                    });
+                var distance = this.game.stageManager.getNbTilesBetween(
+                    {'x': targetX, 'y': targetY}, 
+                    {'x': activePawn.getPosition().x, 'y': activePawn.getPosition().y}
+                );
+
+                console.log(distance, activePawn.ap);
+
+                if(distance <= activePawn.ap) {
+                    if(targetX != activePawn.getPosition().x || targetY != activePawn.getPosition().y) {
+                        this.game.process = true;
+                        activePawn.createGhost();
+                        activePawn.preMoveTo(targetX, targetY).then((res) => {
+                            this.game.orderManager.add('move', activePawn, targetX, targetY);
+                            this.game.uiManager.directionUI.update(activePawn.getDirection());
+                            this.game.process = false;
+                            activePawn.ap -= distance;
+                        });
+                    }
                 }
             }
         }

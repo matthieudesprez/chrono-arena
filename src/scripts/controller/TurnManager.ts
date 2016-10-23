@@ -11,7 +11,8 @@ module TacticArena.Controller {
 	        	for(var i = 0; i < this.pawns.length; i++) {
 	        		this.pawns[i].active = false;
 	        	}
-	        	pawn.active = true;
+                pawn.active = true;
+	        	pawn.ap = 2;
 	        	resolve(true);
         	});
         }
@@ -29,7 +30,6 @@ module TacticArena.Controller {
         }
 
         getActivePawn():Entity.Pawn {
-            console.log(this.pawns);
         	for(var i = 0; i < this.pawns.length; i++) {
         		if(this.pawns[i].active) {
         			return this.pawns[i];

@@ -3,35 +3,33 @@ module TacticArena.UI {
         menu;
         element;
         savedDirection;
+        matching;
 
         constructor(menu) {
             var self = this;
             this.menu = menu;
             this.element = this.menu.element.querySelector('.ui-direction');
 
+            this.matching = {'N': 'north', 'E': 'east', 'S': 'south', 'W': 'west'};
+
             this.getButton('.compass').addEventListener('click', function() {
-            	self.deselectAll();
-                self.getButton('.compass').classList.add('selected');
+            	self.select('compass');
                 self.changeDirection(self.savedDirection);
             });
             this.getButton('.north').addEventListener('click', function() {
-            	self.deselectAll();
-                self.getButton('.north').classList.add('selected');
+            	self.select('north');
                 self.changeDirection('N');
             });
             this.getButton('.east').addEventListener('click', function() {
-            	self.deselectAll();
-                self.getButton('.east').classList.add('selected');
+            	self.select('east');
                 self.changeDirection('E');
             });
             this.getButton('.south').addEventListener('click', function() {
-            	self.deselectAll();
-                self.getButton('.south').classList.add('selected');
+            	self.select('south');
                 self.changeDirection('S');
             });
             this.getButton('.west').addEventListener('click', function() {
-            	self.deselectAll();
-                self.getButton('.west').classList.add('selected');
+            	self.select('west');
                 self.changeDirection('W');
             });
         }
@@ -45,11 +43,20 @@ module TacticArena.UI {
             return this.element.querySelector(query);
         }
 
+        select(name) {
+        	this.deselectAll();
+            this.getButton('.' + name).classList.add('selected');
+        }
+
         deselectAll() {
             var buttons = this.element.querySelectorAll('a');
             for(var i=0; i < buttons.length; i++) {
                 buttons[i].classList.remove('selected');
             }
+        }
+
+        update(direction) {
+        	this.select(this.matching[direction]);
         }
 
     	changeDirection(direction) {

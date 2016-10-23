@@ -4,11 +4,11 @@ module TacticArena.Entity {
         game;
         ghost;
         _id;
+        ap;
 
         constructor(game, x, y, ext, id) {
             this.game = game;
             this._id = id;
-            console.log('he', this._id);
             this.ghost = null;
             this.sprite = new Entity.Sprite(game, x, y, ext, this, 64);
             this.game.add.existing(this.sprite);  
@@ -126,6 +126,7 @@ module TacticArena.Entity {
         getDirection() {
             return this.sprite._ext;
         }
+        
         faceDirection(direction) {
             this.sprite._ext = direction;
             this.sprite.stand();
