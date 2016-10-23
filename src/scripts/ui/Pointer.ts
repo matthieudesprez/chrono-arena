@@ -44,5 +44,16 @@ module TacticArena.UI {
             this.marker.y = -this.game.tileSize;
             this.marker.visible = true;
         }
+
+        dealWith(element) {
+            var self = this;
+            element.addEventListener('mouseover', function() {
+                self.hide();
+            });
+            element.addEventListener('mouseout', function() {
+                self.show();
+            });
+            
+        }
     }
 }

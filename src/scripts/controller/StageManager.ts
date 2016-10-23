@@ -39,5 +39,9 @@ module TacticArena.Controller {
             }
             return false;
         }
+
+        getNbTilesBetween(coordsA, coordsB) {
+            return Math.abs(coordsA.x - coordsB.x) + Math.abs(coordsA.y - coordsB.y);
+        }
     }
 }

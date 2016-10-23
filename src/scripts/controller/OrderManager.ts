@@ -24,6 +24,7 @@ module TacticArena.Controller {
         }
 
         add(action, entity, x, y) {
+            //this.orders = this.orders.filter(this.removeEntityOrder(entity));
             this.orders.push({
             	'action': action,
             	'entity': entity,

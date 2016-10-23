@@ -122,5 +122,13 @@ module TacticArena.Entity {
             this.sprite.alpha = 1;
 
         }
+
+        getDirection() {
+            return this.sprite._ext;
+        }
+        faceDirection(direction) {
+            this.sprite._ext = direction;
+            this.sprite.stand();
+        }
     }
 }

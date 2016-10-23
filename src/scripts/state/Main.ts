@@ -9,10 +9,10 @@ module TacticArena.State {
         turnManager: Controller.TurnManager;
         orderManager: Controller.OrderManager;
         stageManager: Controller.StageManager;
+        uiManager: UI.UIManager
         process: Boolean;
         endTurnKey;
         pointer;
-        menu;
 
         create() {
             this.process = true;
@@ -42,7 +42,7 @@ module TacticArena.State {
                 this.process = false;
             });
 
-            this.menu = new UI.Menu(this);
+            this.uiManager = new UI.UIManager(this);
         }
 
         getUniqueId() {
