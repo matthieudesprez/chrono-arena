@@ -11,7 +11,6 @@ module TacticArena.State {
         stageManager: Controller.StageManager;
         uiManager: UI.UIManager
         process: Boolean;
-        endTurnKey;
         pointer;
 
         create() {
@@ -21,9 +20,9 @@ module TacticArena.State {
             this.stageManager = new Controller.StageManager(this);
             this.stageManager.init();
 
-            this.pawns = [];            
-            this.pawns.push(new Entity.Pawn(this, 7, 9, 'E', this.getUniqueId()));
-            this.pawns.push(new Entity.Pawn(this, 12, 9, 'W', this.getUniqueId()));
+            this.pawns = [];
+            this.pawns.push(new Entity.Pawn(this, 7, 9, 'E', 'redhead', this.getUniqueId()));
+            this.pawns.push(new Entity.Pawn(this, 12, 9, 'W', 'skeleton', this.getUniqueId()));
 
             this.stageManager.addDecorations();
 

@@ -7,7 +7,7 @@ module TacticArena.Controller {
         }
 
         removeEntityOrder(id) {
-            var result = []
+            var result = [];
             for(var i = 0; i < this.orders.length; i++) {
                 if(this.orders[i].entity._id != id) {
                     result.push(this.orders[i]);

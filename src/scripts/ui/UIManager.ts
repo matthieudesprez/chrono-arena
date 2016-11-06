@@ -5,6 +5,7 @@ module TacticArena.UI {
         logsUI;
         directionUI;
         actionUI;
+        pawnsinfosUI;
         endTurnKey;
 
         constructor(game) {
@@ -14,6 +15,7 @@ module TacticArena.UI {
             this.logsUI = new UI.Logs(this);
             this.directionUI = new UI.Direction(this);
             this.actionUI = new UI.Action(this);
+            this.pawnsinfosUI = new UI.PawnsInfos(this);
 
             this.game.pointer.dealWith(this.logsUI.element);
             this.game.pointer.dealWith(this.actionUI.element);
@@ -31,6 +33,7 @@ module TacticArena.UI {
             this.directionUI.init(activePawn.getDirection());
             this.actionUI.init();
             this.logsUI.write('au tour de Player_0' + activePawn._id);
+            this.pawnsinfosUI.select(activePawn._id);
         }
 
         cancelAction() {

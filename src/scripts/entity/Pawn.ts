@@ -5,12 +5,14 @@ module TacticArena.Entity {
         ghost;
         _id;
         ap;
+        type;
 
-        constructor(game, x, y, ext, id) {
+        constructor(game, x, y, ext, type, id) {
             this.game = game;
             this._id = id;
+            this.type = type;
             this.ghost = null;
-            this.sprite = new Entity.Sprite(game, x, y, ext, this, 64);
+            this.sprite = new Entity.Sprite(game, x, y, ext, type, this, 64);
             this.game.add.existing(this.sprite);  
             this.sprite.stand();
         }
@@ -88,6 +90,7 @@ module TacticArena.Entity {
                     this.getPosition().x,
                     this.getPosition().y,
                     this.sprite._ext,
+                    this.type,
                     null
                 );
                 this.ghost.sprite.alpha = 0.5;

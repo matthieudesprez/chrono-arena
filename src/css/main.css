@@ -1,6 +1,7 @@
 *, ol, ul {
   padding: 0;
   margin: 0;
+  box-sizing: border-box;
 }
 
 li {
@@ -11,7 +12,7 @@ html, body {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: rgba(0, 0, 0, 0.32);
+  background: #333333;
   text-align: center;
 }
 #content {
@@ -24,6 +25,52 @@ html, body {
 }
 #content #game-container canvas {
   position: relative;
+}
+.ui-pawns-infos {
+  position: absolute;
+  width: 100%;
+  left: 0px;
+  bottom: -108px;
+  height: auto;
+}
+.ui-pawns-infos .pawn{
+  height: 96px;
+  width: 96px;
+  float: left;
+  margin-right: 20px;
+  position: relative;
+  border: 2px solid transparent;
+}
+.ui-pawns-infos .pawn.active {
+  border: 2px solid #ffffff;
+}
+.ui-pawns-infos .pawn .avatar {
+  background-position: 0 0;
+  background-repeat: no-repeat;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+.ui-pawns-infos .pawn01 .avatar{
+  background-image: url('/assets/images/redhead_avatar.png');
+}
+.ui-pawns-infos .pawn02 .avatar{
+  background-image: url('/assets/images/skeleton_avatar.png');
+}
+.ui-pawns-infos .infos{
+  position: absolute;
+  width: 100%;
+  bottom: -25px;
+}
+.ui-pawns-infos .infos .ap{
+  color: dodgerblue;
+  float: right;
+}
+.ui-pawns-infos .infos .hp{
+  color: forestgreen;
+  float: left;
 }
 .ui-logs {
   height: 96px;

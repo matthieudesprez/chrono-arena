@@ -5,12 +5,12 @@ module TacticArena.Entity {
         _size;
         private _ext:string;
 
-        constructor(game, x, y, ext, parent, size) {
+        constructor(game, x, y, ext, type, parent, size) {
             super(
                 game.game, 
                 game.tileSize * x - (size / 4), 
                 game.tileSize * y - (size / 2), 
-                'player'
+                type
             );
             this._parent = parent;
             this._ext = ext;
