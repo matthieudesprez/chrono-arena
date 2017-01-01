@@ -13,7 +13,8 @@ module TacticArena.Entity {
             this.type = type;
             this.ghost = null;
             this.sprite = new Entity.Sprite(game, x, y, ext, type, this, 64);
-            this.game.add.existing(this.sprite);  
+            this.game.add.existing(this.sprite);
+            console.log(this.sprite._ext);
             this.sprite.stand();
         }
 
@@ -38,8 +39,9 @@ module TacticArena.Entity {
                     function(path) {
                         if(path && path.length > 0) {
                             path.shift();
+                            var result = JSON.parse(JSON.stringify(path));
                             self.moveTo(0, 0, path, null).then((res) => {
-                                resolve(res);
+                                resolve(result);
                             });
                         }
                     }
@@ -94,19 +96,26 @@ module TacticArena.Entity {
                     null
                 );
                 this.ghost.sprite.alpha = 0.5;
-            } else if (!this.ghost.sprite.alive) {
+            }
+            else if (!this.ghost.sprite.alive) {
                 this.ghost.sprite.reset(
                     this.sprite.position.x,
                     this.sprite.position.y
                 );
+                this.ghost.sprite._ext = this.sprite._ext;
+                this.ghost.sprite.stand();
             }
         }
 
         destroyGhost() {
-            this.ghost.sprite.kill();
+            if(this.ghost) {
+                this.ghost.sprite._ext = this.sprite._ext;
+                this.ghost.sprite.kill();
+            }
         }
 
         resetToGhostPosition() {
+            console.log(this.ghost.sprite._ext);
             if(this.ghost !== null) {
                 this.sprite.position.x = this.ghost.sprite.position.x;
                 this.sprite.position.y = this.ghost.sprite.position.y;

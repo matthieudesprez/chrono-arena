@@ -10,7 +10,6 @@ module TacticArena.Controller {
         	this.map = null;
         	this.layer = null;
         	this.grid = [];
-            
         }
 
         init() {
@@ -41,6 +40,10 @@ module TacticArena.Controller {
         }
 
         getNbTilesBetween(coordsA, coordsB) {
+            return Math.abs(coordsA.x - coordsB.x) + Math.abs(coordsA.y - coordsB.y);
+        }
+
+        getTilesBetween(coordsA, coordsB) {
             return Math.abs(coordsA.x - coordsB.x) + Math.abs(coordsA.y - coordsB.y);
         }
     }

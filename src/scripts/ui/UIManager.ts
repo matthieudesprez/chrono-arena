@@ -32,7 +32,7 @@ module TacticArena.UI {
             var activePawn = this.game.turnManager.getActivePawn();
             this.directionUI.init(activePawn.getDirection());
             this.actionUI.init();
-            this.logsUI.write('au tour de Player_0' + activePawn._id);
+            this.logsUI.write('au tour du joueur ' + activePawn._id);
             this.pawnsinfosUI.select(activePawn._id);
         }
 
@@ -40,13 +40,14 @@ module TacticArena.UI {
             var activePawn = this.game.turnManager.getActivePawn();
             activePawn.resetToGhostPosition();
             activePawn.ap = 2;
-            this.game.orderManager.add('stand', activePawn, null, null);
+            this.game.orderManager.removeEntityOrder(activePawn._id);
+            this.game.orderManager.add('stand_' + activePawn.getDirection(), activePawn, null, null);
         }
 
         endTurn() {           
             var activePawn = this.game.turnManager.getActivePawn();
             if(!this.game.orderManager.hasOrder(activePawn._id)) {
-                console.log('forceadd');
+                console.log('force add order if none exists');
                 this.game.orderManager.add('stand', activePawn, null, null);
             }
             activePawn.hide();

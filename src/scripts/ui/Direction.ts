@@ -62,6 +62,7 @@ module TacticArena.UI {
     	changeDirection(direction) {
             var activePawn = this.menu.game.turnManager.getActivePawn();
             activePawn.faceDirection(direction);
+            this.menu.game.orderManager.add('stand_' + direction, activePawn, activePawn.getPosition().x, activePawn.getPosition().y);
     	}
     }
 }
