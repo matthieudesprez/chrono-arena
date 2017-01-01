@@ -1,9 +1,11 @@
 module TacticArena.Controller {
     export class OrderManager {
         orders;
+        game;
 
-        constructor() {
-            this.orders = [];     
+        constructor(game) {
+            this.orders = [];
+            this.game = game;
         }
 
         removeEntityOrder(id, order?) {
@@ -14,6 +16,7 @@ module TacticArena.Controller {
                         var list = [];
                         for(var j = 0; j < this.orders[i].list.length; j++) {
                             var o = this.orders[i].list[j];
+                            // exemple si order == stand_W on remove un éventuel stand_* aux mêmes coordonnées
                             if(o.action.indexOf(order.action.substring(0, order.action.length - 1)) < 0
                             || o.x != order.x
                             || o.y != order.y ) {
@@ -42,7 +45,6 @@ module TacticArena.Controller {
                     'list': []
                 });
             }
-            console.log(entity._id, this.orders);
             for(var i = 0; i < this.orders.length; i++) {
                 if(this.orders[i].entity._id == entity._id) {
                     var order = {
@@ -66,10 +68,6 @@ module TacticArena.Controller {
             return max;
         }
 
-        createPromiseOrderFactory(entity, x, y) {
-            return this.createPromiseOrder(entity, x, y);
-        }
-
         createPromiseOrder(entity, x, y) {
             return entity.ghost.moveTo(x, y).then((res) => {
                 return res;
@@ -77,26 +75,27 @@ module TacticArena.Controller {
         }
 
         resolveAll() {
-            console.log(this.orders);
             return new Promise((resolve, reject) => {
                 var steps = new Array(this.getMaxOrderListLength());
                 for (var j = 0; j < steps.length; j++) {
                     steps[j] = [];
                     for(var i = 0; i < this.orders.length; i++) {
+                        var entity = this.orders[i].entity;
                         steps[j].push({
-                            'entity': this.orders[i].entity,
-                            'order': this.orders[i].list[j]
+                            'entity': entity,
+                            'order': this.orders[i].list[j] ? this.orders[i].list[j] : {
+                                'action': 'stand_' + entity.getDirection(),
+                                'x': entity.getPosition().x,
+                                'y': entity.getPosition().y
+                            }
                         });
                     }
                 }
-                console.log(steps);
-
+                //steps.shift(); // skip the first stand order
                 this.processOrders(steps).then((res) => {
                     console.log('finito');
-
                     for(var i = 0; i < this.orders.length; i++) {
                         this.orders[i].entity.destroyGhost();
-                        this.orders[i].entity.show();
                     }
                     this.orders = [];
                     resolve(true);
@@ -107,32 +106,60 @@ module TacticArena.Controller {
         processOrders(steps) {
             return new Promise((resolve, reject) => {
                 if (steps && steps.length > 0) {
-                    console.log(steps);
                     var step = steps[0];
                     steps.shift();
+
+                    // check actions before
+                    for(var i = 0; i < step.length; i++) {
+                        for(var j = i + 1; j < step.length; j++) {
+                            var currentEntity = step[i].entity.ghost ? step[i].entity.ghost : step[i].entity;
+                            var otherEntity = step[j].entity.ghost ? step[j].entity.ghost : step[j].entity;
+                            if(this.game.stageManager.getNbTilesBetween(currentEntity.getPosition(), otherEntity.getPosition()) == 1) {
+                                console.log('battle begin');
+                                if (step[i].order.action == 'move') {
+                                    if (step[j].order.action == 'move') {
+                                        console.log('desengagement'); // désengagement mutuel
+                                    } else if (step[j].order.action.indexOf('stand_') >= 0 && otherEntity.isFacing(currentEntity.getPosition())) {
+                                        console.log('accrochage from ennemy');
+
+                                    } else if (step[j].order.action.indexOf('attack_') >= 0 && otherEntity.isFacing(currentEntity.getPosition())) {
+                                        console.log('accrochage+1 from ennemy');
+                                    }
+                                } else {
+                                    if (currentEntity.isFacing(otherEntity.getPosition())) {
+                                        console.log('accrochage from current');
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    console.log('check');
+
                     var promisesOrders = [];
                     for (var i = 0; i < step.length; i++) {
                         var o = step[i].order;
                         var entity = step[i].entity;
                         var p = null;
-                        if (o && o.action == 'move') {
-                            console.log(o.x, o.y);
-                            promisesOrders.push(this.createPromiseOrderFactory(entity, o.x, o.y));
-                        }
-                        else {
-                            promisesOrders.push(new Promise((resolve, reject) => {
-                                entity.show();
+                        console.log(entity._id, o);
+                        if (o.action == 'move') {
+                            p = this.createPromiseOrder(entity, o.x, o.y);
+                        } else if (o.action.indexOf('stand_') >= 0) {
+                            p = new Promise((resolve, reject) => {
+                                var e = entity.ghost ? entity.ghost : entity;
+                                e.faceDirection(o.action.replace('stand_', ''));
+                                console.log(o.action.replace('stand_', ''));
                                 resolve(true);
-                            }));
+                            });
                         }
+                        promisesOrders.push(p);
                     }
+
                     Promise.all(promisesOrders).then((res) => {
                         if (steps && steps.length > 0) {
                             this.processOrders(steps).then((res) => {
                                 resolve(res);
                             }); // recursive
                         } else {
-                            console.log('finished');
                             resolve(true);
                         }
                     });

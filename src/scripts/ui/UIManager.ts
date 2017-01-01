@@ -44,13 +44,12 @@ module TacticArena.UI {
             this.game.orderManager.add('stand_' + activePawn.getDirection(), activePawn, null, null);
         }
 
-        endTurn() {           
+        endTurn() {
             var activePawn = this.game.turnManager.getActivePawn();
             if(!this.game.orderManager.hasOrder(activePawn._id)) {
                 console.log('force add order if none exists');
-                this.game.orderManager.add('stand', activePawn, null, null);
+                this.game.orderManager.add('stand_' + activePawn.getDirection(), activePawn, null, null);
             }
-            activePawn.hide();
             if (!this.game.process) {
                 this.game.process = true;
                 if (activePawn._id == this.game.pawns[this.game.pawns.length-1]._id) {

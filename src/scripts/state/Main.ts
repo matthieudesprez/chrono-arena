@@ -4,6 +4,7 @@ module TacticArena.State {
     export class Main extends Phaser.State {
         layer: Phaser.TilemapLayer;
         pawns: Entity.Pawn[];
+        pawnsSpritesGroup;
         pathfinder;
         tileSize: number;
         turnManager: Controller.TurnManager;
@@ -21,6 +22,7 @@ module TacticArena.State {
             this.stageManager.init();
 
             this.pawns = [];
+            this.pawnsSpritesGroup = this.add.group();
             this.pawns.push(new Entity.Pawn(this, 7, 9, 'E', 'redhead', this.getUniqueId()));
             this.pawns.push(new Entity.Pawn(this, 12, 9, 'W', 'skeleton', this.getUniqueId()));
 
@@ -34,7 +36,7 @@ module TacticArena.State {
 
             this.pointer = new UI.Pointer(this);
 
-            this.orderManager = new Controller.OrderManager();
+            this.orderManager = new Controller.OrderManager(this);
 
             this.turnManager = new Controller.TurnManager(this);
             this.turnManager.initTurn(this.pawns[0]).then((res) => {
@@ -42,6 +44,10 @@ module TacticArena.State {
             });
 
             this.uiManager = new UI.UIManager(this);
+        }
+
+        update() {
+            this.pawnsSpritesGroup.sort('y', Phaser.Group.SORT_ASCENDING);
         }
 
         getUniqueId() {

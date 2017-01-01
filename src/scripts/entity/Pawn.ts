@@ -13,8 +13,7 @@ module TacticArena.Entity {
             this.type = type;
             this.ghost = null;
             this.sprite = new Entity.Sprite(game, x, y, ext, type, this, 64);
-            this.game.add.existing(this.sprite);
-            console.log(this.sprite._ext);
+            this.game.pawnsSpritesGroup.add(this.sprite);
             this.sprite.stand();
         }
 
@@ -64,7 +63,7 @@ module TacticArena.Entity {
                 var tile = this.game.stageManager.map.layers[1].data[tile_y][tile_x];
                 var newX = tile.x * this.game.tileSize - this.sprite._size / 4;
                 var newY = tile.y * this.game.tileSize - this.sprite._size / 2;
-                this.sprite.faceTo(newX, newY);
+                //this.sprite.faceTo(newX, newY);
                 this.sprite.walk();
                 var t = this.game.add.tween(
                     this.sprite).to({x: newX,y: newY},
@@ -96,8 +95,7 @@ module TacticArena.Entity {
                     null
                 );
                 this.ghost.sprite.alpha = 0.5;
-            }
-            else if (!this.ghost.sprite.alive) {
+            } else if (!this.ghost.sprite.alive) {
                 this.ghost.sprite.reset(
                     this.sprite.position.x,
                     this.sprite.position.y
@@ -142,6 +140,26 @@ module TacticArena.Entity {
         faceDirection(direction) {
             this.sprite._ext = direction;
             this.sprite.stand();
+        }
+
+        isFacing(position) {
+            // x,y 1,0 2,0
+            // 0,1 1,1 2,1
+            // 0,2 1,2 2,2
+            var pawnPosition = this.getPosition();
+            var result = (
+                pawnPosition.x == position.x && (
+                    (pawnPosition.y == position.y + 1 && this.getDirection() == 'N')
+                    || (pawnPosition.y == position.y - 1 && this.getDirection() == 'S')
+                )
+                || pawnPosition.y == position.y && (
+                    (pawnPosition.x == position.x + 1 && this.getDirection() == 'W')
+                    || (pawnPosition.x == position.x - 1 && this.getDirection() == 'E')
+                )
+            );
+
+            console.log(result, pawnPosition, position, this.getDirection());
+            return result;
         }
     }
 }
