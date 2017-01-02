@@ -13,6 +13,7 @@ module TacticArena.Controller {
 	        	}
                 pawn.active = true;
 	        	pawn.ap = 2;
+				pawn.stunned = false;
 	        	resolve(true);
         	});
         }

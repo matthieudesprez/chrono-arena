@@ -115,20 +115,36 @@ module TacticArena.Controller {
                             var currentEntity = step[i].entity.ghost ? step[i].entity.ghost : step[i].entity;
                             var otherEntity = step[j].entity.ghost ? step[j].entity.ghost : step[j].entity;
                             if(this.game.stageManager.getNbTilesBetween(currentEntity.getPosition(), otherEntity.getPosition()) == 1) {
-                                console.log('battle begin');
+                                var fleeProbability = 100;
                                 if (step[i].order.action == 'move') {
                                     if (step[j].order.action == 'move') {
                                         console.log('desengagement'); // désengagement mutuel
                                     } else if (step[j].order.action.indexOf('stand_') >= 0 && otherEntity.isFacing(currentEntity.getPosition())) {
                                         console.log('accrochage from ennemy');
+                                        fleeProbability = 0;//100 - 20 + 5;
 
                                     } else if (step[j].order.action.indexOf('attack_') >= 0 && otherEntity.isFacing(currentEntity.getPosition())) {
                                         console.log('accrochage+1 from ennemy');
+                                        fleeProbability = 0;//100 - 50 + 5;
                                     }
-                                } else {
-                                    if (currentEntity.isFacing(otherEntity.getPosition())) {
-                                        console.log('accrochage from current');
+                                    console.log(Math.floor(Math.random() * 100), fleeProbability);
+                                    if(Math.floor(Math.random() * 100) > fleeProbability) {
+                                        console.log('esquive failed');
+                                        // resolution des degats
+                                        step[j].order.action = 'attack_' + otherEntity.getDirection();
+                                        step[j].order.target = step[i].entity;
+                                        // cancel de la prochaine action
+                                        step[i].order = {
+                                            'action': 'stand_' + currentEntity.getDirection(),
+                                            'x': currentEntity.getPosition().x,
+                                            'y': currentEntity.getPosition().y
+                                        };
+                                        step[i].entity.stunned = true;
+                                    } else {
+                                        console.log('esquive success');
                                     }
+                                } else if (currentEntity.isFacing(otherEntity.getPosition())) {
+                                    console.log('accrochage from current');
                                 }
                             }
                         }
@@ -140,14 +156,22 @@ module TacticArena.Controller {
                         var o = step[i].order;
                         var entity = step[i].entity;
                         var p = null;
-                        console.log(entity._id, o);
+                        console.log(entity, o);
                         if (o.action == 'move') {
                             p = this.createPromiseOrder(entity, o.x, o.y);
                         } else if (o.action.indexOf('stand_') >= 0) {
                             p = new Promise((resolve, reject) => {
                                 var e = entity.ghost ? entity.ghost : entity;
                                 e.faceDirection(o.action.replace('stand_', ''));
-                                console.log(o.action.replace('stand_', ''));
+                                if(entity.stunned) {
+                                    console.log('reset');
+                                    entity.resetToGhostPosition();
+                                }
+                                resolve(true);
+                            });
+                        } else if (o.action.indexOf('attack_') >= 0) {
+                            p = new Promise((resolve, reject) => {
+                                entity.attack(o.target);
                                 resolve(true);
                             });
                         }
