@@ -1,4 +1,6 @@
 # Tactic-Arena
+
+[Démo](http://www.edistra.com/tactical_arena/)
 A WIP turn based strategy game made with phaser and typescript.
 
 ## Install project
