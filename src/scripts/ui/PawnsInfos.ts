@@ -21,5 +21,13 @@ module TacticArena.UI {
             }
         }
 
+        updateInfos() {
+            for(var i=0; i < this.menu.game.pawns.length; i++) {
+                var entity = this.menu.game.pawns[i];
+                this.element.querySelector('.pawn0' + entity._id + ' .infos .hp').innerHTML = entity.hp + ' HP';
+                this.element.querySelector('.pawn0' + entity._id + ' .infos .ap').innerHTML = entity.ap + ' AP';
+            }
+        }
+
     }
 }

@@ -91,7 +91,9 @@ module TacticArena.Controller {
                         });
                     }
                 }
-                //steps.shift(); // skip the first stand order
+                if(steps.length > 1) {
+                    steps.shift(); // skip the first stand order
+                }
                 this.processOrders(steps).then((res) => {
                     console.log('finito');
                     for(var i = 0; i < this.orders.length; i++) {
@@ -125,14 +127,16 @@ module TacticArena.Controller {
 
                     // check actions before step resolution
                     for(var i = 0; i < step.length; i++) {
+                        // todo améliorer ça car c'est jamais clair si on cible le ghost ou l'entité
                         var entityA = step[i].entity.ghost ? step[i].entity.ghost : step[i].entity;
                         for(var j = i + 1; j < step.length; j++) {
                             var entityB = step[j].entity.ghost ? step[j].entity.ghost : step[j].entity;
+                            console.log(this.game.stageManager.getNbTilesBetween(entityA.getPosition(), entityB.getPosition()), entityA, entityB);
                             if(this.game.stageManager.getNbTilesBetween(entityA.getPosition(), entityB.getPosition()) == 1
                             && (entityB.isFacing(entityA.getPosition()) || entityA.isFacing(entityB.getPosition()))) {
                                 var fleeRate = 0;
                                 if (step[i].order.action == 'move' && step[j].order.action == 'move') {
-                                    console.log('desengagement'); // désengagement mutuel
+                                    console.log('desengagement', entityA); // désengagement mutuel
                                 } else {
                                     if (step[i].order.action.indexOf('stand_') >= 0 && entityA.isFacing(entityB.getPosition())) {
                                         console.log('accrochage from player');
@@ -151,16 +155,15 @@ module TacticArena.Controller {
                             step[i].order.action = 'attack_' + entityA.getDirection();
                             console.log(entityA.attackTarget);
                             step[i].order.target = entityA.attackTarget;
+                        } else if(entityA.isHurt) {
+                            // cancel de la prochaine action
+                            step[i].order = {
+                                'action': 'stand_' + entityA.getDirection(),
+                                'x': entityA.getPosition().x,
+                                'y': entityA.getPosition().y
+                            };
+                            step[i].entity.stunned = true;
                         }
-                        //else if(entityA.isHurt) {
-                        //    // cancel de la prochaine action
-                        //    step[i].order = {
-                        //        'action': 'stand_' + entityA.getDirection(),
-                        //        'x': entityA.getPosition().x,
-                        //        'y': entityA.getPosition().y
-                        //    };
-                        //    step[i].entity.stunned = true;
-                        //}
                     }
 
                     var promisesOrders = [];
@@ -172,9 +175,10 @@ module TacticArena.Controller {
                         console.log(entity, o);
                         if (o.action == 'move') {
                             p = this.createPromiseOrder(entity, o.x, o.y);
-                        } else if (o.action.indexOf('stand_') >= 0) {
+                        } else if (o.action.indexOf('stand_') >= 0 || entity.hasAttacked) {
                             p = new Promise((resolve, reject) => {
-                                e.faceDirection(o.action.replace('stand_', ''));
+                                var direction = o.action.replace('stand_', '').replace('attack_', '');
+                                e.faceDirection(direction);
                                 if(entity.stunned) {
                                     console.log('reset');
                                     entity.resetToGhostPosition();

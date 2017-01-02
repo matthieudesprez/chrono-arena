@@ -39,7 +39,7 @@ module TacticArena.State {
             this.orderManager = new Controller.OrderManager(this);
 
             this.turnManager = new Controller.TurnManager(this);
-            this.turnManager.initTurn(this.pawns[0]).then((res) => {
+            this.turnManager.initTurn(this.pawns[0], true).then((res) => {
                 this.process = false;
             });
 
@@ -48,6 +48,7 @@ module TacticArena.State {
 
         update() {
             this.pawnsSpritesGroup.sort('y', Phaser.Group.SORT_ASCENDING);
+            this.uiManager.pawnsinfosUI.updateInfos();
         }
 
         getUniqueId() {

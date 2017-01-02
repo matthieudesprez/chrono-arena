@@ -3,19 +3,24 @@ module TacticArena.Controller {
         pawns;
 
         constructor(game) {
-            this.pawns = game.pawns;         
+            this.pawns = game.pawns;
         }
 
-        initTurn(pawn) {
+        initTurn(pawn, first = false) {
             return new Promise((resolve, reject) => {
 	        	for(var i = 0; i < this.pawns.length; i++) {
 	        		this.pawns[i].active = false;
+                    //distribution des ap va se faire à chaque début de tour
+					if(first) {
+						this.pawns[i].ap = 2;
+                        this.pawns[i].stunned = false;
+                        this.pawns[i].isHurt = false;
+                        this.pawns[i].isAttacking = false;
+                        this.pawns[i].hasAttacked = false;
+                        this.pawns[i].ghost = null;
+					}
 	        	}
                 pawn.active = true;
-	        	pawn.ap = 2;
-				pawn.stunned = false;
-				pawn.isHurt = false;
-				pawn.isAttacking = false;
 	        	resolve(true);
         	});
         }

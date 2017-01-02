@@ -5,12 +5,14 @@ module TacticArena.Entity {
         ghost;
         _id;
         ap;
+        hp;
         type;
         stunned;
         isHurt;
         isAttacking;
         isGhost;
         attackTarget;
+        hasAttacked;
 
         constructor(game, x, y, ext, type, id) {
             this.game = game;
@@ -25,6 +27,8 @@ module TacticArena.Entity {
             this.isAttacking = false;
             this.isGhost = false;
             this.attackTarget = null;
+            this.hasAttacked = false;
+            this.hp = 4;
         }
 
         getPosition() {
@@ -35,15 +39,17 @@ module TacticArena.Entity {
         }
 
         attack(target?) {
+            var that = this;
             return new Promise((resolve, reject) => {
-                console.log(this, 'attack');
                 this.sprite.attack(target, function() {
+                    that.hasAttacked = true;
                     resolve(true);
                 });
             });
         }
         hurt() {
             this.sprite.hurt();
+            this.hp -= 1;
         }
 
         preMoveTo(targetX, targetY) {
@@ -126,6 +132,11 @@ module TacticArena.Entity {
                 this.ghost.sprite._ext = this.sprite._ext;
                 this.ghost.sprite.stand();
             }
+            this.ghost.stunned = this.stunned;
+            this.ghost.isHurt = this.isHurt;
+            this.ghost.isAttacking = this.isAttacking;
+            this.ghost.hasAttacked = this.hasAttacked;
+            console.log('reset');
         }
 
         destroyGhost() {
@@ -136,7 +147,6 @@ module TacticArena.Entity {
         }
 
         resetToGhostPosition() {
-            console.log(this.ghost);
             if(this.ghost !== null) {
                 this.sprite.position.x = this.ghost.sprite.position.x;
                 this.sprite.position.y = this.ghost.sprite.position.y;
@@ -170,7 +180,7 @@ module TacticArena.Entity {
             // 0,1 1,1 2,1
             // 0,2 1,2 2,2
             var pawnPosition = this.getPosition();
-            var result = (
+            return (
                 pawnPosition.x == position.x && (
                     (pawnPosition.y == position.y + 1 && this.getDirection() == 'N')
                     || (pawnPosition.y == position.y - 1 && this.getDirection() == 'S')
@@ -180,9 +190,6 @@ module TacticArena.Entity {
                     || (pawnPosition.x == position.x - 1 && this.getDirection() == 'E')
                 )
             );
-
-            console.log(result, pawnPosition, position, this.getDirection());
-            return result;
         }
     }
 }

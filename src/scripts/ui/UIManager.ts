@@ -55,7 +55,7 @@ module TacticArena.UI {
                 if (activePawn._id == this.game.pawns[this.game.pawns.length-1]._id) {
                     this.game.orderManager.resolveAll().then((res) => {
                         this.game.turnManager.endTurn().then((res) => {
-                            this.game.turnManager.initTurn(res);
+                            this.game.turnManager.initTurn(res, true);
                             this.game.process = false;
                             this.init();
                         });

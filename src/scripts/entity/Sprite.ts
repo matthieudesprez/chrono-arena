@@ -44,7 +44,6 @@ module TacticArena.Entity {
             }
 
             var animationName = this.animations.currentAnim.name;
-            console.info('complete', animationName);
             if(animationName.indexOf('attack') >= 0) {
                 this.stand();
             }
@@ -90,7 +89,6 @@ module TacticArena.Entity {
                 tint : 0.65 * 0xffffff,
                 alpha : 0.5
             }, 100, Phaser.Easing.Exponential.Out, true, 0, 0, true);
-            //this.tint = 0xffffff;
         }
     }
 }
