@@ -4,6 +4,7 @@ module TacticArena.Entity {
         _speed:number;
         _size;
         private _ext:string;
+        _animationCompleteCallback;
 
         constructor(game, x, y, ext, type, parent, size) {
             super(
@@ -17,6 +18,7 @@ module TacticArena.Entity {
             this._speed = 200;
             this._size = size;
             this.setAnimations();
+            this._animationCompleteCallback = null;
         }
 
         setAnimations() {
@@ -36,7 +38,13 @@ module TacticArena.Entity {
         }
 
         animationComplete() {
+            if(this._animationCompleteCallback){
+                this._animationCompleteCallback();
+                this._animationCompleteCallback = null;
+            }
+
             var animationName = this.animations.currentAnim.name;
+            console.info('complete', animationName);
             if(animationName.indexOf('attack') >= 0) {
                 this.stand();
             }
@@ -69,9 +77,12 @@ module TacticArena.Entity {
             this.playAnimation('stand' + this._ext);
         }
 
-        attack(target) {
+        attack(target?, callback?) {
+            this._animationCompleteCallback = callback;
             this.playAnimation('attack' + this._ext);
-            target.hurt();
+            if(target) {
+                target.hurt();
+            }
         }
 
         hurt() {

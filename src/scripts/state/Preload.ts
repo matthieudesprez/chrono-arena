@@ -9,8 +9,8 @@ module TacticArena.State {
       this.load.image('tiles-collection', 'assets/images/maptiles.png');
       this.load.atlasJSONArray('player', 'assets/images/character.png', 'assets/images/character.json');
       this.load.atlasJSONArray('orc', 'assets/images/orc.png', 'assets/images/orc.json');
-      this.load.atlasJSONArray('skeleton', 'assets/images/skeleton.png', 'assets/images/skeleton.json');
       this.load.atlasJSONArray('redhead', 'assets/images/redhead.png', 'assets/images/redhead.json');
+      this.load.atlasJSONArray('skeleton', 'assets/images/skeleton.png', 'assets/images/skeleton.json');
     }
 
     create() {

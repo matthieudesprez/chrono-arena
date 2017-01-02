@@ -7,6 +7,10 @@ module TacticArena.Entity {
         ap;
         type;
         stunned;
+        isHurt;
+        isAttacking;
+        isGhost;
+        attackTarget;
 
         constructor(game, x, y, ext, type, id) {
             this.game = game;
@@ -17,6 +21,10 @@ module TacticArena.Entity {
             this.game.pawnsSpritesGroup.add(this.sprite);
             this.sprite.stand();
             this.stunned = false;
+            this.isHurt = false;
+            this.isAttacking = false;
+            this.isGhost = false;
+            this.attackTarget = null;
         }
 
         getPosition() {
@@ -26,8 +34,13 @@ module TacticArena.Entity {
             };
         }
 
-        attack(target) {
-            this.sprite.attack(target);
+        attack(target?) {
+            return new Promise((resolve, reject) => {
+                console.log(this, 'attack');
+                this.sprite.attack(target, function() {
+                    resolve(true);
+                });
+            });
         }
         hurt() {
             this.sprite.hurt();
@@ -104,6 +117,7 @@ module TacticArena.Entity {
                     null
                 );
                 this.ghost.sprite.alpha = 0.5;
+                this.ghost.isGhost = true;
             } else if (!this.ghost.sprite.alive) {
                 this.ghost.sprite.reset(
                     this.sprite.position.x,

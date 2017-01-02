@@ -103,65 +103,77 @@ module TacticArena.Controller {
             });
         }
 
+        resolutionEsquive(fleeRate, entityA, entityB, target) {
+            // entityA attaque entityB
+            console.log(entityA, entityB);
+            if(Math.floor(Math.random() * 100) > fleeRate) {
+                console.log('esquive failed');
+                entityB.isHurt = true;
+                entityA.isAttacking = true;
+                entityA.attackTarget = target;
+                // resolution des degats
+            } else {
+                console.log('esquive success');
+            }
+        }
+
         processOrders(steps) {
             return new Promise((resolve, reject) => {
                 if (steps && steps.length > 0) {
                     var step = steps[0];
                     steps.shift();
 
-                    // check actions before
+                    // check actions before step resolution
                     for(var i = 0; i < step.length; i++) {
+                        var entityA = step[i].entity.ghost ? step[i].entity.ghost : step[i].entity;
                         for(var j = i + 1; j < step.length; j++) {
-                            var currentEntity = step[i].entity.ghost ? step[i].entity.ghost : step[i].entity;
-                            var otherEntity = step[j].entity.ghost ? step[j].entity.ghost : step[j].entity;
-                            if(this.game.stageManager.getNbTilesBetween(currentEntity.getPosition(), otherEntity.getPosition()) == 1) {
-                                var fleeProbability = 100;
-                                if (step[i].order.action == 'move') {
-                                    if (step[j].order.action == 'move') {
-                                        console.log('desengagement'); // désengagement mutuel
-                                    } else if (step[j].order.action.indexOf('stand_') >= 0 && otherEntity.isFacing(currentEntity.getPosition())) {
+                            var entityB = step[j].entity.ghost ? step[j].entity.ghost : step[j].entity;
+                            if(this.game.stageManager.getNbTilesBetween(entityA.getPosition(), entityB.getPosition()) == 1
+                            && (entityB.isFacing(entityA.getPosition()) || entityA.isFacing(entityB.getPosition()))) {
+                                var fleeRate = 0;
+                                if (step[i].order.action == 'move' && step[j].order.action == 'move') {
+                                    console.log('desengagement'); // désengagement mutuel
+                                } else {
+                                    if (step[i].order.action.indexOf('stand_') >= 0 && entityA.isFacing(entityB.getPosition())) {
+                                        console.log('accrochage from player');
+                                        this.resolutionEsquive(fleeRate, entityA, entityB, step[j].entity);
+                                    }
+                                    if (step[j].order.action.indexOf('stand_') >= 0 && entityB.isFacing(entityA.getPosition())) {
                                         console.log('accrochage from ennemy');
-                                        fleeProbability = 0;//100 - 20 + 5;
-
-                                    } else if (step[j].order.action.indexOf('attack_') >= 0 && otherEntity.isFacing(currentEntity.getPosition())) {
-                                        console.log('accrochage+1 from ennemy');
-                                        fleeProbability = 0;//100 - 50 + 5;
+                                        this.resolutionEsquive(fleeRate, entityB, entityA, step[i].entity);
                                     }
-                                    console.log(Math.floor(Math.random() * 100), fleeProbability);
-                                    if(Math.floor(Math.random() * 100) > fleeProbability) {
-                                        console.log('esquive failed');
-                                        // resolution des degats
-                                        step[j].order.action = 'attack_' + otherEntity.getDirection();
-                                        step[j].order.target = step[i].entity;
-                                        // cancel de la prochaine action
-                                        step[i].order = {
-                                            'action': 'stand_' + currentEntity.getDirection(),
-                                            'x': currentEntity.getPosition().x,
-                                            'y': currentEntity.getPosition().y
-                                        };
-                                        step[i].entity.stunned = true;
-                                    } else {
-                                        console.log('esquive success');
-                                    }
-                                } else if (currentEntity.isFacing(otherEntity.getPosition())) {
-                                    console.log('accrochage from current');
                                 }
                             }
                         }
+
+                        if(entityA.isAttacking) {
+                            console.log(step[i].entity._id, 'attacking', j);
+                            step[i].order.action = 'attack_' + entityA.getDirection();
+                            console.log(entityA.attackTarget);
+                            step[i].order.target = entityA.attackTarget;
+                        }
+                        //else if(entityA.isHurt) {
+                        //    // cancel de la prochaine action
+                        //    step[i].order = {
+                        //        'action': 'stand_' + entityA.getDirection(),
+                        //        'x': entityA.getPosition().x,
+                        //        'y': entityA.getPosition().y
+                        //    };
+                        //    step[i].entity.stunned = true;
+                        //}
                     }
-                    console.log('check');
 
                     var promisesOrders = [];
                     for (var i = 0; i < step.length; i++) {
                         var o = step[i].order;
                         var entity = step[i].entity;
+                        var e = entity.ghost ? entity.ghost : entity;
                         var p = null;
                         console.log(entity, o);
                         if (o.action == 'move') {
                             p = this.createPromiseOrder(entity, o.x, o.y);
                         } else if (o.action.indexOf('stand_') >= 0) {
                             p = new Promise((resolve, reject) => {
-                                var e = entity.ghost ? entity.ghost : entity;
                                 e.faceDirection(o.action.replace('stand_', ''));
                                 if(entity.stunned) {
                                     console.log('reset');
@@ -170,10 +182,7 @@ module TacticArena.Controller {
                                 resolve(true);
                             });
                         } else if (o.action.indexOf('attack_') >= 0) {
-                            p = new Promise((resolve, reject) => {
-                                entity.attack(o.target);
-                                resolve(true);
-                            });
+                            p = entity.attack(o.target);
                         }
                         promisesOrders.push(p);
                     }

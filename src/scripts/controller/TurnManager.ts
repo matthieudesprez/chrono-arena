@@ -14,6 +14,8 @@ module TacticArena.Controller {
                 pawn.active = true;
 	        	pawn.ap = 2;
 				pawn.stunned = false;
+				pawn.isHurt = false;
+				pawn.isAttacking = false;
 	        	resolve(true);
         	});
         }
