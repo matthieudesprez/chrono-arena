@@ -58,6 +58,7 @@ module TacticArena.Controller {
                     this.orders[i].list.push(order);
                 }
             }
+            this.game.stageManager.showPossibleMove(this.game.turnManager.getActivePawn());
         }
 
         getMaxOrderListLength() {

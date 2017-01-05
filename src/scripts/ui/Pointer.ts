@@ -36,12 +36,12 @@ module TacticArena.UI {
                         this.game.process = true;
                         activePawn.createGhost();
                         activePawn.preMoveTo(targetX, targetY).then((path) => {
+                            activePawn.ap -= distance;
                             for(var i = 0; i < (path as any).length; i++) {
                                 this.game.orderManager.add('move', activePawn, path[i].x, path[i].y);
                             }
                             this.game.uiManager.directionUI.update(activePawn.getDirection());
                             this.game.process = false;
-                            activePawn.ap -= distance;
                         });
                     }
                 }

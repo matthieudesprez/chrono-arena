@@ -163,7 +163,6 @@ module TacticArena.Entity {
 
         show() {
             this.sprite.alpha = 1;
-
         }
 
         getDirection() {

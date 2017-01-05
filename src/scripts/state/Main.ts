@@ -21,6 +21,8 @@ module TacticArena.State {
             this.stageManager = new Controller.StageManager(this);
             this.stageManager.init();
 
+            this.pointer = new UI.Pointer(this);
+
             this.pawns = [];
             this.pawnsSpritesGroup = this.add.group();
             this.pawns.push(new Entity.Pawn(this, 7, 9, 'E', 'redhead', this.getUniqueId()));
@@ -33,8 +35,6 @@ module TacticArena.State {
             this.pathfinder.disableDiagonals();
             this.pathfinder.disableSync();
             this.pathfinder.setGrid(this.stageManager.grid);
-
-            this.pointer = new UI.Pointer(this);
 
             this.orderManager = new Controller.OrderManager(this);
 
