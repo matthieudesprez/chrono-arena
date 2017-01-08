@@ -8,61 +8,57 @@ module TacticArena.UI {
         constructor(menu) {
             var self = this;
             this.menu = menu;
-            this.element = this.menu.element.querySelector('.ui-direction');
-
+            this.menu.element.append('<div class="ui-direction"><a class="compass"></a><a class="north"></a><a class="south"></a><a class="east"></a><a class="west"></a></div>');
+            this.element = this.menu.element.find('.ui-direction');
             this.matching = {'N': 'north', 'E': 'east', 'S': 'south', 'W': 'west'};
 
-            this.getButton('.compass').addEventListener('click', function() {
-            	self.select('compass');
+            $('.compass').on('click', function () {
+                self.select('compass');
                 self.changeDirection(self.savedDirection);
             });
-            this.getButton('.north').addEventListener('click', function() {
-            	self.select('north');
+            $('.north').on('click', function () {
+                self.select('north');
                 self.changeDirection('N');
             });
-            this.getButton('.east').addEventListener('click', function() {
-            	self.select('east');
+            $('.east').on('click', function () {
+                self.select('east');
                 self.changeDirection('E');
             });
-            this.getButton('.south').addEventListener('click', function() {
-            	self.select('south');
+            $('.south').on('click', function () {
+                self.select('south');
                 self.changeDirection('S');
             });
-            this.getButton('.west').addEventListener('click', function() {
-            	self.select('west');
+            $('.west').on('click', function () {
+                self.select('west');
                 self.changeDirection('W');
             });
         }
 
         init(direction) {
-        	this.savedDirection = direction;
-            this.getButton('.compass').click();
-        }
-
-        getButton(query) {
-            return this.element.querySelector(query);
+            this.savedDirection = direction;
+            // TODO ne doit pas être ce qui set le premier ordre xD
+            $('.compass').trigger('click');
         }
 
         select(name) {
-        	this.deselectAll();
-            this.getButton('.' + name).classList.add('selected');
+            this.deselectAll();
+            this.element.find('.' + name).addClass('selected');
         }
 
         deselectAll() {
-            var buttons = this.element.querySelectorAll('a');
-            for(var i=0; i < buttons.length; i++) {
-                buttons[i].classList.remove('selected');
-            }
+            this.element.find('a').removeClass('selected');
         }
 
         update(direction) {
-        	this.select(this.matching[direction]);
+            this.select(this.matching[direction]);
         }
 
-    	changeDirection(direction) {
-            var activePawn = this.menu.game.turnManager.getActivePawn();
-            activePawn.faceDirection(direction);
-            this.menu.game.orderManager.add('stand_' + direction, activePawn, activePawn.getPosition().x, activePawn.getPosition().y);
-    	}
+        changeDirection(direction) {
+            let activePawn = this.menu.game.turnManager.getActivePawn();
+            activePawn.getProjectionOrReal().faceDirection(direction);
+            let position = activePawn.getProjectionOrReal().getPosition();
+            this.menu.game.orderManager.add('stand_' + direction, activePawn, position.x, position.y);
+            this.menu.game.onActionPlayed.dispatch(activePawn);
+        }
     }
 }

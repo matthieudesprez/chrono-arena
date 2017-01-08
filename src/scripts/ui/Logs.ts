@@ -6,12 +6,13 @@ module TacticArena.UI {
         constructor(menu) {
             var self = this;
             this.menu = menu;
-            this.element = this.menu.element.querySelector('.ui-logs');
+            this.menu.element.append('<div class="ui-logs"></div>');
+            this.element = this.menu.element.find('.ui-logs');
         }
 
         write(msg) {
-            this.element.innerHTML += msg + '<br/>';
-            this.element.scrollTop = this.element.scrollHeight;
+            this.element.append(msg + '<br/>');
+            this.element.scrollTop(this.element[0].scrollHeight - this.element.height());
         }
 
     }

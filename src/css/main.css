@@ -64,6 +64,11 @@ html, body {
   width: 100%;
   bottom: -25px;
 }
+.ui-pawns-infos .orders{
+  position: absolute;
+  width: 100%;
+  bottom: -45px;
+}
 .ui-pawns-infos .infos .ap{
   color: dodgerblue;
   float: right;

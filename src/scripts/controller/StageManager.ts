@@ -38,12 +38,12 @@ module TacticArena.Controller {
             return false;
         }
 
-        showPossibleMove(pawn) {
-            let position = pawn.getPosition();
-            for(var x = 0; x < this.map.width; x++) {
-                for(var y = 0; y < this.map.height; y++) {
+        showPossibleMove(position, ap) {
+            console.log(position, ap);
+            for (var x = 0; x < this.map.width; x++) {
+                for (var y = 0; y < this.map.height; y++) {
                     let tile = this.map.getTile(x, y, this.map.layer[0], true);
-                    tile.alpha = (this.getNbTilesBetween(position, {'x': x, 'y': y}) <= pawn.ap) ? 0.7 : 1;
+                    tile.alpha = ap > 0 && this.getNbTilesBetween(position, {'x': x, 'y': y}) <= ap ? 0.7 : 1;
                 }
             }
             this.map.layers[0].dirty = true;

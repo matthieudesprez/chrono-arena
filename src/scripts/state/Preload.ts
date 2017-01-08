@@ -14,7 +14,10 @@ module TacticArena.State {
     }
 
     create() {
-      this.game.state.start('main');
+      var that = this;
+      $(document).ready(function() {
+        that.game.state.start('main');
+      });
     }
   }
 }

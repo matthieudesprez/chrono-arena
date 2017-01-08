@@ -24,23 +24,21 @@ module TacticArena.UI {
                 var activePawn = this.game.turnManager.getActivePawn();
                 var targetX = this.marker.x / this.game.tileSize;
                 var targetY = this.marker.y / this.game.tileSize;
+                let position = activePawn.getProjectionOrReal().getPosition();
                 var distance = this.game.stageManager.getNbTilesBetween(
-                    {'x': targetX, 'y': targetY}, 
-                    {'x': activePawn.getPosition().x, 'y': activePawn.getPosition().y}
+                    {'x': targetX, 'y': targetY}, {'x': position.x, 'y': position.y}
                 );
 
-                console.log(distance, activePawn.ap);
-
-                if(distance <= activePawn.ap) {
+                if(distance <= activePawn.getAp()) {
                     if(targetX != activePawn.getPosition().x || targetY != activePawn.getPosition().y) {
                         this.game.process = true;
-                        activePawn.createGhost();
-                        activePawn.preMoveTo(targetX, targetY).then((path) => {
-                            activePawn.ap -= distance;
+                        activePawn.createProjection();
+                        activePawn.projection.preMoveTo(targetX, targetY).then((path) => {
+                            activePawn.setAp(activePawn.getAp() - distance);
                             for(var i = 0; i < (path as any).length; i++) {
                                 this.game.orderManager.add('move', activePawn, path[i].x, path[i].y);
                             }
-                            this.game.uiManager.directionUI.update(activePawn.getDirection());
+                            this.game.onActionPlayed.dispatch(activePawn);
                             this.game.process = false;
                         });
                     }
@@ -60,13 +58,12 @@ module TacticArena.UI {
 
         dealWith(element) {
             var self = this;
-            element.addEventListener('mouseover', function() {
+            element.on('mouseover', function() {
                 self.hide();
             });
-            element.addEventListener('mouseout', function() {
+            element.on('mouseout', function() {
                 self.show();
             });
-            
         }
     }
 }

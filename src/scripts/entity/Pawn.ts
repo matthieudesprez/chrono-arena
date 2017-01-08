@@ -2,15 +2,14 @@ module TacticArena.Entity {
     export class Pawn {
         private sprite;
         game;
-        ghost;
+        projection;
+        _parent;
         _id;
-        ap;
-        hp;
+        _ap;
+        _hp;
         type;
-        stunned;
         isHurt;
         isAttacking;
-        isGhost;
         attackTarget;
         hasAttacked;
 
@@ -18,17 +17,23 @@ module TacticArena.Entity {
             this.game = game;
             this._id = id;
             this.type = type;
-            this.ghost = null;
+            this.projection = null;
+            this._parent = null;
             this.sprite = new Entity.Sprite(game, x, y, ext, type, this, 64);
             this.game.pawnsSpritesGroup.add(this.sprite);
             this.sprite.stand();
-            this.stunned = false;
             this.isHurt = false;
             this.isAttacking = false;
-            this.isGhost = false;
             this.attackTarget = null;
             this.hasAttacked = false;
-            this.hp = 4;
+            this._hp = 4;
+        }
+
+        getReal() {
+            return this._parent ? this._parent : this;
+        }
+        getProjectionOrReal() {
+            return this.projection ? this.projection : this;
         }
 
         getPosition() {
@@ -47,9 +52,11 @@ module TacticArena.Entity {
                 });
             });
         }
+
         hurt() {
             this.sprite.hurt();
-            this.hp -= 1;
+            this.destroyProjection();
+            this.setHp(this._hp - 1);
         }
 
         preMoveTo(targetX, targetY) {
@@ -91,7 +98,6 @@ module TacticArena.Entity {
                 var tile = this.game.stageManager.map.layers[1].data[tile_y][tile_x];
                 var newX = tile.x * this.game.tileSize - this.sprite._size / 4;
                 var newY = tile.y * this.game.tileSize - this.sprite._size / 2;
-                //this.sprite.faceTo(newX, newY);
                 this.sprite.walk();
                 var t = this.game.add.tween(
                     this.sprite).to({x: newX,y: newY},
@@ -112,9 +118,9 @@ module TacticArena.Entity {
             });
         }
 
-        createGhost() {
-            if (this.ghost == null) {
-                this.ghost = new Entity.Pawn(
+        createProjection() {
+            if (this.projection == null) {
+                this.projection = new Entity.Pawn(
                     this.game,
                     this.getPosition().x,
                     this.getPosition().y,
@@ -122,48 +128,18 @@ module TacticArena.Entity {
                     this.type,
                     null
                 );
-                this.ghost.sprite.alpha = 0.5;
-                this.ghost.isGhost = true;
-            } else if (!this.ghost.sprite.alive) {
-                this.ghost.sprite.reset(
-                    this.sprite.position.x,
-                    this.sprite.position.y
-                );
-                this.ghost.sprite._ext = this.sprite._ext;
-                this.ghost.sprite.stand();
-            }
-            this.ghost.stunned = this.stunned;
-            this.ghost.isHurt = this.isHurt;
-            this.ghost.isAttacking = this.isAttacking;
-            this.ghost.hasAttacked = this.hasAttacked;
-            console.log('reset');
-        }
-
-        destroyGhost() {
-            if(this.ghost) {
-                this.ghost.sprite._ext = this.sprite._ext;
-                this.ghost.sprite.kill();
+                this.projection.parent = this;
+                this.projection.sprite.alpha = 0.7;
             }
         }
 
-        resetToGhostPosition() {
-            if(this.ghost !== null) {
-                this.sprite.position.x = this.ghost.sprite.position.x;
-                this.sprite.position.y = this.ghost.sprite.position.y;
-                this.sprite._ext = this.ghost.sprite._ext;
-                this.sprite.stand();
-                this.destroyGhost();
+        destroyProjection() {
+            if(this.projection) {
+                this.projection.sprite.kill();
+                this.projection = null;
             }
         }
 
-        hide() {
-            this.sprite.alpha = 0.5;
-
-        }
-
-        show() {
-            this.sprite.alpha = 1;
-        }
 
         getDirection() {
             return this.sprite._ext;
@@ -189,6 +165,24 @@ module TacticArena.Entity {
                     || (pawnPosition.x == position.x - 1 && this.getDirection() == 'E')
                 )
             );
+        }
+
+        getAp() {
+            return this._ap;
+        }
+
+        setAp(ap) {
+            this._ap = ap;
+            this.game.onApChange.dispatch(this._ap);
+        }
+
+        getHp() {
+            return this._hp;
+        }
+
+        setHp(hp) {
+            this._hp = hp;
+            this.game.onHpChange.dispatch(this._hp);
         }
     }
 }

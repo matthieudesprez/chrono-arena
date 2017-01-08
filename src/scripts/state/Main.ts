@@ -1,4 +1,5 @@
 declare var EasyStar;
+/// <reference path="../definitions/jquery.d.ts" />
 /// <reference path="../definitions/easystarjs.d.ts"/>
 module TacticArena.State {
     export class Main extends Phaser.State {
@@ -10,11 +11,16 @@ module TacticArena.State {
         turnManager: Controller.TurnManager;
         orderManager: Controller.OrderManager;
         stageManager: Controller.StageManager;
-        uiManager: UI.UIManager
+        uiManager: UI.UIManager;
         process: Boolean;
         pointer;
+        onApChange:Phaser.Signal;
+        onHpChange:Phaser.Signal;
+        onOrderAdd:Phaser.Signal;
+        onActionPlayed:Phaser.Signal;
 
         create() {
+            var that = this;
             this.process = true;
             this.tileSize = 32;
 
@@ -37,18 +43,35 @@ module TacticArena.State {
             this.pathfinder.setGrid(this.stageManager.grid);
 
             this.orderManager = new Controller.OrderManager(this);
-
             this.turnManager = new Controller.TurnManager(this);
-            this.turnManager.initTurn(this.pawns[0], true).then((res) => {
-                this.process = false;
+            this.uiManager = new UI.UIManager(this);
+
+            this.onApChange = new Phaser.Signal();
+            this.onHpChange = new Phaser.Signal();
+            this.onOrderAdd = new Phaser.Signal();
+            this.onActionPlayed = new Phaser.Signal();
+            this.onApChange.add(function() {
+                that.uiManager.pawnsinfosUI.updateInfos();
+            });
+            this.onHpChange.add(function() {
+                that.uiManager.pawnsinfosUI.updateInfos();
+            });
+            this.onOrderAdd.add(function(pawn) {
+                console.log('orderadd');
+            });
+            this.onActionPlayed.add(function(pawn) {
+                that.stageManager.showPossibleMove(pawn.getProjectionOrReal().getPosition(), pawn.getReal().getAp());
             });
 
-            this.uiManager = new UI.UIManager(this);
+            this.turnManager.initTurn(this.pawns[0], true).then((res) => {
+                this.process = false;
+                console.log(that.turnManager.getActivePawn());
+                that.uiManager.init();
+            });
         }
 
         update() {
             this.pawnsSpritesGroup.sort('y', Phaser.Group.SORT_ASCENDING);
-            this.uiManager.pawnsinfosUI.updateInfos();
         }
 
         getUniqueId() {

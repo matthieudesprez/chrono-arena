@@ -58,7 +58,7 @@ module TacticArena.Controller {
                     this.orders[i].list.push(order);
                 }
             }
-            this.game.stageManager.showPossibleMove(this.game.turnManager.getActivePawn());
+            this.game.onOrderAdd.dispatch(entity);
         }
 
         getMaxOrderListLength() {
@@ -69,10 +69,18 @@ module TacticArena.Controller {
             return max;
         }
 
-        createPromiseOrder(entity, x, y) {
-            return entity.ghost.moveTo(x, y).then((res) => {
+        createPromiseMoveOrder(entity, x, y) {
+            return entity.moveTo(x, y).then((res) => {
                 return res;
             });
+        }
+
+        getDefaultOrder(entity) {
+            return  {
+                'action': 'stand_' + entity.getDirection(),
+                'x': entity.getPosition().x,
+                'y': entity.getPosition().y
+            };
         }
 
         resolveAll() {
@@ -84,21 +92,17 @@ module TacticArena.Controller {
                         var entity = this.orders[i].entity;
                         steps[j].push({
                             'entity': entity,
-                            'order': this.orders[i].list[j] ? this.orders[i].list[j] : {
-                                'action': 'stand_' + entity.getDirection(),
-                                'x': entity.getPosition().x,
-                                'y': entity.getPosition().y
-                            }
+                            'order': this.orders[i].list[j] ? this.orders[i].list[j] : this.getDefaultOrder(entity)
                         });
                     }
                 }
                 if(steps.length > 1) {
+                    // TODO Faire sans si possible
                     steps.shift(); // skip the first stand order
                 }
                 this.processOrders(steps).then((res) => {
-                    console.log('finito');
                     for(var i = 0; i < this.orders.length; i++) {
-                        this.orders[i].entity.destroyGhost();
+                        this.orders[i].entity.destroyProjection();
                     }
                     this.orders = [];
                     resolve(true);
@@ -107,14 +111,11 @@ module TacticArena.Controller {
         }
 
         resolutionEsquive(fleeRate, entityA, entityB, target) {
-            // entityA attaque entityB
-            console.log(entityA, entityB);
             if(Math.floor(Math.random() * 100) > fleeRate) {
                 console.log('esquive failed');
-                entityB.isHurt = true;
                 entityA.isAttacking = true;
                 entityA.attackTarget = target;
-                // resolution des degats
+                entityB.isHurt = true;
             } else {
                 console.log('esquive success');
             }
@@ -128,11 +129,9 @@ module TacticArena.Controller {
 
                     // check actions before step resolution
                     for(var i = 0; i < step.length; i++) {
-                        // todo améliorer ça car c'est jamais clair si on cible le ghost ou l'entité
-                        var entityA = step[i].entity.ghost ? step[i].entity.ghost : step[i].entity;
+                        var entityA = step[i].entity;
                         for(var j = i + 1; j < step.length; j++) {
-                            var entityB = step[j].entity.ghost ? step[j].entity.ghost : step[j].entity;
-                            console.log(this.game.stageManager.getNbTilesBetween(entityA.getPosition(), entityB.getPosition()), entityA, entityB);
+                            var entityB = step[j].entity;
                             if(this.game.stageManager.getNbTilesBetween(entityA.getPosition(), entityB.getPosition()) == 1
                             && (entityB.isFacing(entityA.getPosition()) || entityA.isFacing(entityB.getPosition()))) {
                                 var fleeRate = 0;
@@ -152,42 +151,32 @@ module TacticArena.Controller {
                         }
 
                         if(entityA.isAttacking) {
-                            console.log(step[i].entity._id, 'attacking', j);
                             step[i].order.action = 'attack_' + entityA.getDirection();
-                            console.log(entityA.attackTarget);
                             step[i].order.target = entityA.attackTarget;
-                        } else if(entityA.isHurt) {
-                            // cancel de la prochaine action
+                        } else if(entityA.isHurt) { // cancel des prochaines actions
                             step[i].order = {
                                 'action': 'stand_' + entityA.getDirection(),
                                 'x': entityA.getPosition().x,
                                 'y': entityA.getPosition().y
                             };
-                            step[i].entity.stunned = true;
                         }
                     }
 
                     var promisesOrders = [];
                     for (var i = 0; i < step.length; i++) {
                         var o = step[i].order;
-                        var entity = step[i].entity;
-                        var e = entity.ghost ? entity.ghost : entity;
+                        var e = step[i].entity;
                         var p = null;
-                        console.log(entity, o);
                         if (o.action == 'move') {
-                            p = this.createPromiseOrder(entity, o.x, o.y);
-                        } else if (o.action.indexOf('stand_') >= 0 || entity.hasAttacked) {
+                            p = this.createPromiseMoveOrder(e, o.x, o.y);
+                        } else if (o.action.indexOf('attack_') >= 0) {
+                            p = e.attack(o.target);
+                        } else if (o.action.indexOf('stand_') >= 0 || e.hasAttacked) {
                             p = new Promise((resolve, reject) => {
                                 var direction = o.action.replace('stand_', '').replace('attack_', '');
                                 e.faceDirection(direction);
-                                if(entity.stunned) {
-                                    console.log('reset');
-                                    entity.resetToGhostPosition();
-                                }
                                 resolve(true);
                             });
-                        } else if (o.action.indexOf('attack_') >= 0) {
-                            p = entity.attack(o.target);
                         }
                         promisesOrders.push(p);
                     }
@@ -201,6 +190,8 @@ module TacticArena.Controller {
                             resolve(true);
                         }
                     });
+                } else {
+                    resolve(false);
                 }
             });
         }

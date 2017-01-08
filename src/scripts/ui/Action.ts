@@ -6,39 +6,28 @@ module TacticArena.UI {
         constructor(menu) {
             var self = this;
             this.menu = menu;
-            this.element = this.menu.element.querySelector('.ui-menu');
-
-            this.getButton('.submit').addEventListener('click', function() {
+            this.menu.element.append('<ul class="ui-menu"><li class="cancel"></li><li class="walk"></li><li class="wait"></li><li class="submit"></li></ul>');
+            this.element = this.menu.element.find('.ui-menu');
+            this.element.find('.submit').on('click', function () {
                 self.menu.endTurn();
             });
-            this.getButton('.cancel').addEventListener('click', function() {
+            this.element.find('.cancel').on('click', function () {
                 self.menu.cancelAction();
             });
-            this.getButton('.walk').addEventListener('click', function() {
+            this.element.find('.walk').on('click', function () {
                 self.deselectAll();
-                self.getButton('.walk').classList.add('selected');
+                self.element.find('.walk').addClass('selected');
             });
-            this.getButton('.wait').addEventListener('click', function() {
+            this.element.find('.wait').on('click', function () {
                 self.deselectAll();
-                self.getButton('.wait').classList.add('selected');
+                self.element.find('.wait').addClass('selected');
             });
 
-            this.init();
-        }
-
-        init() {
-            this.getButton('.walk').click();
-        }
-
-        getButton(query) {
-            return this.element.querySelector(query);
+            this.element.find('.walk').trigger('click');
         }
 
         deselectAll() {
-            var buttons = this.element.querySelectorAll('li');
-            for(var i=0; i < buttons.length; i++) {
-                buttons[i].classList.remove('selected');
-            }
+            this.element.find('li').removeClass('selected');
         }
     }
 }
