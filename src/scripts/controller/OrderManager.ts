@@ -39,6 +39,7 @@ module TacticArena.Controller {
         }
 
         add(action, entity, x, y) {
+            console.log(action, entity, x, y);
             if(!this.hasOrder(entity._id)) {
                 this.orders.push({
                     'entity': entity,
@@ -134,15 +135,17 @@ module TacticArena.Controller {
                             var entityB = step[j].entity;
                             if(this.game.stageManager.getNbTilesBetween(entityA.getPosition(), entityB.getPosition()) == 1
                             && (entityB.isFacing(entityA.getPosition()) || entityA.isFacing(entityB.getPosition()))) {
-                                var fleeRate = 0;
-                                if (step[i].order.action == 'move' && step[j].order.action == 'move') {
+                                let fleeRate = 0;
+                                let ai = step[i].order.action;
+                                let aj = step[j].order.action;
+                                if (ai == 'move' && aj == 'move') {
                                     console.log('desengagement', entityA); // désengagement mutuel
                                 } else {
-                                    if (step[i].order.action.indexOf('stand_') >= 0 && entityA.isFacing(entityB.getPosition())) {
+                                    if ((ai.indexOf('stand_') >= 0 || ai == 'move') && entityA.isFacing(entityB.getPosition())) {
                                         console.log('accrochage from player');
                                         this.resolutionEsquive(fleeRate, entityA, entityB, step[j].entity);
                                     }
-                                    if (step[j].order.action.indexOf('stand_') >= 0 && entityB.isFacing(entityA.getPosition())) {
+                                    if ((aj.indexOf('stand_') >= 0 || aj == 'move') && entityB.isFacing(entityA.getPosition())) {
                                         console.log('accrochage from ennemy');
                                         this.resolutionEsquive(fleeRate, entityB, entityA, step[i].entity);
                                     }
@@ -155,7 +158,7 @@ module TacticArena.Controller {
                             step[i].order.target = entityA.attackTarget;
                         } else if(entityA.isHurt) { // cancel des prochaines actions
                             step[i].order = {
-                                'action': 'stand_' + entityA.getDirection(),
+                                'action': 'hurt_' + entityA.getDirection(),
                                 'x': entityA.getPosition().x,
                                 'y': entityA.getPosition().y
                             };
@@ -163,14 +166,21 @@ module TacticArena.Controller {
                     }
 
                     var promisesOrders = [];
+                    var logInfos = [];
                     for (var i = 0; i < step.length; i++) {
+                        var color = '#78dd77';
                         var o = step[i].order;
                         var e = step[i].entity;
                         var p = null;
+                        if (o.action.indexOf('hurt_') >= 0) {
+                            var color = '#f45d62';
+                            o.action = o.action.replace('hurt_', 'stand_');
+                        }
                         if (o.action == 'move') {
                             p = this.createPromiseMoveOrder(e, o.x, o.y);
                         } else if (o.action.indexOf('attack_') >= 0) {
                             p = e.attack(o.target);
+                            steps = [];
                         } else if (o.action.indexOf('stand_') >= 0 || e.hasAttacked) {
                             p = new Promise((resolve, reject) => {
                                 var direction = o.action.replace('stand_', '').replace('attack_', '');
@@ -179,7 +189,9 @@ module TacticArena.Controller {
                             });
                         }
                         promisesOrders.push(p);
+                        logInfos.push('<span style="color:' + color + ';">entity ' + e._id + ' : ' + o.action + ' ' + o.x + ',' + o.y + '</span>');
                     }
+                    this.game.uiManager.logsUI.write(logInfos.join(' | '));
 
                     Promise.all(promisesOrders).then((res) => {
                         if (steps && steps.length > 0) {

@@ -26,7 +26,13 @@ module TacticArena.UI {
             this.endTurnKey.onDown.add(this.endTurn ,this);
 
             this.logsUI.element.ready(function() {
-                self.logsUI.write('<b>Tactic Arena</b>');
+                self.logsUI.write('##################');
+                self.logsUI.write('<b># Tactical <span style="color:orangered;">A</span>' +
+                    '<span style="color:limegreen;">r</span>' +
+                    '<span style="color:cyan;">e</span>' +
+                    '<span style="color:yellow;">n</span>' +
+                    '<span style="color:orangered;">a</span> #</b>');
+                self.logsUI.write('##################<br/>');
             });
         }
 
@@ -42,10 +48,21 @@ module TacticArena.UI {
             activePawn.destroyProjection();
             activePawn.setAp(2);
 
+            this.directionUI.changeDirection(this.directionUI.savedDirection);
+
             this.game.orderManager.removeEntityOrder(activePawn._id);
             // TODO Pouvoir se passer du premier ordre
-            this.game.orderManager.add('stand_' + activePawn.getDirection(), activePawn, null, null);
+            let position = activePawn.getPosition();
+            this.game.orderManager.add('stand_' + activePawn.getDirection(), activePawn, position.x, position.y);
             this.game.onActionPlayed.dispatch(activePawn);
+        }
+
+        initTurn(pawn, first) {
+            this.game.turnManager.initTurn(pawn, first).then((data) => {
+                this.game.process = false;
+                this.init();
+                this.game.turnInitialized.dispatch(pawn);
+            });
         }
 
         endTurn() {
@@ -57,21 +74,16 @@ module TacticArena.UI {
             }
             if (!this.game.process) {
                 this.game.process = true;
-                if (activePawn._id == this.game.pawns[this.game.pawns.length-1]._id) { // Si le dernier pawn a joué
-                    this.game.turnManager.endTurn().then((nextPawn) => {
+                this.game.turnManager.endTurn().then((nextPawn) => {
+                    if (activePawn._id == this.game.pawns[this.game.pawns.length-1]._id) { // Si le dernier pawn a joué
                         this.game.orderManager.resolveAll().then((res) => {
-                            this.game.turnManager.initTurn(nextPawn, true);
-                            this.game.process = false;
-                            this.init();
+                            this.pawnsinfosUI.cleanOrders();
+                            this.initTurn(nextPawn, true);
                         });
-                    });
-                } else {
-                    this.game.turnManager.endTurn().then((res) => {
-                        this.game.turnManager.initTurn(res);
-                        this.game.process = false;
-                        this.init();
-                    });
-                }
+                    } else {
+                        this.initTurn(nextPawn, false);
+                    }
+                });
             }
         }
     }

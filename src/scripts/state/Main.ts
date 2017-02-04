@@ -11,6 +11,7 @@ module TacticArena.State {
         turnManager: Controller.TurnManager;
         orderManager: Controller.OrderManager;
         stageManager: Controller.StageManager;
+        aiManager: Controller.AiManager;
         uiManager: UI.UIManager;
         process: Boolean;
         pointer;
@@ -18,6 +19,7 @@ module TacticArena.State {
         onHpChange:Phaser.Signal;
         onOrderAdd:Phaser.Signal;
         onActionPlayed:Phaser.Signal;
+        turnInitialized:Phaser.Signal;
 
         create() {
             var that = this;
@@ -31,8 +33,8 @@ module TacticArena.State {
 
             this.pawns = [];
             this.pawnsSpritesGroup = this.add.group();
-            this.pawns.push(new Entity.Pawn(this, 7, 9, 'E', 'redhead', this.getUniqueId()));
-            this.pawns.push(new Entity.Pawn(this, 12, 9, 'W', 'skeleton', this.getUniqueId()));
+            this.pawns.push(new Entity.Pawn(this, 8, 12, 'W', 'redhead', this.getUniqueId(), false));
+            this.pawns.push(new Entity.Pawn(this, 7, 12, 'S', 'skeleton', this.getUniqueId(), true));
 
             this.stageManager.addDecorations();
 
@@ -43,6 +45,7 @@ module TacticArena.State {
             this.pathfinder.setGrid(this.stageManager.grid);
 
             this.orderManager = new Controller.OrderManager(this);
+            this.aiManager = new Controller.AiManager(this);
             this.turnManager = new Controller.TurnManager(this);
             this.uiManager = new UI.UIManager(this);
 
@@ -50,6 +53,7 @@ module TacticArena.State {
             this.onHpChange = new Phaser.Signal();
             this.onOrderAdd = new Phaser.Signal();
             this.onActionPlayed = new Phaser.Signal();
+            this.turnInitialized = new Phaser.Signal();
             this.onApChange.add(function() {
                 that.uiManager.pawnsinfosUI.updateInfos();
             });
@@ -57,10 +61,20 @@ module TacticArena.State {
                 that.uiManager.pawnsinfosUI.updateInfos();
             });
             this.onOrderAdd.add(function(pawn) {
-                console.log('orderadd');
+                that.uiManager.pawnsinfosUI.updateOrders(pawn, that.orderManager.orders);
             });
             this.onActionPlayed.add(function(pawn) {
-                that.stageManager.showPossibleMove(pawn.getProjectionOrReal().getPosition(), pawn.getReal().getAp());
+                if(!pawn.bot) {
+                    that.stageManager.showPossibleMove(pawn.getProjectionOrReal().getPosition(), pawn.getReal().getAp());
+                }
+            });
+            this.turnInitialized.add(function(pawn) {
+                console.log(pawn);
+                if(pawn.bot) {
+                    that.aiManager.play(pawn);
+                } else {
+                    that.stageManager.showPossibleMove(pawn.getProjectionOrReal().getPosition(), pawn.getReal().getAp());
+                }
             });
 
             this.turnManager.initTurn(this.pawns[0], true).then((res) => {

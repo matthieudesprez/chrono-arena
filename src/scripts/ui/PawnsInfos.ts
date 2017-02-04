@@ -33,5 +33,22 @@ module TacticArena.UI {
                 this.element.find('.pawn0' + entity._id + ' .infos .ap .value').html(entity.getAp());
             }
         }
+
+        updateOrders(pawn, orders) {
+            let orders_list = '';
+            for(var i=0; i < orders.length; i++) {
+                if(orders[i].entity._id == pawn._id) {
+                    for(var j = 0; j < orders[i].list.length; j++) {
+                        let o = orders[i].list[j];
+                        orders_list += '<div>' + o.action + ' : ' + o.x + ',' + o.y + '</div>';
+                    }
+                }
+            }
+            this.element.find('.pawn0' + pawn._id + ' .orders').html(orders_list);
+        }
+
+        cleanOrders() {
+            this.element.find('.orders').html('');
+        }
     }
 }

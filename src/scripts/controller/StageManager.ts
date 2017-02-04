@@ -39,7 +39,6 @@ module TacticArena.Controller {
         }
 
         showPossibleMove(position, ap) {
-            console.log(position, ap);
             for (var x = 0; x < this.map.width; x++) {
                 for (var y = 0; y < this.map.height; y++) {
                     let tile = this.map.getTile(x, y, this.map.layer[0], true);

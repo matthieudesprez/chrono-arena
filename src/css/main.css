@@ -2,6 +2,7 @@
   padding: 0;
   margin: 0;
   box-sizing: border-box;
+  font-smoothing: antialiased;
 }
 
 li {
@@ -28,16 +29,15 @@ html, body {
 }
 .ui-pawns-infos {
   position: absolute;
-  width: 100%;
-  left: 0px;
-  bottom: -108px;
+  width: 96px;
+  left: -100px;
+  top: 0px;
   height: auto;
 }
 .ui-pawns-infos .pawn{
   height: 96px;
   width: 96px;
-  float: left;
-  margin-right: 20px;
+  margin: 0 20px 40px 0;
   position: relative;
   border: 2px solid transparent;
 }
@@ -66,8 +66,13 @@ html, body {
 }
 .ui-pawns-infos .orders{
   position: absolute;
-  width: 100%;
-  bottom: -45px;
+  width: 135px;
+  bottom: 0;
+  right: 100px;
+  color: #b5b5b5;
+  text-align: right;
+  height: 96px;
+  padding: 10px;
 }
 .ui-pawns-infos .infos .ap{
   color: dodgerblue;
@@ -78,22 +83,25 @@ html, body {
   float: left;
 }
 .ui-logs {
-  height: 96px;
-  width: 160px;
-  background-color: #e6c762;
-  color: #333;
-  padding: 5px;
-  bottom: 0px;
+  height: 134px;
+  width: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 10px;
+  bottom: -134px;
   left: 0px;
   overflow: auto;
   position: absolute;
   text-align: left;
+  font-family: Menlo, Courier New;
+  font-size: 14px;
+  text-rendering: optimizeLegibility;
+  color: #ffffff;
 }
 .ui-direction {
   height: 96px;
   width: 96px;
-  bottom: 0px;
-  left: 192px;
+  bottom: 32px;
+  left: 32px;
   overflow: auto;
   position: absolute;
 }
@@ -101,7 +109,7 @@ html, body {
   position: absolute;
   height: 32px;
   width: 32px;
-  background-color: #e6c762;
+  background-color: rgba(255, 255, 255, 0.3);
   background-position: center center;
   background-repeat: no-repeat;
   background-size: 85%;
@@ -147,7 +155,7 @@ html, body {
   width: 32px;
   background-position: center center;
   background-repeat: no-repeat;
-  background-color: #e6c762;
+  background-color: rgba(255, 255, 255, 0.3);
   float: left;
   cursor: pointer;
   border: 1px solid #333;

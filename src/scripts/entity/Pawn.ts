@@ -12,8 +12,10 @@ module TacticArena.Entity {
         isAttacking;
         attackTarget;
         hasAttacked;
+        selected;
+        bot;
 
-        constructor(game, x, y, ext, type, id) {
+        constructor(game, x, y, ext, type, id, bot) {
             this.game = game;
             this._id = id;
             this.type = type;
@@ -27,6 +29,8 @@ module TacticArena.Entity {
             this.attackTarget = null;
             this.hasAttacked = false;
             this._hp = 4;
+            this.selected = false;
+            this.bot = bot;
         }
 
         getReal() {
@@ -126,7 +130,8 @@ module TacticArena.Entity {
                     this.getPosition().y,
                     this.sprite._ext,
                     this.type,
-                    null
+                    null,
+                    false
                 );
                 this.projection.parent = this;
                 this.projection.sprite.alpha = 0.7;
