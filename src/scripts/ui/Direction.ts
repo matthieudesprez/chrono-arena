@@ -50,7 +50,7 @@ module TacticArena.UI {
         changeDirection(direction) {
             let activePawn = this.menu.game.turnManager.getActivePawn();
 
-            if(activePawn.getAp() > 0) {
+            if(!this.menu.game.process && activePawn.getAp() > 0) {
                 activePawn.getProjectionOrReal().faceDirection(direction);
                 let position = activePawn.getProjectionOrReal().getPosition();
                 this.menu.game.orderManager.add('stand_' + direction, activePawn, position.x, position.y);

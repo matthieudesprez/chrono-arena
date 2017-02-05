@@ -7,11 +7,6 @@ module TacticArena.Controller {
         }
 
         getClosestPawn(position) {
-            //for (var x = 0; x < this.game.stageManager.map.width; x++) {
-            //    for (var y = 0; y < this.game.stageManager.map.height; y++) {
-            //        tile.alpha = ap > 0 && this.getNbTilesBetween(position, {'x': x, 'y': y}) <= ap ? 0.7 : 1;
-            //    }
-            //}
             let result = null;
             for (var i = 0; i < this.game.pawns.length; i++) {
                 let p = this.game.pawns[i];
@@ -48,6 +43,7 @@ module TacticArena.Controller {
                     pawn.setAp(pawn.getAp() - 1);
                 }
 
+                let lastDirection = pawn.getDirection();
                 this.game.pathfinder.findPath(
                     p.x,
                     p.y,
@@ -62,7 +58,8 @@ module TacticArena.Controller {
                                     pawn.setAp(pawn.getAp() - 1);
 
                                     direction = self.getDirection(p, targetPosition);
-                                    if(pawn.getDirection() != direction) {
+                                    if(lastDirection != direction) {
+                                        lastDirection = direction;
                                         self.game.orderManager.add('stand_' + direction, pawn, path[i].x, path[i].y);
                                         pawn.setAp(pawn.getAp() - 1);
                                     }

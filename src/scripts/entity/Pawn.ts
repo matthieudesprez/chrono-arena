@@ -9,6 +9,7 @@ module TacticArena.Entity {
         _hp;
         type;
         isHurt;
+        isBlocked;
         isAttacking;
         attackTarget;
         hasAttacked;
@@ -28,6 +29,7 @@ module TacticArena.Entity {
             this.isAttacking = false;
             this.attackTarget = null;
             this.hasAttacked = false;
+            this.isBlocked = false;
             this._hp = 4;
             this.selected = false;
             this.bot = bot;
@@ -76,6 +78,19 @@ module TacticArena.Entity {
             this.sprite.addChild(label_score);
         }
 
+        blocked() {
+            let label_score = this.game.add.text(20, 10, "blocked", { font: '8px Press Start 2P', fill: "#ffffff" });
+            let t = this.game.add.tween(label_score).to({x: 20,y: -20, alpha: 0},
+                1000,
+                Phaser.Easing.Linear.None,
+                true
+                );
+            t.onComplete.add(function() {
+                label_score.destroy();
+            }, this);
+            this.sprite.addChild(label_score);
+        }
+
         preMoveTo(targetX, targetY) {
             var self = this;
             return new Promise((resolve, reject) => {
@@ -91,7 +106,7 @@ module TacticArena.Entity {
                         if(path && path.length > 0) {
                             path.shift();
                             var result = JSON.parse(JSON.stringify(path));
-                            self.moveTo(0, 0, path, null).then((res) => {
+                            self.moveTo(0, 0, path).then((res) => {
                                 resolve(result);
                             });
                         }
@@ -101,7 +116,7 @@ module TacticArena.Entity {
             });
         }
 
-        moveTo(x, y, path, callback) {
+        moveTo(x, y, path) {
             return new Promise((resolve, reject) => {
                 var tile_y, tile_x;
                 if (path != undefined && path.length > 0) {
@@ -124,7 +139,7 @@ module TacticArena.Entity {
                 );
                 t.onComplete.add( function(){
                     if (path != undefined && path.length > 0){
-                        this.moveTo(0, 0, path, callback).then((res) => {
+                        this.moveTo(0, 0, path).then((res) => {
                             resolve(res);
                         }); // recursive
                     } else {

@@ -62,13 +62,15 @@ module TacticArena.UI {
         }
 
         cancelAction() {
-            var activePawn = this.game.turnManager.getActivePawn();
-            activePawn.destroyProjection();
-            activePawn.setAp(3);
-            activePawn.getProjectionOrReal().faceDirection(this.directionUI.savedDirection);
-            this.directionUI.init(this.directionUI.savedDirection);
-            this.game.orderManager.removeEntityOrder(activePawn);
-            this.game.onActionPlayed.dispatch(activePawn);
+            if(!this.game.process) {
+                var activePawn = this.game.turnManager.getActivePawn();
+                activePawn.destroyProjection();
+                activePawn.setAp(3);
+                activePawn.getProjectionOrReal().faceDirection(this.directionUI.savedDirection);
+                this.directionUI.init(this.directionUI.savedDirection);
+                this.game.orderManager.removeEntityOrder(activePawn);
+                this.game.onActionPlayed.dispatch(activePawn);
+            }
         }
 
         initTurn(pawn, first) {

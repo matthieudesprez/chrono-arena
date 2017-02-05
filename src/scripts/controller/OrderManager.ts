@@ -157,6 +157,7 @@ module TacticArena.Controller {
                         entityA.isAttacking = false;
                         entityA.isHurt = false;
                         entityA.attackTarget = false;
+                        entityA.isBlocked = false;
                     }
                     // check actions before step resolution
                     // foreach entities in step
@@ -165,24 +166,35 @@ module TacticArena.Controller {
                         // foreach entities except A
                         for(var j = i + 1; j < step.length; j++) {
                             var entityB = step[j].entity;
+                            let orderA = step[i].order;
+                            let orderB = step[j].order;
+                            let aIsFacingB = entityA.isFacing(entityB.getPosition();
+                            let bIsFacingA = entityB.isFacing(entityA.getPosition();
+                            let actionA = orderA.action;
+                            let actionB = orderB.action;
+                            console.log(orderA.x,orderB.x,orderA.y,orderB.y, !aIsFacingB , !bIsFacingA);
                             if(this.game.stageManager.getNbTilesBetween(entityA.getPosition(), entityB.getPosition()) == 1
                             && (entityB.isFacing(entityA.getPosition()) || entityA.isFacing(entityB.getPosition()))) {
                                 let fleeRate = 50;
-                                let orderA = step[i].order;
-                                let orderB = step[j].order;
-                                let actionA = orderA.action;
-                                let actionB = orderB.action;
                                 if (actionA == 'move' && actionB == 'move' && !this.movesTo(orderA, entityB) && !this.movesTo(orderB, entityA)) {
                                     console.log('desengagement', entityA); // désengagement mutuel
                                 } else {
-                                    if ((actionA.indexOf('stand_') >= 0 || this.movesTo(orderA, entityB)) && entityA.isFacing(entityB.getPosition())) {
+                                    if ((actionA.indexOf('stand_') >= 0 || this.movesTo(orderA, entityB)) && aIsFacingB) {
                                         console.log('accrochage from player');
                                         this.resolutionEsquive(fleeRate, entityA, entityB);
                                     }
-                                    if ((actionB.indexOf('stand_') >= 0 || this.movesTo(orderB, entityA)) && entityB.isFacing(entityA.getPosition())) {
+                                    if ((actionB.indexOf('stand_') >= 0 || this.movesTo(orderB, entityA)) && bIsFacingA) {
                                         console.log('accrochage from ennemy');
                                         this.resolutionEsquive(fleeRate, entityB, entityA);
                                     }
+                                }
+                            } else if(orderA.x == orderB.x && orderA.y == orderB.y && !aIsFacingB && !bIsFacingA) {
+                                // si les deux veulent aller sur la même case sans se faire face
+                                if (actionA == 'move') {
+                                    entityA.isBlocked = true;
+                                }
+                                if (actionB == 'move') {
+                                    entityA.isBlocked = true;
                                 }
                             }
                         }
@@ -193,6 +205,12 @@ module TacticArena.Controller {
                         } else if(entityA.isHurt) { // cancel des prochaines actions
                             step[i].order = {
                                 'action': 'hurt_' + this.getOrderDirection(step[i]),
+                                'x': entityA.getPosition().x,
+                                'y': entityA.getPosition().y
+                            };
+                        } else if(entityA.isBlocked) { // cancel des prochaines actions
+                            step[i].order = {
+                                'action': 'stand_' + this.getOrderDirection(step[i]),
                                 'x': entityA.getPosition().x,
                                 'y': entityA.getPosition().y
                             };
@@ -212,6 +230,9 @@ module TacticArena.Controller {
                         }
                         if(e.isDodging) {
                             e.dodge();
+                        }
+                        if(e.isBlocked) {
+                            e.blocked();
                         }
                         if (o.action == 'move') {
                             p = this.createPromiseMoveOrder(e, o.x, o.y);

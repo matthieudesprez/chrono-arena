@@ -27,34 +27,35 @@ module TacticArena.UI {
             this.marker.x = pointerPosition.x * this.game.tileSize;
             this.marker.y = pointerPosition.y * this.game.tileSize;
 
-            let activePawn = this.game.turnManager.getActivePawn();
-            let position = activePawn.getProjectionOrReal().getPosition();
-            let distance = this.game.stageManager.getNbTilesBetween(
-                {'x': pointerPosition.x, 'y': pointerPosition.y}, {'x': position.x, 'y': position.y}
-            );
-            self.game.pathTilesGroup.removeAll();
-            if(this.game.stageManager.canMove(pointerPosition.x, pointerPosition.y) && distance <= activePawn.getAp()) {
-                this.game.pathfinder.findPath(
-                    position.x,
-                    position.y,
-                    pointerPosition.x,
-                    pointerPosition.y,
-                    function (path) {
-                        if (path && path.length > 0) {
-                            path.shift();
-                            self.game.stageManager.showPath(path);
-                        }
-                    }
+            if(!self.game.process) {
+                console.log('update');
+                let activePawn = this.game.turnManager.getActivePawn();
+                let position = activePawn.getProjectionOrReal().getPosition();
+                let distance = this.game.stageManager.getNbTilesBetween(
+                    {'x': pointerPosition.x, 'y': pointerPosition.y}, {'x': position.x, 'y': position.y}
                 );
-                this.game.pathfinder.calculate();
-                this.game.stageManager.showPossibleMove(activePawn.getProjectionOrReal().getPosition(), activePawn.getReal().getAp());
-            } else {
-                this.game.stageManager.clearPossibleMove();
+                self.game.pathTilesGroup.removeAll();
+                if (this.game.stageManager.canMove(pointerPosition.x, pointerPosition.y) && distance <= activePawn.getAp()) {
+                    this.game.pathfinder.findPath(
+                        position.x,
+                        position.y,
+                        pointerPosition.x,
+                        pointerPosition.y,
+                        function (path) {
+                            if (path && path.length > 0) {
+                                path.shift();
+                                self.game.stageManager.showPath(path);
+                            }
+                        }
+                    );
+                    this.game.pathfinder.calculate();
+                    this.game.stageManager.showPossibleMove(activePawn.getProjectionOrReal().getPosition(), activePawn.getReal().getAp());
+                } else {
+                    this.game.stageManager.clearPossibleMove();
+                }
             }
         }
 
-        onGridOver() {
-        }
         onGridClick() {
             if (!this.game.process) {
                 var activePawn = this.game.turnManager.getActivePawn();
@@ -65,7 +66,7 @@ module TacticArena.UI {
                     {'x': targetX, 'y': targetY}, {'x': position.x, 'y': position.y}
                 );
                 if(this.game.stageManager.canMove(targetX, targetY) && distance <= activePawn.getAp()) {
-                    if(targetX != activePawn.getPosition().x || targetY != activePawn.getPosition().y) {
+                    if(targetX != activePawn.getProjectionOrReal().getPosition().x || targetY != activePawn.getProjectionOrReal().getPosition().y) {
                         this.game.process = true;
                         activePawn.createProjection();
                         activePawn.projection.preMoveTo(targetX, targetY).then((path) => {
@@ -73,8 +74,8 @@ module TacticArena.UI {
                             for(var i = 0; i < (path as any).length; i++) {
                                 this.game.orderManager.add('move', activePawn, path[i].x, path[i].y);
                             }
-                            this.game.onActionPlayed.dispatch(activePawn);
                             this.game.process = false;
+                            this.game.onActionPlayed.dispatch(activePawn.getProjectionOrReal());
                         });
                     }
                 }
