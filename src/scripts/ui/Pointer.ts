@@ -28,8 +28,7 @@ module TacticArena.UI {
                 var distance = this.game.stageManager.getNbTilesBetween(
                     {'x': targetX, 'y': targetY}, {'x': position.x, 'y': position.y}
                 );
-
-                if(distance <= activePawn.getAp()) {
+                if(this.game.stageManager.canMove(targetX, targetY) && distance <= activePawn.getAp()) {
                     if(targetX != activePawn.getPosition().x || targetY != activePawn.getPosition().y) {
                         this.game.process = true;
                         activePawn.createProjection();

@@ -38,6 +38,7 @@ module TacticArena.UI {
 
         init() {
             var activePawn = this.game.turnManager.getActivePawn();
+            console.log(activePawn.getDirection());
             this.directionUI.init(activePawn.getDirection());
             this.logsUI.write('au tour du joueur ' + activePawn._id);
             this.pawnsinfosUI.select(activePawn._id);
@@ -46,14 +47,9 @@ module TacticArena.UI {
         cancelAction() {
             var activePawn = this.game.turnManager.getActivePawn();
             activePawn.destroyProjection();
-            activePawn.setAp(2);
-
-            this.directionUI.changeDirection(this.directionUI.savedDirection);
-
+            activePawn.setAp(3);
+            activePawn.getProjectionOrReal().faceDirection(this.directionUI.savedDirection);
             this.game.orderManager.removeEntityOrder(activePawn._id);
-            // TODO Pouvoir se passer du premier ordre
-            let position = activePawn.getPosition();
-            this.game.orderManager.add('stand_' + activePawn.getDirection(), activePawn, position.x, position.y);
             this.game.onActionPlayed.dispatch(activePawn);
         }
 
@@ -67,11 +63,6 @@ module TacticArena.UI {
 
         endTurn() {
             var activePawn = this.game.turnManager.getActivePawn();
-            if(!this.game.orderManager.hasOrder(activePawn._id)) {
-                // TODO Pouvoir se passer du premier ordre / Plus difficile pour celui ci car activePawn doit etre
-                // dans OrdreManager au moment de la résolution du tour
-                this.game.orderManager.add('stand_' + activePawn.getDirection(), activePawn, null, null);
-            }
             if (!this.game.process) {
                 this.game.process = true;
                 this.game.turnManager.endTurn().then((nextPawn) => {

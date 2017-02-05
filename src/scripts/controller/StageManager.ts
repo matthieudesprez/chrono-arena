@@ -33,7 +33,7 @@ module TacticArena.Controller {
 
         canMove(x, y) {
             if(this.grid[y]) {
-                return this.grid[y][x];
+                return this.grid[y][x] == -1;
             }
             return false;
         }

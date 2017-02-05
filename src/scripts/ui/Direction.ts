@@ -13,31 +13,25 @@ module TacticArena.UI {
             this.matching = {'N': 'north', 'E': 'east', 'S': 'south', 'W': 'west'};
 
             $('.compass').on('click', function () {
-                self.select('compass');
                 self.changeDirection(self.savedDirection);
             });
             $('.north').on('click', function () {
-                self.select('north');
                 self.changeDirection('N');
             });
             $('.east').on('click', function () {
-                self.select('east');
                 self.changeDirection('E');
             });
             $('.south').on('click', function () {
-                self.select('south');
                 self.changeDirection('S');
             });
             $('.west').on('click', function () {
-                self.select('west');
                 self.changeDirection('W');
             });
         }
 
         init(direction) {
             this.savedDirection = direction;
-            // TODO ne doit pas être ce qui set le premier ordre xD
-            $('.compass').trigger('click');
+            this.select(this.matching[direction]);
         }
 
         select(name) {
@@ -55,10 +49,17 @@ module TacticArena.UI {
 
         changeDirection(direction) {
             let activePawn = this.menu.game.turnManager.getActivePawn();
-            activePawn.getProjectionOrReal().faceDirection(direction);
-            let position = activePawn.getProjectionOrReal().getPosition();
-            this.menu.game.orderManager.add('stand_' + direction, activePawn, position.x, position.y);
-            this.menu.game.onActionPlayed.dispatch(activePawn);
+
+            if(activePawn.getAp() > 0) {
+                activePawn.getProjectionOrReal().faceDirection(direction);
+                let position = activePawn.getProjectionOrReal().getPosition();
+                this.menu.game.orderManager.add('stand_' + direction, activePawn, position.x, position.y);
+                activePawn.setAp(activePawn.getAp() - 1);
+                this.menu.game.onActionPlayed.dispatch(activePawn);
+                this.select(this.matching[direction]);
+            } else {
+
+            }
         }
     }
 }

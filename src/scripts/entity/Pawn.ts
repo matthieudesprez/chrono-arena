@@ -63,6 +63,19 @@ module TacticArena.Entity {
             this.setHp(this._hp - 1);
         }
 
+        dodge() {
+            let label_score = this.game.add.text(20, 10, "flee", { font: "14px Arial", fill: "#ffffff" });
+            let t = this.game.add.tween(label_score).to({x: 20,y: -20, alpha: 0},
+                1000,
+                Phaser.Easing.Linear.None,
+                true
+                );
+            t.onComplete.add(function() {
+                label_score.destroy();
+            }, this);
+            this.sprite.addChild(label_score);
+        }
+
         preMoveTo(targetX, targetY) {
             var self = this;
             return new Promise((resolve, reject) => {
@@ -116,6 +129,7 @@ module TacticArena.Entity {
                         }); // recursive
                     } else {
                         this.sprite.stand();
+                        this.destroyProjectionIfSamePosition();
                         resolve(true);
                     }
                 }, this);
@@ -135,6 +149,16 @@ module TacticArena.Entity {
                 );
                 this.projection.parent = this;
                 this.projection.sprite.alpha = 0.7;
+            }
+        }
+
+        destroyProjectionIfSamePosition() {
+            if(this.projection) {
+                let p1 = this.getPosition();
+                let p2 = this.projection.getPosition();
+                if(p1.x == p2.x && p1.y == p2.y) {
+                    this.destroyProjection();
+                }
             }
         }
 

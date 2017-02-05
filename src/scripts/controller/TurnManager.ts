@@ -12,7 +12,7 @@ module TacticArena.Controller {
 	        		this.pawns[i].active = false;
                     //distribution des ap va se faire à chaque début de tour
 					if(first) {
-						this.pawns[i].setAp(2);
+						this.pawns[i].setAp(3);
                         this.pawns[i].stunned = false;
                         this.pawns[i].isHurt = false;
                         this.pawns[i].isAttacking = false;

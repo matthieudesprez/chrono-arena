@@ -69,7 +69,6 @@ module TacticArena.State {
                 }
             });
             this.turnInitialized.add(function(pawn) {
-                console.log(pawn);
                 if(pawn.bot) {
                     that.aiManager.play(pawn);
                 } else {
@@ -79,7 +78,6 @@ module TacticArena.State {
 
             this.turnManager.initTurn(this.pawns[0], true).then((res) => {
                 this.process = false;
-                console.log(that.turnManager.getActivePawn());
                 that.uiManager.init();
             });
         }

@@ -41,7 +41,13 @@ module TacticArena.Controller {
             let target = this.getClosestPawn(p);
             if(target) {
                 let targetPosition = target.getPosition();
-                this.game.orderManager.add('stand_' + this.getDirection(p, targetPosition), pawn, p.x, p.y);
+
+                let direction = self.getDirection(p, targetPosition);
+                if(pawn.getDirection() != direction) {
+                    this.game.orderManager.add('stand_' + direction, pawn, p.x, p.y);
+                    pawn.setAp(pawn.getAp() - 1);
+                }
+
                 this.game.pathfinder.findPath(
                     p.x,
                     p.y,
@@ -53,8 +59,13 @@ module TacticArena.Controller {
                             for (var i = 0; i < (path as any).length; i++) {
                                 if(pawn.getAp() > 0) {
                                     self.game.orderManager.add('move', pawn, path[i].x, path[i].y);
-                                    self.game.orderManager.add('stand_' + self.getDirection(p, targetPosition), pawn, path[i].x, path[i].y);
                                     pawn.setAp(pawn.getAp() - 1);
+
+                                    direction = self.getDirection(p, targetPosition);
+                                    if(pawn.getDirection() != direction) {
+                                        self.game.orderManager.add('stand_' + direction, pawn, path[i].x, path[i].y);
+                                        pawn.setAp(pawn.getAp() - 1);
+                                    }
                                 }
                             }
                         }
