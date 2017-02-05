@@ -7,6 +7,11 @@ module TacticArena.UI {
         actionUI;
         pawnsinfosUI;
         endTurnKey;
+        leftKey;
+        rightKey;
+        downKey;
+        upKey;
+        cancelKey;
 
         constructor(game) {
             var self = this;
@@ -24,6 +29,18 @@ module TacticArena.UI {
 
             this.endTurnKey = this.game.input.keyboard.addKey(Phaser.KeyCode.SPACEBAR);
             this.endTurnKey.onDown.add(this.endTurn ,this);
+
+            this.leftKey = this.game.input.keyboard.addKey(Phaser.KeyCode.LEFT);
+            this.leftKey.onDown.add(function() {self.directionUI.changeDirection('W');} ,this);
+            this.rightKey = this.game.input.keyboard.addKey(Phaser.KeyCode.RIGHT);
+            this.rightKey.onDown.add(function() {self.directionUI.changeDirection('E');} ,this);
+            this.downKey = this.game.input.keyboard.addKey(Phaser.KeyCode.DOWN);
+            this.downKey.onDown.add(function() {self.directionUI.changeDirection('S');} ,this);
+            this.upKey = this.game.input.keyboard.addKey(Phaser.KeyCode.UP);
+            this.upKey.onDown.add(function() {self.directionUI.changeDirection('N');} ,this);
+
+            this.cancelKey = this.game.input.keyboard.addKey(Phaser.KeyCode.BACKSPACE);
+            this.cancelKey.onDown.add(this.cancelAction ,this);
 
             this.logsUI.element.ready(function() {
                 self.logsUI.write('##################');
@@ -49,7 +66,8 @@ module TacticArena.UI {
             activePawn.destroyProjection();
             activePawn.setAp(3);
             activePawn.getProjectionOrReal().faceDirection(this.directionUI.savedDirection);
-            this.game.orderManager.removeEntityOrder(activePawn._id);
+            this.directionUI.init(this.directionUI.savedDirection);
+            this.game.orderManager.removeEntityOrder(activePawn);
             this.game.onActionPlayed.dispatch(activePawn);
         }
 

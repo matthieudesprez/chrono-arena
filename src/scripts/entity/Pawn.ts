@@ -64,7 +64,7 @@ module TacticArena.Entity {
         }
 
         dodge() {
-            let label_score = this.game.add.text(20, 10, "flee", { font: "14px Arial", fill: "#ffffff" });
+            let label_score = this.game.add.text(20, 10, "miss", { font: '8px Press Start 2P', fill: "#ffffff" });
             let t = this.game.add.tween(label_score).to({x: 20,y: -20, alpha: 0},
                 1000,
                 Phaser.Easing.Linear.None,

@@ -19,10 +19,10 @@ module TacticArena.Controller {
             this.layer = this.map.createLayer('Foreground');
             this.map.createLayer('Decorations');
             this.map.createLayer('Decorations2');
-            for(var i = 0; i < this.map.layers[1].data.length; i++) {
+            for(var i = 0; i < this.map.layers[2].data.length; i++) {
                 this.grid[i] = [];
-                for(var j = 0; j < this.map.layers[1].data[i].length; j++) {
-                    this.grid[i][j] = this.map.layers[1].data[i][j].index;
+                for(var j = 0; j < this.map.layers[2].data[i].length; j++) {
+                    this.grid[i][j] = this.map.layers[2].data[i][j].index;
                 }
             }
         }
@@ -46,6 +46,23 @@ module TacticArena.Controller {
                 }
             }
             this.map.layers[0].dirty = true;
+        }
+
+        clearPossibleMove() {
+            for (var x = 0; x < this.map.width; x++) {
+                for (var y = 0; y < this.map.height; y++) {
+                    let tile = this.map.getTile(x, y, this.map.layer[0], true);
+                    tile.alpha = 1;
+                }
+            }
+            this.map.layers[0].dirty = true;
+        }
+
+        showPath(path) {
+            for (var i = 0; i < (path as any).length; i++) {
+                let tile = this.map.getTile(path[i].x, path[i].y, this.map.layer[0], true);
+                this.game.pathTilesGroup.add(new Phaser.Sprite(this.game, tile.x * this.game.tileSize, tile.y * this.game.tileSize, 'path-tile', ''));
+            }
         }
 
         getNbTilesBetween(coordsA, coordsB) {

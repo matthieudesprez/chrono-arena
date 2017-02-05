@@ -14,11 +14,47 @@ module TacticArena.UI {
             this.game.input.onDown.add(this.onGridClick, this);
         }
 
-        update() {      
-            this.marker.x = this.game.stageManager.layer.getTileX(this.game.input.activePointer.worldX) * this.game.tileSize;
-            this.marker.y = this.game.stageManager.layer.getTileY(this.game.input.activePointer.worldY) * this.game.tileSize;
+        getPosition() {
+            return {
+                x: this.game.stageManager.layer.getTileX(this.game.input.activePointer.worldX),
+                y: this.game.stageManager.layer.getTileY(this.game.input.activePointer.worldY)
+            }
         }
 
+        update() {
+            let self = this;
+            let pointerPosition = this.getPosition();
+            this.marker.x = pointerPosition.x * this.game.tileSize;
+            this.marker.y = pointerPosition.y * this.game.tileSize;
+
+            let activePawn = this.game.turnManager.getActivePawn();
+            let position = activePawn.getProjectionOrReal().getPosition();
+            let distance = this.game.stageManager.getNbTilesBetween(
+                {'x': pointerPosition.x, 'y': pointerPosition.y}, {'x': position.x, 'y': position.y}
+            );
+            self.game.pathTilesGroup.removeAll();
+            if(this.game.stageManager.canMove(pointerPosition.x, pointerPosition.y) && distance <= activePawn.getAp()) {
+                this.game.pathfinder.findPath(
+                    position.x,
+                    position.y,
+                    pointerPosition.x,
+                    pointerPosition.y,
+                    function (path) {
+                        if (path && path.length > 0) {
+                            path.shift();
+                            self.game.stageManager.showPath(path);
+                        }
+                    }
+                );
+                this.game.pathfinder.calculate();
+                this.game.stageManager.showPossibleMove(activePawn.getProjectionOrReal().getPosition(), activePawn.getReal().getAp());
+            } else {
+                this.game.stageManager.clearPossibleMove();
+            }
+        }
+
+        onGridOver() {
+        }
         onGridClick() {
             if (!this.game.process) {
                 var activePawn = this.game.turnManager.getActivePawn();

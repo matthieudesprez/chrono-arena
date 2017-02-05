@@ -5,6 +5,7 @@ module TacticArena.State {
     export class Main extends Phaser.State {
         layer: Phaser.TilemapLayer;
         pawns: Entity.Pawn[];
+        pathTilesGroup;
         pawnsSpritesGroup;
         pathfinder;
         tileSize: number;
@@ -17,7 +18,7 @@ module TacticArena.State {
         pointer;
         onApChange:Phaser.Signal;
         onHpChange:Phaser.Signal;
-        onOrderAdd:Phaser.Signal;
+        onOrderChange:Phaser.Signal;
         onActionPlayed:Phaser.Signal;
         turnInitialized:Phaser.Signal;
 
@@ -32,6 +33,7 @@ module TacticArena.State {
             this.pointer = new UI.Pointer(this);
 
             this.pawns = [];
+            this.pathTilesGroup = this.add.group();
             this.pawnsSpritesGroup = this.add.group();
             this.pawns.push(new Entity.Pawn(this, 8, 12, 'W', 'redhead', this.getUniqueId(), false));
             this.pawns.push(new Entity.Pawn(this, 7, 12, 'S', 'skeleton', this.getUniqueId(), true));
@@ -51,7 +53,7 @@ module TacticArena.State {
 
             this.onApChange = new Phaser.Signal();
             this.onHpChange = new Phaser.Signal();
-            this.onOrderAdd = new Phaser.Signal();
+            this.onOrderChange = new Phaser.Signal();
             this.onActionPlayed = new Phaser.Signal();
             this.turnInitialized = new Phaser.Signal();
             this.onApChange.add(function() {
@@ -60,19 +62,15 @@ module TacticArena.State {
             this.onHpChange.add(function() {
                 that.uiManager.pawnsinfosUI.updateInfos();
             });
-            this.onOrderAdd.add(function(pawn) {
+            this.onOrderChange.add(function(pawn) {
                 that.uiManager.pawnsinfosUI.updateOrders(pawn, that.orderManager.orders);
             });
             this.onActionPlayed.add(function(pawn) {
-                if(!pawn.bot) {
-                    that.stageManager.showPossibleMove(pawn.getProjectionOrReal().getPosition(), pawn.getReal().getAp());
-                }
+                that.pointer.update();
             });
             this.turnInitialized.add(function(pawn) {
                 if(pawn.bot) {
                     that.aiManager.play(pawn);
-                } else {
-                    that.stageManager.showPossibleMove(pawn.getProjectionOrReal().getPosition(), pawn.getReal().getAp());
                 }
             });
 

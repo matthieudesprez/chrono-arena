@@ -8,7 +8,8 @@ module TacticArena.Controller {
             this.game = game;
         }
 
-        removeEntityOrder(id, order?) {
+        removeEntityOrder(pawn, order?) {
+            let id = pawn._id;
             var result = [];
             for(var i = 0; i < this.orders.length; i++) {
                 if(this.orders[i].entity._id != id) {
@@ -29,6 +30,7 @@ module TacticArena.Controller {
                 }
             }
             this.orders = result;
+            this.game.onOrderChange.dispatch(pawn);
         }
 
         hasOrder(id) {
@@ -58,7 +60,7 @@ module TacticArena.Controller {
                     this.orders[i].list.push(order);
                 }
             }
-            this.game.onOrderAdd.dispatch(entity);
+            this.game.onOrderChange.dispatch(entity);
         }
 
         getMaxOrderListLength() {
