@@ -58,7 +58,7 @@ module TacticArena.Controller {
                                     pawn.setAp(pawn.getAp() - 1);
 
                                     direction = self.getDirection(p, targetPosition);
-                                    if(lastDirection != direction) {
+                                    if(lastDirection != direction || i >= path.length - 1) {
                                         lastDirection = direction;
                                         self.game.orderManager.add('stand_' + direction, pawn, path[i].x, path[i].y);
                                         pawn.setAp(pawn.getAp() - 1);

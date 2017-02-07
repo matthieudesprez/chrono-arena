@@ -65,6 +65,15 @@ module TacticArena.Controller {
             }
         }
 
+        clearPath() {
+            this.game.pathTilesGroup.removeAll();
+        }
+
+        clearHelp() {
+            this.clearPossibleMove();
+            this.clearPath();
+        }
+
         getNbTilesBetween(coordsA, coordsB) {
             return Math.abs(coordsA.x - coordsB.x) + Math.abs(coordsA.y - coordsB.y);
         }

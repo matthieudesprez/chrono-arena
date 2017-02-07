@@ -77,6 +77,14 @@ module TacticArena.Controller {
             });
         }
 
+        createPromiseBlockOrder(entity, x, y, initialX, initialY) {
+            return entity.moveTo(x, y).then((res) => {
+                entity.moveTo(initialX, initialY).then((res) => {
+                    return res;
+                });
+            });
+        }
+
         getDefaultOrder(entity) {
             return  {
                 'action': 'stand_' + entity.getProjectionOrReal().getDirection(),
@@ -161,6 +169,7 @@ module TacticArena.Controller {
                     }
                     // check actions before step resolution
                     // foreach entities in step
+                    console.log(step);
                     for(var i = 0; i < step.length; i++) {
                         var entityA = step[i].entity;
                         // foreach entities except A
@@ -168,8 +177,8 @@ module TacticArena.Controller {
                             var entityB = step[j].entity;
                             let orderA = step[i].order;
                             let orderB = step[j].order;
-                            let aIsFacingB = entityA.isFacing(entityB.getPosition();
-                            let bIsFacingA = entityB.isFacing(entityA.getPosition();
+                            let aIsFacingB = entityA.isFacing(entityB.getPosition());
+                            let bIsFacingA = entityB.isFacing(entityA.getPosition());
                             let actionA = orderA.action;
                             let actionB = orderB.action;
                             console.log(orderA.x,orderB.x,orderA.y,orderB.y, !aIsFacingB , !bIsFacingA);
@@ -190,11 +199,9 @@ module TacticArena.Controller {
                                 }
                             } else if(orderA.x == orderB.x && orderA.y == orderB.y && !aIsFacingB && !bIsFacingA) {
                                 // si les deux veulent aller sur la même case sans se faire face
-                                if (actionA == 'move') {
+                                if (actionA == 'move' && actionB == 'move') {
                                     entityA.isBlocked = true;
-                                }
-                                if (actionB == 'move') {
-                                    entityA.isBlocked = true;
+                                    entityB.isBlocked = true;
                                 }
                             }
                         }
@@ -209,11 +216,11 @@ module TacticArena.Controller {
                                 'y': entityA.getPosition().y
                             };
                         } else if(entityA.isBlocked) { // cancel des prochaines actions
-                            step[i].order = {
-                                'action': 'stand_' + this.getOrderDirection(step[i]),
-                                'x': entityA.getPosition().x,
-                                'y': entityA.getPosition().y
-                            };
+                            //step[i].order = {
+                            //    'action': 'stand_' + this.getOrderDirection(step[i]),
+                            //    'x': entityA.getPosition().x,
+                            //    'y': entityA.getPosition().y
+                            //};
                         }
                     }
 
@@ -233,6 +240,10 @@ module TacticArena.Controller {
                         }
                         if(e.isBlocked) {
                             e.blocked();
+                            steps = [];
+                            let position = e.getPosition();
+                            console.log(o.x, o.y);
+                            p = this.createPromiseBlockOrder(e, o.x, o.y, position.x, position.y);
                         }
                         if (o.action == 'move') {
                             p = this.createPromiseMoveOrder(e, o.x, o.y);

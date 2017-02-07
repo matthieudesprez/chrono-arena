@@ -79,7 +79,7 @@ module TacticArena.Entity {
         }
 
         blocked() {
-            let label_score = this.game.add.text(20, 10, "blocked", { font: '8px Press Start 2P', fill: "#ffffff" });
+            let label_score = this.game.add.text(20, 10, "block", { font: '8px Press Start 2P', fill: "#ffffff" });
             let t = this.game.add.tween(label_score).to({x: 20,y: -20, alpha: 0},
                 1000,
                 Phaser.Easing.Linear.None,

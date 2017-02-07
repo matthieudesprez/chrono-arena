@@ -84,6 +84,8 @@ module TacticArena.UI {
         endTurn() {
             var activePawn = this.game.turnManager.getActivePawn();
             if (!this.game.process) {
+                this.game.stageManager.clearPossibleMove();
+                this.game.stageManager.clearPath();
                 this.game.process = true;
                 this.game.turnManager.endTurn().then((nextPawn) => {
                     if (activePawn._id == this.game.pawns[this.game.pawns.length-1]._id) { // Si le dernier pawn a joué
