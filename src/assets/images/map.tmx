@@ -9,7 +9,7 @@
    eJylk8ENwCAMA2E39p+pHx5VxZ2N+kAqDXacOFlzjDX2eX/TfR5ixkHYExdx0/0UIxz9++ohXaaV8JbzhDX+v7jU4+R/g6caTXMTb3Nar60eO/SWcpDuht/8Jt23u5t2xvym2U47kHxqZjLpsb1L85ZmuO1j6s2Nf+Zlq7GZC+pLqnu/eQBahWsB
   </data>
  </layer>
- <layer name="Pathfinder" width="20" height="20">
+ <layer name="Pathfinder" width="20" height="20" visible="0">
   <data encoding="base64" compression="zlib">
    eJxzZ2BgcB/Fo3gUj+JRPIpJxACmdW7x
   </data>

@@ -43,6 +43,7 @@ module TacticArena.UI {
                             pointerPosition.x,
                             pointerPosition.y,
                             function (path) {
+                                console.log(path);
                                 if (path && path.length > 0) {
                                     path.shift();
                                     self.game.stageManager.showPath(path);
@@ -52,13 +53,25 @@ module TacticArena.UI {
                         this.game.pathfinder.calculate();
                         this.game.stageManager.showPossibleMove(activePawn.getProjectionOrReal().getPosition(), activePawn.getReal().getAp());
                     }
-                } else if(self.game.uiManager.actionUI.canOrderFire()) {
-
+                } else if(self.game.uiManager.actionUI.canOrderFire() && activePawn.getAp() >= 2) {
+                    if (distance <= 4) {
+                        let path = this.game.stageManager.showPossibleLinearTrajectories(activePawn.getProjectionOrReal(), 4);
+                        let isInPath = false;
+                        for(var i = 0; i < path.length; i++) {
+                            if(path[i].x == pointerPosition.x && path[i].y == pointerPosition.y) {
+                                isInPath = true;
+                            }
+                        }
+                        if(isInPath) {
+                            this.game.stageManager.showPath(path, 0xfc000f);
+                        }
+                    }
                 }
             }
         }
 
         onGridClick() {
+            let self = this;
             if (!this.game.process) {
                 var activePawn = this.game.turnManager.getActivePawn();
                 var targetX = this.marker.x / this.game.tileSize;
@@ -82,21 +95,28 @@ module TacticArena.UI {
                             });
                         }
                     }
-                } else if (this.game.uiManager.actionUI.canOrderFire()) {
-                    let fireball = this.game.add.sprite(position.x * this.game.tileSize, position.y * this.game.tileSize, 'fireball');
-                    let fire = fireball.animations.add('fire');
-                    let targetX = (position.x - 2) * this.game.tileSize;
-                    let targetY = (position.y) * this.game.tileSize;
-                    fireball.animations.play('fire', 10, false);
-                    var t = this.game.add.tween(
-                        fireball).to({x: targetX,y: targetY},
-                        1000,
-                        Phaser.Easing.Linear.None,
-                        true
-                    );
-                    t.onComplete.add( function(){
-                        fireball.kill();
-                    }, this);
+                } else if (this.game.uiManager.actionUI.canOrderFire() && activePawn.getAp() >= 2) {
+                    if (distance <= 4) {
+                        let path = this.game.stageManager.showPossibleLinearTrajectories(activePawn.getProjectionOrReal(), 4);
+                        let isInPath = false;
+                        let maxX = null;
+                        let maxY = null;
+                        for(var i = 0; i < path.length; i++) {
+                            if(path[i].x == targetX && path[i].y == targetY) {
+                                isInPath = true;
+                            }
+                            if(this.game.stageManager.getNbTilesBetween({'x': path[i].x, 'y': path[i].y}, {'x': position.x, 'y': position.y}) == 4) {
+                                maxX = path[i].x;
+                                maxY = path[i].y;
+                            }
+                        }
+                        if(isInPath) {
+                            activePawn.createProjection();
+                            activePawn.getProjectionOrReal().halfcast();
+                            activePawn.setAp(activePawn.getAp() - 2);
+                            this.game.orderManager.add('cast_' + activePawn.getProjectionOrReal().getDirection(), activePawn, maxX, maxY);
+                        }
+                    }
 
                 }
             }

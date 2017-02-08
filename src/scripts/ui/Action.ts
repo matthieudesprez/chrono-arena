@@ -27,7 +27,7 @@ module TacticArena.UI {
                 self.select('fire');
             });
 
-            this.element.find('.walk').trigger('click');
+            this.element.find('.fire').trigger('click');
         }
 
         deselectAll() {

@@ -166,6 +166,14 @@ module TacticArena.Controller {
                         entityA.isHurt = false;
                         entityA.attackTarget = false;
                         entityA.isBlocked = false;
+
+                        if(entityA.projection) {
+                            if(JSON.stringify(entityA.getPosition()) == JSON.stringify(entityA.getProjectionOrReal().getPosition())) {
+                                entityA.projection.hide();
+                            } else {
+                                entityA.projection.show();
+                            }
+                        }
                     }
                     // check actions before step resolution
                     // foreach entities in step
@@ -252,11 +260,15 @@ module TacticArena.Controller {
                             if(o.target) {
                                 steps = [];
                             }
+                        } else if (o.action.indexOf('cast_') >= 0) {
+                            p = e.cast();
                         } else if (o.action.indexOf('stand_') >= 0 || e.hasAttacked) {
                             p = new Promise((resolve, reject) => {
                                 var direction = o.action.replace('stand_', '').replace('attack_', '');
                                 e.faceDirection(direction);
-                                resolve(true);
+                                setTimeout(function() {
+                                    resolve(true);
+                                }, 250);
                             });
                         }
                         promisesOrders.push(p);

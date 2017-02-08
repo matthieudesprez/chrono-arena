@@ -34,6 +34,14 @@ module TacticArena.Entity {
             this.animations.add('attackN', ["attackN1","attackN2","attackN3","attackN4","attackN5","attackN6"], 12, false);
             this.animations.add('attackW', ["attackW1","attackW2","attackW3","attackW4","attackW5","attackW6"], 12, false);
             this.animations.add('attackE', ["attackE1","attackE2","attackE3","attackE4","attackE5","attackE6"], 12, false);
+            this.animations.add('castS', ["castS1","castS2","castS3","castS3","castS3","castS4","castS5","castS6", "castS7"], 10, false);
+            this.animations.add('castN', ["castN1","castN2","castN3","castN3","castN3","castN4","castN5","castN6", "castN7"], 10, false);
+            this.animations.add('castW', ["castW1","castW2","castW3","castW3","castW3","castW4","castW5","castW6", "castW7"], 10, false);
+            this.animations.add('castE', ["castE1","castE2","castE3","castE3","castE3","castE4","castE5","castE6", "castE7"], 10, false);
+            this.animations.add('halfcastS', ["castS1","castS2","castS3"], 10, false);
+            this.animations.add('halfcastN', ["castN1","castN2","castN3"], 10, false);
+            this.animations.add('halfcastW', ["castW1","castW2","castW3"], 10, false);
+            this.animations.add('halfcastE', ["castE1","castE2","castE3"], 10, false);
             this.events.onAnimationComplete.add(this.animationComplete, this);
         }
 
@@ -74,6 +82,65 @@ module TacticArena.Entity {
 
         stand() {
             this.playAnimation('stand' + this._ext);
+        }
+
+        halfcast() {
+            this.playAnimation('halfcast' + this._ext);
+        }
+
+        cast(callback?) {
+            let self = this;
+            this._animationCompleteCallback = callback;
+            this.playAnimation('cast' + this._ext);
+
+            setTimeout( function() {
+                let initialX = 0;
+                let initialY = 0;
+                let targetX = 0;
+                let targetY = 0;
+                let scaleX = 1;
+                let angle = 0;
+                if(self._ext == 'W' || self._ext == 'E') {
+                    initialY = self.position.y + 40;
+                    targetY = initialY;
+
+                    initialX = self.position.x - 40;
+                    targetX = initialX - 45;
+                    if(self._ext == 'E') {
+                        initialX = self.position.x + 110;
+                        targetX = initialX + 45;
+                        scaleX = -1;
+                    }
+                } else if(self._ext == 'N' || self._ext == 'S') {
+                    initialX = self.position.x + 33;
+                    targetX = initialX;
+
+                    initialY = self.position.y - 40;
+                    targetY = initialY - 45;
+                    angle = 90;
+                    if (self._ext == 'S') {
+                        initialY = self.position.y + 110;
+                        targetY = initialY + 50;
+                        angle = 270;
+                    }
+                }
+                let fireball = self._parent.game.add.sprite(initialX, initialY, 'fireball');
+                self._parent.game.pawnsSpritesGroup.add(fireball);
+                fireball.anchor.setTo(.5,.5);
+                fireball.scale.x *= scaleX;
+                fireball.angle += angle;
+                fireball.animations.add('fire', ["fireball_04", "fireball_03", "fireball_02", "fireball_01", "fireball_02", "fireball_03", "fireball_04"], 10, false);
+                fireball.animations.play('fire');
+                var t = self._parent.game.add.tween(
+                    fireball).to({x: targetX, y: targetY},
+                    700,
+                    Phaser.Easing.Linear.None,
+                    true
+                );
+                t.onComplete.add(function () {
+                    fireball.kill();
+                }, self);
+            }, 500);
         }
 
         attack(target?, callback?) {

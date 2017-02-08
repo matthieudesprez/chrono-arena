@@ -65,6 +65,21 @@ module TacticArena.Entity {
             this.setHp(this._hp - 1);
         }
 
+        halfcast() {
+            this.sprite.halfcast();
+        }
+
+        cast() {
+            var that = this;
+            return new Promise((resolve, reject) => {
+                this.sprite.cast(function() {
+                    that.sprite.stand();
+                    that.hasAttacked = true;
+                    resolve(true);
+                });
+            });
+        }
+
         dodge() {
             let label_score = this.game.add.text(20, 10, "miss", { font: '8px Press Start 2P', fill: "#ffffff" });
             let t = this.game.add.tween(label_score).to({x: 20,y: -20, alpha: 0},
@@ -192,6 +207,14 @@ module TacticArena.Entity {
         faceDirection(direction) {
             this.sprite._ext = direction;
             this.sprite.stand();
+        }
+
+        hide() {
+            this.sprite.alpha = 0;
+        }
+
+        show() {
+            this.sprite.alpha = 1;
         }
 
         isFacing(position) {

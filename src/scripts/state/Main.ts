@@ -36,7 +36,7 @@ module TacticArena.State {
             this.pathTilesGroup = this.add.group();
             this.pawnsSpritesGroup = this.add.group();
             this.pawns.push(new Entity.Pawn(this, 8, 8, 'E', 'redhead', this.getUniqueId(), false));
-            this.pawns.push(new Entity.Pawn(this, 10, 8, 'W', 'skeleton', this.getUniqueId(), true));
+            this.pawns.push(new Entity.Pawn(this, 10, 8, 'W', 'skeleton', this.getUniqueId(), false));
 
             this.stageManager.addDecorations();
 
@@ -81,7 +81,10 @@ module TacticArena.State {
         }
 
         update() {
+            this.pathTilesGroup.sort('y', Phaser.Group.SORT_ASCENDING);
             this.pawnsSpritesGroup.sort('y', Phaser.Group.SORT_ASCENDING);
+            this.world.bringToTop(this.pointer.marker);
+            this.world.bringToTop(this.pawnsSpritesGroup);
         }
 
         getUniqueId() {

@@ -1,7 +1,7 @@
 {"frames": [
 
 {
-	"filename": "fireball_01.png",
+	"filename": "fireball_01",
 	"frame": {"x":0,"y":0,"w":150,"h":57},
 	"rotated": false,
 	"trimmed": false,
@@ -10,7 +10,7 @@
 	"pivot": {"x":0.5,"y":0.5}
 },
 {
-	"filename": "fireball_02.png",
+	"filename": "fireball_02",
 	"frame": {"x":150,"y":0,"w":150,"h":57},
 	"rotated": false,
 	"trimmed": false,
@@ -19,7 +19,7 @@
 	"pivot": {"x":0.5,"y":0.5}
 },
 {
-	"filename": "fireball_03.png",
+	"filename": "fireball_03",
 	"frame": {"x":300,"y":0,"w":150,"h":57},
 	"rotated": false,
 	"trimmed": false,
@@ -28,7 +28,7 @@
 	"pivot": {"x":0.5,"y":0.5}
 },
 {
-	"filename": "fireball_04.png",
+	"filename": "fireball_04",
 	"frame": {"x":450,"y":0,"w":150,"h":57},
 	"rotated": false,
 	"trimmed": false,

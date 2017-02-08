@@ -55,7 +55,6 @@ module TacticArena.UI {
 
         init() {
             var activePawn = this.game.turnManager.getActivePawn();
-            console.log(activePawn.getDirection());
             this.directionUI.init(activePawn.getDirection());
             this.logsUI.write('au tour du joueur ' + activePawn._id);
             this.pawnsinfosUI.select(activePawn._id);
