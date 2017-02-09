@@ -43,7 +43,6 @@ module TacticArena.UI {
                             pointerPosition.x,
                             pointerPosition.y,
                             function (path) {
-                                console.log(path);
                                 if (path && path.length > 0) {
                                     path.shift();
                                     self.game.stageManager.showPath(path);
@@ -55,7 +54,8 @@ module TacticArena.UI {
                     }
                 } else if(self.game.uiManager.actionUI.canOrderFire() && activePawn.getAp() >= 2) {
                     if (distance <= 4) {
-                        let path = this.game.stageManager.showPossibleLinearTrajectories(activePawn.getProjectionOrReal(), 4);
+                        let path = this.game.stageManager.getLinearPath(activePawn.getProjectionOrReal(), 4);
+                        this.game.stageManager.showPossibleLinearTrajectories(path);
                         let isInPath = false;
                         for(var i = 0; i < path.length; i++) {
                             if(path[i].x == pointerPosition.x && path[i].y == pointerPosition.y) {
@@ -97,7 +97,8 @@ module TacticArena.UI {
                     }
                 } else if (this.game.uiManager.actionUI.canOrderFire() && activePawn.getAp() >= 2) {
                     if (distance <= 4) {
-                        let path = this.game.stageManager.showPossibleLinearTrajectories(activePawn.getProjectionOrReal(), 4);
+                        let path = this.game.stageManager.getLinearPath(activePawn.getProjectionOrReal(), 4);
+                        this.game.stageManager.showPossibleLinearTrajectories(path);
                         let isInPath = false;
                         let maxX = null;
                         let maxY = null;

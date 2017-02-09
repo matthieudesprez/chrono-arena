@@ -111,6 +111,7 @@ module TacticArena.Controller {
                     steps[j] = [];
                     for(var i = 0; i < this.orders.length; i++) {
                         var entity = this.orders[i].entity;
+                        entity.show();
                         steps[j].push({
                             'entity': entity,
                             'order': this.orders[i].list[j] ? this.orders[i].list[j] : this.getDefaultOrder(entity)
@@ -154,6 +155,7 @@ module TacticArena.Controller {
         }
 
         processOrders(steps) {
+            this.game.selecting = false;
             return new Promise((resolve, reject) => {
                 if (steps && steps.length > 0) {
                     var step = steps[0];
@@ -171,67 +173,79 @@ module TacticArena.Controller {
                             if(JSON.stringify(entityA.getPosition()) == JSON.stringify(entityA.getProjectionOrReal().getPosition())) {
                                 entityA.projection.hide();
                             } else {
-                                entityA.projection.show();
+                                entityA.projection.show(0.7);
                             }
                         }
                     }
                     // check actions before step resolution
                     // foreach entities in step
-                    console.log(step);
                     for(var i = 0; i < step.length; i++) {
                         var entityA = step[i].entity;
                         // foreach entities except A
-                        for(var j = i + 1; j < step.length; j++) {
+                        for(var j = 0; j < step.length; j++) {
                             var entityB = step[j].entity;
+                            if (entityA._id == entityB._id) continue;
                             let orderA = step[i].order;
                             let orderB = step[j].order;
                             let aIsFacingB = entityA.isFacing(entityB.getPosition());
                             let bIsFacingA = entityB.isFacing(entityA.getPosition());
                             let actionA = orderA.action;
                             let actionB = orderB.action;
-                            console.log(orderA.x,orderB.x,orderA.y,orderB.y, !aIsFacingB , !bIsFacingA);
-                            if(this.game.stageManager.getNbTilesBetween(entityA.getPosition(), entityB.getPosition()) == 1
-                            && (entityB.isFacing(entityA.getPosition()) || entityA.isFacing(entityB.getPosition()))) {
+                            let positionA = entityA.getPosition();
+                            let positionB = entityB.getPosition();
+
+                            console.log(entityA._id, actionA);
+                            if (actionA.indexOf('cast_') >= 0) {
+                                let path = this.game.stageManager.getLinearPath(entityA, 4);
+                                let targets = [];
+                                for(var k = 0; k < path.length; k++) {
+                                    if(path[k].x == positionB.x && path[k].y == positionB.y) {
+                                        //entityB.isHurt = true;
+                                        targets.push(entityB);
+                                    }
+                                }
+                                orderA.targets = targets;
+                            } else if (this.game.stageManager.getNbTilesBetween(entityA.getPosition(), positionB) == 1 && aIsFacingB) {
                                 let fleeRate = 50;
                                 if (actionA == 'move' && actionB == 'move' && !this.movesTo(orderA, entityB) && !this.movesTo(orderB, entityA)) {
-                                    console.log('desengagement', entityA); // désengagement mutuel
+                                    console.log('desengagement', entityA._id); // désengagement mutuel
                                 } else {
-                                    if ((actionA.indexOf('stand_') >= 0 || this.movesTo(orderA, entityB)) && aIsFacingB) {
-                                        console.log('accrochage from player');
+                                    let actualDirection = entityA.getDirection();
+                                    let nextDirection = actionA.replace('stand_', '').replace('cast_', '');
+                                    if (
+                                        (actionA.indexOf('stand_') >= 0 || this.movesTo(orderA, entityB)) &&
+                                        aIsFacingB &&
+                                        actualDirection == nextDirection
+                                    ) {
+                                        console.log('accrochage from ' + entityA._id);
                                         this.resolutionEsquive(fleeRate, entityA, entityB);
+
+                                        if(entityA.isAttacking) {
+                                            step[i].order.action = 'attack_' + entityA.getDirection();
+                                            step[i].order.target = entityA.attackTarget;
+                                        }
+                                        //if(entityB.isHurt && !entityB.isAttacking) { // cancel des prochaines actions
+                                        //    step[j].order = {
+                                        //        'action': 'hurt_' + this.getOrderDirection(step[j]),
+                                        //        'x': entityB.getPosition().x,
+                                        //        'y': entityB.getPosition().y
+                                        //    };
+                                        //}
                                     }
-                                    if ((actionB.indexOf('stand_') >= 0 || this.movesTo(orderB, entityA)) && bIsFacingA) {
-                                        console.log('accrochage from ennemy');
-                                        this.resolutionEsquive(fleeRate, entityB, entityA);
-                                    }
+                                    //if ((actionB.indexOf('stand_') >= 0 || this.movesTo(orderB, entityA)) && bIsFacingA) {
+                                    //    console.log('accrochage from ennemy');
+                                    //    this.resolutionEsquive(fleeRate, entityB, entityA);
+                                    //}
                                 }
                             } else if(orderA.x == orderB.x && orderA.y == orderB.y && !aIsFacingB && !bIsFacingA) {
                                 // si les deux veulent aller sur la même case sans se faire face
-                                if (actionA == 'move' && actionB == 'move') {
-                                    entityA.isBlocked = true;
-                                    entityB.isBlocked = true;
-                                }
+                                entityA.isBlocked = (actionA == 'move');
+                                entityB.isBlocked = (actionB == 'move');
                             }
-                        }
-
-                        if(entityA.isAttacking) {
-                            step[i].order.action = 'attack_' + entityA.getDirection();
-                            step[i].order.target = entityA.attackTarget;
-                        } else if(entityA.isHurt) { // cancel des prochaines actions
-                            step[i].order = {
-                                'action': 'hurt_' + this.getOrderDirection(step[i]),
-                                'x': entityA.getPosition().x,
-                                'y': entityA.getPosition().y
-                            };
-                        } else if(entityA.isBlocked) { // cancel des prochaines actions
-                            //step[i].order = {
-                            //    'action': 'stand_' + this.getOrderDirection(step[i]),
-                            //    'x': entityA.getPosition().x,
-                            //    'y': entityA.getPosition().y
-                            //};
                         }
                     }
 
+                    console.log(step);
                     var promisesOrders = [];
                     var logInfos = [];
                     for (var i = 0; i < step.length; i++) {
@@ -245,6 +259,11 @@ module TacticArena.Controller {
                         }
                         if(e.isDodging) {
                             e.dodge();
+                        }
+                        if(e.isHurt && !e.isAttacking) {
+                            var color = '#f45d62';
+                            steps = [];
+                            o.action = o.action.replace('move', 'stand_' + e.getDirection());
                         }
                         if(e.isBlocked) {
                             e.blocked();
@@ -261,7 +280,7 @@ module TacticArena.Controller {
                                 steps = [];
                             }
                         } else if (o.action.indexOf('cast_') >= 0) {
-                            p = e.cast();
+                            p = e.cast(o.targets);
                         } else if (o.action.indexOf('stand_') >= 0 || e.hasAttacked) {
                             p = new Promise((resolve, reject) => {
                                 var direction = o.action.replace('stand_', '').replace('attack_', '');

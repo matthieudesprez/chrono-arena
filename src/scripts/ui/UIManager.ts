@@ -63,6 +63,7 @@ module TacticArena.UI {
         cancelAction() {
             if(!this.game.process) {
                 var activePawn = this.game.turnManager.getActivePawn();
+                activePawn.show();
                 activePawn.destroyProjection();
                 activePawn.setAp(3);
                 activePawn.getProjectionOrReal().faceDirection(this.directionUI.savedDirection);
@@ -74,7 +75,6 @@ module TacticArena.UI {
 
         initTurn(pawn, first) {
             this.game.turnManager.initTurn(pawn, first).then((data) => {
-                this.game.process = false;
                 this.init();
                 this.game.turnInitialized.dispatch(pawn);
             });

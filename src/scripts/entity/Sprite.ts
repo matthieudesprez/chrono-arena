@@ -61,6 +61,18 @@ module TacticArena.Entity {
             this.animations.play(animation);
         }
 
+        update() {
+            if(this._parent.game.selecting && this._parent.projection != null) {
+                let p1 = this._parent.getPosition();
+                let p2 = this._parent.projection.getPosition();
+                if (p1.x == p2.x && p1.y == p2.y) {
+                    this._parent.hide();
+                } else {
+                    this._parent.show();
+                }
+            }
+        }
+
         faceTo(x:number, y:number) {
             if (this.position.x < x) {
                 this._ext = 'E';
@@ -88,7 +100,7 @@ module TacticArena.Entity {
             this.playAnimation('halfcast' + this._ext);
         }
 
-        cast(callback?) {
+        cast(targets, callback?) {
             let self = this;
             this._animationCompleteCallback = callback;
             this.playAnimation('cast' + this._ext);
@@ -100,18 +112,18 @@ module TacticArena.Entity {
                 let targetY = 0;
                 let scaleX = 1;
                 let angle = 0;
-                if(self._ext == 'W' || self._ext == 'E') {
+                if (self._ext == 'W' || self._ext == 'E') {
                     initialY = self.position.y + 40;
                     targetY = initialY;
 
                     initialX = self.position.x - 40;
                     targetX = initialX - 45;
-                    if(self._ext == 'E') {
+                    if (self._ext == 'E') {
                         initialX = self.position.x + 110;
                         targetX = initialX + 45;
                         scaleX = -1;
                     }
-                } else if(self._ext == 'N' || self._ext == 'S') {
+                } else if (self._ext == 'N' || self._ext == 'S') {
                     initialX = self.position.x + 33;
                     targetX = initialX;
 
@@ -126,11 +138,18 @@ module TacticArena.Entity {
                 }
                 let fireball = self._parent.game.add.sprite(initialX, initialY, 'fireball');
                 self._parent.game.pawnsSpritesGroup.add(fireball);
-                fireball.anchor.setTo(.5,.5);
+                fireball.anchor.setTo(.5, .5);
                 fireball.scale.x *= scaleX;
                 fireball.angle += angle;
                 fireball.animations.add('fire', ["fireball_04", "fireball_03", "fireball_02", "fireball_01", "fireball_02", "fireball_03", "fireball_04"], 10, false);
                 fireball.animations.play('fire');
+
+                if (targets) {
+                    for (var i = 0; i < targets.length; i++) {
+                        targets[i].hurt(2);
+                    }
+                }
+
                 var t = self._parent.game.add.tween(
                     fireball).to({x: targetX, y: targetY},
                     700,

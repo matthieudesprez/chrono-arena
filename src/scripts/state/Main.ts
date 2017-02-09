@@ -15,6 +15,7 @@ module TacticArena.State {
         aiManager: Controller.AiManager;
         uiManager: UI.UIManager;
         process: Boolean;
+        selecting: Boolean;
         pointer;
         onApChange:Phaser.Signal;
         onHpChange:Phaser.Signal;
@@ -25,6 +26,7 @@ module TacticArena.State {
         create() {
             var that = this;
             this.process = true;
+            this.selecting = false;
             this.tileSize = 32;
 
             this.stageManager = new Controller.StageManager(this);
@@ -69,14 +71,16 @@ module TacticArena.State {
                 that.pointer.update();
             });
             this.turnInitialized.add(function(pawn) {
+                that.process = false;
                 if(pawn.bot) {
                     that.aiManager.play(pawn);
+                } else {
+                    that.selecting = true;
                 }
             });
 
             this.turnManager.initTurn(this.pawns[0], true).then((res) => {
-                this.process = false;
-                that.uiManager.init();
+                that.uiManager.initTurn(this.pawns[0], true);
             });
         }
 

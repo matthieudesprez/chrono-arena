@@ -38,13 +38,12 @@ module TacticArena.Controller {
             return false;
         }
 
-        showPossibleLinearTrajectories(pawn, distance) {
+        getLinearPath(pawn, distance) {
             let position = pawn.getPosition();
             let direction = pawn.getDirection();
             let path = [];
             for (var x = 0; x < this.map.width; x++) {
                 for (var y = 0; y < this.map.height; y++) {
-                    let tile = this.map.getTile(x, y, this.map.layer[0], true);
                     if (
                         (direction == 'W' && position.x > x && position.y == y ||
                         direction == 'E' && position.x < x && position.y == y ||
@@ -52,15 +51,20 @@ module TacticArena.Controller {
                         direction == 'S' && position.x == x && position.y < y) &&
                         this.getNbTilesBetween(position, {'x': x, 'y': y}) <= distance
                     ) {
-                        tile.alpha = 0.7;
                         path.push({'x': x, 'y': y});
-                    } else {
-                        tile.alpha = 1;
                     }
                 }
             }
-            this.map.layers[0].dirty = true;
             return path;
+        }
+
+        showPossibleLinearTrajectories(path) {
+            this.clearPossibleMove();
+            for(var i = 0; i < path.length; i++) {
+                let tile = this.map.getTile(path[i].x, path[i].y, this.map.layer[0], true);
+                tile.alpha = 0.7;
+            }
+            this.map.layers[0].dirty = true;
         }
 
         showPossibleMove(position, ap) {

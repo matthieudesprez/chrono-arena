@@ -59,20 +59,31 @@ module TacticArena.Entity {
             });
         }
 
-        hurt() {
+        hurt(hp=1) {
             this.sprite.hurt();
             this.destroyProjection();
-            this.setHp(this._hp - 1);
+            this.setHp(this._hp - hp);
+
+            let label_score = this.game.add.text(20, 10, "-" + hp, { font: '12px Press Start 2P', fill: "#ff021b", stroke: '#000000', strokeThickness: 6 });
+            let t = this.game.add.tween(label_score).to({x: 20,y: -20, alpha: 0},
+                1000,
+                Phaser.Easing.Linear.None,
+                true
+            );
+            t.onComplete.add(function() {
+                label_score.destroy();
+            }, this);
+            this.sprite.addChild(label_score);
         }
 
         halfcast() {
             this.sprite.halfcast();
         }
 
-        cast() {
+        cast(targets) {
             var that = this;
             return new Promise((resolve, reject) => {
-                this.sprite.cast(function() {
+                this.sprite.cast(targets, function() {
                     that.sprite.stand();
                     that.hasAttacked = true;
                     resolve(true);
@@ -213,8 +224,8 @@ module TacticArena.Entity {
             this.sprite.alpha = 0;
         }
 
-        show() {
-            this.sprite.alpha = 1;
+        show(alpha=1) {
+            this.sprite.alpha = alpha;
         }
 
         isFacing(position) {
