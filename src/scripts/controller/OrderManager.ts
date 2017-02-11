@@ -114,7 +114,7 @@ module TacticArena.Controller {
                         entity.show();
                         steps[j].push({
                             'entity': entity,
-                            'order': this.orders[i].list[j] ? this.orders[i].list[j] : this.getDefaultOrder(entity)
+                            'order': this.orders[i].list[j] ? this.orders[i].list[j] : null
                         });
                     }
                 }
@@ -185,63 +185,60 @@ module TacticArena.Controller {
                         for(var j = 0; j < step.length; j++) {
                             var entityB = step[j].entity;
                             if (entityA._id == entityB._id) continue;
+                            if(step[i].order == null) {
+                                step[i].order = this.getDefaultOrder(entityA);
+                            }
+                            if(step[j].order == null) {
+                                step[j].order = this.getDefaultOrder(entityB);
+                            }
                             let orderA = step[i].order;
                             let orderB = step[j].order;
                             let aIsFacingB = entityA.isFacing(entityB.getPosition());
-                            let bIsFacingA = entityB.isFacing(entityA.getPosition());
                             let actionA = orderA.action;
-                            let actionB = orderB.action;
                             let positionA = entityA.getPosition();
                             let positionB = entityB.getPosition();
+                            let directionA = entityA.getDirection();
+                            let fleeRate = 50;
 
-                            console.log(entityA._id, actionA);
+                            console.log(entityA._id, orderA);
+                            if (actionA.indexOf('move') >= 0) {
+                                if(this.game.stageManager.getNbTilesBetween(positionA, {x: orderA.x, y: orderA.y}) > 1) {
+                                    // recalcul du path
+
+                                }
+                            }
                             if (actionA.indexOf('cast_') >= 0) {
                                 let path = this.game.stageManager.getLinearPath(entityA, 4);
                                 let targets = [];
                                 for(var k = 0; k < path.length; k++) {
                                     if(path[k].x == positionB.x && path[k].y == positionB.y) {
-                                        //entityB.isHurt = true;
                                         targets.push(entityB);
                                     }
                                 }
                                 orderA.targets = targets;
-                            } else if (this.game.stageManager.getNbTilesBetween(entityA.getPosition(), positionB) == 1 && aIsFacingB) {
-                                let fleeRate = 50;
-                                if (actionA == 'move' && actionB == 'move' && !this.movesTo(orderA, entityB) && !this.movesTo(orderB, entityA)) {
-                                    console.log('desengagement', entityA._id); // désengagement mutuel
-                                } else {
-                                    let actualDirection = entityA.getDirection();
-                                    let nextDirection = actionA.replace('stand_', '').replace('cast_', '');
-                                    if (
-                                        (actionA.indexOf('stand_') >= 0 || this.movesTo(orderA, entityB)) &&
-                                        aIsFacingB &&
-                                        actualDirection == nextDirection
-                                    ) {
-                                        console.log('accrochage from ' + entityA._id);
-                                        this.resolutionEsquive(fleeRate, entityA, entityB);
+                            } else if (this.game.stageManager.getNbTilesBetween(positionA, positionB) == 1 && aIsFacingB) {
+                                // Possible cases :
+                                // [  ][A v][  ]
+                                // [A>][ B ][<A]
+                                // [  ][ A^][  ]
+                                let keepDirection = (directionA == actionA.replace('stand_', '').replace('cast_', ''));
+                                if (keepDirection || this.movesTo(orderA, entityB)) {
+                                    console.log('accrochage from ' + entityA._id);
+                                    this.resolutionEsquive(fleeRate, entityA, entityB);
 
-                                        if(entityA.isAttacking) {
-                                            step[i].order.action = 'attack_' + entityA.getDirection();
-                                            step[i].order.target = entityA.attackTarget;
-                                        }
-                                        //if(entityB.isHurt && !entityB.isAttacking) { // cancel des prochaines actions
-                                        //    step[j].order = {
-                                        //        'action': 'hurt_' + this.getOrderDirection(step[j]),
-                                        //        'x': entityB.getPosition().x,
-                                        //        'y': entityB.getPosition().y
-                                        //    };
-                                        //}
+                                    if(entityA.isAttacking) {
+                                        step[i].order.action = 'attack_' + entityA.getDirection();
+                                        step[i].order.target = entityA.attackTarget;
                                     }
-                                    //if ((actionB.indexOf('stand_') >= 0 || this.movesTo(orderB, entityA)) && bIsFacingA) {
-                                    //    console.log('accrochage from ennemy');
-                                    //    this.resolutionEsquive(fleeRate, entityB, entityA);
-                                    //}
                                 }
-                            } else if(orderA.x == orderB.x && orderA.y == orderB.y && !aIsFacingB && !bIsFacingA) {
-                                // si les deux veulent aller sur la même case sans se faire face
-                                entityA.isBlocked = (actionA == 'move');
-                                entityB.isBlocked = (actionB == 'move');
                             }
+
+                            if(orderA.x == orderB.x && orderA.y == orderB.y) {
+                                // Si A veut aller sur la même case que B (qu'il y soit déjà où qu'il veuille y aller)
+                                entityA.isBlocked = (step[i].order.action == 'move');
+                            }
+
+                            console.log(entityA._id, step[i].order.action);
                         }
                     }
 
