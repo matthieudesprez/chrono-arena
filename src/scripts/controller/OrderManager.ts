@@ -77,11 +77,22 @@ module TacticArena.Controller {
             });
         }
 
-        createPromiseBlockOrder(entity, x, y, initialX, initialY) {
+        createPromiseBlockOrder(entity, x, y) {
+            let initialPosition = entity.getPosition();
             return entity.moveTo(x, y).then((res) => {
-                entity.moveTo(initialX, initialY).then((res) => {
+                entity.blocked();
+                entity.moveTo(initialPosition.x, initialPosition.y).then((res) => {
                     return res;
                 });
+            });
+        }
+
+        createPromiseStandOrder(entity, direction) {
+            return new Promise((resolve, reject) => {
+                entity.faceDirection(direction);
+                setTimeout(function() {
+                    resolve(true);
+                }, 250);
             });
         }
 
@@ -131,14 +142,10 @@ module TacticArena.Controller {
         resolutionEsquive(fleeRate, entityA, entityB) {
             if(Math.floor(Math.random() * 100) > fleeRate) {
                 console.log('esquive failed', entityB._id);
-                entityA.isAttacking = true;
-                entityA.attackTarget = entityB;
                 entityB.isHurt = true;
                 entityB.isDodging = false;
             } else {
                 console.log('esquive success', entityB._id);
-                entityA.isAttacking = true;
-                entityA.attackTarget = null;
                 entityB.isHurt = false;
                 entityB.isDodging = true;
             }
@@ -154,6 +161,19 @@ module TacticArena.Controller {
             return (order.x == p.x && order.y == p.y);
         }
 
+        pacifyEntity(steps, entity) {
+            for(var i = 0; i < steps.length; i++) {
+                for(var j = 0; j < steps.length; j++) {
+                    if(steps[i][j].entity._id == entity._id) {
+                        steps[i][j].order = this.getDefaultOrder(entity);
+                    }
+                }
+            }
+            entity.destroyProjection();
+            return steps;
+        }
+
+
         processOrders(steps) {
             this.game.selecting = false;
             return new Promise((resolve, reject) => {
@@ -168,8 +188,10 @@ module TacticArena.Controller {
                         entityA.isHurt = false;
                         entityA.attackTarget = false;
                         entityA.isBlocked = false;
+                        entityA.moveHasBeenBlocked = false;
 
                         if(entityA.projection) {
+                            // Si entity et sa projection se chevauchent durant la résolution
                             if(JSON.stringify(entityA.getPosition()) == JSON.stringify(entityA.getProjectionOrReal().getPosition())) {
                                 entityA.projection.hide();
                             } else {
@@ -184,13 +206,11 @@ module TacticArena.Controller {
                         // foreach entities except A
                         for(var j = 0; j < step.length; j++) {
                             var entityB = step[j].entity;
-                            if (entityA._id == entityB._id) continue;
-                            if(step[i].order == null) {
-                                step[i].order = this.getDefaultOrder(entityA);
-                            }
-                            if(step[j].order == null) {
-                                step[j].order = this.getDefaultOrder(entityB);
-                            }
+                            if (entityA._id == entityB._id) continue; // Pas d'interaction avec soi-même
+                            // Dans le cas où une entité à moins d'actions à jouer que les autres
+                            // On lui en assigne un par défaut pour qu'elle ne soit pas inactive
+                            if(step[i].order == null) { step[i].order = this.getDefaultOrder(entityA); }
+                            if(step[j].order == null) { step[j].order = this.getDefaultOrder(entityB); }
                             let orderA = step[i].order;
                             let orderB = step[j].order;
                             let aIsFacingB = entityA.isFacing(entityB.getPosition());
@@ -198,15 +218,9 @@ module TacticArena.Controller {
                             let positionA = entityA.getPosition();
                             let positionB = entityB.getPosition();
                             let directionA = entityA.getDirection();
-                            let fleeRate = 50;
-
+                            let fleeRate = 100;
                             console.log(entityA._id, orderA);
-                            if (actionA.indexOf('move') >= 0) {
-                                if(this.game.stageManager.getNbTilesBetween(positionA, {x: orderA.x, y: orderA.y}) > 1) {
-                                    // recalcul du path
 
-                                }
-                            }
                             if (actionA.indexOf('cast_') >= 0) {
                                 let path = this.game.stageManager.getLinearPath(entityA, 4);
                                 let targets = [];
@@ -222,20 +236,28 @@ module TacticArena.Controller {
                                 // [A>][ B ][<A]
                                 // [  ][ A^][  ]
                                 let keepDirection = (directionA == actionA.replace('stand_', '').replace('cast_', ''));
+                                // Si A reste dans sa direction (aIsFacingB), et ne va pas pas se détourner de B
+                                console.info(keepDirection, entityA._id);
                                 if (keepDirection || this.movesTo(orderA, entityB)) {
+                                    entityA.isAttacking = true;
+                                    entityA.attackTarget = entityB;
                                     console.log('accrochage from ' + entityA._id);
                                     this.resolutionEsquive(fleeRate, entityA, entityB);
 
-                                    if(entityA.isAttacking) {
-                                        step[i].order.action = 'attack_' + entityA.getDirection();
-                                        step[i].order.target = entityA.attackTarget;
-                                    }
+                                    step[i].order.action = 'attack_' + entityA.getDirection();
+                                    step[i].order.target = entityA.attackTarget;
+
+                                    // Si A projetait de se déplacer vers B, son move a été interrompu
+                                    // Ses prochaines actions seront remplacées par celle par défaut
+                                    entityA.moveHasBeenBlocked = this.movesTo(orderA, entityB);
                                 }
                             }
 
                             if(orderA.x == orderB.x && orderA.y == orderB.y) {
                                 // Si A veut aller sur la même case que B (qu'il y soit déjà où qu'il veuille y aller)
                                 entityA.isBlocked = (step[i].order.action == 'move');
+                                entityA.moveHasBeenBlocked = entityA.isBlocked;
+                                console.warn('blocked', entityA.isBlocked);
                             }
 
                             console.log(entityA._id, step[i].order.action);
@@ -246,49 +268,33 @@ module TacticArena.Controller {
                     var promisesOrders = [];
                     var logInfos = [];
                     for (var i = 0; i < step.length; i++) {
-                        var color = '#78dd77';
+                        var logColor = '#78dd77';
                         var o = step[i].order;
                         var e = step[i].entity;
                         var p = null;
-                        if (o.action.indexOf('hurt_') >= 0) {
-                            var color = '#f45d62';
-                            o.action = o.action.replace('hurt_', 'stand_');
-                        }
-                        if(e.isDodging) {
-                            e.dodge();
-                        }
+                        // TODO Reporter dans la boucle du dessus
                         if(e.isHurt && !e.isAttacking) {
-                            var color = '#f45d62';
-                            steps = [];
+                            logColor = '#f45d62';
                             o.action = o.action.replace('move', 'stand_' + e.getDirection());
                         }
                         if(e.isBlocked) {
-                            e.blocked();
-                            steps = [];
-                            let position = e.getPosition();
-                            console.log(o.x, o.y);
-                            p = this.createPromiseBlockOrder(e, o.x, o.y, position.x, position.y);
-                        }
-                        if (o.action == 'move') {
+                            p = this.createPromiseBlockOrder(e, o.x, o.y);
+                        } else if (o.action == 'move') {
                             p = this.createPromiseMoveOrder(e, o.x, o.y);
                         } else if (o.action.indexOf('attack_') >= 0) {
                             p = e.attack(o.target);
-                            if(o.target) {
-                                steps = [];
-                            }
                         } else if (o.action.indexOf('cast_') >= 0) {
                             p = e.cast(o.targets);
-                        } else if (o.action.indexOf('stand_') >= 0 || e.hasAttacked) {
-                            p = new Promise((resolve, reject) => {
-                                var direction = o.action.replace('stand_', '').replace('attack_', '');
-                                e.faceDirection(direction);
-                                setTimeout(function() {
-                                    resolve(true);
-                                }, 250);
-                            });
+                        } else if (o.action.indexOf('stand_') >= 0) {
+                            p = this.createPromiseStandOrder(e, o.action.replace('stand_', ''));
                         }
+
+                        if(e.moveHasBeenBlocked) {
+                            steps = this.pacifyEntity(steps, e);
+                        }
+
                         promisesOrders.push(p);
-                        logInfos.push('<span style="color:' + color + ';">entity ' + e._id + ' : ' + o.action + ' ' + o.x + ',' + o.y + '</span>');
+                        logInfos.push('<span style="color:' + logColor + ';">entity ' + e._id + ' : ' + o.action + ' ' + o.x + ',' + o.y + '</span>');
                     }
                     this.game.uiManager.logsUI.write(logInfos.join(' | '));
 

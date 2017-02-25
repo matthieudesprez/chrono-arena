@@ -165,7 +165,9 @@ module TacticArena.Entity {
         attack(target?, callback?) {
             this._animationCompleteCallback = callback;
             this.playAnimation('attack' + this._ext);
-            if(target) {
+            if(target.isDodging) {
+                target.dodge();
+            } else {
                 target.hurt();
             }
         }

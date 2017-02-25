@@ -13,6 +13,7 @@ module TacticArena.Entity {
         isAttacking;
         attackTarget;
         hasAttacked;
+        moveHasBeenBlocked;
         selected;
         bot;
 
@@ -29,6 +30,7 @@ module TacticArena.Entity {
             this.isAttacking = false;
             this.attackTarget = null;
             this.hasAttacked = false;
+            this.moveHasBeenBlocked = false;
             this.isBlocked = false;
             this._hp = 4;
             this.selected = false;
@@ -64,16 +66,16 @@ module TacticArena.Entity {
             this.destroyProjection();
             this.setHp(this._hp - hp);
 
-            let label_score = this.game.add.text(20, 10, "-" + hp, { font: '12px Press Start 2P', fill: "#ff021b", stroke: '#000000', strokeThickness: 6 });
-            let t = this.game.add.tween(label_score).to({x: 20,y: -20, alpha: 0},
+            let label_dmg = this.game.add.text(20, 10, "-" + hp, { font: '12px Press Start 2P', fill: "#ff021b", stroke: '#000000', strokeThickness: 6 });
+            let t = this.game.add.tween(label_dmg).to({x: 20,y: -20, alpha: 0},
                 1000,
                 Phaser.Easing.Linear.None,
                 true
             );
             t.onComplete.add(function() {
-                label_score.destroy();
+                label_dmg.destroy();
             }, this);
-            this.sprite.addChild(label_score);
+            this.sprite.addChild(label_dmg);
         }
 
         halfcast() {
