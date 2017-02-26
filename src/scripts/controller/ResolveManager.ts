@@ -6,30 +6,36 @@ module TacticArena.Controller {
         currentIndex;
         canResolve;
         active;
+        processedIndexes;
 
         constructor(game) {
             this.steps = [];
             this.game = game;
-            this.currentIndex = null;
+            this.currentIndex = 0;
             this.processing = false;
             this.canResolve = false;
             this.active = false;
+            this.processedIndexes = [];
         }
 
-        createPromiseMove(entity, x, y) {
-            return entity.moveTo(x, y).then((res) => {
+        createPromiseMove(entity, x, y, animate=true) {
+            return entity.moveTo(x, y, animate).then((res) => {
                 return res;
             });
         }
 
-        createPromiseBlock(entity, x, y) {
+        createPromiseBlock(entity, x, y, animate=true) {
             let initialPosition = entity.getPosition();
-            return entity.moveTo(x, y).then((res) => {
-                entity.blocked();
-                entity.moveTo(initialPosition.x, initialPosition.y).then((res) => {
-                    return res;
+            if(animate) {
+                return entity.moveTo(x, y).then((res) => {
+                    entity.blocked();
+                    entity.moveTo(initialPosition.x, initialPosition.y).then((res) => {
+                        return res;
+                    });
                 });
-            });
+            } else {
+                return this.createPromiseStand(entity, entity.getDirection());
+            }
         }
 
         createPromiseStand(entity, direction) {
@@ -69,6 +75,8 @@ module TacticArena.Controller {
                 this.steps = steps;
                 this.active = true;
                 this.canResolve = false;
+                this.processedIndexes = [];
+                this.currentIndex = 0;
                 this.processStep(0).then((res) => {
                     this.isGameReadyPromise().then((res) => {
                         resolve(true);
@@ -79,8 +87,10 @@ module TacticArena.Controller {
 
         processStep(index) {
             return new Promise((resolve, reject) => {
-                let animate = (index == this.currentIndex + 1);
+                let animate = this.processedIndexes.indexOf(index) < 0;
+                console.info(animate);
                 this.currentIndex = index;
+                this.processedIndexes.push(index);
                 this.game.uiManager.timelineUI.update(index);
                 let step = this.steps[index];
                 this.processing = true;
@@ -112,9 +122,9 @@ module TacticArena.Controller {
                         e.moveHasBeenBlocked = true;
                     }
                     if(e.isBlocked) {
-                        p = this.createPromiseBlock(e, o.x, o.y);
+                        p = this.createPromiseBlock(e, o.x, o.y, animate);
                     } else if (o.action == 'move') {
-                        p = this.createPromiseMove(e, o.x, o.y);
+                        p = this.createPromiseMove(e, o.x, o.y, animate);
                     } else if (o.action.indexOf('attack_') >= 0) {
                         p = e.attack(o.target);
                     } else if (o.action.indexOf('cast_') >= 0) {

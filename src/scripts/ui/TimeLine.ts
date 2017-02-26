@@ -31,7 +31,10 @@ module TacticArena.UI {
             }
             this.element.html(timeline);
             this.element.find('.timeline-item').on('click', function () {
-                self.menu.game.resolveManager.processStep($(this).attr('timeline-index'));
+                let index = $(this).attr('timeline-index');
+                if(index != self.menu.game.resolveManager.currentIndex) {
+                    self.menu.game.resolveManager.processStep(index);
+                }
             });
         }
     }
