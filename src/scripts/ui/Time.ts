@@ -19,18 +19,33 @@ module TacticArena.UI {
                 self.deselectAll();
                 self.select('play');
                 self.menu.game.isPaused = false;
+                self.goForward()
             });
 
             this.element.find('.next').on('click', function () {
-                if(self.menu.game.process) {
-                    self.menu.game.isPaused = false;
-                    self.menu.game.orderManager.isProcessingPromise().then((res) => {
-                        self.menu.game.isPaused = true;
-                    });
-                }
+                self.goForward();
             });
 
             this.element.find('.pause').trigger('click');
+        }
+
+        goForward() {
+            if(this.menu.game.process) {
+                let nextIndex = this.menu.game.resolveManager.currentIndex + 1;
+                if(nextIndex < this.menu.game.resolveManager.steps.length) {
+                    this.menu.game.resolveManager.processStep(nextIndex);
+                } else {
+                    this.menu.game.resolveManager.canResolve = true;
+                }
+            }
+        }
+
+        togglePause() {
+            if(this.menu.game.isPaused) {
+                this.element.find('.play').trigger('click');
+            } else {
+                this.element.find('.pause').trigger('click');
+            }
         }
 
         deselectAll() {

@@ -22,8 +22,12 @@ module TacticArena.UI {
         }
 
         select(id) {
-            this.element.find('.pawn').removeClass('active');
+            this.deselectAll();
             this.element.find('.pawn0' + id).addClass('active');
+        }
+
+        deselectAll() {
+            this.element.find('.pawn').removeClass('active');
         }
 
         updateInfos() {

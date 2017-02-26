@@ -3,11 +3,17 @@ module TacticArena.Controller {
         steps;
         game;
         processing;
+        currentIndex;
+        canResolve;
+        active;
 
         constructor(game) {
             this.steps = [];
             this.game = game;
+            this.currentIndex = null;
             this.processing = false;
+            this.canResolve = false;
+            this.active = false;
         }
 
         createPromiseMove(entity, x, y) {
@@ -39,9 +45,20 @@ module TacticArena.Controller {
             var self = this;
             return new Promise((resolve, reject) => {
                 (function isGameReady(){
-                    console.log('isPaused');
-                    if (!self.game.isPaused) return resolve();
+                    console.log('is paused');
+                    if (!self.game.isPaused || self.canResolve) return resolve();
                     setTimeout(isGameReady, 300);
+                })();
+            });
+        }
+
+        stopProcessingPromise() {
+            var self = this;
+            return new Promise((resolve, reject) => {
+                (function stopProcessing(){
+                    console.log('is processing');
+                    if (!self.processing) return resolve();
+                    setTimeout(stopProcessing, 300);
                 })();
             });
         }
@@ -50,8 +67,10 @@ module TacticArena.Controller {
             console.log(steps);
             return new Promise((resolve) => {
                 this.steps = steps;
-                this.isGameReadyPromise().then((res) => {
-                    this.processStep(0).then((res) => {
+                this.active = true;
+                this.canResolve = false;
+                this.processStep(0).then((res) => {
+                    this.isGameReadyPromise().then((res) => {
                         resolve(true);
                     });
                 });
@@ -59,11 +78,13 @@ module TacticArena.Controller {
         }
 
         processStep(index) {
-            console.log(index);
             return new Promise((resolve, reject) => {
+                let animate = (index == this.currentIndex + 1);
+                this.currentIndex = index;
+                this.game.uiManager.timelineUI.update(index);
                 let step = this.steps[index];
                 this.processing = true;
-                console.info('processStep');
+                console.info('processStep', index);
                 // Reset
                 for(var i = 0; i < step.length; i++) {
                     var entityA = step[i].entity;
@@ -113,12 +134,11 @@ module TacticArena.Controller {
 
                 Promise.all(promisesOrders).then((res) => {
                     this.processing = false;
-                    if (this.steps.length > (index + 1)) {
-                        this.isGameReadyPromise().then((result) => {
-                            this.processStep(index + 1).then((res) => {
-                                resolve(res);
-                            }); // recursive
-                        });
+                    console.log(this.steps.length > (index + 1), !this.game.isPaused, this.canResolve);
+                    if (this.steps.length > (index + 1) && (!this.game.isPaused || this.canResolve)) {
+                        this.processStep(index + 1).then((res) => {
+                            resolve(res);
+                        }); // recursive
                     } else {
                         resolve(true);
                     }

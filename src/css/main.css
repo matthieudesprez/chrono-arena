@@ -154,6 +154,10 @@ html, body {
   bottom: 32px;
   left: 160px;
 }
+.ui-timeline-menu {
+  bottom: 0px;
+  left: 160px;
+}
 .ui-menu li {
   height: 32px;
   width: 32px;
@@ -195,4 +199,19 @@ html, body {
 }
 .ui-menu li.previous{
   background-image: url('../assets/images/icons/icon-previous.png');
+}
+.ui-timeline-menu li {
+  color: red;
+  position: relative;
+  font-size: 20px;
+  font-weight: bold;
+}
+.ui-timeline-menu li span{
+  display: inline-block;
+  width: 100%;
+  height: 4px;
+  background-color: red;
+  position: absolute;
+  top: 50%;
+  left: 0;
 }

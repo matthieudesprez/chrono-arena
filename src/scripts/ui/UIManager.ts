@@ -6,8 +6,9 @@ module TacticArena.UI {
         directionUI;
         actionUI;
         timeUI;
+        timelineUI;
         pawnsinfosUI;
-        endTurnKey;
+        enterKey;
         leftKey;
         rightKey;
         downKey;
@@ -24,15 +25,17 @@ module TacticArena.UI {
             this.directionUI = new UI.Direction(this);
             this.actionUI = new UI.Action(this);
             this.timeUI = new UI.Time(this);
+            this.timelineUI = new UI.TimeLine(this);
             this.pawnsinfosUI = new UI.PawnsInfos(this);
 
             this.game.pointer.dealWith(this.logsUI.element);
             this.game.pointer.dealWith(this.actionUI.element);
             this.game.pointer.dealWith(this.timeUI.element);
+            this.game.pointer.dealWith(this.timelineUI.element);
             this.game.pointer.dealWith(this.directionUI.element);
 
-            this.endTurnKey = this.game.input.keyboard.addKey(Phaser.KeyCode.ENTER);
-            this.endTurnKey.onDown.add(this.endTurn, this);
+            this.enterKey = this.game.input.keyboard.addKey(Phaser.KeyCode.ENTER);
+            this.enterKey.onDown.add(this.enterKeyPressed, this);
 
             this.pauseKey = this.game.input.keyboard.addKey(Phaser.KeyCode.SPACEBAR);
             this.pauseKey.onDown.add(this.pauseResolve, this);
@@ -67,6 +70,14 @@ module TacticArena.UI {
             this.pawnsinfosUI.select(activePawn._id);
         }
 
+        enterKeyPressed() {
+            if(this.game.resolveManager.active) {
+                this.timeUI.goForward();
+            } else {
+                this.endTurn();
+            }
+        }
+
         cancelAction() {
             if(!this.game.process) {
                 var activePawn = this.game.turnManager.getActivePawn();
@@ -96,10 +107,14 @@ module TacticArena.UI {
                 this.game.selecting = false;
                 this.game.turnManager.endTurn().then((nextPawn) => {
                     if (activePawn._id == this.game.pawns[this.game.pawns.length-1]._id) { // Si le dernier pawn a joué
+                        this.pawnsinfosUI.deselectAll();
                         this.game.orderManager.resolveAll().then((steps) => {
+                            this.timelineUI.build(steps.length);
                             return this.game.resolveManager.processSteps(steps);
                         }).then((res) => {
+                            this.game.resolveManager.active = false;
                             this.pawnsinfosUI.cleanOrders();
+                            this.timelineUI.build(0);
                             this.initTurn(nextPawn, true);
                         });
                     } else {
@@ -110,8 +125,7 @@ module TacticArena.UI {
         }
 
         pauseResolve() {
-            this.game.isPaused = !this.game.isPaused;
-            this.timeUI.update();
+            this.timeUI.togglePause();
         }
     }
 }
