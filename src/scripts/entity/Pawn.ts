@@ -55,6 +55,7 @@ module TacticArena.Entity {
             var that = this;
             return new Promise((resolve, reject) => {
                 this.sprite.attack(target, function() {
+                    that.sprite.stand();
                     that.hasAttacked = true;
                     resolve(true);
                 });
@@ -220,6 +221,7 @@ module TacticArena.Entity {
         faceDirection(direction) {
             this.sprite._ext = direction;
             this.sprite.stand();
+            console.log(this.sprite);
         }
 
         hide() {

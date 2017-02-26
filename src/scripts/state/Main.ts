@@ -22,12 +22,14 @@ module TacticArena.State {
         onOrderChange:Phaser.Signal;
         onActionPlayed:Phaser.Signal;
         turnInitialized:Phaser.Signal;
+        isPaused: Boolean;
 
         create() {
             var that = this;
             this.process = true;
             this.selecting = false;
             this.tileSize = 32;
+            this.isPaused = false;
 
             this.stageManager = new Controller.StageManager(this);
             this.stageManager.init();
@@ -38,7 +40,7 @@ module TacticArena.State {
             this.pathTilesGroup = this.add.group();
             this.pawnsSpritesGroup = this.add.group();
             this.pawns.push(new Entity.Pawn(this, 8, 8, 'E', 'redhead', this.getUniqueId(), false));
-            this.pawns.push(new Entity.Pawn(this, 10, 8, 'W', 'skeleton', this.getUniqueId(), true));
+            this.pawns.push(new Entity.Pawn(this, 10, 8, 'W', 'skeleton', this.getUniqueId(), false));
 
             this.stageManager.addDecorations();
 

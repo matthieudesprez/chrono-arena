@@ -150,6 +150,10 @@ html, body {
   bottom: 32px;
   left: 320px;
 }
+.ui-time-menu {
+  bottom: 32px;
+  left: 160px;
+}
 .ui-menu li {
   height: 32px;
   width: 32px;
@@ -179,4 +183,16 @@ html, body {
 }
 .ui-menu li.submit{
   background-image: url('../assets/images/icons/icon-submit.png');
+}
+.ui-menu li.pause{
+  background-image: url('../assets/images/icons/icon-pause.png');
+}
+.ui-menu li.play{
+  background-image: url('../assets/images/icons/icon-play.png');
+}
+.ui-menu li.next{
+  background-image: url('../assets/images/icons/icon-next.png');
+}
+.ui-menu li.previous{
+  background-image: url('../assets/images/icons/icon-previous.png');
 }

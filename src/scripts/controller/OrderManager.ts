@@ -2,10 +2,12 @@ module TacticArena.Controller {
     export class OrderManager {
         orders;
         game;
+        processing;
 
         constructor(game) {
             this.orders = [];
             this.game = game;
+            this.processing = false;
         }
 
         removeEntityOrder(pawn, order?) {
@@ -114,31 +116,6 @@ module TacticArena.Controller {
             }
         }
 
-        resolveAll() {
-            return new Promise((resolve, reject) => {
-                this.formatOrders();
-                var steps = new Array(this.getMaxOrderListLength());
-                for (var j = 0; j < steps.length; j++) {
-                    steps[j] = [];
-                    for(var i = 0; i < this.orders.length; i++) {
-                        var entity = this.orders[i].entity;
-                        entity.show();
-                        steps[j].push({
-                            'entity': entity,
-                            'order': this.orders[i].list[j] ? this.orders[i].list[j] : null
-                        });
-                    }
-                }
-                this.processOrders(steps).then((res) => {
-                    for(var i = 0; i < this.orders.length; i++) {
-                        this.orders[i].entity.destroyProjection();
-                    }
-                    this.orders = [];
-                    resolve(true);
-                });
-            });
-        }
-
         resolutionEsquive(fleeRate, entityA, entityB) {
             if(Math.floor(Math.random() * 100) > fleeRate) {
                 console.log('esquive failed', entityB._id);
@@ -173,9 +150,59 @@ module TacticArena.Controller {
             return steps;
         }
 
+        isGameReadyPromise() {
+            var self = this;
+            return new Promise((resolve, reject) => {
+                (function isGameReady(){
+                    console.log('isPaused');
+                    if (!self.game.isPaused) return resolve();
+                    setTimeout(isGameReady, 300);
+                })();
+            });
+        }
+
+        isProcessingPromise() {
+            var self = this;
+            return new Promise((resolve, reject) => {
+                (function isProcessing(){
+                    console.log('isProcessing');
+                    if (self.processing) return resolve();
+                    setTimeout(isProcessing, 30);
+                })();
+            });
+        }
+
+        resolveAll() {
+            return new Promise((resolve, reject) => {
+                this.formatOrders();
+                var steps = new Array(this.getMaxOrderListLength());
+                for (var j = 0; j < steps.length; j++) {
+                    steps[j] = [];
+                    for(var i = 0; i < this.orders.length; i++) {
+                        var entity = this.orders[i].entity;
+                        entity.show();
+                        steps[j].push({
+                            'entity': entity,
+                            'order': this.orders[i].list[j] ? this.orders[i].list[j] : null
+                        });
+                    }
+                }
+                this.isGameReadyPromise().then((result) => {
+                    this.processOrders(steps).then((res) => {
+                        for (var i = 0; i < this.orders.length; i++) {
+                            this.orders[i].entity.destroyProjection();
+                        }
+                        this.orders = [];
+                        resolve(true);
+                    });
+                });
+            });
+        }
 
         processOrders(steps) {
             this.game.selecting = false;
+            this.processing = true;
+            console.info('processorders');
             return new Promise((resolve, reject) => {
                 if (steps && steps.length > 0) {
                     var step = steps[0];
@@ -218,8 +245,7 @@ module TacticArena.Controller {
                             let positionA = entityA.getPosition();
                             let positionB = entityB.getPosition();
                             let directionA = entityA.getDirection();
-                            let fleeRate = 100;
-                            console.log(entityA._id, orderA);
+                            let fleeRate = 0;
 
                             if (actionA.indexOf('cast_') >= 0) {
                                 let path = this.game.stageManager.getLinearPath(entityA, 4);
@@ -241,7 +267,6 @@ module TacticArena.Controller {
                                 if (keepDirection || this.movesTo(orderA, entityB)) {
                                     entityA.isAttacking = true;
                                     entityA.attackTarget = entityB;
-                                    console.log('accrochage from ' + entityA._id);
                                     this.resolutionEsquive(fleeRate, entityA, entityB);
 
                                     step[i].order.action = 'attack_' + entityA.getDirection();
@@ -257,10 +282,7 @@ module TacticArena.Controller {
                                 // Si A veut aller sur la même case que B (qu'il y soit déjà où qu'il veuille y aller)
                                 entityA.isBlocked = (step[i].order.action == 'move');
                                 entityA.moveHasBeenBlocked = entityA.isBlocked;
-                                console.warn('blocked', entityA.isBlocked);
                             }
-
-                            console.log(entityA._id, step[i].order.action);
                         }
                     }
 
@@ -272,10 +294,11 @@ module TacticArena.Controller {
                         var o = step[i].order;
                         var e = step[i].entity;
                         var p = null;
-                        // TODO Reporter dans la boucle du dessus
+
                         if(e.isHurt && !e.isAttacking) {
                             logColor = '#f45d62';
                             o.action = o.action.replace('move', 'stand_' + e.getDirection());
+                            e.moveHasBeenBlocked = true;
                         }
                         if(e.isBlocked) {
                             p = this.createPromiseBlockOrder(e, o.x, o.y);
@@ -299,10 +322,13 @@ module TacticArena.Controller {
                     this.game.uiManager.logsUI.write(logInfos.join(' | '));
 
                     Promise.all(promisesOrders).then((res) => {
+                        this.processing = false;
                         if (steps && steps.length > 0) {
-                            this.processOrders(steps).then((res) => {
-                                resolve(res);
-                            }); // recursive
+                            this.isGameReadyPromise().then((result) => {
+                                this.processOrders(steps).then((res) => {
+                                    resolve(res);
+                                }); // recursive
+                            });
                         } else {
                             resolve(true);
                         }

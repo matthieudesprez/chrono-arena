@@ -5,6 +5,7 @@ module TacticArena.UI {
         logsUI;
         directionUI;
         actionUI;
+        timeUI;
         pawnsinfosUI;
         endTurnKey;
         leftKey;
@@ -12,6 +13,7 @@ module TacticArena.UI {
         downKey;
         upKey;
         cancelKey;
+        pauseKey;
 
         constructor(game) {
             var self = this;
@@ -21,26 +23,31 @@ module TacticArena.UI {
             this.logsUI = new UI.Logs(this);
             this.directionUI = new UI.Direction(this);
             this.actionUI = new UI.Action(this);
+            this.timeUI = new UI.Time(this);
             this.pawnsinfosUI = new UI.PawnsInfos(this);
 
             this.game.pointer.dealWith(this.logsUI.element);
             this.game.pointer.dealWith(this.actionUI.element);
+            this.game.pointer.dealWith(this.timeUI.element);
             this.game.pointer.dealWith(this.directionUI.element);
 
-            this.endTurnKey = this.game.input.keyboard.addKey(Phaser.KeyCode.SPACEBAR);
-            this.endTurnKey.onDown.add(this.endTurn ,this);
+            this.endTurnKey = this.game.input.keyboard.addKey(Phaser.KeyCode.ENTER);
+            this.endTurnKey.onDown.add(this.endTurn, this);
+
+            this.pauseKey = this.game.input.keyboard.addKey(Phaser.KeyCode.SPACEBAR);
+            this.pauseKey.onDown.add(this.pauseResolve, this);
 
             this.leftKey = this.game.input.keyboard.addKey(Phaser.KeyCode.LEFT);
-            this.leftKey.onDown.add(function() {self.directionUI.changeDirection('W');} ,this);
+            this.leftKey.onDown.add(function() {self.directionUI.changeDirection('W');}, this);
             this.rightKey = this.game.input.keyboard.addKey(Phaser.KeyCode.RIGHT);
-            this.rightKey.onDown.add(function() {self.directionUI.changeDirection('E');} ,this);
+            this.rightKey.onDown.add(function() {self.directionUI.changeDirection('E');}, this);
             this.downKey = this.game.input.keyboard.addKey(Phaser.KeyCode.DOWN);
-            this.downKey.onDown.add(function() {self.directionUI.changeDirection('S');} ,this);
+            this.downKey.onDown.add(function() {self.directionUI.changeDirection('S');}, this);
             this.upKey = this.game.input.keyboard.addKey(Phaser.KeyCode.UP);
-            this.upKey.onDown.add(function() {self.directionUI.changeDirection('N');} ,this);
+            this.upKey.onDown.add(function() {self.directionUI.changeDirection('N');}, this);
 
             this.cancelKey = this.game.input.keyboard.addKey(Phaser.KeyCode.BACKSPACE);
-            this.cancelKey.onDown.add(this.cancelAction ,this);
+            this.cancelKey.onDown.add(this.cancelAction, this);
 
             this.logsUI.element.ready(function() {
                 self.logsUI.write('##################');
@@ -97,6 +104,11 @@ module TacticArena.UI {
                     }
                 });
             }
+        }
+
+        pauseResolve() {
+            this.game.isPaused = !this.game.isPaused;
+            this.timeUI.update();
         }
     }
 }
