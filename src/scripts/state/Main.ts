@@ -11,6 +11,7 @@ module TacticArena.State {
         tileSize: number;
         turnManager: Controller.TurnManager;
         orderManager: Controller.OrderManager;
+        resolveManager: Controller.ResolveManager;
         stageManager: Controller.StageManager;
         aiManager: Controller.AiManager;
         uiManager: UI.UIManager;
@@ -51,6 +52,7 @@ module TacticArena.State {
             this.pathfinder.setGrid(this.stageManager.grid);
 
             this.orderManager = new Controller.OrderManager(this);
+            this.resolveManager = new Controller.ResolveManager(this);
             this.aiManager = new Controller.AiManager(this);
             this.turnManager = new Controller.TurnManager(this);
             this.uiManager = new UI.UIManager(this);

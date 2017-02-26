@@ -93,9 +93,12 @@ module TacticArena.UI {
                 this.game.stageManager.clearPossibleMove();
                 this.game.stageManager.clearPath();
                 this.game.process = true;
+                this.game.selecting = false;
                 this.game.turnManager.endTurn().then((nextPawn) => {
                     if (activePawn._id == this.game.pawns[this.game.pawns.length-1]._id) { // Si le dernier pawn a joué
-                        this.game.orderManager.resolveAll().then((res) => {
+                        this.game.orderManager.resolveAll().then((steps) => {
+                            return this.game.resolveManager.processSteps(steps);
+                        }).then((res) => {
                             this.pawnsinfosUI.cleanOrders();
                             this.initTurn(nextPawn, true);
                         });

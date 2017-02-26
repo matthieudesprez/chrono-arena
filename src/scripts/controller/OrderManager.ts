@@ -2,12 +2,10 @@ module TacticArena.Controller {
     export class OrderManager {
         orders;
         game;
-        processing;
 
         constructor(game) {
             this.orders = [];
             this.game = game;
-            this.processing = false;
         }
 
         removeEntityOrder(pawn, order?) {
@@ -73,31 +71,6 @@ module TacticArena.Controller {
             return max;
         }
 
-        createPromiseMoveOrder(entity, x, y) {
-            return entity.moveTo(x, y).then((res) => {
-                return res;
-            });
-        }
-
-        createPromiseBlockOrder(entity, x, y) {
-            let initialPosition = entity.getPosition();
-            return entity.moveTo(x, y).then((res) => {
-                entity.blocked();
-                entity.moveTo(initialPosition.x, initialPosition.y).then((res) => {
-                    return res;
-                });
-            });
-        }
-
-        createPromiseStandOrder(entity, direction) {
-            return new Promise((resolve, reject) => {
-                entity.faceDirection(direction);
-                setTimeout(function() {
-                    resolve(true);
-                }, 250);
-            });
-        }
-
         getDefaultOrder(entity) {
             return  {
                 'action': 'stand_' + entity.getProjectionOrReal().getDirection(),
@@ -116,21 +89,13 @@ module TacticArena.Controller {
             }
         }
 
-        resolutionEsquive(fleeRate, entityA, entityB) {
-            if(Math.floor(Math.random() * 100) > fleeRate) {
-                console.log('esquive failed', entityB._id);
-                entityB.isHurt = true;
-                entityB.isDodging = false;
-            } else {
-                console.log('esquive success', entityB._id);
-                entityB.isHurt = false;
-                entityB.isDodging = true;
-            }
+        resolutionEsquive(fleeRate, entityBState) {
+            return (Math.floor(Math.random() * 100) > fleeRate);
         }
 
-        getOrderDirection(step) {
-            let direction =  step.order.action.split(/[_ ]+/).pop();
-            return ['N','S','E','W'].indexOf(direction) > -1 ? direction : step.entity.getDirection();
+        getOrderDirection(entityStep) {
+            let direction =  entityStep.order.action.split(/[_ ]+/).pop();
+            return ['N','S','E','W'].indexOf(direction) > -1 ? direction : entityStep.entity.getDirection();
         }
 
         movesTo(order, entity) {
@@ -150,28 +115,6 @@ module TacticArena.Controller {
             return steps;
         }
 
-        isGameReadyPromise() {
-            var self = this;
-            return new Promise((resolve, reject) => {
-                (function isGameReady(){
-                    console.log('isPaused');
-                    if (!self.game.isPaused) return resolve();
-                    setTimeout(isGameReady, 300);
-                })();
-            });
-        }
-
-        isProcessingPromise() {
-            var self = this;
-            return new Promise((resolve, reject) => {
-                (function isProcessing(){
-                    console.log('isProcessing');
-                    if (self.processing) return resolve();
-                    setTimeout(isProcessing, 30);
-                })();
-            });
-        }
-
         resolveAll() {
             return new Promise((resolve, reject) => {
                 this.formatOrders();
@@ -187,156 +130,95 @@ module TacticArena.Controller {
                         });
                     }
                 }
-                this.isGameReadyPromise().then((result) => {
-                    this.processOrders(steps).then((res) => {
-                        for (var i = 0; i < this.orders.length; i++) {
-                            this.orders[i].entity.destroyProjection();
-                        }
-                        this.orders = [];
-                        resolve(true);
-                    });
-                });
+                this.orders = [];
+                resolve(this.processOrders(steps));
             });
         }
 
         processOrders(steps) {
-            this.game.selecting = false;
-            this.processing = true;
-            console.info('processorders');
-            return new Promise((resolve, reject) => {
-                if (steps && steps.length > 0) {
-                    var step = steps[0];
-                    steps.shift();
-                    // Reset
-                    for(var i = 0; i < step.length; i++) {
-                        var entityA = step[i].entity;
-                        entityA.isDodging = false;
-                        entityA.isAttacking = false;
-                        entityA.isHurt = false;
-                        entityA.attackTarget = false;
-                        entityA.isBlocked = false;
-                        entityA.moveHasBeenBlocked = false;
-
-                        if(entityA.projection) {
-                            // Si entity et sa projection se chevauchent durant la résolution
-                            if(JSON.stringify(entityA.getPosition()) == JSON.stringify(entityA.getProjectionOrReal().getPosition())) {
-                                entityA.projection.hide();
-                            } else {
-                                entityA.projection.show(0.7);
-                            }
-                        }
-                    }
-                    // check actions before step resolution
-                    // foreach entities in step
-                    for(var i = 0; i < step.length; i++) {
-                        var entityA = step[i].entity;
-                        // foreach entities except A
-                        for(var j = 0; j < step.length; j++) {
-                            var entityB = step[j].entity;
-                            if (entityA._id == entityB._id) continue; // Pas d'interaction avec soi-même
-                            // Dans le cas où une entité à moins d'actions à jouer que les autres
-                            // On lui en assigne un par défaut pour qu'elle ne soit pas inactive
-                            if(step[i].order == null) { step[i].order = this.getDefaultOrder(entityA); }
-                            if(step[j].order == null) { step[j].order = this.getDefaultOrder(entityB); }
-                            let orderA = step[i].order;
-                            let orderB = step[j].order;
-                            let aIsFacingB = entityA.isFacing(entityB.getPosition());
-                            let actionA = orderA.action;
-                            let positionA = entityA.getPosition();
-                            let positionB = entityB.getPosition();
-                            let directionA = entityA.getDirection();
-                            let fleeRate = 0;
-
-                            if (actionA.indexOf('cast_') >= 0) {
-                                let path = this.game.stageManager.getLinearPath(entityA, 4);
-                                let targets = [];
-                                for(var k = 0; k < path.length; k++) {
-                                    if(path[k].x == positionB.x && path[k].y == positionB.y) {
-                                        targets.push(entityB);
-                                    }
-                                }
-                                orderA.targets = targets;
-                            } else if (this.game.stageManager.getNbTilesBetween(positionA, positionB) == 1 && aIsFacingB) {
-                                // Possible cases :
-                                // [  ][A v][  ]
-                                // [A>][ B ][<A]
-                                // [  ][ A^][  ]
-                                let keepDirection = (directionA == actionA.replace('stand_', '').replace('cast_', ''));
-                                // Si A reste dans sa direction (aIsFacingB), et ne va pas pas se détourner de B
-                                console.info(keepDirection, entityA._id);
-                                if (keepDirection || this.movesTo(orderA, entityB)) {
-                                    entityA.isAttacking = true;
-                                    entityA.attackTarget = entityB;
-                                    this.resolutionEsquive(fleeRate, entityA, entityB);
-
-                                    step[i].order.action = 'attack_' + entityA.getDirection();
-                                    step[i].order.target = entityA.attackTarget;
-
-                                    // Si A projetait de se déplacer vers B, son move a été interrompu
-                                    // Ses prochaines actions seront remplacées par celle par défaut
-                                    entityA.moveHasBeenBlocked = this.movesTo(orderA, entityB);
-                                }
-                            }
-
-                            if(orderA.x == orderB.x && orderA.y == orderB.y) {
-                                // Si A veut aller sur la même case que B (qu'il y soit déjà où qu'il veuille y aller)
-                                entityA.isBlocked = (step[i].order.action == 'move');
-                                entityA.moveHasBeenBlocked = entityA.isBlocked;
-                            }
-                        }
-                    }
-
-                    console.log(step);
-                    var promisesOrders = [];
-                    var logInfos = [];
-                    for (var i = 0; i < step.length; i++) {
-                        var logColor = '#78dd77';
-                        var o = step[i].order;
-                        var e = step[i].entity;
-                        var p = null;
-
-                        if(e.isHurt && !e.isAttacking) {
-                            logColor = '#f45d62';
-                            o.action = o.action.replace('move', 'stand_' + e.getDirection());
-                            e.moveHasBeenBlocked = true;
-                        }
-                        if(e.isBlocked) {
-                            p = this.createPromiseBlockOrder(e, o.x, o.y);
-                        } else if (o.action == 'move') {
-                            p = this.createPromiseMoveOrder(e, o.x, o.y);
-                        } else if (o.action.indexOf('attack_') >= 0) {
-                            p = e.attack(o.target);
-                        } else if (o.action.indexOf('cast_') >= 0) {
-                            p = e.cast(o.targets);
-                        } else if (o.action.indexOf('stand_') >= 0) {
-                            p = this.createPromiseStandOrder(e, o.action.replace('stand_', ''));
-                        }
-
-                        if(e.moveHasBeenBlocked) {
-                            steps = this.pacifyEntity(steps, e);
-                        }
-
-                        promisesOrders.push(p);
-                        logInfos.push('<span style="color:' + logColor + ';">entity ' + e._id + ' : ' + o.action + ' ' + o.x + ',' + o.y + '</span>');
-                    }
-                    this.game.uiManager.logsUI.write(logInfos.join(' | '));
-
-                    Promise.all(promisesOrders).then((res) => {
-                        this.processing = false;
-                        if (steps && steps.length > 0) {
-                            this.isGameReadyPromise().then((result) => {
-                                this.processOrders(steps).then((res) => {
-                                    resolve(res);
-                                }); // recursive
-                            });
-                        } else {
-                            resolve(true);
-                        }
-                    });
-                } else {
-                    resolve(false);
+            for(var l = 0; l < steps.length; l++) {
+                var step = steps[l];
+                for (var i = 0; i < step.length; i++) {
+                    step[i].entityState = {
+                        isDodging: false,
+                        isAttacking: false,
+                        isHurt: false,
+                        attackTarget: false,
+                        isBlocked: false,
+                        moveHasBeenBlocked: false
+                    };
                 }
-            });
+
+                // check actions before for each entitie in step
+                for (var i = 0; i < step.length; i++) {
+                    var entityA = step[i].entity;
+                    var entityAState = step[i].entity.entityState;
+                    // foreach entities except A
+                    for (var j = 0; j < step.length; j++) {
+                        var entityB = step[j].entity;
+                        if (entityA._id == entityB._id) continue; // Pas d'interaction avec soi-même
+                        var entityBState = step[j].entityState;
+                        // Dans le cas où une entité à moins d'actions à jouer que les autres
+                        // On lui en assigne un par défaut pour qu'elle ne soit pas inactive
+                        // TODO FAIRE GAFFE => INACTIF SI PLUS DE AP
+                        if (step[i].order == null) { step[i].order = this.getDefaultOrder(entityA); }
+                        if (step[j].order == null) { step[j].order = this.getDefaultOrder(entityB); }
+                        let orderA = step[i].order;
+                        let orderB = step[j].order;
+                        let aIsFacingB = entityA.isFacing(entityB.getPosition());
+                        let actionA = orderA.action;
+                        let positionA = entityA.getPosition();
+                        let positionB = entityB.getPosition();
+                        let directionA = entityA.getDirection();
+                        let fleeRate = 0;
+
+                        if (actionA.indexOf('cast_') >= 0) {
+                            let path = this.game.stageManager.getLinearPath(entityA, 4);
+                            let targets = [];
+                            for (var k = 0; k < path.length; k++) {
+                                if (path[k].x == positionB.x && path[k].y == positionB.y) {
+                                    targets.push(entityB);
+                                }
+                            }
+                            orderA.targets = targets;
+                        } else if (this.game.stageManager.getNbTilesBetween(positionA, positionB) == 1 && aIsFacingB) {
+                            // Possible cases :
+                            // [  ][A v][  ]
+                            // [A>][ B ][<A]
+                            // [  ][ A^][  ]
+                            // TODO Utiliser getOrderDirection ?
+                            let keepDirection = (directionA == actionA.replace('stand_', '').replace('cast_', ''));
+                            // Si A reste dans sa direction (aIsFacingB), et ne va pas pas se détourner de B
+                            // Ou si A va vers B (en lui faisant face)
+                            if (keepDirection || this.movesTo(orderA, entityB)) {
+                                entityAState.isAttacking = true;
+                                entityAState.attackTarget = entityB;
+                                if(this.resolutionEsquive(fleeRate, entityBState)) {
+                                    entityBState.isHurt = true;
+                                    entityBState.isDodging = false;
+                                } else {
+                                    entityBState.isHurt = false;
+                                    entityBState.isDodging = true;
+                                }
+
+                                step[i].order.action = 'attack_' + entityA.getDirection();
+                                step[i].order.target = entityA.attackTarget;
+
+                                // Si A projetait de se déplacer vers B, son move a été interrompu
+                                // Ses prochaines actions seront remplacées par celle par défaut
+                                entityAState.moveHasBeenBlocked = this.movesTo(orderA, entityB);
+                            }
+                        }
+
+                        if (orderA.x == orderB.x && orderA.y == orderB.y) {
+                            // Si A veut aller sur la même case que B (qu'il y soit déjà où qu'il veuille y aller)
+                            entityAState.isBlocked = (step[i].order.action == 'move');
+                            entityAState.moveHasBeenBlocked = entityA.isBlocked;
+                        }
+                    }
+                }
+            }
+            return steps;
         }
     }
 }
