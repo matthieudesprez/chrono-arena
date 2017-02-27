@@ -136,6 +136,7 @@ module TacticArena.Entity {
                             path.shift();
                             var result = JSON.parse(JSON.stringify(path));
                             self.moveTo(0, 0, path).then((res) => {
+                                self.destroyProjectionIfSamePosition();
                                 resolve(result);
                             });
                         }
@@ -145,7 +146,7 @@ module TacticArena.Entity {
             });
         }
 
-        moveTo(x, y, path, animate=true) {
+        moveTo(x, y, path, animate = true) {
             return new Promise((resolve, reject) => {
                 var tile_y, tile_x;
                 if (path != undefined && path.length > 0) {
@@ -159,28 +160,29 @@ module TacticArena.Entity {
                 var tile = this.game.stageManager.map.layers[1].data[tile_y][tile_x];
                 var newX = tile.x * this.game.tileSize - this.sprite._size / 4;
                 var newY = tile.y * this.game.tileSize - this.sprite._size / 2;
-                let speed = 0;
                 if(animate) {
                     this.sprite.walk();
-                    speed = this.sprite._speed;
+                    var t = this.game.add.tween(
+                        this.sprite).to({x: newX, y: newY},
+                        this.sprite._speed,
+                        Phaser.Easing.Linear.None,
+                        true
+                    );
+                    t.onComplete.add(function () {
+                        if (path != undefined && path.length > 0) {
+                            this.moveTo(0, 0, path).then((res) => {
+                                resolve(res);
+                            }); // recursive
+                        } else {
+                            this.sprite.stand();
+                            resolve(true);
+                        }
+                    }, this);
+                } else {
+                    this.sprite.x = newX;
+                    this.sprite.y = newY;
+                    resolve(true);
                 }
-                var t = this.game.add.tween(
-                    this.sprite).to({x: newX,y: newY},
-                    speed,
-                    Phaser.Easing.Linear.None,
-                    true
-                );
-                t.onComplete.add( function(){
-                    if (path != undefined && path.length > 0){
-                        this.moveTo(0, 0, path).then((res) => {
-                            resolve(res);
-                        }); // recursive
-                    } else {
-                        this.sprite.stand();
-                        this.destroyProjectionIfSamePosition();
-                        resolve(true);
-                    }
-                }, this);
             });
         }
 

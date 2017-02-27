@@ -109,9 +109,13 @@ module TacticArena.UI {
                     if (activePawn._id == this.game.pawns[this.game.pawns.length-1]._id) { // Si le dernier pawn a joué
                         this.pawnsinfosUI.deselectAll();
                         this.game.orderManager.resolveAll().then((steps) => {
+                            console.log(steps);
                             this.timelineUI.build(steps.length);
                             return this.game.resolveManager.processSteps(steps);
                         }).then((res) => {
+                            for(var i = 0; i < this.game.pawns.length; i++) {
+                                this.game.pawns[i].destroyProjection();
+                            }
                             this.game.resolveManager.active = false;
                             this.pawnsinfosUI.cleanOrders();
                             this.timelineUI.build(0);

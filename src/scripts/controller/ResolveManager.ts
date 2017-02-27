@@ -18,13 +18,14 @@ module TacticArena.Controller {
             this.processedIndexes = [];
         }
 
-        createPromiseMove(entity, x, y, animate=true) {
-            return entity.moveTo(x, y, animate).then((res) => {
+        createPromiseMove(entity, x, y, animate) {
+            console.info(animate);
+            return entity.moveTo(x, y, null, animate).then((res) => {
                 return res;
             });
         }
 
-        createPromiseBlock(entity, x, y, animate=true) {
+        createPromiseBlock(entity, x, y, animate) {
             let initialPosition = entity.getPosition();
             if(animate) {
                 return entity.moveTo(x, y).then((res) => {
@@ -85,9 +86,8 @@ module TacticArena.Controller {
             });
         }
 
-        processStep(index) {
+        processStep(index: number, animate: boolean = true) {
             return new Promise((resolve, reject) => {
-                let animate = this.processedIndexes.indexOf(index) < 0;
                 console.info(animate);
                 this.currentIndex = index;
                 this.processedIndexes.push(index);
@@ -95,18 +95,6 @@ module TacticArena.Controller {
                 let step = this.steps[index];
                 this.processing = true;
                 console.info('processStep', index);
-                // Reset
-                for(var i = 0; i < step.length; i++) {
-                    var entityA = step[i].entity;
-                    if(entityA.projection) {
-                        // Si entity et sa projection se chevauchent durant la résolution
-                        if(JSON.stringify(entityA.getPosition()) == JSON.stringify(entityA.getProjectionOrReal().getPosition())) {
-                            entityA.projection.hide();
-                        } else {
-                            entityA.projection.show(0.7);
-                        }
-                    }
-                }
 
                 var promisesOrders = [];
                 var logInfos = [];
@@ -140,7 +128,20 @@ module TacticArena.Controller {
                     promisesOrders.push(p);
                     logInfos.push('<span style="color:' + logColor + ';">entity ' + e._id + ' : ' + o.action + ' ' + o.x + ',' + o.y + '</span>');
                 }
-                this.game.uiManager.logsUI.write(logInfos.join(' | '));
+                //this.game.uiManager.logsUI.write(logInfos.join(' | '));
+
+
+                for(var i = 0; i < step.length; i++) {
+                    var entityA = step[i].entity;
+                    if(entityA.projection) {
+                        // Si entity et sa projection se chevauchent durant la résolution
+                        if(JSON.stringify(entityA.getPosition()) == JSON.stringify(entityA.getProjectionOrReal().getPosition())) {
+                            entityA.projection.hide();
+                        } else {
+                            entityA.projection.show(0.7);
+                        }
+                    }
+                }
 
                 Promise.all(promisesOrders).then((res) => {
                     this.processing = false;
