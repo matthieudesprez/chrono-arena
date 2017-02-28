@@ -19,7 +19,7 @@ module TacticArena.UI {
                 self.deselectAll();
                 self.select('play');
                 self.menu.game.isPaused = false;
-                self.goForward()
+                self.goForward();
             });
 
             this.element.find('.next').on('click', function () {
@@ -31,11 +31,21 @@ module TacticArena.UI {
 
         goForward() {
             if(this.menu.game.process) {
+                console.log(this.menu.game.isPaused);
                 let nextIndex = this.menu.game.resolveManager.currentIndex + 1;
                 if(nextIndex < this.menu.game.resolveManager.steps.length) {
                     this.menu.game.resolveManager.processStep(nextIndex);
                 } else {
                     this.menu.game.resolveManager.canResolve = true;
+                }
+            }
+        }
+
+        goBackward() {
+            if(this.menu.game.process) {
+                let previousIndex = this.menu.game.resolveManager.currentIndex -1;
+                if(previousIndex >= 0) {
+                    this.menu.game.resolveManager.processStep(previousIndex);
                 }
             }
         }
@@ -64,6 +74,10 @@ module TacticArena.UI {
                 this.deselectAll();
                 this.select('play');
             }
+        }
+
+        updatePauseFromSelected() {
+            this.menu.game.isPaused = this.element.find('.pause').hasClass('selected');
         }
     }
 }

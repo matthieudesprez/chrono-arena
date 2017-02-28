@@ -89,6 +89,17 @@ module TacticArena.Controller {
             }
         }
 
+        getInitialStep() {
+            var step = [];
+            for(var i = 0; i < this.game.pawns.length; i++) {
+                step.push({
+                    entity: this.game.pawns[i],
+                    order: this.getDefaultOrder(this.game.pawns[i])
+                });
+            }
+            return step;
+        }
+
         resolutionEsquive(fleeRate, entityBState) {
             return (Math.floor(Math.random() * 100) > fleeRate);
         }
@@ -122,6 +133,7 @@ module TacticArena.Controller {
                 for (var j = 0; j < steps.length; j++) {
                     steps[j] = [];
                     for(var i = 0; i < this.orders.length; i++) {
+                        console.log(this.orders[i]);
                         var entity = this.orders[i].entity;
                         entity.show();
                         steps[j].push({
@@ -130,13 +142,15 @@ module TacticArena.Controller {
                         });
                     }
                 }
+                steps.unshift(this.getInitialStep());
+                console.log(steps);
                 this.orders = [];
                 resolve(this.processOrders(steps));
             });
         }
 
         processOrders(steps) {
-            for(var l = 0; l < steps.length; l++) {
+            for(var l = 1; l < steps.length; l++) {
                 var step = steps[l];
                 for (var i = 0; i < step.length; i++) {
                     step[i].entityState = {

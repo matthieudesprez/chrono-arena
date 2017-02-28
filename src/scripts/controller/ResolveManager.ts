@@ -19,7 +19,6 @@ module TacticArena.Controller {
         }
 
         createPromiseMove(entity, x, y, animate) {
-            console.info(animate);
             return entity.moveTo(x, y, null, animate).then((res) => {
                 return res;
             });
@@ -35,13 +34,13 @@ module TacticArena.Controller {
                     });
                 });
             } else {
-                return this.createPromiseStand(entity, entity.getDirection());
+                return this.createPromiseStand(entity, entity.getDirection(), x, y, animate);
             }
         }
 
-        createPromiseStand(entity, direction) {
+        createPromiseStand(entity, direction, x, y, animate) {
             return new Promise((resolve, reject) => {
-                entity.faceDirection(direction);
+                entity.faceDirection(direction, x, y, animate);
                 setTimeout(function() {
                     resolve(true);
                 }, 250);
@@ -55,6 +54,17 @@ module TacticArena.Controller {
                     console.log('is paused');
                     if (!self.game.isPaused || self.canResolve) return resolve();
                     setTimeout(isGameReady, 300);
+                })();
+            });
+        }
+
+        isNextStepReadyPromise(index) {
+            var self = this;
+            return new Promise((resolve, reject) => {
+                (function isNextStepReady(){
+                    console.log('is not ready');
+                    if (!self.game.isPaused || self.canResolve) return resolve();
+                    setTimeout(isNextStepReady, 300);
                 })();
             });
         }
@@ -118,7 +128,7 @@ module TacticArena.Controller {
                     } else if (o.action.indexOf('cast_') >= 0) {
                         p = e.cast(o.targets);
                     } else if (o.action.indexOf('stand_') >= 0) {
-                        p = this.createPromiseStand(e, o.action.replace('stand_', ''));
+                        p = this.createPromiseStand(e, o.action.replace('stand_', ''), o.x, o.y, animate);
                     }
 
                     //if(e.moveHasBeenBlocked) {
@@ -130,26 +140,31 @@ module TacticArena.Controller {
                 }
                 //this.game.uiManager.logsUI.write(logInfos.join(' | '));
 
-
-                for(var i = 0; i < step.length; i++) {
-                    var entityA = step[i].entity;
-                    if(entityA.projection) {
-                        // Si entity et sa projection se chevauchent durant la résolution
-                        if(JSON.stringify(entityA.getPosition()) == JSON.stringify(entityA.getProjectionOrReal().getPosition())) {
-                            entityA.projection.hide();
-                        } else {
-                            entityA.projection.show(0.7);
-                        }
-                    }
-                }
-
                 Promise.all(promisesOrders).then((res) => {
                     this.processing = false;
+
+                    for(var i = 0; i < step.length; i++) {
+                        var entityA = step[i].entity;
+                        if(entityA.projection) {
+                            // Si entity et sa projection se chevauchent durant la résolution
+                            if(JSON.stringify(entityA.getPosition()) == JSON.stringify(entityA.getProjectionOrReal().getPosition())) {
+                                entityA.projection.hide();
+                                console.info('hide');
+                            } else {
+                                entityA.projection.show(0.7);
+                                console.info('show');
+                            }
+                        }
+                    }
+
                     console.log(this.steps.length > (index + 1), !this.game.isPaused, this.canResolve);
-                    if (this.steps.length > (index + 1) && (!this.game.isPaused || this.canResolve)) {
-                        this.processStep(index + 1).then((res) => {
-                            resolve(res);
-                        }); // recursive
+
+                    if(this.steps.length > (index + 1)) {
+                        this.isNextStepReadyPromise(index).then((res) => {
+                            this.processStep(index + 1).then((res) => {
+                                resolve(res);
+                            }); // recursive
+                        });
                     } else {
                         resolve(true);
                     }

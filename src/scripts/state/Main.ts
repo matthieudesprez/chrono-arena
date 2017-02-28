@@ -75,6 +75,7 @@ module TacticArena.State {
                 that.pointer.update();
             });
             this.turnInitialized.add(function(pawn) {
+                console.log('ok');
                 that.process = false;
                 if(pawn.bot) {
                     that.aiManager.play(pawn);

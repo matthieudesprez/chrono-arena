@@ -41,13 +41,13 @@ module TacticArena.UI {
             this.pauseKey.onDown.add(this.pauseResolve, this);
 
             this.leftKey = this.game.input.keyboard.addKey(Phaser.KeyCode.LEFT);
-            this.leftKey.onDown.add(function() {self.directionUI.changeDirection('W');}, this);
+            this.leftKey.onDown.add(this.leftKeyPressed, this);
             this.rightKey = this.game.input.keyboard.addKey(Phaser.KeyCode.RIGHT);
-            this.rightKey.onDown.add(function() {self.directionUI.changeDirection('E');}, this);
+            this.rightKey.onDown.add(this.rightKeyPressed, this);
             this.downKey = this.game.input.keyboard.addKey(Phaser.KeyCode.DOWN);
-            this.downKey.onDown.add(function() {self.directionUI.changeDirection('S');}, this);
+            this.downKey.onDown.add(this.downKeyPressed, this);
             this.upKey = this.game.input.keyboard.addKey(Phaser.KeyCode.UP);
-            this.upKey.onDown.add(function() {self.directionUI.changeDirection('N');}, this);
+            this.upKey.onDown.add(this.upKeyPressed, this);
 
             this.cancelKey = this.game.input.keyboard.addKey(Phaser.KeyCode.BACKSPACE);
             this.cancelKey.onDown.add(this.cancelAction, this);
@@ -70,10 +70,41 @@ module TacticArena.UI {
             this.pawnsinfosUI.select(activePawn._id);
         }
 
-        enterKeyPressed() {
+        leftKeyPressed() {
+            if(this.game.resolveManager.active) {
+                this.timeUI.goBackward();
+            } else if (!this.game.process) {
+                this.directionUI.changeDirection('W');
+            }
+        }
+        rightKeyPressed() {
             if(this.game.resolveManager.active) {
                 this.timeUI.goForward();
-            } else {
+            } else if (!this.game.process) {
+                this.directionUI.changeDirection('E');
+            }
+        }
+        upKeyPressed() {
+            if(this.game.resolveManager.active) {
+
+            } else if (!this.game.process) {
+                this.directionUI.changeDirection('N');
+            }
+        }
+        downKeyPressed() {
+            if(this.game.resolveManager.active) {
+
+            } else if (!this.game.process) {
+                this.directionUI.changeDirection('S');
+            }
+        }
+
+        enterKeyPressed() {
+            if(this.game.resolveManager.active) {
+                //this.timeUI.togglePause();
+                this.game.isPaused = false;
+                this.timeUI.goForward();
+            } else if (!this.game.process) {
                 this.endTurn();
             }
         }
@@ -119,6 +150,7 @@ module TacticArena.UI {
                             this.game.resolveManager.active = false;
                             this.pawnsinfosUI.cleanOrders();
                             this.timelineUI.build(0);
+                            this.timeUI.updatePauseFromSelected();
                             this.initTurn(nextPawn, true);
                         });
                     } else {
