@@ -8,13 +8,7 @@ module TacticArena.UI {
         timeUI;
         timelineUI;
         pawnsinfosUI;
-        enterKey;
-        leftKey;
-        rightKey;
-        downKey;
-        upKey;
-        cancelKey;
-        pauseKey;
+        keyManager;
 
         constructor(game) {
             var self = this;
@@ -27,30 +21,13 @@ module TacticArena.UI {
             this.timeUI = new UI.Time(this);
             this.timelineUI = new UI.TimeLine(this);
             this.pawnsinfosUI = new UI.PawnsInfos(this);
+            this.keyManager = new UI.KeyManager(this);
 
             this.game.pointer.dealWith(this.logsUI.element);
             this.game.pointer.dealWith(this.actionUI.element);
             this.game.pointer.dealWith(this.timeUI.element);
             this.game.pointer.dealWith(this.timelineUI.element);
             this.game.pointer.dealWith(this.directionUI.element);
-
-            this.enterKey = this.game.input.keyboard.addKey(Phaser.KeyCode.ENTER);
-            this.enterKey.onDown.add(this.enterKeyPressed, this);
-
-            this.pauseKey = this.game.input.keyboard.addKey(Phaser.KeyCode.SPACEBAR);
-            this.pauseKey.onDown.add(this.pauseResolve, this);
-
-            this.leftKey = this.game.input.keyboard.addKey(Phaser.KeyCode.LEFT);
-            this.leftKey.onDown.add(this.leftKeyPressed, this);
-            this.rightKey = this.game.input.keyboard.addKey(Phaser.KeyCode.RIGHT);
-            this.rightKey.onDown.add(this.rightKeyPressed, this);
-            this.downKey = this.game.input.keyboard.addKey(Phaser.KeyCode.DOWN);
-            this.downKey.onDown.add(this.downKeyPressed, this);
-            this.upKey = this.game.input.keyboard.addKey(Phaser.KeyCode.UP);
-            this.upKey.onDown.add(this.upKeyPressed, this);
-
-            this.cancelKey = this.game.input.keyboard.addKey(Phaser.KeyCode.BACKSPACE);
-            this.cancelKey.onDown.add(this.cancelAction, this);
 
             this.logsUI.element.ready(function() {
                 self.logsUI.write('##################');
@@ -70,58 +47,6 @@ module TacticArena.UI {
             this.pawnsinfosUI.select(activePawn._id);
         }
 
-        leftKeyPressed() {
-            if(this.game.resolveManager.active) {
-                this.timeUI.goBackward();
-            } else if (!this.game.process) {
-                this.directionUI.changeDirection('W');
-            }
-        }
-        rightKeyPressed() {
-            if(this.game.resolveManager.active) {
-                this.timeUI.goForward();
-            } else if (!this.game.process) {
-                this.directionUI.changeDirection('E');
-            }
-        }
-        upKeyPressed() {
-            if(this.game.resolveManager.active) {
-
-            } else if (!this.game.process) {
-                this.directionUI.changeDirection('N');
-            }
-        }
-        downKeyPressed() {
-            if(this.game.resolveManager.active) {
-
-            } else if (!this.game.process) {
-                this.directionUI.changeDirection('S');
-            }
-        }
-
-        enterKeyPressed() {
-            if(this.game.resolveManager.active) {
-                //this.timeUI.togglePause();
-                this.game.isPaused = false;
-                this.timeUI.goForward();
-            } else if (!this.game.process) {
-                this.endTurn();
-            }
-        }
-
-        cancelAction() {
-            if(!this.game.process) {
-                var activePawn = this.game.turnManager.getActivePawn();
-                activePawn.show();
-                activePawn.destroyProjection();
-                activePawn.setAp(3);
-                activePawn.getProjectionOrReal().faceDirection(this.directionUI.savedDirection);
-                this.directionUI.init(this.directionUI.savedDirection);
-                this.game.orderManager.removeEntityOrder(activePawn);
-                this.game.onActionPlayed.dispatch(activePawn);
-            }
-        }
-
         initTurn(pawn, first) {
             this.game.turnManager.initTurn(pawn, first).then((data) => {
                 this.init();
@@ -139,20 +64,10 @@ module TacticArena.UI {
                 this.game.turnManager.endTurn().then((nextPawn) => {
                     if (activePawn._id == this.game.pawns[this.game.pawns.length-1]._id) { // Si le dernier pawn a joué
                         this.pawnsinfosUI.deselectAll();
-                        this.game.orderManager.resolveAll().then((steps) => {
-                            console.log(steps);
-                            this.timelineUI.build(steps.length);
-                            return this.game.resolveManager.processSteps(steps);
-                        }).then((res) => {
-                            for(var i = 0; i < this.game.pawns.length; i++) {
-                                this.game.pawns[i].destroyProjection();
-                            }
-                            this.game.resolveManager.active = false;
-                            this.pawnsinfosUI.cleanOrders();
-                            this.timelineUI.build(0);
-                            this.timeUI.updatePauseFromSelected();
-                            this.initTurn(nextPawn, true);
-                        });
+                        let steps = this.game.orderManager.resolveAll();
+                        console.log(steps);
+                        this.timelineUI.build(<any>steps.length);
+                        this.game.resolveManager.processSteps(steps);
                     } else {
                         this.initTurn(nextPawn, false);
                     }
@@ -160,8 +75,15 @@ module TacticArena.UI {
             }
         }
 
-        pauseResolve() {
-            this.timeUI.togglePause();
+        endTimeLinePhase() {
+            for(var i = 0; i < this.game.pawns.length; i++) {
+                this.game.pawns[i].destroyProjection();
+            }
+            this.game.resolveManager.active = false;
+            this.pawnsinfosUI.cleanOrders();
+            this.timelineUI.build(0);
+            this.timeUI.updatePauseFromSelected();
+            this.initTurn(this.game.turnManager.pawns[0], true);
         }
     }
 }

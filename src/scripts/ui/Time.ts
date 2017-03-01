@@ -30,19 +30,20 @@ module TacticArena.UI {
         }
 
         goForward() {
-            if(this.menu.game.process) {
+            if(this.menu.game.process && !this.menu.game.resolveManager.processing) {
                 console.log(this.menu.game.isPaused);
                 let nextIndex = this.menu.game.resolveManager.currentIndex + 1;
-                if(nextIndex < this.menu.game.resolveManager.steps.length) {
+                //if(nextIndex < this.menu.game.resolveManager.steps.length) {
                     this.menu.game.resolveManager.processStep(nextIndex);
-                } else {
-                    this.menu.game.resolveManager.canResolve = true;
-                }
+                //} else {
+                    //this.menu.game.resolveManager.canResolve = true;
+                //}
             }
         }
 
         goBackward() {
-            if(this.menu.game.process) {
+            if(this.menu.game.process && !this.menu.game.resolveManager.processing) {
+                this.element.find('.pause').trigger('click');
                 let previousIndex = this.menu.game.resolveManager.currentIndex -1;
                 if(previousIndex >= 0) {
                     this.menu.game.resolveManager.processStep(previousIndex);

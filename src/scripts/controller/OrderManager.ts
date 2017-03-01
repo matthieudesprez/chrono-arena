@@ -127,26 +127,22 @@ module TacticArena.Controller {
         }
 
         resolveAll() {
-            return new Promise((resolve, reject) => {
-                this.formatOrders();
-                var steps = new Array(this.getMaxOrderListLength());
-                for (var j = 0; j < steps.length; j++) {
-                    steps[j] = [];
-                    for(var i = 0; i < this.orders.length; i++) {
-                        console.log(this.orders[i]);
-                        var entity = this.orders[i].entity;
-                        entity.show();
-                        steps[j].push({
-                            'entity': entity,
-                            'order': this.orders[i].list[j] ? this.orders[i].list[j] : null
-                        });
-                    }
+            this.formatOrders();
+            let steps = new Array(this.getMaxOrderListLength());
+            for (var j = 0; j < steps.length; j++) {
+                steps[j] = [];
+                for(var i = 0; i < this.orders.length; i++) {
+                    var entity = this.orders[i].entity;
+                    entity.show();
+                    steps[j].push({
+                        'entity': entity,
+                        'order': this.orders[i].list[j] ? this.orders[i].list[j] : null
+                    });
                 }
-                steps.unshift(this.getInitialStep());
-                console.log(steps);
-                this.orders = [];
-                resolve(this.processOrders(steps));
-            });
+            }
+            steps.unshift(this.getInitialStep());
+            this.orders = [];
+            return this.processOrders(steps);
         }
 
         processOrders(steps) {

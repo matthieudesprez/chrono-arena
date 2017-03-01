@@ -82,16 +82,14 @@ module TacticArena.Controller {
 
         processSteps(steps) {
             console.log(steps);
-            return new Promise((resolve) => {
-                this.steps = steps;
-                this.active = true;
-                this.canResolve = false;
-                this.processedIndexes = [];
-                this.currentIndex = 0;
-                this.processStep(0).then((res) => {
-                    this.isGameReadyPromise().then((res) => {
-                        resolve(true);
-                    });
+            this.steps = steps;
+            this.active = true;
+            this.canResolve = false;
+            this.processedIndexes = [];
+            this.currentIndex = 0;
+            this.processStep(0).then((res) => {
+                this.isGameReadyPromise().then((res) => {
+                    this.game.uiManager.endTimeLinePhase();
                 });
             });
         }
@@ -102,6 +100,11 @@ module TacticArena.Controller {
                 this.currentIndex = index;
                 this.processedIndexes.push(index);
                 this.game.uiManager.timelineUI.update(index);
+                if(index >= this.steps.length) {
+                    console.log('resolve');
+                    this.game.uiManager.endTimeLinePhase();
+                    return true;
+                }
                 let step = this.steps[index];
                 this.processing = true;
                 console.info('processStep', index);
@@ -160,11 +163,13 @@ module TacticArena.Controller {
                     console.log(this.steps.length > (index + 1), !this.game.isPaused, this.canResolve);
 
                     if(this.steps.length > (index + 1)) {
-                        this.isNextStepReadyPromise(index).then((res) => {
+                        //this.isNextStepReadyPromise(index).then((res) => {
+                        if (!this.game.isPaused || this.canResolve) {
                             this.processStep(index + 1).then((res) => {
                                 resolve(res);
                             }); // recursive
-                        });
+                        }
+                        //});
                     } else {
                         resolve(true);
                     }
