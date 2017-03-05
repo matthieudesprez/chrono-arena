@@ -118,18 +118,14 @@ module TacticArena.Controller {
                         }
                     }
 
-                    if(this.steps.length > (index + 1)) {
-                        if (!this.game.isPaused) {
-                            this.processStep(index + 1).then((res) => {
-                                resolve(res);
-                            }, (res) => {
-                                console.log('erreur', res);
-                            }); // recursive
-                        } else {
-                            reject(false);
-                        }
+                    if(this.steps.length > (index + 1) && !this.game.isPaused) {
+                        this.processStep(index + 1).then((res) => {
+                            resolve(res);
+                        }, (res) => {
+                            console.log('erreur', res);
+                        }); // recursive
                     } else {
-                        resolve(true);
+                        reject(false);
                     }
                 });
             });

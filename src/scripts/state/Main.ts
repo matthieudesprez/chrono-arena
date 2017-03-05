@@ -1,6 +1,4 @@
 declare var EasyStar;
-/// <reference path="../definitions/jquery.d.ts" />
-/// <reference path="../definitions/easystarjs.d.ts"/>
 module TacticArena.State {
     export class Main extends Phaser.State {
         layer: Phaser.TilemapLayer;
@@ -43,8 +41,8 @@ module TacticArena.State {
             this.pawns = [];
             this.pathTilesGroup = this.add.group();
             this.pawnsSpritesGroup = this.add.group();
-            this.pawns.push(new Entity.Pawn(this, 8, 8, 'E', 'redhead', this.getUniqueId(), false));
-            this.pawns.push(new Entity.Pawn(this, 10, 8, 'W', 'skeleton', this.getUniqueId(), false));
+            this.pawns.push(new Entity.Pawn(this, 8, 8, 'E', 'redhead', this.getUniqueId(), false, 'Captain Red'));
+            this.pawns.push(new Entity.Pawn(this, 10, 8, 'W', 'skeleton', this.getUniqueId(), false, 'Mr Skeleton'));
 
             this.stageManager.addDecorations();
 
@@ -113,7 +111,6 @@ module TacticArena.State {
             var self = this;
             return new Promise((resolve, reject) => {
                 (function isGameReady(){
-                    console.log('is paused');
                     if (!self.isPaused) return resolve();
                     setTimeout(isGameReady, 300);
                 })();

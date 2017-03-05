@@ -14,6 +14,7 @@ module TacticArena.Controller {
         }
 
         add(steps) {
+            console.log(steps);
             this.logs.push(steps);
         }
 

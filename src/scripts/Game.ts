@@ -1,4 +1,8 @@
 /// <reference path="./definitions/phaser.comments.d.ts"/>
+/// <reference path="./definitions/jasmine.d.ts"/>
+/// <reference path="./definitions/jquery.d.ts" />
+/// <reference path="./definitions/easystarjs.d.ts"/>
+
 module TacticArena {
   export class Game extends Phaser.Game {
     constructor() {

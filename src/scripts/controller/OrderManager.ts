@@ -40,7 +40,7 @@ module TacticArena.Controller {
             return false;
         }
 
-        add(action, entity, x, y) {
+        add(action, entity, x, y, direction = null) {
             if(!this.hasOrder(entity._id)) {
                 this.orders.push({
                     'entity': entity,
@@ -52,11 +52,9 @@ module TacticArena.Controller {
                     var order = {
                         'action': action,
                         'x': x,
-                        'y': y
+                        'y': y,
+                        'direction': direction
                     };
-                    //if(action.indexOf('stand_') >= 0) {
-                    //    this.removeEntityOrder(entity, order);
-                    //}
                     this.orders[i].list.push(order);
                 }
             }
@@ -75,7 +73,8 @@ module TacticArena.Controller {
             return  {
                 'action': 'stand_' + entity.getProjectionOrReal().getDirection(),
                 'x': entity.getPosition().x,
-                'y': entity.getPosition().y
+                'y': entity.getPosition().y,
+                'direction': entity.getProjectionOrReal().getDirection()
             };
         }
 
@@ -84,7 +83,7 @@ module TacticArena.Controller {
                 let p = this.game.pawns[i];
                 if(!this.hasOrder(p._id)) {
                     let position = p.getPosition();
-                    this.game.orderManager.add('stand_' + p.getDirection(), p, position.x, position.y);
+                    this.game.orderManager.add('stand_' + p.getDirection(), p, position.x, position.y, p.getDirection());
                 }
             }
         }

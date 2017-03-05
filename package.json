@@ -7,6 +7,7 @@
     "watch": "tsc -w --outDir build",
     "clean": "rm -rf build",
     "serve": "lite-server",
+    "test": "karma start spec/support/karma.conf.js",
     "build": "tsc && concurrent \"cp src/index.html build\" \"cp -R src/vendor src/css src/assets build\"",
     "cp": "concurrent \"cp src/index.html build\" \"cp -R src/vendor src/css src/assets build\"",
     "start": "concurrent \"npm run watch\" \"npm run lite\"",
@@ -15,6 +16,13 @@
   "devDependencies": {
     "typescript": "^2.2.1",
     "concurrently": "^1.0.0",
-    "lite-server": "*"
+    "lite-server": "*",
+    "codecov": "~1.0",
+    "jasmine": "~2.5",
+    "karma": "~1.4",
+    "karma-coverage": "~1.1",
+    "karma-jasmine": "~1.1",
+    "karma-phantomjs-launcher": "~1.0",
+    "remap-istanbul": "~0.8"
   }
 }

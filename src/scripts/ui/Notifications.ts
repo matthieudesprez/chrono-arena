@@ -2,6 +2,8 @@ module TacticArena.UI {
     export class Notifications {
         menu;
         element;
+        actionMapping;
+        directionMapping;
 
 
         constructor(menu) {
@@ -9,6 +11,12 @@ module TacticArena.UI {
             this.menu = menu;
             this.menu.element.append('<div class="ui-notifications"></div>');
             this.element = this.menu.element.find('.ui-notifications');
+            this.directionMapping = {
+                'W': "l'Ouest",
+                'E': "l'Est",
+                'N': "le Nord",
+                'S': "le Sud"
+            }
         }
 
         clean() {
@@ -26,15 +34,14 @@ module TacticArena.UI {
         }
 
         update(index) {
-            this.remove(this.element.find(':gt(' + index + ')'));
+            this.remove(this.element.find('div[class*="item-"]:gt(' + index + ')'));
             if ($('.item-' + index).length > 0) {
                 return;
             }
-            console.log(index, this.element.children().length);
+            console.log(index, this.element.children().length );
             let steps = [];
             for (let i = index; i > this.element.children().length - 1; i--) {
-                //steps.push(this.menu.game.logManager.get(this.menu.game.turnManager.currentTurnIndex, i))
-                steps.push($('<div class="item-' + index + '" style="opacity:0; margin-right:-200px;">test</div>'));
+                steps.push($('<div class="item-' + index + '" style="opacity:0; margin-right:-200px;">' + this.getMessage(i) + '</div>'));
             }
             console.log(steps);
             this.add(steps);
@@ -50,10 +57,25 @@ module TacticArena.UI {
             }
         }
 
+        getMessage(index) {
+            let result = [];
+            let step = this.menu.game.logManager.get(this.menu.game.turnManager.currentTurnIndex, index);
+            for(let i = 0; i < step.length; i++) {
+                let e = step[i].entity;
+                let o = step[i].order;
+                let logColor = '#ffffff';
+                //let logColor = '#78dd77';
+                // logColor = '#f45d62';
 
-        //var logColor = '#78dd77';
-        // logColor = '#f45d62';
-        //logInfos.push('<span style="color:' + logColor + ';">entity ' + e._id + ' : ' + o.action + ' ' + o.x + ',' + o.y + '</span>');
-
+                let msg = '<b>' + e._name + '</b>';
+                if(o.action == 'move') {
+                    msg += ' se déplace en ' + o.x + ', ' + o.y;
+                } else if (o.action.indexOf('stand_') >= 0) {
+                    msg += ' reste en position ' + o.x + ', ' + o.y + ' et surveille vers ' + this.directionMapping[o.direction];
+                }
+                result.push('<span style="color:' + logColor + ';">' + msg + '</span>');
+            }
+            return result.join('<br/><br/>');
+        }
     }
 }

@@ -54,7 +54,7 @@ module TacticArena.UI {
                 activePawn.createProjection();
                 activePawn.getProjectionOrReal().faceDirection(direction);
                 let position = activePawn.getProjectionOrReal().getPosition();
-                this.menu.game.orderManager.add('stand_' + direction, activePawn, position.x, position.y);
+                this.menu.game.orderManager.add('stand_' + direction, activePawn, position.x, position.y, direction);
                 activePawn.setAp(activePawn.getAp() - 1);
                 this.menu.game.onActionPlayed.dispatch(activePawn);
                 this.select(this.matching[direction]);

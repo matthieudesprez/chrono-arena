@@ -29,20 +29,16 @@ html, body {
 }
 .ui-pawns-infos {
   position: absolute;
-  width: 96px;
-  left: -100px;
+  width: 200px;
+  left: -210px;
   top: 0px;
   height: auto;
 }
 .ui-pawns-infos .pawn{
-  height: 96px;
-  width: 96px;
+  height: 150px;
+  width: 200px;
   margin: 0 20px 40px 0;
   position: relative;
-  border: 2px solid transparent;
-}
-.ui-pawns-infos .pawn.active {
-  border: 2px solid #ffffff;
 }
 .ui-pawns-infos .pawn .avatar {
   background-position: 0 0;
@@ -52,6 +48,10 @@ html, body {
   left: 0;
   width: 100%;
   height: 100%;
+  border: 2px solid transparent;
+}
+.ui-pawns-infos .pawn.active .avatar{
+  border: 2px solid #ffffff;
 }
 .ui-pawns-infos .pawn01 .avatar{
   background-image: url('../assets/images/redhead_avatar.png');
@@ -62,32 +62,35 @@ html, body {
 .ui-pawns-infos .infos{
   position: absolute;
   width: 100%;
-  bottom: -25px;
+  bottom: 0px;
+  text-align: left;
+  font-size: 18px;
 }
 .ui-pawns-infos .orders{
   position: absolute;
-  width: 135px;
-  bottom: 0;
-  right: 100px;
+  width: 100px;
+  top: 0;
+  right: 0;
   color: #b5b5b5;
   text-align: right;
-  height: 96px;
+  height: 150px;
   padding: 10px;
 }
 .ui-pawns-infos .infos .ap{
   color: dodgerblue;
-  float: right;
+  margin: 10px;
 }
 .ui-pawns-infos .infos .hp{
   color: forestgreen;
-  float: left;
+  margin: 10px;
 }
 .ui-logs {
   height: 134px;
   width: 100%;
   background-color: rgba(0, 0, 0, 0.5);
   padding: 10px;
-  bottom: -134px;
+  bottom: -144px;
+  border: 1px solid black;
   left: 0px;
   overflow: auto;
   position: absolute;
@@ -273,9 +276,12 @@ html, body {
   width: 100%;
   min-height: 150px;
   color: #ffffff;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: #292929;
   text-align: left;
   border: 1px solid black;
   display: inline-block;
   margin: 0 0 10px 0;
+}
+.ui-notifications .item-0 {
+  display: none !important;
 }

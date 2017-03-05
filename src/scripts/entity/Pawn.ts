@@ -5,6 +5,7 @@ module TacticArena.Entity {
         projection;
         _parent;
         _id;
+        _name;
         _ap;
         _hp;
         type;
@@ -17,9 +18,10 @@ module TacticArena.Entity {
         selected;
         bot;
 
-        constructor(game, x, y, ext, type, id, bot) {
+        constructor(game, x, y, ext, type, id, bot, name = "") {
             this.game = game;
             this._id = id;
+            this._name = name;
             this.type = type;
             this.projection = null;
             this._parent = null;
