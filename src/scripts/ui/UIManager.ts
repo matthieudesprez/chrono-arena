@@ -2,59 +2,61 @@ module TacticArena.UI {
     export class UIManager {
         game:State.Main;
         element;
-        logsUI;
+        consolelogsUI;
         directionUI;
         actionUI;
         timeUI;
         timelineUI;
         pawnsinfosUI;
         keyManager;
+        notificationsUI;
 
         constructor(game) {
             var self = this;
             this.game = game;
 
             this.element = $('#content');
-            this.logsUI = new UI.Logs(this);
+            this.consolelogsUI = new UI.ConsoleLogs(this);
             this.directionUI = new UI.Direction(this);
             this.actionUI = new UI.Action(this);
             this.timeUI = new UI.Time(this);
             this.timelineUI = new UI.TimeLine(this);
             this.pawnsinfosUI = new UI.PawnsInfos(this);
             this.keyManager = new UI.KeyManager(this);
+            this.notificationsUI = new UI.Notifications(this);
 
-            this.game.pointer.dealWith(this.logsUI.element);
+            this.game.pointer.dealWith(this.consolelogsUI.element);
             this.game.pointer.dealWith(this.actionUI.element);
             this.game.pointer.dealWith(this.timeUI.element);
             this.game.pointer.dealWith(this.timelineUI.element);
             this.game.pointer.dealWith(this.directionUI.element);
 
-            this.logsUI.element.ready(function() {
-                self.logsUI.write('##################');
-                self.logsUI.write('<b># Tactical <span style="color:orangered;">A</span>' +
+            this.consolelogsUI.element.ready(function() {
+                self.consolelogsUI.write('##################');
+                self.consolelogsUI.write('<b># Tactical <span style="color:orangered;">A</span>' +
                     '<span style="color:limegreen;">r</span>' +
                     '<span style="color:cyan;">e</span>' +
                     '<span style="color:yellow;">n</span>' +
                     '<span style="color:orangered;">a</span> #</b>');
-                self.logsUI.write('##################<br/>');
+                self.consolelogsUI.write('##################<br/>');
             });
         }
 
         init() {
             var activePawn = this.game.turnManager.getActivePawn();
             this.directionUI.init(activePawn.getDirection());
-            this.logsUI.write('au tour du joueur ' + activePawn._id);
+            this.consolelogsUI.write('au tour du joueur ' + activePawn._id);
             this.pawnsinfosUI.select(activePawn._id);
         }
 
-        initTurn(pawn, first) {
-            this.game.turnManager.initTurn(pawn, first).then((data) => {
+        initOrderPhase(pawn, first) {
+            this.game.turnManager.init(pawn, first).then((data) => {
                 this.init();
                 this.game.turnInitialized.dispatch(pawn);
             });
         }
 
-        endTurn() {
+        endOrderPhase() {
             var activePawn = this.game.turnManager.getActivePawn();
             if (!this.game.process) {
                 this.game.stageManager.clearPossibleMove();
@@ -64,26 +66,31 @@ module TacticArena.UI {
                 this.game.turnManager.endTurn().then((nextPawn) => {
                     if (activePawn._id == this.game.pawns[this.game.pawns.length-1]._id) { // Si le dernier pawn a joué
                         this.pawnsinfosUI.deselectAll();
-                        let steps = this.game.orderManager.resolveAll();
-                        console.log(steps);
+                        let steps = this.game.orderManager.getSteps();
                         this.timelineUI.build(<any>steps.length);
-                        this.game.resolveManager.processSteps(steps);
+                        this.game.logManager.add(steps);
+                        this.game.resolveManager.init(steps);
+                        this.game.resolveManager.processSteps(0);
                     } else {
-                        this.initTurn(nextPawn, false);
+                        this.initOrderPhase(nextPawn, false);
                     }
                 });
             }
         }
 
-        endTimeLinePhase() {
+        endResolvePhase() {
+            var self = this;
             for(var i = 0; i < this.game.pawns.length; i++) {
                 this.game.pawns[i].destroyProjection();
             }
             this.game.resolveManager.active = false;
             this.pawnsinfosUI.cleanOrders();
+            setTimeout(function() {
+                self.notificationsUI.clean();
+            }, 500);
             this.timelineUI.build(0);
             this.timeUI.updatePauseFromSelected();
-            this.initTurn(this.game.turnManager.pawns[0], true);
+            this.initOrderPhase(this.game.turnManager.pawns[0], true);
         }
     }
 }

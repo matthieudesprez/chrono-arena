@@ -4,7 +4,6 @@ module TacticArena.Controller {
         game;
         processing;
         currentIndex;
-        canResolve;
         active;
         processedIndexes;
 
@@ -13,7 +12,6 @@ module TacticArena.Controller {
             this.game = game;
             this.currentIndex = 0;
             this.processing = false;
-            this.canResolve = false;
             this.active = false;
             this.processedIndexes = [];
         }
@@ -47,78 +45,41 @@ module TacticArena.Controller {
             });
         }
 
-        isGameReadyPromise() {
-            var self = this;
-            return new Promise((resolve, reject) => {
-                (function isGameReady(){
-                    console.log('is paused');
-                    if (!self.game.isPaused || self.canResolve) return resolve();
-                    setTimeout(isGameReady, 300);
-                })();
-            });
-        }
-
-        isNextStepReadyPromise(index) {
-            var self = this;
-            return new Promise((resolve, reject) => {
-                (function isNextStepReady(){
-                    console.log('is not ready');
-                    if (!self.game.isPaused || self.canResolve) return resolve();
-                    setTimeout(isNextStepReady, 300);
-                })();
-            });
-        }
-
-        stopProcessingPromise() {
-            var self = this;
-            return new Promise((resolve, reject) => {
-                (function stopProcessing(){
-                    console.log('is processing');
-                    if (!self.processing) return resolve();
-                    setTimeout(stopProcessing, 300);
-                })();
-            });
-        }
-
-        processSteps(steps) {
-            console.log(steps);
+        init(steps) {
             this.steps = steps;
             this.active = true;
-            this.canResolve = false;
             this.processedIndexes = [];
             this.currentIndex = 0;
-            this.processStep(0).then((res) => {
-                this.isGameReadyPromise().then((res) => {
-                    this.game.uiManager.endTimeLinePhase();
-                });
+        }
+
+        processSteps(index, animate: boolean = true) {
+            this.processStep(index, animate).then((res) => {
+                this.game.resolvePhaseFinished.dispatch();
+            }, (res) => {
+
             });
         }
 
         processStep(index: number, animate: boolean = true) {
             return new Promise((resolve, reject) => {
-                console.info(animate);
+                if(index >= this.steps.length) {
+                    resolve(true);
+                    return true;
+                }
                 this.currentIndex = index;
                 this.processedIndexes.push(index);
                 this.game.uiManager.timelineUI.update(index);
-                if(index >= this.steps.length) {
-                    console.log('resolve');
-                    this.game.uiManager.endTimeLinePhase();
-                    return true;
-                }
                 let step = this.steps[index];
                 this.processing = true;
                 console.info('processStep', index);
 
                 var promisesOrders = [];
-                var logInfos = [];
                 for (var i = 0; i < step.length; i++) {
-                    var logColor = '#78dd77';
                     var o = step[i].order;
                     var e = step[i].entity;
                     var p = null;
 
                     if(e.isHurt && !e.isAttacking) {
-                        logColor = '#f45d62';
                         o.action = o.action.replace('move', 'stand_' + e.getDirection());
                         e.moveHasBeenBlocked = true;
                     }
@@ -133,17 +94,14 @@ module TacticArena.Controller {
                     } else if (o.action.indexOf('stand_') >= 0) {
                         p = this.createPromiseStand(e, o.action.replace('stand_', ''), o.x, o.y, animate);
                     }
-
                     //if(e.moveHasBeenBlocked) {
                     //    steps = this.pacifyEntity(steps, e);
                     //}
-
                     promisesOrders.push(p);
-                    logInfos.push('<span style="color:' + logColor + ';">entity ' + e._id + ' : ' + o.action + ' ' + o.x + ',' + o.y + '</span>');
                 }
-                //this.game.uiManager.logsUI.write(logInfos.join(' | '));
 
                 Promise.all(promisesOrders).then((res) => {
+                    this.game.stepResolutionFinished.dispatch(index);
                     this.processing = false;
 
                     for(var i = 0; i < step.length; i++) {
@@ -160,16 +118,16 @@ module TacticArena.Controller {
                         }
                     }
 
-                    console.log(this.steps.length > (index + 1), !this.game.isPaused, this.canResolve);
-
                     if(this.steps.length > (index + 1)) {
-                        //this.isNextStepReadyPromise(index).then((res) => {
-                        if (!this.game.isPaused || this.canResolve) {
+                        if (!this.game.isPaused) {
                             this.processStep(index + 1).then((res) => {
                                 resolve(res);
+                            }, (res) => {
+                                console.log('erreur', res);
                             }); // recursive
+                        } else {
+                            reject(false);
                         }
-                        //});
                     } else {
                         resolve(true);
                     }

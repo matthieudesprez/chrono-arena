@@ -66,7 +66,7 @@ module TacticArena.Controller {
                                 }
                             }
                         }
-                        //self.game.uiManager.endTurn();
+                        //self.game.uiManager.endOrderPhase();
                     }
                 );
                 this.game.pathfinder.calculate();

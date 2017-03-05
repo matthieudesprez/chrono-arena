@@ -259,3 +259,23 @@ html, body {
   background-color: #CD2F36;
   width: 100%;
 }
+
+.ui-notifications {
+  position: absolute;
+  top: 0;
+  right: -210px;
+  width: 200px;
+  height: 600px;
+}
+
+.ui-notifications div[class*="item-"] {
+  padding: 10px;
+  width: 100%;
+  min-height: 150px;
+  color: #ffffff;
+  background-color: rgba(0, 0, 0, 0.5);
+  text-align: left;
+  border: 1px solid black;
+  display: inline-block;
+  margin: 0 0 10px 0;
+}

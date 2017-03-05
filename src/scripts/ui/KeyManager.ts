@@ -65,11 +65,10 @@ module TacticArena.UI {
 
         enterKeyPressed(self, uiManager) {
             if(uiManager.game.resolveManager.active) {
-                //this.timeUI.togglePause();
                 uiManager.game.isPaused = false;
                 uiManager.timeUI.goForward();
             } else if (!uiManager.game.process) {
-                uiManager.endTurn();
+                uiManager.endOrderPhase();
             }
         }
 

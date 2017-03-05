@@ -14,6 +14,7 @@ module TacticArena.State {
         resolveManager: Controller.ResolveManager;
         stageManager: Controller.StageManager;
         aiManager: Controller.AiManager;
+        logManager: Controller.LogManager;
         uiManager: UI.UIManager;
         process: Boolean;
         selecting: Boolean;
@@ -23,10 +24,12 @@ module TacticArena.State {
         onOrderChange:Phaser.Signal;
         onActionPlayed:Phaser.Signal;
         turnInitialized:Phaser.Signal;
+        stepResolutionFinished:Phaser.Signal;
+        resolvePhaseFinished:Phaser.Signal;
         isPaused: Boolean;
 
         create() {
-            var that = this;
+            var self = this;
             this.process = true;
             this.selecting = false;
             this.tileSize = 32;
@@ -51,6 +54,7 @@ module TacticArena.State {
             this.pathfinder.disableSync();
             this.pathfinder.setGrid(this.stageManager.grid);
 
+            this.logManager = new Controller.LogManager(this);
             this.orderManager = new Controller.OrderManager(this);
             this.resolveManager = new Controller.ResolveManager(this);
             this.aiManager = new Controller.AiManager(this);
@@ -62,31 +66,40 @@ module TacticArena.State {
             this.onOrderChange = new Phaser.Signal();
             this.onActionPlayed = new Phaser.Signal();
             this.turnInitialized = new Phaser.Signal();
+            this.stepResolutionFinished = new Phaser.Signal();
+            this.resolvePhaseFinished = new Phaser.Signal();
             this.onApChange.add(function() {
-                that.uiManager.pawnsinfosUI.updateInfos();
+                self.uiManager.pawnsinfosUI.updateInfos();
             });
             this.onHpChange.add(function() {
-                that.uiManager.pawnsinfosUI.updateInfos();
+                self.uiManager.pawnsinfosUI.updateInfos();
             });
             this.onOrderChange.add(function(pawn) {
-                that.uiManager.pawnsinfosUI.updateOrders(pawn, that.orderManager.orders);
+                self.uiManager.pawnsinfosUI.updateOrders(pawn, self.orderManager.orders);
             });
             this.onActionPlayed.add(function(pawn) {
-                that.pointer.update();
+                self.pointer.update();
             });
             this.turnInitialized.add(function(pawn) {
-                console.log('ok');
-                that.process = false;
+                console.log("turnInitialized");
+                self.process = false;
                 if(pawn.bot) {
-                    that.aiManager.play(pawn);
+                    self.aiManager.play(pawn);
                 } else {
-                    that.selecting = true;
+                    self.selecting = true;
                 }
             });
-
-            this.turnManager.initTurn(this.pawns[0], true).then((res) => {
-                that.uiManager.initTurn(this.pawns[0], true);
+            this.stepResolutionFinished.add(function(stepIndex) {
+                self.uiManager.notificationsUI.update(stepIndex);
             });
+            this.resolvePhaseFinished.add(function() {
+                console.log('resolvePhaseFinished');
+                self.isGameReadyPromise().then((res) => {
+                    self.uiManager.endResolvePhase();
+                });
+            });
+
+            self.uiManager.initOrderPhase(this.pawns[0], true);
         }
 
         update() {
@@ -94,6 +107,17 @@ module TacticArena.State {
             this.pawnsSpritesGroup.sort('y', Phaser.Group.SORT_ASCENDING);
             this.world.bringToTop(this.pointer.marker);
             this.world.bringToTop(this.pawnsSpritesGroup);
+        }
+
+        isGameReadyPromise() {
+            var self = this;
+            return new Promise((resolve, reject) => {
+                (function isGameReady(){
+                    console.log('is paused');
+                    if (!self.isPaused) return resolve();
+                    setTimeout(isGameReady, 300);
+                })();
+            });
         }
 
         getUniqueId() {

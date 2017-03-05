@@ -1,5 +1,5 @@
 module TacticArena.UI {
-    export class Logs {
+    export class ConsoleLogs {
         menu;
         element;
 

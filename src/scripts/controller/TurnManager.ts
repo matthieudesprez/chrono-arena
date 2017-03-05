@@ -1,17 +1,19 @@
 module TacticArena.Controller {
     export class TurnManager {
         pawns;
+		currentTurnIndex;
 
         constructor(game) {
             this.pawns = game.pawns;
+			this.currentTurnIndex = -1;
         }
 
-        initTurn(pawn, first = false) {
+        init(pawn, firstTurnCall = false) {
             return new Promise((resolve, reject) => {
 	        	for(var i = 0; i < this.pawns.length; i++) {
 	        		this.pawns[i].active = false;
                     //distribution des ap va se faire à chaque début de tour
-					if(first) {
+					if(firstTurnCall) {
 						this.pawns[i].setAp(3);
                         this.pawns[i].stunned = false;
                         this.pawns[i].isHurt = false;
@@ -20,6 +22,10 @@ module TacticArena.Controller {
                         this.pawns[i].ghost = null;
 					}
 	        	}
+				if(firstTurnCall) {
+					console.log(firstTurnCall);
+					this.currentTurnIndex++;
+				}
                 pawn.active = true;
 	        	resolve(true);
         	});

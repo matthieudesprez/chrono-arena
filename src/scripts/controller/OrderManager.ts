@@ -126,7 +126,7 @@ module TacticArena.Controller {
             return steps;
         }
 
-        resolveAll() {
+        getSteps() {
             this.formatOrders();
             let steps = new Array(this.getMaxOrderListLength());
             for (var j = 0; j < steps.length; j++) {
