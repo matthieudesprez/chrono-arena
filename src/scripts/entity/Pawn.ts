@@ -8,6 +8,8 @@ module TacticArena.Entity {
         _name;
         _ap;
         _hp;
+        _apMax;
+        _hpMax;
         type;
         isHurt;
         isBlocked;
@@ -35,6 +37,8 @@ module TacticArena.Entity {
             this.moveHasBeenBlocked = false;
             this.isBlocked = false;
             this._hp = 4;
+            this._hpMax = 4;
+            this._apMax = 3;
             this.selected = false;
             this.bot = bot;
         }

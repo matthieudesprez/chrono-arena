@@ -69,12 +69,13 @@ module TacticArena.Controller {
             return max;
         }
 
-        getDefaultOrder(entity) {
+        getDefaultOrder(entity, forceReal = false) {
+            var d = forceReal ? entity.getDirection() : entity.getProjectionOrReal().getDirection()
             return  {
-                'action': 'stand_' + entity.getProjectionOrReal().getDirection(),
+                'action': 'stand_' + d,
                 'x': entity.getPosition().x,
                 'y': entity.getPosition().y,
-                'direction': entity.getProjectionOrReal().getDirection()
+                'direction': d
             };
         }
 

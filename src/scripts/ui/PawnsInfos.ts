@@ -10,10 +10,20 @@ module TacticArena.UI {
                 html += '<div class="pawn pawn0' + this.menu.game.pawns[i]._id + '">' +
                 '<div class="avatar"></div>' +
                 '<div class="infos">' +
-                '<span class="hp"><span class="value"></span> HP</span>' +
-                '<span class="ap"><span class="value"></span> AP</span>' +
+                '<div class="hp">' +
+                    '<div class="bar">' +
+                        '<div class="content"></div>' +
+                        '<div class="text"><span class="value"></span> / ' + this.menu.game.pawns[i]._hpMax + ' HP</div>' +
+                    '</div>' +
                 '</div>' +
-                '<div class="orders"></div> ' +
+                '<div class="ap">' +
+                    '<div class="bar">' +
+                        '<div class="content"></div>' +
+                        '<div class="text"><span class="value"></span> / ' + this.menu.game.pawns[i]._apMax + ' AP</div>' +
+                    '</div>' +
+                '</div>' +
+                //'<div class="orders"></div> ' +
+                '</div>' +
                 '</div>';
             }
             html += '</div>';
@@ -34,7 +44,9 @@ module TacticArena.UI {
             for(var i=0; i < this.menu.game.pawns.length; i++) {
                 var entity = this.menu.game.pawns[i];
                 this.element.find('.pawn0' + entity._id + ' .infos .hp .value').html(entity.getHp());
+                this.element.find('.pawn0' + entity._id + ' .infos .hp .bar .content').css('width', ((entity.getHp() / entity._hpMax) * 100) + '%');
                 this.element.find('.pawn0' + entity._id + ' .infos .ap .value').html(entity.getAp());
+                this.element.find('.pawn0' + entity._id + ' .infos .ap .bar .content').css('width', ((entity.getAp() / entity._apMax) * 100) + '%');
             }
         }
 
@@ -44,7 +56,7 @@ module TacticArena.UI {
                 if(orders[i].entity._id == pawn._id) {
                     for(var j = 0; j < orders[i].list.length; j++) {
                         let o = orders[i].list[j];
-                        orders_list += '<div>' + o.action + ' : ' + o.x + ',' + o.y + '</div>';
+                        orders_list += '<div><span class="' + o.action + '"></span> ' + o.x + ',' + o.y + '</div>';
                     }
                 }
             }
