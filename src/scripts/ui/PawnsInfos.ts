@@ -9,6 +9,7 @@ module TacticArena.UI {
             for(var i = 0; i < this.menu.game.pawns.length; i++) {
                 html += '<div class="pawn pawn0' + this.menu.game.pawns[i]._id + '">' +
                 '<div class="avatar"></div>' +
+                '<div class="orders"></div> ' +
                 '<div class="infos">' +
                 '<div class="hp">' +
                     '<div class="bar">' +
@@ -22,7 +23,6 @@ module TacticArena.UI {
                         '<div class="text"><span class="value"></span> / ' + this.menu.game.pawns[i]._apMax + ' AP</div>' +
                     '</div>' +
                 '</div>' +
-                //'<div class="orders"></div> ' +
                 '</div>' +
                 '</div>';
             }
@@ -56,7 +56,7 @@ module TacticArena.UI {
                 if(orders[i].entity._id == pawn._id) {
                     for(var j = 0; j < orders[i].list.length; j++) {
                         let o = orders[i].list[j];
-                        orders_list += '<div><span class="' + o.action + '"></span> ' + o.x + ',' + o.y + '</div>';
+                        orders_list += '<div class="order"><span class="' + o.action + '"></span><span class="coordinates">' + o.x + ',' + o.y + '</span></div>';
                     }
                 }
             }
