@@ -1,6 +1,7 @@
 /// <reference path="./definitions/phaser.comments.d.ts"/>
 /// <reference path="./definitions/jasmine.d.ts"/>
 /// <reference path="./definitions/jquery.d.ts" />
+/// <reference path="./definitions/jqueryui.d.ts" />
 /// <reference path="./definitions/easystarjs.d.ts"/>
 
 module TacticArena {

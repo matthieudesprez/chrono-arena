@@ -45,7 +45,7 @@ html, body {
     margin: 0 0 10px auto;
     position: relative;
     background: rgba(100, 100, 100, 0.8);
-    opacity: 1;
+    opacity: 0.5;
     border: 2px solid black;
 }
 
@@ -53,7 +53,7 @@ html, body {
     background-position: 0 0;
     background-repeat: no-repeat;
     position: absolute;
-    border: 2px solid #ffffff;
+    border: 1px outset white;
     width: 98px;
     height: 98px;
     border-radius: 50%;
@@ -62,8 +62,8 @@ html, body {
     overflow: hidden;
 }
 
-.ui-pawns-infos .pawn.active .avatar {
-    /*border: 2px solid #ffffff;*/
+.ui-pawns-infos .pawn.active {
+    opacity: 1;
 }
 
 .ui-pawns-infos .avatar .picture {
@@ -409,12 +409,15 @@ html, body {
     overflow: hidden;
     z-index: 1;
     margin: 25px 0 25px 25px;
-    border-radius: 50%;
     color: #fff;
     text-decoration: none;
     text-align: center;
     line-height: 50px;
     font-size: 12px;
+}
+
+.pawn .shiny {
+    border-radius: 50%;
 }
 
 /**
@@ -444,7 +447,7 @@ html, body {
 
 /* Hover state - trigger effect */
 
-.shiny:hover:after {
+.active .shiny:after {
     opacity: 1;
     top: -30%;
     left: -30%;
@@ -458,3 +461,74 @@ html, body {
 .shiny:active:after {
     opacity: 0;
 }
+
+.ui-transition {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    overflow: hidden;
+}
+
+.glowing {
+    text-decoration: none;
+    /*transition: all 0.5s;*/
+
+    font-size: 80px;
+    color: #FAF394;
+    font-family: Iceland;
+    font-style: italic;
+    text-shadow: -4px 0 #AC4B37, 0 4px #AC4B37, 4px 0 #AC4B37, 0 -4px #AC4B37;
+    position: absolute;
+    top: 0px;
+    width: 100%;
+}
+
+.glowing:after {
+    content: "";
+    position: absolute;
+    overflow: hidden;
+    top: -110%;
+    left: -210%;
+    width: 200%;
+    height: 200%;
+    opacity: 0;
+    transform: rotate(30deg);
+
+    /*background: rgba(255, 255, 255, 0.13);*/
+    background: linear-gradient(
+            to right,
+            rgba(255, 255, 255, 0.13) 0%,
+            rgba(255, 255, 255, 0.13) 77%,
+            rgba(255, 255, 255, 0.5) 92%,
+            rgba(255, 255, 255, 0.0) 100%
+    );
+}
+
+/* Hover state - trigger effect */
+
+.active .glowing:after {
+    opacity: 1;
+    top: -30%;
+    left: -30%;
+    transition-property: left, top, opacity;
+    transition-duration: 0.7s, 0.7s, 0.15s;
+    transition-timing-function: ease;
+}
+
+/*.glowing.active {*/
+    /*animation: neon 1.5s ease-in-out infinite alternate;*/
+    /*color: #ffffff;*/
+/*}*/
+
+/*@keyframes neon {*/
+    /*from {*/
+        /*text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #fff, 0 0 40px #FAF394, 0 0 70px #FAF394, 0 0 80px #FAF394, 0 0 100px #FAF394, 0 0 150px #FAF394;*/
+    /*}*/
+    /*to {*/
+        /*text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px #FAF394, 0 0 35px #FAF394, 0 0 40px #FAF394, 0 0 50px #FAF394, 0 0 75px #FAF394;*/
+    /*}*/
+/*}*/

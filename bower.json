@@ -4,7 +4,8 @@
   "dependencies": {
     "phaser-official": "2.6.2",
     "easystarjs": "~0.2.3",
-    "jquery": "^2.0.3"
+    "jquery": "^2.0.3",
+    "jquery-ui": "^1.12.1"
   },
   "ignore": [
     "**/.*",

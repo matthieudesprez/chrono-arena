@@ -10,6 +10,7 @@ module TacticArena.UI {
         pawnsinfosUI;
         keyManager;
         notificationsUI;
+        transitionUI;
 
         constructor(game) {
             var self = this;
@@ -24,6 +25,7 @@ module TacticArena.UI {
             this.pawnsinfosUI = new UI.PawnsInfos(this);
             this.keyManager = new UI.KeyManager(this);
             this.notificationsUI = new UI.Notifications(this);
+            this.transitionUI = new UI.Transition(this);
 
             this.game.pointer.dealWith(this.consolelogsUI.element);
             this.game.pointer.dealWith(this.actionUI.element);
@@ -51,6 +53,9 @@ module TacticArena.UI {
 
         initOrderPhase(pawn, first) {
             this.game.turnManager.init(pawn, first).then((data) => {
+                if(first) {
+                    this.transitionUI.show('Phase de commandement');
+                }
                 this.init();
                 this.game.turnInitialized.dispatch(pawn);
             });
@@ -65,7 +70,8 @@ module TacticArena.UI {
                 this.game.selecting = false;
                 this.game.turnManager.endTurn().then((nextPawn) => {
                     if (activePawn._id == this.game.pawns[this.game.pawns.length-1]._id) { // Si le dernier pawn a joué
-                        this.pawnsinfosUI.deselectAll();
+                        this.transitionUI.show('Resolution Phase');
+                        this.pawnsinfosUI.selectAll();
                         let steps = this.game.orderManager.getSteps();
                         this.timelineUI.build(<any>steps.length);
                         this.game.logManager.add(steps);
