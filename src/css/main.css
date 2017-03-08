@@ -40,7 +40,7 @@ html, body {
 }
 
 .ui-pawns-infos .pawn {
-    height: 190px;
+    height: 200px;
     width: 150px;
     margin: 0 0 10px auto;
     position: relative;
@@ -59,18 +59,33 @@ html, body {
     border-radius: 50%;
     left: 26px;
     top: 10px;
+    overflow: hidden;
 }
 
 .ui-pawns-infos .pawn.active .avatar {
     /*border: 2px solid #ffffff;*/
 }
 
-.ui-pawns-infos .pawn01 .avatar {
+.ui-pawns-infos .avatar .picture {
+    position: relative;
+    height: 100%;
+    width: 100%;
+    margin: 0;
+}
+.ui-pawns-infos .pawn01 .avatar .picture {
     background-image: url('../assets/images/redhead_avatar.png');
 }
 
-.ui-pawns-infos .pawn02 .avatar {
+.ui-pawns-infos .pawn02 .avatar .picture {
     background-image: url('../assets/images/skeleton_avatar.png');
+}
+
+.ui-pawns-infos .name {
+    position: absolute;
+    top: 115px;
+    width: 100%;
+    text-align: center;
+    color: #ffffff;
 }
 
 .ui-pawns-infos .infos {
@@ -113,7 +128,7 @@ html, body {
 
 .ui-pawns-infos .orders .coordinates {
     display: inline-block;
-    width: 35px;
+    width: 30px;
 }
 
 .ui-pawns-infos .infos .bar {
@@ -383,4 +398,63 @@ html, body {
 
 .ui-notifications .item-0 {
     /*display: none !important;*/
+}
+
+/**
+ * shiny
+ */
+
+.shiny {
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+    margin: 25px 0 25px 25px;
+    border-radius: 50%;
+    color: #fff;
+    text-decoration: none;
+    text-align: center;
+    line-height: 50px;
+    font-size: 12px;
+}
+
+/**
+ * The "shine" element
+ */
+
+.shiny:after {
+    content: "";
+    position: absolute;
+    overflow: hidden;
+    top: -110%;
+    left: -210%;
+    width: 200%;
+    height: 200%;
+    opacity: 0;
+    transform: rotate(30deg);
+
+    /*background: rgba(255, 255, 255, 0.13);*/
+    background: linear-gradient(
+            to right,
+            rgba(255, 255, 255, 0.13) 0%,
+            rgba(255, 255, 255, 0.13) 77%,
+            rgba(255, 255, 255, 0.5) 92%,
+            rgba(255, 255, 255, 0.0) 100%
+    );
+}
+
+/* Hover state - trigger effect */
+
+.shiny:hover:after {
+    opacity: 1;
+    top: -30%;
+    left: -30%;
+    transition-property: left, top, opacity;
+    transition-duration: 0.7s, 0.7s, 0.15s;
+    transition-timing-function: ease;
+}
+
+/* Active state */
+
+.shiny:active:after {
+    opacity: 0;
 }

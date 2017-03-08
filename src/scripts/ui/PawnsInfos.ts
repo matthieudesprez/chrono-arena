@@ -8,7 +8,8 @@ module TacticArena.UI {
             var html = '<div class="ui-pawns-infos">';
             for(var i = 0; i < this.menu.game.pawns.length; i++) {
                 html += '<div class="pawn pawn0' + this.menu.game.pawns[i]._id + '">' +
-                '<div class="avatar"></div>' +
+                '<div class="avatar"><div class="picture shiny"></div></div>' +
+                '<div class="name">' + this.menu.game.pawns[i]._name + '</div>' +
                 '<div class="orders"></div> ' +
                 '<div class="infos">' +
                 '<div class="hp">' +
