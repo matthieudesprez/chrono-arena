@@ -6,7 +6,7 @@ module TacticArena.UI {
         constructor(menu) {
             var self = this;
             this.menu = menu;
-            this.menu.element.append('<ul class="ui-menu ui-time-menu"><li class="pause"></li><li class="play"></li><li class="next"></ul>');
+            this.menu.element.append('<ul class="ui-menu ui-time-menu"><li class="pause"></li><li class="play"></li></ul>');
             this.element = this.menu.element.find('.ui-time-menu');
 
             this.element.find('.pause').on('click', function () {
@@ -20,10 +20,6 @@ module TacticArena.UI {
                 self.select('play');
                 self.menu.game.isPaused = false;
 
-                self.goForward();
-            });
-
-            this.element.find('.next').on('click', function () {
                 self.goForward();
             });
 

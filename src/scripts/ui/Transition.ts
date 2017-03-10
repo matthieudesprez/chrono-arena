@@ -31,15 +31,18 @@ module TacticArena.UI {
         }
 
         show(message) {
-            var self = this;
-            self.element.show();
-            this.elementText.html('');
-            this.elementText.css('right', '-800px');
-            this.elementText.html(message);
-            this.elementText.animate({right: '0px'}, 800, 'easeOutBack', function() {
-                setTimeout( function() {
-                    self.hide();
-                }, 1000);
+            return new Promise((resolve, reject) => {
+                var self = this;
+                self.element.show();
+                this.elementText.html('');
+                this.elementText.css('right', '-800px');
+                this.elementText.html(message);
+                this.elementText.animate({right: '0px'}, 800, 'easeOutBack', function () {
+                    setTimeout(function () {
+                        self.hide();
+                        resolve(true);
+                    }, 800);
+                });
             });
         }
     }

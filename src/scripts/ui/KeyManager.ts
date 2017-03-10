@@ -6,7 +6,7 @@ module TacticArena.UI {
         rightKey;
         downKey;
         upKey;
-        cancelKey;
+        backKey;
         pauseKey;
 
         constructor(menu) {
@@ -30,8 +30,8 @@ module TacticArena.UI {
             this.upKey = this.menu.game.input.keyboard.addKey(Phaser.KeyCode.UP);
             this.upKey.onDown.add(this.upKeyPressed, this, 0, this.menu);
 
-            this.cancelKey = this.menu.game.input.keyboard.addKey(Phaser.KeyCode.BACKSPACE);
-            this.cancelKey.onDown.add(this.cancelAction, this, 0, this.menu);
+            this.backKey = this.menu.game.input.keyboard.addKey(Phaser.KeyCode.BACKSPACE);
+            this.backKey.onDown.add(this.backKeyPressed, this, 0, this.menu);
         }
 
        leftKeyPressed(self, uiManager) {
@@ -72,17 +72,8 @@ module TacticArena.UI {
             }
         }
 
-        cancelAction(self, uiManager) {
-            if(!uiManager.game.process) {
-                var activePawn = uiManager.game.turnManager.getActivePawn();
-                activePawn.show();
-                activePawn.destroyProjection();
-                activePawn.setAp(3);
-                activePawn.getProjectionOrReal().faceDirection(uiManager.directionUI.savedDirection);
-                uiManager.directionUI.init(uiManager.directionUI.savedDirection);
-                uiManager.game.orderManager.removeEntityOrder(activePawn);
-                uiManager.game.onActionPlayed.dispatch(activePawn);
-            }
+        backKeyPressed(self, uiManager) {
+            uiManager.cancelAction();
         }
 
         pauseResolve(self, uiManager) {

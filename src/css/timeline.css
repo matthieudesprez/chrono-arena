@@ -1,0 +1,88 @@
+.timeline-container {
+    position: absolute;
+    bottom: -40px;
+    left: 0px;
+    width: 100%;
+    padding-left: 35px;
+    display: none;
+}
+
+.timeline-container .prev, .timeline-container .next {
+    position: absolute;
+    top: -8px;
+    color: #d3d3d3;
+    font-size: 30px;
+    font-weight: bold;
+    font-family: Iceland;
+    transition-duration: 0.7s;
+    transition-timing-function: ease;
+    text-decoration: none;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.timeline-container .prev {
+    left: 0px;
+}
+
+.timeline-container .next {
+    right: 0px;
+}
+
+.ui-timeline-menu li {
+    float: left;
+    position: relative;
+    margin-left: 91px;
+    opacity: 0.2;
+    cursor: pointer;
+
+    transition-duration: 0.7s;
+    transition-timing-function: ease;
+}
+
+.ui-timeline-menu li.selected, .ui-timeline-menu li.previous {
+    opacity: 1;
+}
+.ui-timeline-menu li:first-child {
+    margin-left: 0px;
+}
+.ui-timeline-menu li:first-child .line{
+    display: none;
+}
+
+.ui-timeline-menu li .square {
+    display: block;
+    width: 17px;
+    height: 17px;
+    background-color: #9D988B;
+    position: relative;
+    margin-top: 6px;
+    color: #000000;
+    font-weight: bold;
+    font-size: 11px;
+    font-family: Roboto;
+    text-align: center;
+    padding: 1px;
+}
+.ui-timeline-menu li .line {
+    display: block;
+    width: 91px;
+    height: 6px;
+    background-color: #9D988B;
+    position: absolute;
+    left: -91px;
+    top: 11px;
+    z-index: 0;
+}
+.ui-timeline-menu li:nth-child(1) .square { background-color: #FFFFFF; }
+.ui-timeline-menu li:nth-child(1) .square .line { display: none; }
+.ui-timeline-menu li:nth-child(2) .square, .ui-timeline-menu li:nth-child(2) .line { background-color: #E4E3DF; }
+.ui-timeline-menu li:nth-child(3) .square, .ui-timeline-menu li:nth-child(3) .line { background-color: #D2D0CA; }
+.ui-timeline-menu li:nth-child(4) .square, .ui-timeline-menu li:nth-child(4) .line { background-color: #9D988B; }
+
+.ui-timeline-menu li:nth-last-child(2) .square { background-color: #9D988B; }
+.ui-timeline-menu li:nth-last-child(2) .line {
+    background-color: #9D988B;
+    width: 91px;
+}
+.ui-timeline-menu li:last-child .square, .ui-timeline-menu li:last-child .line { background-color: #9D988B; }

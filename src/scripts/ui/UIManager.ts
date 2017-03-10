@@ -54,7 +54,11 @@ module TacticArena.UI {
         initOrderPhase(pawn, first) {
             this.game.turnManager.init(pawn, first).then((data) => {
                 if(first) {
-                    this.transitionUI.show('Phase de commandement');
+                    this.transitionUI.show('Phase de commandement').then( (res) => {
+                        this.actionUI.show();
+                        this.directionUI.show();
+                        return true;
+                    });
                 }
                 this.init();
                 this.game.turnInitialized.dispatch(pawn);
@@ -70,13 +74,20 @@ module TacticArena.UI {
                 this.game.selecting = false;
                 this.game.turnManager.endTurn().then((nextPawn) => {
                     if (activePawn._id == this.game.pawns[this.game.pawns.length-1]._id) { // Si le dernier pawn a joué
-                        this.transitionUI.show('Phase de Résolution');
-                        this.pawnsinfosUI.selectAll();
-                        let steps = this.game.orderManager.getSteps();
-                        this.timelineUI.build(<any>steps.length);
-                        this.game.logManager.add(steps);
-                        this.game.resolveManager.init(steps);
-                        this.game.resolveManager.processSteps(0);
+                        this.actionUI.clean();
+                        this.directionUI.clean();
+                        this.transitionUI.show('Phase de Résolution').then((res) => {
+                            return true;
+                        }).then((res) => {
+                            this.pawnsinfosUI.selectAll();
+                            let steps = this.game.orderManager.getSteps();
+                            this.game.logManager.add(steps);
+                            this.timelineUI.build(<any>steps.length).then((res) => {
+                                console.log(res);
+                                this.game.resolveManager.init(steps);
+                                this.game.resolveManager.processSteps(0);
+                            });
+                        });
                     } else {
                         this.initOrderPhase(nextPawn, false);
                     }
@@ -94,9 +105,22 @@ module TacticArena.UI {
             setTimeout(function() {
                 self.notificationsUI.clean();
             }, 500);
-            this.timelineUI.build(0);
+            this.timelineUI.clean();
             this.timeUI.updatePauseFromSelected();
             this.initOrderPhase(this.game.turnManager.pawns[0], true);
+        }
+
+        cancelAction() {
+            if(!this.game.process) {
+                var activePawn = this.game.turnManager.getActivePawn();
+                activePawn.show();
+                activePawn.destroyProjection();
+                activePawn.setAp(3);
+                activePawn.getProjectionOrReal().faceDirection(this.directionUI.savedDirection);
+                this.directionUI.init(this.directionUI.savedDirection);
+                this.game.orderManager.removeEntityOrder(activePawn);
+                this.game.onActionPlayed.dispatch(activePawn);
+            }
         }
     }
 }

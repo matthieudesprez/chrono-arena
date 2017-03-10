@@ -62,5 +62,13 @@ module TacticArena.UI {
 
             }
         }
+
+        clean() {
+            this.element.fadeOut();
+        }
+
+        show() {
+            this.element.fadeIn();
+        }
     }
 }
