@@ -70,7 +70,7 @@ module TacticArena.UI {
                 this.game.selecting = false;
                 this.game.turnManager.endTurn().then((nextPawn) => {
                     if (activePawn._id == this.game.pawns[this.game.pawns.length-1]._id) { // Si le dernier pawn a joué
-                        this.transitionUI.show('Resolution Phase');
+                        this.transitionUI.show('Phase de Résolution');
                         this.pawnsinfosUI.selectAll();
                         let steps = this.game.orderManager.getSteps();
                         this.timelineUI.build(<any>steps.length);
