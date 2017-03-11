@@ -39,7 +39,6 @@ module TacticArena.UI {
         }
 
         update(index) {
-            console.log('update', index, this.menu.game.resolveManager.steps.length);
             this.deselectAll();
             this.select('[timeline-index=' + index + ']');
             for(var i = index - 1; i >= 0; i--) {

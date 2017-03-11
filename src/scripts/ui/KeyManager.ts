@@ -7,7 +7,7 @@ module TacticArena.UI {
         downKey;
         upKey;
         backKey;
-        pauseKey;
+        spacebarKey;
 
         constructor(menu) {
             this.menu = menu;
@@ -15,8 +15,8 @@ module TacticArena.UI {
             this.enterKey = this.menu.game.input.keyboard.addKey(Phaser.KeyCode.ENTER);
             this.enterKey.onDown.add(this.enterKeyPressed, this, 0, this.menu);
 
-            this.pauseKey = this.menu.game.input.keyboard.addKey(Phaser.KeyCode.SPACEBAR);
-            this.pauseKey.onDown.add(this.pauseResolve, this, 0, this.menu);
+            this.spacebarKey = this.menu.game.input.keyboard.addKey(Phaser.KeyCode.SPACEBAR);
+            this.spacebarKey.onDown.add(this.pauseResolve, this, 0, this.menu);
 
             this.leftKey = this.menu.game.input.keyboard.addKey(Phaser.KeyCode.LEFT);
             this.leftKey.onDown.add(this.leftKeyPressed, this, 0, this.menu);
@@ -37,28 +37,28 @@ module TacticArena.UI {
        leftKeyPressed(self, uiManager) {
             if(uiManager.game.resolveManager.active) {
                 uiManager.timeUI.goBackward();
-            } else if (!uiManager.game.process) {
+            } else if (!uiManager.game.process && !uiManager.process) {
                 uiManager.directionUI.changeDirection('W');
             }
         }
         rightKeyPressed(self, uiManager) {
             if(uiManager.game.resolveManager.active) {
                 uiManager.timeUI.goForward();
-            } else if (!uiManager.game.process) {
+            } else if (!uiManager.game.process && !uiManager.process) {
                 uiManager.directionUI.changeDirection('E');
             }
         }
         upKeyPressed(self, uiManager) {
             if(uiManager.game.resolveManager.active) {
 
-            } else if (!uiManager.game.process) {
+            } else if (!uiManager.game.process && !uiManager.process) {
                 uiManager.directionUI.changeDirection('N');
             }
         }
         downKeyPressed(self, uiManager) {
             if(uiManager.game.resolveManager.active) {
 
-            } else if (!uiManager.game.process) {
+            } else if (!uiManager.game.process && !uiManager.process) {
                 uiManager.directionUI.changeDirection('S');
             }
         }
@@ -67,7 +67,7 @@ module TacticArena.UI {
             if(uiManager.game.resolveManager.active) {
                 uiManager.game.isPaused = false;
                 uiManager.timeUI.goForward();
-            } else if (!uiManager.game.process) {
+            } else if (!uiManager.game.process && !uiManager.process) {
                 uiManager.endOrderPhase();
             }
         }

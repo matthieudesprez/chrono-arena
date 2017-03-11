@@ -230,17 +230,9 @@ module TacticArena.Entity {
             return this.sprite._ext;
         }
         
-        faceDirection(direction, x=null, y=null, animate=false) {
+        faceDirection(direction) {
             this.sprite._ext = direction;
-            let p = this.getPosition();
-            if(x && y && (p.x != x || p.y != y)) {
-                this.moveTo(x, y, [], animate).then((res) => {
-                    //resolve(result);
-                });
-            } else {
-                this.sprite.stand();
-                //resolve(result);
-            }
+            this.sprite.stand();
         }
 
         hide() {

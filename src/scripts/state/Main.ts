@@ -79,7 +79,6 @@ module TacticArena.State {
                 self.pointer.update();
             });
             this.turnInitialized.add(function(pawn) {
-                console.log("turnInitialized");
                 self.process = false;
                 if(pawn.bot) {
                     self.aiManager.play(pawn);
@@ -91,7 +90,6 @@ module TacticArena.State {
                 self.uiManager.notificationsUI.update(stepIndex);
             });
             this.resolvePhaseFinished.add(function() {
-                console.log('resolvePhaseFinished');
                 self.isGameReadyPromise().then((res) => {
                     self.uiManager.endResolvePhase();
                 });

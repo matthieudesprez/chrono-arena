@@ -94,7 +94,7 @@ module TacticArena.Controller {
             for(var i = 0; i < this.game.pawns.length; i++) {
                 step.push({
                     entity: this.game.pawns[i],
-                    order: this.getDefaultOrder(this.game.pawns[i])
+                    order: this.getDefaultOrder(this.game.pawns[i], true)
                 });
             }
             return step;

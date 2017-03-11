@@ -38,12 +38,10 @@ module TacticArena.UI {
             if ($('.item-' + index).length > 0) {
                 return;
             }
-            console.log(index, this.element.children().length );
             let steps = [];
             for (let i = index; i > this.element.children().length - 1; i--) {
                 steps.push($('<div class="item-' + index + '" style="opacity:0; margin-right:-200px;">' + this.getMessage(i) + '</div>'));
             }
-            console.log(steps);
             this.add(steps);
         }
 

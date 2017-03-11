@@ -11,6 +11,7 @@ module TacticArena.UI {
         keyManager;
         notificationsUI;
         transitionUI;
+        process;
 
         constructor(game) {
             var self = this;
@@ -32,6 +33,8 @@ module TacticArena.UI {
             this.game.pointer.dealWith(this.timeUI.element);
             this.game.pointer.dealWith(this.timelineUI.element);
             this.game.pointer.dealWith(this.directionUI.element);
+
+            this.process = false;
 
             this.consolelogsUI.element.ready(function() {
                 self.consolelogsUI.write('##################');
@@ -83,7 +86,6 @@ module TacticArena.UI {
                             let steps = this.game.orderManager.getSteps();
                             this.game.logManager.add(steps);
                             this.timelineUI.build(<any>steps.length).then((res) => {
-                                console.log(res);
                                 this.game.resolveManager.init(steps);
                                 this.game.resolveManager.processSteps(0);
                             });

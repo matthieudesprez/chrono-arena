@@ -14,7 +14,6 @@ module TacticArena.UI {
 
 
             this.element.on('click', function () {
-                console.log('clic');
                 $(self.element).fadeOut();
             });
         }
@@ -23,6 +22,7 @@ module TacticArena.UI {
             var self = this;
             $(self.elementText).animate({right: '800px'}, 800, 'easeInBack', function() {
                 $(self.element).hide();
+                self.menu.process = false;
             });
         }
 
@@ -33,6 +33,7 @@ module TacticArena.UI {
         show(message) {
             return new Promise((resolve, reject) => {
                 var self = this;
+                this.menu.process = true;
                 self.element.show();
                 this.elementText.html('');
                 this.elementText.css('right', '-800px');

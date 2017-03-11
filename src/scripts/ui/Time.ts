@@ -41,7 +41,7 @@ module TacticArena.UI {
                 this.element.find('.pause').trigger('click');
                 let previousIndex = this.menu.game.resolveManager.currentIndex -1;
                 if(previousIndex >= 0) {
-                    this.menu.game.resolveManager.processSteps(previousIndex);
+                    this.menu.game.resolveManager.processSteps(previousIndex, true, true);
                 }
             }
         }
