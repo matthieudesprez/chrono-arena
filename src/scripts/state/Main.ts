@@ -87,6 +87,7 @@ module TacticArena.State {
                 }
             });
             this.stepResolutionFinished.add(function(stepIndex) {
+                self.uiManager.process = false;
                 self.uiManager.notificationsUI.update(stepIndex);
             });
             this.resolvePhaseFinished.add(function() {

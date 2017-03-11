@@ -79,15 +79,16 @@ module TacticArena.UI {
                     if (activePawn._id == this.game.pawns[this.game.pawns.length-1]._id) { // Si le dernier pawn a joué
                         this.actionUI.clean();
                         this.directionUI.clean();
+                        let steps = this.game.orderManager.getSteps();
+                        this.game.resolveManager.init(steps);
                         this.transitionUI.show('Phase de Résolution').then((res) => {
                             return true;
                         }).then((res) => {
                             this.pawnsinfosUI.selectAll();
-                            let steps = this.game.orderManager.getSteps();
                             this.game.logManager.add(steps);
                             this.timelineUI.build(<any>steps.length).then((res) => {
-                                this.game.resolveManager.init(steps);
                                 this.game.resolveManager.processSteps(0);
+                                this.game.resolveManager.activate();
                             });
                         });
                     } else {

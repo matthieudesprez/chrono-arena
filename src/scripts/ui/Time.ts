@@ -10,9 +10,7 @@ module TacticArena.UI {
             this.element = this.menu.element.find('.ui-time-menu');
 
             this.element.find('.pause').on('click', function () {
-                self.deselectAll();
-                self.select('pause');
-                self.menu.game.isPaused = true;
+                self.pause();
             });
 
             this.element.find('.play').on('click', function () {
@@ -23,7 +21,7 @@ module TacticArena.UI {
                 self.goForward();
             });
 
-            this.element.find('.pause').trigger('click');
+            this.pause();
         }
 
         goForward() {
@@ -36,9 +34,15 @@ module TacticArena.UI {
             }
         }
 
+        pause() {
+            this.deselectAll();
+            this.select('pause');
+            this.menu.game.isPaused = true;
+        }
+
         goBackward() {
             if(this.menu.game.resolveManager.active && !this.menu.game.resolveManager.processing) {
-                this.element.find('.pause').trigger('click');
+                this.pause();
                 let previousIndex = this.menu.game.resolveManager.currentIndex -1;
                 if(previousIndex >= 0) {
                     this.menu.game.resolveManager.processSteps(previousIndex, true, true);
@@ -50,7 +54,7 @@ module TacticArena.UI {
             if(this.menu.game.isPaused) {
                 this.element.find('.play').trigger('click');
             } else {
-                this.element.find('.pause').trigger('click');
+                this.pause();
             }
         }
 

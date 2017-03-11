@@ -94,6 +94,7 @@ module TacticArena.Controller {
             for(var i = 0; i < this.game.pawns.length; i++) {
                 step.push({
                     entity: this.game.pawns[i],
+                    entityState: this.getDefaultEntityState(),
                     order: this.getDefaultOrder(this.game.pawns[i], true)
                 });
             }
@@ -145,18 +146,22 @@ module TacticArena.Controller {
             return this.processOrders(steps);
         }
 
+        getDefaultEntityState() {
+            return {
+                isDodging: false,
+                isAttacking: false,
+                isHurt: false,
+                attackTarget: false,
+                isBlocked: false,
+                moveHasBeenBlocked: false
+            };
+        }
+
         processOrders(steps) {
             for(var l = 1; l < steps.length; l++) {
                 var step = steps[l];
                 for (var i = 0; i < step.length; i++) {
-                    step[i].entityState = {
-                        isDodging: false,
-                        isAttacking: false,
-                        isHurt: false,
-                        attackTarget: false,
-                        isBlocked: false,
-                        moveHasBeenBlocked: false
-                    };
+                    step[i].entityState = this.getDefaultEntityState();
                 }
 
                 // check actions before for each entitie in step

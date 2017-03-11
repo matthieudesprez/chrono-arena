@@ -35,39 +35,42 @@ module TacticArena.UI {
         }
 
        leftKeyPressed(self, uiManager) {
-            if(uiManager.game.resolveManager.active) {
+           if(uiManager.process) return false;
+            if(uiManager.game.resolveManager.active && !uiManager.game.resolveManager.processing) {
                 uiManager.timeUI.goBackward();
-            } else if (!uiManager.game.process && !uiManager.process) {
+            } else if (!uiManager.game.process) {
                 uiManager.directionUI.changeDirection('W');
             }
         }
         rightKeyPressed(self, uiManager) {
-            if(uiManager.game.resolveManager.active) {
+            if(uiManager.process) return false;
+            if(uiManager.game.resolveManager.active && !uiManager.game.resolveManager.processing) {
                 uiManager.timeUI.goForward();
-            } else if (!uiManager.game.process && !uiManager.process) {
+            } else if (!uiManager.game.process) {
                 uiManager.directionUI.changeDirection('E');
             }
         }
         upKeyPressed(self, uiManager) {
-            if(uiManager.game.resolveManager.active) {
-
-            } else if (!uiManager.game.process && !uiManager.process) {
+            if(uiManager.process) return false;
+            if (!uiManager.game.process) {
                 uiManager.directionUI.changeDirection('N');
             }
         }
         downKeyPressed(self, uiManager) {
-            if(uiManager.game.resolveManager.active) {
-
-            } else if (!uiManager.game.process && !uiManager.process) {
+            if(uiManager.process) return false;
+            if (!uiManager.game.process) {
                 uiManager.directionUI.changeDirection('S');
             }
         }
 
         enterKeyPressed(self, uiManager) {
-            if(uiManager.game.resolveManager.active) {
+            if(uiManager.process) return false;
+            console.info(uiManager.game.resolveManager.active, uiManager.game.resolveManager.processing);
+            if(uiManager.game.resolveManager.active && !uiManager.game.resolveManager.processing) {
+                uiManager.process = true;
                 uiManager.game.isPaused = false;
                 uiManager.timeUI.goForward();
-            } else if (!uiManager.game.process && !uiManager.process) {
+            } else if (!uiManager.game.process) {
                 uiManager.endOrderPhase();
             }
         }
