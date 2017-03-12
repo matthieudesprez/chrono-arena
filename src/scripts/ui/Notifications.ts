@@ -68,7 +68,9 @@ module TacticArena.UI {
                 let msg = '<b>' + e._name + '</b>';
                 if(o.action == 'move') {
                     msg += ' se déplace en ' + o.x + ', ' + o.y;
-                } else if (o.action.indexOf('stand_') >= 0) {
+                } else if (o.action == 'cast') {
+                    msg += ' lance une boule de feu vers ' + this.directionMapping[o.direction];
+                } else if (o.action == 'stand') {
                     msg += ' reste en position ' + o.x + ', ' + o.y + ' et surveille vers ' + this.directionMapping[o.direction];
                 }
                 result.push('<span style="color:' + logColor + ';">' + msg + '</span>');

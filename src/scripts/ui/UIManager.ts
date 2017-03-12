@@ -2,7 +2,7 @@ module TacticArena.UI {
     export class UIManager {
         game:State.Main;
         element;
-        consolelogsUI;
+        //consolelogsUI;
         directionUI;
         actionUI;
         timeUI;
@@ -11,6 +11,7 @@ module TacticArena.UI {
         keyManager;
         notificationsUI;
         transitionUI;
+        turnIndicatorUI;
         process;
 
         constructor(game) {
@@ -18,7 +19,7 @@ module TacticArena.UI {
             this.game = game;
 
             this.element = $('#content');
-            this.consolelogsUI = new UI.ConsoleLogs(this);
+            //this.consolelogsUI = new UI.ConsoleLogs(this);
             this.directionUI = new UI.Direction(this);
             this.actionUI = new UI.Action(this);
             this.timeUI = new UI.Time(this);
@@ -27,8 +28,9 @@ module TacticArena.UI {
             this.keyManager = new UI.KeyManager(this);
             this.notificationsUI = new UI.Notifications(this);
             this.transitionUI = new UI.Transition(this);
+            this.turnIndicatorUI = new UI.TurnIndicator(this);
 
-            this.game.pointer.dealWith(this.consolelogsUI.element);
+            //this.game.pointer.dealWith(this.consolelogsUI.element);
             this.game.pointer.dealWith(this.actionUI.element);
             this.game.pointer.dealWith(this.timeUI.element);
             this.game.pointer.dealWith(this.timelineUI.element);
@@ -36,27 +38,28 @@ module TacticArena.UI {
 
             this.process = false;
 
-            this.consolelogsUI.element.ready(function() {
-                self.consolelogsUI.write('##################');
-                self.consolelogsUI.write('<b># Tactical <span style="color:orangered;">A</span>' +
-                    '<span style="color:limegreen;">r</span>' +
-                    '<span style="color:cyan;">e</span>' +
-                    '<span style="color:yellow;">n</span>' +
-                    '<span style="color:orangered;">a</span> #</b>');
-                self.consolelogsUI.write('##################<br/>');
-            });
+            //this.consolelogsUI.element.ready(function() {
+            //    self.consolelogsUI.write('##################');
+            //    self.consolelogsUI.write('<b># Tactical <span style="color:orangered;">A</span>' +
+            //        '<span style="color:limegreen;">r</span>' +
+            //        '<span style="color:cyan;">e</span>' +
+            //        '<span style="color:yellow;">n</span>' +
+            //        '<span style="color:orangered;">a</span> #</b>');
+            //    self.consolelogsUI.write('##################<br/>');
+            //});
         }
 
         init() {
             var activePawn = this.game.turnManager.getActivePawn();
             this.directionUI.init(activePawn.getDirection());
-            this.consolelogsUI.write('au tour du joueur ' + activePawn._id);
+            //this.consolelogsUI.write('au tour du joueur ' + activePawn._id);
             this.pawnsinfosUI.select(activePawn._id);
         }
 
         initOrderPhase(pawn, first) {
             this.game.turnManager.init(pawn, first).then((data) => {
                 if(first) {
+                    this.turnIndicatorUI.write(this.game.turnManager.currentTurnIndex + 1);
                     this.transitionUI.show('Phase de commandement').then( (res) => {
                         this.actionUI.show();
                         this.directionUI.show();

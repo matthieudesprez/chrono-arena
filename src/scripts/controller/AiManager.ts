@@ -39,7 +39,7 @@ module TacticArena.Controller {
 
                 let direction = self.getDirection(p, targetPosition);
                 if(pawn.getDirection() != direction) {
-                    this.game.orderManager.add('stand_' + direction, pawn, p.x, p.y, direction);
+                    this.game.orderManager.add('stand', pawn, p.x, p.y, direction);
                     pawn.setAp(pawn.getAp() - 1);
                 }
 
@@ -60,7 +60,7 @@ module TacticArena.Controller {
                                     direction = self.getDirection(p, targetPosition);
                                     if(lastDirection != direction || i >= path.length - 1) {
                                         lastDirection = direction;
-                                        self.game.orderManager.add('stand_' + direction, pawn, path[i].x, path[i].y, direction);
+                                        self.game.orderManager.add('stand', pawn, path[i].x, path[i].y, direction);
                                         pawn.setAp(pawn.getAp() - 1);
                                     }
                                 }

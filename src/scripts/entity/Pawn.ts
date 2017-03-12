@@ -11,14 +11,8 @@ module TacticArena.Entity {
         _apMax;
         _hpMax;
         type;
-        isHurt;
-        isBlocked;
-        isAttacking;
-        attackTarget;
-        hasAttacked;
-        moveHasBeenBlocked;
         selected;
-        bot;
+        isBot;
 
         constructor(game, x, y, ext, type, id, bot, name = "") {
             this.game = game;
@@ -30,17 +24,11 @@ module TacticArena.Entity {
             this.sprite = new Entity.Sprite(game, x, y, ext, type, this, 64);
             this.game.pawnsSpritesGroup.add(this.sprite);
             this.sprite.stand();
-            this.isHurt = false;
-            this.isAttacking = false;
-            this.attackTarget = null;
-            this.hasAttacked = false;
-            this.moveHasBeenBlocked = false;
-            this.isBlocked = false;
             this._hp = 4;
             this._hpMax = 4;
             this._apMax = 3;
             this.selected = false;
-            this.bot = bot;
+            this.isBot = bot;
         }
 
         getReal() {
@@ -62,7 +50,6 @@ module TacticArena.Entity {
             return new Promise((resolve, reject) => {
                 this.sprite.attack(target, function() {
                     that.sprite.stand();
-                    that.hasAttacked = true;
                     resolve(true);
                 });
             });
@@ -94,9 +81,7 @@ module TacticArena.Entity {
             return new Promise((resolve, reject) => {
                 this.projection.hide();
                 this.sprite.cast(targets, function() {
-                    console.log('ok');
                     that.sprite.stand();
-                    that.hasAttacked = true;
                     resolve(true);
                 });
             });

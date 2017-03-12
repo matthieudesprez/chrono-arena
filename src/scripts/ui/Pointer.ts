@@ -88,7 +88,7 @@ module TacticArena.UI {
                             activePawn.projection.preMoveTo(targetX, targetY).then((path) => {
                                 activePawn.setAp(activePawn.getAp() - distance);
                                 for (var i = 0; i < (path as any).length; i++) {
-                                    this.game.orderManager.add('move', activePawn, path[i].x, path[i].y);
+                                    this.game.orderManager.add('move', activePawn, path[i].x, path[i].y, activePawn.getDirection());
                                 }
                                 this.game.process = false;
                                 this.game.onActionPlayed.dispatch(activePawn.getProjectionOrReal());
@@ -116,7 +116,7 @@ module TacticArena.UI {
                             activePawn.getProjectionOrReal().halfcast();
                             activePawn.setAp(activePawn.getAp() - 2);
                             //this.game.orderManager.add('cast_' + activePawn.getProjectionOrReal().getDirection(), activePawn, maxX, maxY);
-                            this.game.orderManager.add('cast_' + activePawn.getProjectionOrReal().getDirection(), activePawn, position.x, position.y);
+                            this.game.orderManager.add('cast', activePawn, position.x, position.y, activePawn.getProjectionOrReal().getDirection());
                         }
                     }
 

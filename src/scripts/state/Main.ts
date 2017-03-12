@@ -27,6 +27,7 @@ module TacticArena.State {
         isPaused: Boolean;
 
         create() {
+            console.log(':)');
             var self = this;
             this.process = true;
             this.selecting = false;
@@ -80,7 +81,7 @@ module TacticArena.State {
             });
             this.turnInitialized.add(function(pawn) {
                 self.process = false;
-                if(pawn.bot) {
+                if(pawn.isBot) {
                     self.aiManager.play(pawn);
                 } else {
                     self.selecting = true;

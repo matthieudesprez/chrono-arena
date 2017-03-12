@@ -14,12 +14,10 @@ module TacticArena.Controller {
         }
 
         add(steps) {
-            console.log(steps);
             this.logs.push(steps);
         }
 
         get(turnIndex, stepIndex) {
-            console.log(turnIndex, stepIndex, this.logs);
             return this.logs[turnIndex][stepIndex];
         }
     }
