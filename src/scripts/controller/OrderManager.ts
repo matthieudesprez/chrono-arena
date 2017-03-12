@@ -92,9 +92,12 @@ module TacticArena.Controller {
         getInitialStep() {
             var step = [];
             for(var i = 0; i < this.game.pawns.length; i++) {
+                let state = this.getDefaultEntityState();
+                state['ap'] = this.game.pawns[i]._apMax;
+                state['hp'] = this.game.pawns[i].getHp();
                 step.push({
                     entity: this.game.pawns[i],
-                    entityState: this.getDefaultEntityState(),
+                    entityState: state,
                     order: this.getDefaultOrder(this.game.pawns[i], true)
                 });
             }
@@ -153,7 +156,8 @@ module TacticArena.Controller {
                 isHurt: false,
                 attackTarget: false,
                 isBlocked: false,
-                moveHasBeenBlocked: false
+                moveHasBeenBlocked: false,
+                isBurned: false
             };
         }
 
@@ -167,7 +171,7 @@ module TacticArena.Controller {
                 // check actions before for each entitie in step
                 for (var i = 0; i < step.length; i++) {
                     var entityA = step[i].entity;
-                    var entityAState = step[i].entity.entityState;
+                    var entityAState = step[i].entityState;
                     // foreach entities except A
                     for (var j = 0; j < step.length; j++) {
                         var entityB = step[j].entity;
@@ -186,13 +190,17 @@ module TacticArena.Controller {
                         let positionB = entityB.getPosition();
                         let directionA = entityA.getDirection();
                         let fleeRate = 0;
+                        let apCost = 1;
+                        let hpLost = 0;
 
                         if (actionA.indexOf('cast_') >= 0) {
+                            apCost++;
                             let path = this.game.stageManager.getLinearPath(entityA, 4);
                             let targets = [];
                             for (var k = 0; k < path.length; k++) {
                                 if (path[k].x == positionB.x && path[k].y == positionB.y) {
                                     targets.push(entityB);
+                                    entityBState.isBurned = true;
                                 }
                             }
                             orderA.targets = targets;
@@ -230,6 +238,16 @@ module TacticArena.Controller {
                             entityAState.isBlocked = (step[i].order.action == 'move');
                             entityAState.moveHasBeenBlocked = entityA.isBlocked;
                         }
+
+                        if(entityAState.isHurt) {
+                            hpLost = 1;
+                        }
+                        if(entityAState.isBurned) {
+                            hpLost = 2;
+                        }
+
+                        step[i].entityState['ap'] = steps[l - 1][i].entityState['ap'] - apCost;
+                        step[i].entityState['hp'] = steps[l - 1][i].entityState['hp'] - hpLost;
                     }
                 }
             }

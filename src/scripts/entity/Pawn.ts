@@ -71,7 +71,7 @@ module TacticArena.Entity {
         hurt(hp=1) {
             this.sprite.hurt();
             this.destroyProjection();
-            this.setHp(this._hp - hp);
+            //this.setHp(this._hp - hp);
 
             let label_dmg = this.game.add.text(20, 10, "-" + hp, { font: '12px Press Start 2P', fill: "#ff021b", stroke: '#000000', strokeThickness: 6 });
             let t = this.game.add.tween(label_dmg).to({x: 20,y: -20, alpha: 0},
@@ -92,7 +92,9 @@ module TacticArena.Entity {
         cast(targets) {
             var that = this;
             return new Promise((resolve, reject) => {
+                this.projection.hide();
                 this.sprite.cast(targets, function() {
+                    console.log('ok');
                     that.sprite.stand();
                     that.hasAttacked = true;
                     resolve(true);

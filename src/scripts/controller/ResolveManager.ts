@@ -94,6 +94,9 @@ module TacticArena.Controller {
                     var p = null;
                     let position = e.getPosition();
 
+                    e.setAp(s.ap);
+                    e.setHp(s.hp);
+
                     if (s.isHurt && !s.isAttacking) {
                         o.action = o.action.replace('move', 'stand_' + e.getDirection());
                         s.moveHasBeenBlocked = true;
@@ -127,9 +130,7 @@ module TacticArena.Controller {
                     promisesOrders.push(p);
                 }
 
-                if(backward) {
-                    this.manageProjectionDislay(step);
-                }
+                this.manageProjectionDislay(step);
 
                 Promise.all(promisesOrders).then((res) => {
                     if(!backward) {
@@ -163,6 +164,7 @@ module TacticArena.Controller {
                     if(compareActualEntity) {
                         condition = (JSON.stringify(entityA.getPosition()) == JSON.stringify(entityA.getProjectionOrReal().getPosition()));
                     } else {
+                        console.log(order, position);
                         condition = (order.x == position.x && order.y == position.y);
                     }
 

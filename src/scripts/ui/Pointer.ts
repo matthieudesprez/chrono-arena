@@ -115,7 +115,8 @@ module TacticArena.UI {
                             activePawn.createProjection();
                             activePawn.getProjectionOrReal().halfcast();
                             activePawn.setAp(activePawn.getAp() - 2);
-                            this.game.orderManager.add('cast_' + activePawn.getProjectionOrReal().getDirection(), activePawn, maxX, maxY);
+                            //this.game.orderManager.add('cast_' + activePawn.getProjectionOrReal().getDirection(), activePawn, maxX, maxY);
+                            this.game.orderManager.add('cast_' + activePawn.getProjectionOrReal().getDirection(), activePawn, position.x, position.y);
                         }
                     }
 
