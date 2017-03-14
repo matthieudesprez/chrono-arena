@@ -21,9 +21,11 @@ module TacticArena.Entity {
             this.type = type;
             this.projection = null;
             this._parent = null;
-            this.sprite = new Entity.Sprite(game, x, y, ext, type, this, 64);
-            this.game.pawnsSpritesGroup.add(this.sprite);
-            this.sprite.stand();
+            if(type) {
+                this.sprite = new Entity.Sprite(game, x, y, ext, type, this, 64);
+                this.game.pawnsSpritesGroup.add(this.sprite);
+                this.sprite.stand();
+            }
             this._hp = 4;
             this._hpMax = 4;
             this._apMax = 3;

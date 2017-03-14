@@ -6,11 +6,11 @@
 
 module TacticArena {
     export class Game extends Phaser.Game {
-        constructor() {
+        constructor(headless: boolean = false) {
             super({
                 width: 640,
                 height: 640,
-                renderer: Phaser.AUTO,
+                renderer: headless ? Phaser.HEADLESS : Phaser.AUTO,
                 parent: 'game-container'
             });
 
