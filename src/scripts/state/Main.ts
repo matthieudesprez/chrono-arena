@@ -27,7 +27,6 @@ module TacticArena.State {
         isPaused: Boolean;
 
         create() {
-            console.log(':)');
             var self = this;
             this.process = true;
             this.selecting = false;

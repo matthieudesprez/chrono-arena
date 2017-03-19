@@ -28,11 +28,12 @@ module TacticArena.State {
 
 
         preload() {
-            //this.load.image('preload-bar', '../../assets/images/character.png');
+            this.load.tilemap('map', 'assets/json/map.json', null, Phaser.Tilemap.TILED_JSON);
+            this.load.image('tiles-collection', 'assets/images/maptiles.png');
+            this.load.atlasJSONArray('skeleton', 'assets/images/skeleton.png', 'assets/images/skeleton.json');
         }
 
         create() {
-            console.log('test create');
             var self = this;
             this.process = true;
             this.selecting = false;
@@ -40,15 +41,17 @@ module TacticArena.State {
             this.isPaused = false;
 
             this.stageManager = new Controller.StageManager(this);
+            this.stageManager.init();
 
-            let grid = [];
-            for (var i = 0; i < 20; i++) {
-                grid[i] = [];
-                for (var j = 0; j < 20; j++) {
-                    grid[i][j] = 0;
-                }
-            }
-            this.stageManager.grid = grid;
+            this.pointer = new UI.Pointer(this);
+
+            this.pawns = [];
+            this.pathTilesGroup = this.add.group();
+            this.pawnsSpritesGroup = this.add.group();
+            //this.pawns.push(new Entity.Pawn(this, 8, 8, 'E', 'skeleton', 1, false, 'Eikio'));
+            //this.pawns.push(new Entity.Pawn(this, 10, 8, 'W', 'skeleton', 2, false, 'Dormammu'));
+
+            this.stageManager.addDecorations();
 
             this.pathfinder = new EasyStar.js();
             this.pathfinder.setAcceptableTiles([-1]);
@@ -56,65 +59,22 @@ module TacticArena.State {
             this.pathfinder.disableSync();
             this.pathfinder.setGrid(this.stageManager.grid);
 
-            //this.logManager = new Controller.LogManager(this);
+            this.logManager = new Controller.LogManager(this);
             this.orderManager = new Controller.OrderManager(this);
-            //this.resolveManager = new Controller.ResolveManager(this);
-            //this.aiManager = new Controller.AiManager(this);
+            this.resolveManager = new Controller.ResolveManager(this);
+            this.aiManager = new Controller.AiManager(this);
             this.turnManager = new Controller.TurnManager(this);
             //this.uiManager = new UI.UIManager(this);
 
-            //this.onApChange = new Phaser.Signal();
-            //this.onHpChange = new Phaser.Signal();
-            //this.onOrderChange = new Phaser.Signal();
-            //this.onActionPlayed = new Phaser.Signal();
-            //this.turnInitialized = new Phaser.Signal();
-            //this.stepResolutionFinished = new Phaser.Signal();
-            //this.resolvePhaseFinished = new Phaser.Signal();
-            //this.onApChange.add(function() {
-            //    self.uiManager.pawnsinfosUI.updateInfos();
-            //});
-            //this.onHpChange.add(function() {
-            //    self.uiManager.pawnsinfosUI.updateInfos();
-            //});
-            //this.onOrderChange.add(function(pawn) {
-            //    self.uiManager.pawnsinfosUI.updateOrders(pawn, self.orderManager.orders);
-            //});
-            //this.onActionPlayed.add(function(pawn) {
-            //    self.pointer.update();
-            //});
-            //this.turnInitialized.add(function(pawn) {
-            //    self.process = false;
-            //    if(pawn.isBot) {
-            //        self.aiManager.play(pawn);
-            //    } else {
-            //        self.selecting = true;
-            //    }
-            //});
-            //this.stepResolutionFinished.add(function(stepIndex) {
-            //    self.uiManager.process = false;
-            //    self.uiManager.notificationsUI.update(stepIndex);
-            //});
-            //this.resolvePhaseFinished.add(function() {
-            //    self.isGameReadyPromise().then((res) => {
-            //        self.uiManager.endResolvePhase();
-            //    });
-            //});
+            this.onApChange = new Phaser.Signal();
+            this.onHpChange = new Phaser.Signal();
+            this.onOrderChange = new Phaser.Signal();
+            this.onActionPlayed = new Phaser.Signal();
+            this.turnInitialized = new Phaser.Signal();
+            this.stepResolutionFinished = new Phaser.Signal();
+            this.resolvePhaseFinished = new Phaser.Signal();
 
             //self.uiManager.initOrderPhase(this.pawns[0], true);
         }
-
-        update() {
-
-        }
-
-        //isGameReadyPromise() {
-        //    var self = this;
-        //    return new Promise((resolve, reject) => {
-        //        (function isGameReady(){
-        //            if (!self.isPaused) return resolve();
-        //            setTimeout(isGameReady, 300);
-        //        })();
-        //    });
-        //}
     }
 }

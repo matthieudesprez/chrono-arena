@@ -21,7 +21,9 @@ module TacticArena.Controller {
         }
 
         hasOrder(id) {
+            console.info(this.orders);
             for(var i = 0; i < this.orders.length; i++) {
+                console.info(this.orders[i].entity);
                 if(this.orders[i].entity._id == id) { return true; }
             }
             return false;
@@ -91,7 +93,8 @@ module TacticArena.Controller {
             return step;
         }
 
-        resolutionEsquive(fleeRate, entityBState) {
+        resolutionEsquive(fleeRate) {
+            //return false;
             return (Math.floor(Math.random() * 100) > fleeRate);
         }
 
@@ -100,18 +103,24 @@ module TacticArena.Controller {
         }
 
         blockEntity(steps, startI, j, order, entity) {
+            console.info(startI, j, steps.length);
+            console.log(steps);
             for(var i = startI; i < steps.length; i++) {
-                if(steps[i][j].order.action == 'move') {
-                    steps[i][j].order = order;
+                console.log(steps[i][j]);
+                if(steps[i][j].order) {
+                    if (i > startI && steps[i][j].order.action == 'move') {
+                        steps[i][j].order = order;
+                    }
+                    steps[i][j].order.x = order.x;
+                    steps[i][j].order.y = order.y;
                 }
-                steps[i][j].order.x = order.x;
-                steps[i][j].order.y = order.y;
             }
             entity.destroyProjection();
             return steps;
         }
 
         getSteps() {
+            console.log(this.orders);
             this.formatOrders();
             let steps = new Array(this.getMaxOrderListLength());
             for (var j = 0; j < steps.length; j++) {
@@ -135,10 +144,9 @@ module TacticArena.Controller {
                 isDodging: false,
                 isAttacking: false,
                 isHurt: false,
-                attackTarget: false,
-                isBlocked: false,
                 moveHasBeenBlocked: false,
-                isBurned: false
+                isBurned: false,
+                positionBlocked: {}
             };
         }
 
@@ -162,12 +170,14 @@ module TacticArena.Controller {
                         var entityBState = step[j].entityState;
                         // Dans le cas où une entité à moins d'actions à jouer que les autres
                         // On lui en assigne un par défaut pour qu'elle ne soit pas inactive
-                        // TODO FAIRE GAFFE => INACTIF SI PLUS DE AP
+                        // FIXME FAIRE GAFFE => INACTIF SI PLUS DE AP
+                        // INACTIF = stand mais pas le droit d'attaquer
                         if (step[i].order == null) { step[i].order = this.getDefaultOrder(previousStep[i].order, previousStep[i].order.direction); }
                         if (step[j].order == null) { step[j].order = this.getDefaultOrder(previousStep[j].order, previousStep[j].order.direction); }
                         let orderA = step[i].order;
                         let orderB = step[j].order;
                         let actionA = orderA.action;
+                        let actionB = orderB.action;
                         let positionA = {x: orderA.x, y: orderA.y};
                         let positionB = {x: orderB.x, y: orderB.y};
 
@@ -176,18 +186,18 @@ module TacticArena.Controller {
                         let positionBBeforeOrder = {x: previousStep[j].order.x, y: previousStep[j].order.y};
 
                         let aIsFacingB = this.game.stageManager.isFacing(positionABeforeOrder, orderA.direction, positionBBeforeOrder);
-                        let fleeRate = 0;
+                        let fleeRate = 100;
                         let apCost = 1;
                         let hpLost = 0;
 
                         console.log(entityA._id, this.game.stageManager.getNbTilesBetween(positionABeforeOrder, positionBBeforeOrder), aIsFacingB);
                         if (actionA == 'cast') {
                             apCost++;
-                            let path = this.game.stageManager.getLinearPath(entityA, 4, orderA.direction);
+                            let path = this.game.stageManager.getLinearPath(entityA, 4, orderA.direction, {x: orderA.x, y: orderA.y});
                             let targets = [];
                             for (var k = 0; k < path.length; k++) {
                                 if (path[k].x == positionB.x && path[k].y == positionB.y) {
-                                    targets.push(entityB);
+                                    targets.push({entity: entityB, state: entityBState});
                                     entityBState.isBurned = true;
                                 }
                             }
@@ -197,14 +207,14 @@ module TacticArena.Controller {
                             // [  ][A v][  ]
                             // [A>][ B ][<A]
                             // [  ][ A^][  ]
+                            // FIXME ne doit pas attaque si on sort du cac
                             let keepDirection = (directionABeforeOrder == orderA.direction);
                             // Si A reste dans sa direction (aIsFacingB), et ne va pas pas se détourner de B
                             // Ou si A va vers B (en lui faisant face)
                             console.log('oui', entityA._id, keepDirection, this.movesTo(orderA, orderB));
                             if (keepDirection || this.movesTo(orderA, orderB)) {
                                 entityAState.isAttacking = true;
-                                entityAState.attackTarget = entityB;
-                                if(this.resolutionEsquive(fleeRate, entityBState)) {
+                                if(this.resolutionEsquive(fleeRate)) {
                                     entityBState.isHurt = true;
                                     entityBState.moveHasBeenBlocked = true;
                                     entityBState.isDodging = false;
@@ -215,7 +225,10 @@ module TacticArena.Controller {
 
                                 step[i].order.action = 'attack';
                                 step[i].order.direction = entityA.getDirection();
-                                step[i].order.target = entityAState.attackTarget;
+                                step[i].order.target = {
+                                    entity: entityB,
+                                    state: entityBState
+                                };
 
                                 // Si A projetait de se déplacer vers B, son move a été interrompu
                                 // Ses prochaines actions seront remplacées par celle par défaut
@@ -225,8 +238,8 @@ module TacticArena.Controller {
 
                         if (orderA.x == orderB.x && orderA.y == orderB.y) {
                             // Si A veut aller sur la même case que B (qu'il y soit déjà où qu'il veuille y aller)
-                            entityAState.isBlocked = (actionA == 'move');
-                            entityAState.moveHasBeenBlocked = entityAState.isBlocked;
+                            entityAState.moveHasBeenBlocked = (actionA == 'move');
+                            entityBState.moveHasBeenBlocked = (actionB == 'move');
                         }
 
                         step[i].entityState['ap'] = previousStep[i].entityState['ap'] - apCost;
@@ -237,9 +250,11 @@ module TacticArena.Controller {
 
                         if(entityBState.moveHasBeenBlocked) {
                             this.blockEntity(steps, l, j, this.getDefaultOrder(previousStep[j].order, previousStep[j].order.direction), entityB);
+                            entityBState.positionBlocked = {x: orderB.x, y: orderB.y};
                         }
                         if(entityAState.moveHasBeenBlocked) {
-                            this.blockEntity(steps, l, i, this.getDefaultOrder(previousStep[j].order, previousStep[j].order.direction), entityA);
+                            this.blockEntity(steps, l, i, this.getDefaultOrder(previousStep[i].order, previousStep[i].order.direction), entityA);
+                            entityAState.positionBlocked = {x: orderA.x, y: orderA.y};
                         }
                     }
                 }

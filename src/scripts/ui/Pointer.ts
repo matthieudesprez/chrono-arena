@@ -88,7 +88,7 @@ module TacticArena.UI {
                             activePawn.projection.preMoveTo(targetX, targetY).then((path) => {
                                 activePawn.setAp(activePawn.getAp() - distance);
                                 for (var i = 0; i < (path as any).length; i++) {
-                                    this.game.orderManager.add('move', activePawn, path[i].x, path[i].y, activePawn.getDirection());
+                                    this.game.orderManager.add('move', activePawn, path[i].x, path[i].y, activePawn.getProjectionOrReal().getDirection());
                                 }
                                 this.game.process = false;
                                 this.game.onActionPlayed.dispatch(activePawn.getProjectionOrReal());

@@ -144,9 +144,10 @@ module TacticArena.Entity {
                 fireball.animations.add('fire', ["fireball_04", "fireball_03", "fireball_02", "fireball_01", "fireball_02", "fireball_03", "fireball_04"], 10, false);
                 fireball.animations.play('fire');
 
+                console.info(targets);
                 if (targets) {
                     for (var i = 0; i < targets.length; i++) {
-                        targets[i].hurt(2);
+                        targets[i].entity.hurt(2);
                     }
                 }
 
@@ -165,10 +166,10 @@ module TacticArena.Entity {
         attack(target?, callback?) {
             this._animationCompleteCallback = callback;
             this.playAnimation('attack' + this._ext);
-            if(target.isDodging) {
-                target.dodge();
+            if(target.state.isDodging) {
+                target.entity.dodge();
             } else {
-                target.hurt();
+                target.entity.hurt();
             }
         }
 

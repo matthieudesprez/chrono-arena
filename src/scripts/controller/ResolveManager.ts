@@ -28,10 +28,9 @@ module TacticArena.Controller {
             });
         }
 
-        createPromiseBlock(entity, x, y, animate) {
-            let initialPosition = entity.getPosition();
+        createPromiseBlock(entity, initialPosition, targetPosition, animate) {
             if (animate) {
-                return entity.moveTo(x, y).then((res) => {
+                return entity.moveTo(targetPosition.x, targetPosition.y).then((res) => {
                     entity.blocked();
                     entity.moveTo(initialPosition.x, initialPosition.y).then((res) => {
                         return res;
@@ -102,15 +101,9 @@ module TacticArena.Controller {
                     e.setAp(s.ap);
                     e.setHp(s.hp);
 
-                    //if (s.isHurt && !s.isAttacking) {
-                    //    o.action = o.action.replace('move', 'stand');
-                    //    o.x = previousStep[i].order.x;
-                    //    o.y = previousStep[i].order.y;
-                    //    s.moveHasBeenBlocked = true;
-                    //}
                     if (o.action == 'move') {
-                        if (s.isBlocked) {
-                            p = this.createPromiseBlock(e, o.x, o.y, animate);
+                        if (s.moveHasBeenBlocked) {
+                            p = this.createPromiseBlock(e, {x: o.x, y: o.y}, s.positionBlocked, animate);
                         } else {
                             if (backward && position.x == o.x && position.y == o.y) {
                                 let direction = previousStep ? previousStep[i].order.direction : e.getDirection();
@@ -144,9 +137,6 @@ module TacticArena.Controller {
                     }
 
                     console.log(previousStep, s, o.action, position.x != o.x, position.y != o.y);
-                    //if(e.moveHasBeenBlocked) {
-                    //    steps = this.blockEntity(steps, e);
-                    //}
                     promisesOrders.push(p);
                 }
 

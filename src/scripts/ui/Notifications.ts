@@ -61,12 +61,15 @@ module TacticArena.UI {
             for(let i = 0; i < step.length; i++) {
                 let e = step[i].entity;
                 let o = step[i].order;
+                let s = step[i].entityState;
                 let logColor = '#ffffff';
                 //let logColor = '#78dd77';
                 // logColor = '#f45d62';
 
                 let msg = '<b>' + e._name + '</b>';
-                if(o.action == 'move') {
+                if(s.moveHasBeenBlocked) {
+                    msg += ' essaie de se déplacer en ' + s.positionBlocked.x + ', '+ s.positionBlocked.y + ', ' + ' mais se retrouve bloqué en ' + o.x + ', ' + o.y;
+                } else if(o.action == 'move') {
                     msg += ' se déplace en ' + o.x + ', ' + o.y;
                 } else if (o.action == 'cast') {
                     msg += ' lance une boule de feu vers ' + this.directionMapping[o.direction];

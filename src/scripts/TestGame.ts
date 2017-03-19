@@ -1,52 +1,25 @@
-///// <reference path="./state/Main.ts"/>
-//
-//module TacticalArena.Specs {
-//    import Main = TacticArena.State.Main;
-//    export class TestGame {
-//        baseview:Main;
-//
-//        constructor() {
-//            return this.setupSingleView(testgame => {
-//                testgame.baseview = new Main();
-//                return [testgame.baseview, []];
-//            });
-//        }
-//
-//        setupSingleView(buildView:(testgame:TestGame) => [Phaser.State, any[]]) {
-//            let testgame = new Main();
-//
-//            beforeEach(function (done) {
-//                spyOn(console, "log").and.stub();
-//                spyOn(console, "warn").and.stub();
-//
-//
-//                if (testgame.load) {
-//                    spyOn(testgame.load, 'image').and.stub();
-//                    spyOn(testgame.load, 'audio').and.stub();
-//                }
-//
-//               // let [state, stateargs] = buildView(testgame);
-//
-//               // let orig_create = bound(testgame, "create");
-//                spyOn(testgame, "create").and.callFake(() => {
-//                    //orig_create();
-//                    done();
-//                });
-//
-//                //testgame.baseview.state.add("test", state);
-//                //testgame.baseview.state.start("test", true, false, ...stateargs);
-//            });
-//
-//            afterEach(function () {
-//                //let ui = testgame.baseview;
-//                //window.requestAnimationFrame(() => {
-//                //    if (ui) {
-//                //        //ui.destroy();
-//                //    }
-//                //});
-//            });
-//
-//            return testgame;
-//        }
-//    }
-//}
+/// <reference path="./definitions/phaser.comments.d.ts"/>
+/// <reference path="./definitions/jasmine.d.ts"/>
+/// <reference path="./definitions/jquery.d.ts" />
+/// <reference path="./definitions/jqueryui.d.ts" />
+/// <reference path="./definitions/easystarjs.d.ts"/>
+
+module TacticArena.Specs {
+    export class TestGame extends Phaser.Game {
+        constructor(headless: boolean = false) {
+            super({
+                width: 640,
+                height: 640,
+                renderer: headless ? Phaser.HEADLESS : Phaser.AUTO,
+                parent: 'game-container'
+            });
+
+            this.state.add('test', State.Test);
+
+            this.state.onCreateCallback = function() {
+                console.log('ok');
+            };
+            this.state.start('test');
+        }
+    }
+}
