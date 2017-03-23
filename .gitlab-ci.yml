@@ -1,0 +1,3 @@
+apt-get install lftp
+
+lftp -u edistra,mJaQF7zW ftp.edistra.com -e "mirror -e -R ./build www/cronus-arena-tactics ; quit"
