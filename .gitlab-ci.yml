@@ -6,6 +6,6 @@ job1:
   script:
     - lftp -u edistra,mJaQF7zW ftp.edistra.com -e "mirror -e -R ./build www/cronus-arena-tactics ; quit"
   only:
-    - master
-  tags:
-    - #deploy
+    - /^#deploy.*$/
+  except:
+    - branches
