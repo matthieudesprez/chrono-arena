@@ -1,0 +1,184 @@
+*, ol, ul {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    font-smoothing: antialiased;
+
+    user-select: none;
+}
+
+li {
+    list-style-type: none;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #333333;
+    text-align: center;
+}
+
+#content {
+    margin: 70px auto 0 auto;
+    display: table;
+    position: relative;
+}
+
+#content #game-container {
+    width: 100%;
+}
+
+#content #game-container canvas {
+    position: relative;
+}
+
+.shiny {
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+    margin: 25px 0 25px 25px;
+    color: #fff;
+    text-decoration: none;
+    text-align: center;
+    line-height: 50px;
+    font-size: 12px;
+}
+
+.shiny:after {
+    content: "";
+    position: absolute;
+    overflow: hidden;
+    top: -110%;
+    left: -210%;
+    width: 200%;
+    height: 200%;
+    opacity: 0;
+    transform: rotate(30deg);
+
+    /*background: rgba(255, 255, 255, 0.13);*/
+    background: linear-gradient(
+            to right,
+            rgba(255, 255, 255, 0.13) 0%,
+            rgba(255, 255, 255, 0.13) 77%,
+            rgba(255, 255, 255, 0.5) 92%,
+            rgba(255, 255, 255, 0.0) 100%
+    );
+}
+
+.active .shiny:after {
+    opacity: 1;
+    top: -30%;
+    left: -30%;
+    transition-property: left, top, opacity;
+    transition-duration: 0.7s, 0.7s, 0.15s;
+    transition-timing-function: ease;
+}
+
+.shiny:active:after {
+    opacity: 0;
+}
+
+.ui-transition {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    overflow: hidden;
+}
+
+.glowing {
+    text-decoration: none;
+    /*transition: all 0.5s;*/
+
+    font-size: 80px;
+    color: #FAF394;
+    font-family: Iceland;
+    font-style: italic;
+    text-shadow: -4px 0 #AC4B37, 0 4px #AC4B37, 4px 0 #AC4B37, 0 -4px #AC4B37;
+    position: absolute;
+    top: 25%;
+    user-select: none;
+    width: 100%;
+}
+
+.glowing:after {
+    content: "";
+    position: absolute;
+    overflow: hidden;
+    top: -110%;
+    left: -210%;
+    width: 200%;
+    height: 200%;
+    opacity: 0;
+    transform: rotate(30deg);
+
+    /*background: rgba(255, 255, 255, 0.13);*/
+    background: linear-gradient(
+            to right,
+            rgba(255, 255, 255, 0.13) 0%,
+            rgba(255, 255, 255, 0.13) 77%,
+            rgba(255, 255, 255, 0.5) 92%,
+            rgba(255, 255, 255, 0.0) 100%
+    );
+}
+
+/* Hover state - trigger effect */
+
+.active .glowing:after {
+    opacity: 1;
+    top: -30%;
+    left: -30%;
+    transition-property: left, top, opacity;
+    transition-duration: 0.7s, 0.7s, 0.15s;
+    transition-timing-function: ease;
+}
+
+/*.glowing.active {*/
+    /*animation: neon 1.5s ease-in-out infinite alternate;*/
+    /*color: #ffffff;*/
+/*}*/
+
+/*@keyframes neon {*/
+    /*from {*/
+        /*text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #fff, 0 0 40px #FAF394, 0 0 70px #FAF394, 0 0 80px #FAF394, 0 0 100px #FAF394, 0 0 150px #FAF394;*/
+    /*}*/
+    /*to {*/
+        /*text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px #FAF394, 0 0 35px #FAF394, 0 0 40px #FAF394, 0 0 50px #FAF394, 0 0 75px #FAF394;*/
+    /*}*/
+/*}*/
+
+.ui-turn-indicator {
+    position: absolute;
+    top: -60px;
+    width: 100%;
+    text-align: center;
+    display: block;
+    font-size: 40px;
+    color: dodgerblue;
+    font-family: Iceland;
+    text-shadow: -2px 0 #FAF394, 0 2px #FAF394, 2px 0 #FAF394, 0 -2px #FAF394;
+}
+
+
+
+/*.ui-logs {*/
+/*display: none;*/
+/*height: 134px;*/
+/*width: 100%;*/
+/*background-color: rgba(0, 0, 0, 0.5);*/
+/*padding: 10px;*/
+/*bottom: -144px;*/
+/*border: 1px solid black;*/
+/*left: 0px;*/
+/*overflow: auto;*/
+/*position: absolute;*/
+/*text-align: left;*/
+/*font-family: Menlo, Courier New;*/
+/*font-size: 14px;*/
+/*text-rendering: optimizeLegibility;*/
+/*color: #ffffff;*/
+/*}*/

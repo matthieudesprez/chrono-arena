@@ -1,0 +1,54 @@
+.ui-direction {
+    height: 96px;
+    width: 96px;
+    bottom: 32px;
+    left: 32px;
+    overflow: auto;
+    position: absolute;
+}
+
+.ui-direction a {
+    position: absolute;
+    height: 32px;
+    width: 32px;
+    background-color: rgba(255, 255, 255, 0.3);
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: 85%;
+    cursor: pointer;
+    border: 1px solid #333;
+}
+
+.ui-direction a.compass {
+    background-image: url('../assets/images/icons/icon-compass.png');
+    top: 32px;
+    left: 32px;
+}
+
+.ui-direction a.north {
+    background-image: url('../assets/images/icons/icon-arrow-north.png');
+    top: 0px;
+    left: 32px;
+}
+
+.ui-direction a.east {
+    background-image: url('../assets/images/icons/icon-arrow-east.png');
+    top: 32px;
+    left: 64px;
+}
+
+.ui-direction a.south {
+    background-image: url('../assets/images/icons/icon-arrow-south.png');
+    top: 64px;
+    left: 32px;
+}
+
+.ui-direction a.west {
+    background-image: url('../assets/images/icons/icon-arrow-west.png');
+    top: 32px;
+    left: 0px;
+}
+
+.ui-direction a:hover, .ui-direction a.selected {
+    border: 2px solid #fff;
+}

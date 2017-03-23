@@ -2,7 +2,7 @@
 *.db
 node_modules/
 *.iml
-build/
 src/vendor/
 .editorconfig
 .idea
+out/
