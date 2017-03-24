@@ -1,9 +1,7 @@
 /// <reference path="../TestGame.ts"/>
 // / <reference path="../state/Main.ts"/>
 
-
 module TacticArena.Specs {
-    //import TestGame = TacticalArena.Specs.TestGame;
     import Main = TacticArena.State.Main;
 
     describe("OrderManager", () => {
@@ -42,9 +40,7 @@ module TacticArena.Specs {
             testGame = null;
         });
 
-
         describe("2 players / Fleerate 0%", () => {
-
             beforeEach(function () {
                 spyOn(currentState.orderManager, 'resolutionEsquive').and.callFake(() => {
                    return true;
@@ -189,7 +185,7 @@ module TacticArena.Specs {
                         list: [
                             { action: "move", direction: "W", x: 10, y: 7 },
                             { action: "move", direction: "W", x: 9, y: 7 },
-                            { action: "move", direction: "W", x: 9, y: 6 }
+                            { action: "move", direction: "W", x: 8, y: 7 }
                         ]
                     },
                 ];
@@ -204,9 +200,40 @@ module TacticArena.Specs {
                 expect(steps[2][0].order.targets).toEqual([{entity: currentState.pawns[1], state: steps[2][1].entityState}]);
                 testStep(steps, 2, 1, 2, 'move', 'W', {x: 9, y: 7}, 1, 2, false, {});
                 expect(steps[2][1].entityState.isBurned).toBeTruthy();
-                // FIXME Ne devrait pas etre inférieur à -1 car plus de AP donc ne devrait pas attack non plus
-                testStep(steps, 3, 0, 1, 'attack', 'E', {x: 8, y: 7}, -1, 3, false, {});
-                testStep(steps, 3, 1, 2, 'attack', 'W', {x: 9, y: 7}, 0, 1, true, {x: 9, y: 6});
+                testStep(steps, 3, 0, 1, 'stand', 'E', {x: 8, y: 7}, 0, 3, false, {});
+                testStep(steps, 3, 1, 2, 'attack', 'W', {x: 9, y: 7}, 0, 2, true, {x: 8, y: 7});
+            });
+
+            it("the first one casts to the east while the other moves toward him", function () {
+                currentState.orderManager.orders = [
+                    {
+                        entity: currentState.pawns[0],
+                        list: [
+                            { action: "cast", direction: "E", x: 8, y: 8 }
+                        ]
+                    },
+                    {
+                        entity: currentState.pawns[1],
+                        list: [
+                            { action: "move", direction: "W", x: 9, y: 8 },
+                            { action: "move", direction: "W", x: 8, y: 8 },
+                            { action: "move", direction: "W", x: 7, y: 8 }
+                        ]
+                    },
+                ];
+                let steps = currentState.orderManager.getSteps();
+                expect(steps.length).toEqual(4);
+                expect(steps[0].length).toEqual(2);
+                testStep(steps, 0, 0, 1, 'stand', 'E', {x: 8, y: 8}, 3, 4, false, {});
+                testStep(steps, 0, 1, 2, 'stand', 'W', {x: 10, y: 8}, 3, 4, false, {});
+                testStep(steps, 1, 0, 1, 'cast', 'E', {x: 8, y: 8}, 1, 4, false, {});
+                expect(steps[1][0].order.targets).toEqual([{entity: currentState.pawns[1], state: steps[1][1].entityState}]);
+                testStep(steps, 1, 1, 2, 'move', 'W', {x: 9, y: 8}, 2, 2, false, {});
+                expect(steps[1][1].entityState.isBurned).toBeTruthy();
+                testStep(steps, 2, 0, 1, 'attack', 'E', {x: 8, y: 8}, 0, 3, false, {});
+                testStep(steps, 2, 1, 2, 'attack', 'W', {x: 9, y: 8}, 1, 1, true, {x: 8, y: 8});
+                testStep(steps, 3, 0, 1, 'stand', 'E', {x: 8, y: 8}, 0, 2, false, {});
+                testStep(steps, 3, 1, 2, 'attack', 'W', {x: 9, y: 8}, 0, 1, false, {});
             });
         });
     });

@@ -144,22 +144,14 @@ module TacticArena.Entity {
                 fireball.animations.add('fire', ["fireball_04", "fireball_03", "fireball_02", "fireball_01", "fireball_02", "fireball_03", "fireball_04"], 10, false);
                 fireball.animations.play('fire');
 
-                console.info(targets);
                 if (targets) {
                     for (var i = 0; i < targets.length; i++) {
                         targets[i].entity.hurt(2);
                     }
                 }
 
-                var t = self._parent.game.add.tween(
-                    fireball).to({x: targetX, y: targetY},
-                    700,
-                    Phaser.Easing.Linear.None,
-                    true
-                );
-                t.onComplete.add(function () {
-                    fireball.kill();
-                }, self);
+                var t = self._parent.game.add.tween(fireball).to({x: targetX, y: targetY}, 700, Phaser.Easing.Linear.None, true);
+                t.onComplete.add(function () { fireball.kill(); }, self);
             }, 500);
         }
 

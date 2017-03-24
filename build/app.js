@@ -352,7 +352,7 @@ var TacticArena;
                             list: [
                                 { action: "move", direction: "W", x: 10, y: 7 },
                                 { action: "move", direction: "W", x: 9, y: 7 },
-                                { action: "move", direction: "W", x: 9, y: 6 }
+                                { action: "move", direction: "W", x: 8, y: 7 }
                             ]
                         },
                     ];
@@ -367,9 +367,39 @@ var TacticArena;
                     expect(steps[2][0].order.targets).toEqual([{ entity: currentState.pawns[1], state: steps[2][1].entityState }]);
                     testStep(steps, 2, 1, 2, 'move', 'W', { x: 9, y: 7 }, 1, 2, false, {});
                     expect(steps[2][1].entityState.isBurned).toBeTruthy();
-                    // FIXME Ne devrait pas etre inférieur à -1 car plus de AP donc ne devrait pas attack non plus
-                    testStep(steps, 3, 0, 1, 'attack', 'E', { x: 8, y: 7 }, -1, 3, false, {});
-                    testStep(steps, 3, 1, 2, 'attack', 'W', { x: 9, y: 7 }, 0, 1, true, { x: 9, y: 6 });
+                    testStep(steps, 3, 0, 1, 'stand', 'E', { x: 8, y: 7 }, 0, 3, false, {});
+                    testStep(steps, 3, 1, 2, 'attack', 'W', { x: 9, y: 7 }, 0, 2, true, { x: 8, y: 7 });
+                });
+                it("the first one casts to the east while the other moves toward him", function () {
+                    currentState.orderManager.orders = [
+                        {
+                            entity: currentState.pawns[0],
+                            list: [
+                                { action: "cast", direction: "E", x: 8, y: 8 }
+                            ]
+                        },
+                        {
+                            entity: currentState.pawns[1],
+                            list: [
+                                { action: "move", direction: "W", x: 9, y: 8 },
+                                { action: "move", direction: "W", x: 8, y: 8 },
+                                { action: "move", direction: "W", x: 7, y: 8 }
+                            ]
+                        },
+                    ];
+                    var steps = currentState.orderManager.getSteps();
+                    expect(steps.length).toEqual(4);
+                    expect(steps[0].length).toEqual(2);
+                    testStep(steps, 0, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 3, 4, false, {});
+                    testStep(steps, 0, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 3, 4, false, {});
+                    testStep(steps, 1, 0, 1, 'cast', 'E', { x: 8, y: 8 }, 1, 4, false, {});
+                    expect(steps[1][0].order.targets).toEqual([{ entity: currentState.pawns[1], state: steps[1][1].entityState }]);
+                    testStep(steps, 1, 1, 2, 'move', 'W', { x: 9, y: 8 }, 2, 2, false, {});
+                    expect(steps[1][1].entityState.isBurned).toBeTruthy();
+                    testStep(steps, 2, 0, 1, 'attack', 'E', { x: 8, y: 8 }, 0, 3, false, {});
+                    testStep(steps, 2, 1, 2, 'attack', 'W', { x: 9, y: 8 }, 1, 1, true, { x: 8, y: 8 });
+                    testStep(steps, 3, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 0, 2, false, {});
+                    testStep(steps, 3, 1, 2, 'attack', 'W', { x: 9, y: 8 }, 0, 1, false, {});
                 });
             });
         });
@@ -473,7 +503,6 @@ var TacticArena;
                 return (p1.x == p2.x && p1.y == p2.y);
             };
             OrderManager.prototype.blockEntity = function (steps, startI, j, order, entity) {
-                console.log(startI, j, 'block', { x: steps[startI][j].order.x, y: steps[startI][j].order.y });
                 steps[startI][j].entityState.positionBlocked = { x: steps[startI][j].order.x, y: steps[startI][j].order.y };
                 for (var i = startI; i < steps.length; i++) {
                     if (steps[i][j].order) {
@@ -520,35 +549,29 @@ var TacticArena;
             OrderManager.prototype.processOrders = function (steps) {
                 for (var l = 1; l < steps.length; l++) {
                     var step = steps[l];
+                    var previousStep = steps[l - 1];
                     for (var i = 0; i < step.length; i++) {
                         step[i].entityState = this.getDefaultEntityState();
+                        // Dans le cas où une entité à moins d'actions à jouer que les autres
+                        // On lui en assigne un par défaut pour qu'elle ne soit pas inactive
+                        if (step[i].order == null) {
+                            step[i].order = this.getDefaultOrder(previousStep[i].order, previousStep[i].order.direction);
+                        }
                     }
-                    // check actions before for each entitie in step
+                    // check actions before for each entity in step
                     for (var i = 0; i < step.length; i++) {
                         var entityA = step[i].entity;
                         var entityAState = step[i].entityState;
-                        var previousStep = steps[l - 1];
                         // foreach entities except A
                         for (var j = 0; j < step.length; j++) {
                             var entityB = step[j].entity;
                             if (entityA._id == entityB._id)
                                 continue; // Pas d'interaction avec soi-même
                             var entityBState = step[j].entityState;
-                            // Dans le cas où une entité à moins d'actions à jouer que les autres
-                            // On lui en assigne un par défaut pour qu'elle ne soit pas inactive
-                            // FIXME FAIRE GAFFE => INACTIF SI PLUS DE AP
-                            // INACTIF = stand mais pas le droit d'attaquer
-                            if (step[i].order == null) {
-                                step[i].order = this.getDefaultOrder(previousStep[i].order, previousStep[i].order.direction);
-                            }
-                            if (step[j].order == null) {
-                                step[j].order = this.getDefaultOrder(previousStep[j].order, previousStep[j].order.direction);
-                            }
                             var orderA = step[i].order;
                             var orderB = step[j].order;
                             var actionA = orderA.action;
                             var actionB = orderB.action;
-                            var positionA = { x: orderA.x, y: orderA.y };
                             var positionB = { x: orderB.x, y: orderB.y };
                             var directionABeforeOrder = previousStep[i].order.direction;
                             var positionABeforeOrder = { x: previousStep[i].order.x, y: previousStep[i].order.y };
@@ -557,19 +580,10 @@ var TacticArena;
                             var fleeRate = 100;
                             var apCost = 1;
                             var hpLost = 0;
-                            if (actionA == 'cast') {
-                                apCost++;
-                                var path = this.game.stageManager.getLinearPath(entityA, 4, orderA.direction, { x: orderA.x, y: orderA.y });
-                                var targets = [];
-                                for (var k = 0; k < path.length; k++) {
-                                    if (path[k].x == positionB.x && path[k].y == positionB.y) {
-                                        targets.push({ entity: entityB, state: entityBState });
-                                        entityBState.isBurned = true;
-                                    }
-                                }
-                                orderA.targets = targets;
-                            }
-                            else if (this.game.stageManager.getNbTilesBetween(positionABeforeOrder, positionBBeforeOrder) == 1 && aIsFacingB) {
+                            var aIsActive = previousStep[i].entityState['ap'] > 0; // INACTIF = stand mais pas le droit d'attaquer
+                            if (['stand', 'move'].indexOf(actionA) >= 0 &&
+                                this.game.stageManager.getNbTilesBetween(positionABeforeOrder, positionBBeforeOrder) == 1 &&
+                                aIsFacingB && aIsActive) {
                                 // Possible cases :
                                 // [  ][A v][  ]
                                 // [A>][ B ][<A]
@@ -592,14 +606,10 @@ var TacticArena;
                                         entityBState.isDodging = true;
                                     }
                                     step[i].order.action = 'attack';
-                                    step[i].order.direction = entityA.getDirection();
                                     step[i].order.target = {
                                         entity: entityB,
                                         state: entityBState
                                     };
-                                    // Si A projetait de se déplacer vers B, son move a été interrompu
-                                    // Ses prochaines actions seront remplacées par celle par défaut
-                                    //entityAState.moveHasBeenBlocked = (actionA == 'move' && this.movesTo(orderA, orderB));
                                 }
                             }
                             if (orderA.x == orderB.x && orderA.y == orderB.y) {
@@ -609,7 +619,28 @@ var TacticArena;
                                 if (!entityBState.moveHasBeenBlockedProcessed)
                                     entityBState.moveHasBeenBlocked = (actionB == 'move');
                             }
-                            step[i].entityState['ap'] = previousStep[i].entityState['ap'] - apCost;
+                            if (entityBState.moveHasBeenBlocked && !entityBState.moveHasBeenBlockedProcessed) {
+                                this.blockEntity(steps, l, j, this.getDefaultOrder(previousStep[j].order, previousStep[j].order.direction), entityB);
+                            }
+                            if (entityAState.moveHasBeenBlocked && !entityAState.moveHasBeenBlockedProcessed) {
+                                this.blockEntity(steps, l, i, this.getDefaultOrder(previousStep[i].order, previousStep[i].order.direction), entityA);
+                            }
+                            if (actionA == 'cast') {
+                                apCost++;
+                                var path = this.game.stageManager.getLinearPath(entityA, 4, orderA.direction, {
+                                    x: orderA.x,
+                                    y: orderA.y
+                                });
+                                var targets = [];
+                                for (var k = 0; k < path.length; k++) {
+                                    var targetPosition = entityBState.moveHasBeenBlocked ? positionBBeforeOrder : positionB;
+                                    if (path[k].x == targetPosition.x && path[k].y == targetPosition.y) {
+                                        targets.push({ entity: entityB, state: entityBState });
+                                        entityBState.isBurned = true;
+                                    }
+                                }
+                                orderA.targets = targets;
+                            }
                             if (entityBState.isHurt) {
                                 hpLost = 1;
                             }
@@ -617,14 +648,7 @@ var TacticArena;
                                 hpLost = 2;
                             }
                             step[j].entityState['hp'] = previousStep[j].entityState['hp'] - hpLost;
-                            if (entityBState.moveHasBeenBlocked && !entityBState.moveHasBeenBlockedProcessed) {
-                                console.log('B', entityBState.moveHasBeenBlocked, actionB);
-                                this.blockEntity(steps, l, j, this.getDefaultOrder(previousStep[j].order, previousStep[j].order.direction), entityB);
-                            }
-                            if (entityAState.moveHasBeenBlocked && !entityAState.moveHasBeenBlockedProcessed) {
-                                console.log('A', entityAState.moveHasBeenBlocked, actionA);
-                                this.blockEntity(steps, l, i, this.getDefaultOrder(previousStep[i].order, previousStep[i].order.direction), entityA);
-                            }
+                            step[i].entityState['ap'] = aIsActive ? previousStep[i].entityState['ap'] - apCost : 0;
                         }
                     }
                 }
@@ -634,6 +658,39 @@ var TacticArena;
         }());
         Controller.OrderManager = OrderManager;
     })(Controller = TacticArena.Controller || (TacticArena.Controller = {}));
+})(TacticArena || (TacticArena = {}));
+/// <reference path="../TestGame.ts"/>
+// / <reference path="../state/Main.ts"/>
+var TacticArena;
+(function (TacticArena) {
+    var Specs;
+    (function (Specs) {
+        describe("ResolveManager", function () {
+            var testGame, currentState;
+            beforeEach(function (done) {
+                testGame = new Specs.TestGame(true);
+                testGame.state.start('test');
+                testGame.state.onStateChange.add(function () {
+                    currentState = testGame.state.getCurrentState();
+                    setTimeout(function () {
+                        currentState.pawns = [];
+                        currentState.pathTilesGroup = currentState.add.group();
+                        currentState.pawnsSpritesGroup = currentState.add.group();
+                        currentState.pawns.push(new TacticArena.Entity.Pawn(currentState, 8, 8, 'E', 'skeleton', 1, false, 'Eikio'));
+                        currentState.pawns.push(new TacticArena.Entity.Pawn(currentState, 10, 8, 'W', 'skeleton', 2, false, 'Dormammu'));
+                        done();
+                    }, 200);
+                });
+            });
+            afterEach(function () {
+                testGame.destroy();
+                testGame = null;
+            });
+            it("nothing is played", function () {
+                console.log('ok');
+            });
+        });
+    })(Specs = TacticArena.Specs || (TacticArena.Specs = {}));
 })(TacticArena || (TacticArena = {}));
 var TacticArena;
 (function (TacticArena) {
@@ -697,7 +754,7 @@ var TacticArena;
             ResolveManager.prototype.activate = function () {
                 this.active = true;
             };
-            ResolveManager.prototype.handleBackwardPromise = function (promise, entity, order, position) {
+            ResolveManager.prototype.handleBackwardPromise = function (promise, entity, order, position, animate) {
                 var resultPromise;
                 if (position.x != order.x || position.y != order.y) {
                     resultPromise = entity.moveTo(order.x, order.y, null, false).then(function (res) {
@@ -763,13 +820,13 @@ var TacticArena;
                             }
                         }
                         else if (o.action == 'attack') {
-                            p = _this.handleBackwardPromise(_this.createPromiseAttack(e, o.target), e, o, position);
+                            p = _this.handleBackwardPromise(_this.createPromiseAttack(e, o.target), e, o, position, animate);
                         }
                         else if (o.action == 'cast') {
-                            p = _this.handleBackwardPromise(e.cast(o.targets), e, o, position);
+                            p = _this.handleBackwardPromise(e.cast(o.targets, o.direction), e, o, position, animate);
                         }
                         else if (o.action == 'stand') {
-                            p = _this.handleBackwardPromise(_this.createPromiseStand(e, o.direction), e, o, position);
+                            p = _this.handleBackwardPromise(_this.createPromiseStand(e, o.direction), e, o, position, animate);
                         }
                         promisesOrders.push(p);
                     }
@@ -1032,24 +1089,22 @@ var TacticArena;
                 if (hp === void 0) { hp = 1; }
                 this.sprite.hurt();
                 this.destroyProjection();
-                //this.setHp(this._hp - hp);
                 var label_dmg = this.game.add.text(20, 10, "-" + hp, { font: '12px Press Start 2P', fill: "#ff021b", stroke: '#000000', strokeThickness: 6 });
                 var t = this.game.add.tween(label_dmg).to({ x: 20, y: -20, alpha: 0 }, 1000, Phaser.Easing.Linear.None, true);
-                t.onComplete.add(function () {
-                    label_dmg.destroy();
-                }, this);
+                t.onComplete.add(function () { label_dmg.destroy(); }, this);
                 this.sprite.addChild(label_dmg);
             };
             Pawn.prototype.halfcast = function () {
                 this.sprite.halfcast();
             };
-            Pawn.prototype.cast = function (targets) {
+            Pawn.prototype.cast = function (targets, direction) {
                 var _this = this;
                 var that = this;
                 return new Promise(function (resolve, reject) {
                     if (_this.projection) {
                         _this.projection.hide();
                     }
+                    _this.faceDirection(direction);
                     _this.sprite.cast(targets, function () {
                         that.sprite.stand();
                         resolve(true);
@@ -1057,20 +1112,18 @@ var TacticArena;
                 });
             };
             Pawn.prototype.dodge = function () {
-                var label_score = this.game.add.text(20, 10, "miss", { font: '8px Press Start 2P', fill: "#ffffff" });
-                var t = this.game.add.tween(label_score).to({ x: 20, y: -20, alpha: 0 }, 1000, Phaser.Easing.Linear.None, true);
-                t.onComplete.add(function () {
-                    label_score.destroy();
-                }, this);
-                this.sprite.addChild(label_score);
+                var label = this.game.add.text(20, 10, "miss", { font: '8px Press Start 2P', fill: "#ffffff" });
+                var t = this.game.add.tween(label).to({ x: 20, y: -20, alpha: 0 }, 1000, Phaser.Easing.Linear.None, true);
+                t.onComplete.add(function () { label.destroy(); }, this);
+                this.sprite.addChild(label);
             };
             Pawn.prototype.blocked = function () {
-                var label_score = this.game.add.text(20, 10, "block", { font: '8px Press Start 2P', fill: "#ffffff" });
-                var t = this.game.add.tween(label_score).to({ x: 20, y: -20, alpha: 0 }, 1000, Phaser.Easing.Linear.None, true);
+                var label = this.game.add.text(20, 10, "block", { font: '8px Press Start 2P', fill: "#ffffff" });
+                var t = this.game.add.tween(label).to({ x: 20, y: -20, alpha: 0 }, 1000, Phaser.Easing.Linear.None, true);
                 t.onComplete.add(function () {
-                    label_score.destroy();
+                    label.destroy();
                 }, this);
-                this.sprite.addChild(label_score);
+                this.sprite.addChild(label);
             };
             Pawn.prototype.preMoveTo = function (targetX, targetY) {
                 var _this = this;
@@ -1324,16 +1377,13 @@ var TacticArena;
                     fireball.angle += angle;
                     fireball.animations.add('fire', ["fireball_04", "fireball_03", "fireball_02", "fireball_01", "fireball_02", "fireball_03", "fireball_04"], 10, false);
                     fireball.animations.play('fire');
-                    console.info(targets);
                     if (targets) {
                         for (var i = 0; i < targets.length; i++) {
                             targets[i].entity.hurt(2);
                         }
                     }
                     var t = self._parent.game.add.tween(fireball).to({ x: targetX, y: targetY }, 700, Phaser.Easing.Linear.None, true);
-                    t.onComplete.add(function () {
-                        fireball.kill();
-                    }, self);
+                    t.onComplete.add(function () { fireball.kill(); }, self);
                 }, 500);
             };
             Sprite.prototype.attack = function (target, callback) {
@@ -1402,7 +1452,7 @@ var TacticArena;
                 this.pathTilesGroup = this.add.group();
                 this.pawnsSpritesGroup = this.add.group();
                 this.pawns.push(new TacticArena.Entity.Pawn(this, 8, 8, 'E', 'redhead', this.getUniqueId(), false, 'Eikio'));
-                this.pawns.push(new TacticArena.Entity.Pawn(this, 10, 8, 'W', 'skeleton', this.getUniqueId(), true, 'Dormammu'));
+                this.pawns.push(new TacticArena.Entity.Pawn(this, 10, 8, 'W', 'skeleton', this.getUniqueId(), false, 'Dormammu'));
                 this.stageManager.addDecorations();
                 this.pathfinder = new EasyStar.js();
                 this.pathfinder.setAcceptableTiles([-1]);

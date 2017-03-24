@@ -68,7 +68,7 @@ module TacticArena.Controller {
             this.active = true;
         }
 
-        handleBackwardPromise(promise, entity, order, position) {
+        handleBackwardPromise(promise, entity, order, position, animate) {
             let resultPromise;
             if(position.x != order.x || position.y != order.y) {
                 resultPromise = entity.moveTo(order.x, order.y, null, false).then((res) => {
@@ -130,11 +130,11 @@ module TacticArena.Controller {
                             }
                         }
                     } else if (o.action == 'attack') {
-                        p = this.handleBackwardPromise(this.createPromiseAttack(e, o.target), e, o, position);
+                        p = this.handleBackwardPromise(this.createPromiseAttack(e, o.target), e, o, position, animate);
                     } else if (o.action == 'cast') {
-                        p = this.handleBackwardPromise(e.cast(o.targets), e, o, position);
+                        p = this.handleBackwardPromise(e.cast(o.targets, o.direction), e, o, position, animate);
                     } else if (o.action == 'stand') {
-                        p = this.handleBackwardPromise(this.createPromiseStand(e, o.direction), e, o, position);
+                        p = this.handleBackwardPromise(this.createPromiseStand(e, o.direction), e, o, position, animate);
                     }
                     promisesOrders.push(p);
                 }

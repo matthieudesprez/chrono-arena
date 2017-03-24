@@ -60,17 +60,9 @@ module TacticArena.Entity {
         hurt(hp=1) {
             this.sprite.hurt();
             this.destroyProjection();
-            //this.setHp(this._hp - hp);
-
             let label_dmg = this.game.add.text(20, 10, "-" + hp, { font: '12px Press Start 2P', fill: "#ff021b", stroke: '#000000', strokeThickness: 6 });
-            let t = this.game.add.tween(label_dmg).to({x: 20,y: -20, alpha: 0},
-                1000,
-                Phaser.Easing.Linear.None,
-                true
-            );
-            t.onComplete.add(function() {
-                label_dmg.destroy();
-            }, this);
+            let t = this.game.add.tween(label_dmg).to({x: 20,y: -20, alpha: 0}, 1000, Phaser.Easing.Linear.None, true);
+            t.onComplete.add(function() { label_dmg.destroy(); }, this);
             this.sprite.addChild(label_dmg);
         }
 
@@ -78,12 +70,13 @@ module TacticArena.Entity {
             this.sprite.halfcast();
         }
 
-        cast(targets) {
+        cast(targets, direction) {
             var that = this;
             return new Promise((resolve, reject) => {
                 if(this.projection) {
                     this.projection.hide();
                 }
+                this.faceDirection(direction);
                 this.sprite.cast(targets, function() {
                     that.sprite.stand();
                     resolve(true);
@@ -92,29 +85,19 @@ module TacticArena.Entity {
         }
 
         dodge() {
-            let label_score = this.game.add.text(20, 10, "miss", { font: '8px Press Start 2P', fill: "#ffffff" });
-            let t = this.game.add.tween(label_score).to({x: 20,y: -20, alpha: 0},
-                1000,
-                Phaser.Easing.Linear.None,
-                true
-                );
-            t.onComplete.add(function() {
-                label_score.destroy();
-            }, this);
-            this.sprite.addChild(label_score);
+            let label = this.game.add.text(20, 10, "miss", { font: '8px Press Start 2P', fill: "#ffffff" });
+            let t = this.game.add.tween(label).to({x: 20,y: -20, alpha: 0}, 1000, Phaser.Easing.Linear.None, true);
+            t.onComplete.add(function() { label.destroy(); }, this);
+            this.sprite.addChild(label);
         }
 
         blocked() {
-            let label_score = this.game.add.text(20, 10, "block", { font: '8px Press Start 2P', fill: "#ffffff" });
-            let t = this.game.add.tween(label_score).to({x: 20,y: -20, alpha: 0},
-                1000,
-                Phaser.Easing.Linear.None,
-                true
-                );
+            let label = this.game.add.text(20, 10, "block", { font: '8px Press Start 2P', fill: "#ffffff" });
+            let t = this.game.add.tween(label).to({x: 20,y: -20, alpha: 0}, 1000, Phaser.Easing.Linear.None, true);
             t.onComplete.add(function() {
-                label_score.destroy();
+                label.destroy();
             }, this);
-            this.sprite.addChild(label_score);
+            this.sprite.addChild(label);
         }
 
         preMoveTo(targetX, targetY) {
