@@ -68,6 +68,23 @@ module TacticArena.Controller {
             this.active = true;
         }
 
+        handleBackwardPromise(promise, entity, order, position) {
+            let resultPromise;
+            if(position.x != order.x || position.y != order.y) {
+                resultPromise = entity.moveTo(order.x, order.y, null, false).then((res) => {
+                    return true;
+                });
+                resultPromise.then((res) => {
+                    promise.then((res) => {
+                        return true;
+                    });
+                });
+            } else {
+                resultPromise = promise;
+            }
+            return resultPromise;
+        }
+
         processSteps(index, animate:boolean = true, backward:boolean = false) {
             this.processing = true;
             this.processStep(index, animate, backward).then((res) => {
@@ -113,30 +130,12 @@ module TacticArena.Controller {
                             }
                         }
                     } else if (o.action == 'attack') {
-                        let attackP = this.createPromiseAttack(e, o.target);
-                        if(position.x != o.x || position.y != o.y) {
-                            p = e.moveTo(o.x, o.y, null, false).then((res) => {
-                                return true;
-                            });
-                            p.then((res) => {
-                                attackP.then((res) => {
-                                    return true;
-                                });
-                            });
-                        } else {
-                            p = attackP;
-                        }
+                        p = this.handleBackwardPromise(this.createPromiseAttack(e, o.target), e, o, position);
                     } else if (o.action == 'cast') {
-                        p = e.cast(o.targets);
+                        p = this.handleBackwardPromise(e.cast(o.targets), e, o, position);
                     } else if (o.action == 'stand') {
-                        if(position.x != o.x || position.y != o.y) {
-                            p = this.createPromiseMove(e, o.x, o.y, animate, o.direction);
-                        } else {
-                            p = this.createPromiseStand(e, o.direction);
-                        }
+                        p = this.handleBackwardPromise(this.createPromiseStand(e, o.direction), e, o, position);
                     }
-
-                    console.log(previousStep, s, o.action, position.x != o.x, position.y != o.y);
                     promisesOrders.push(p);
                 }
 

@@ -5,30 +5,33 @@
 module TacticArena.Specs {
     //import TestGame = TacticalArena.Specs.TestGame;
     import Main = TacticArena.State.Main;
+
     describe("OrderManager", () => {
         var testGame, currentState;
+
+        function testStep(steps, i, j, entityId, action, direction, orderPosition, ap, hp, moveHasBeenBlocked, positionBlocked) {
+            expect(steps[i][j].entity._id).toEqual(entityId);
+            expect(steps[i][j].order.action).toEqual(action);
+            expect(steps[i][j].order.direction).toEqual(direction);
+            expect(steps[i][j].order.x).toEqual(orderPosition.x);
+            expect(steps[i][j].order.y).toEqual(orderPosition.y);
+            expect(steps[i][j].entityState.ap).toEqual(ap);
+            expect(steps[i][j].entityState.hp).toEqual(hp);
+            expect(steps[i][j].entityState.moveHasBeenBlocked).toEqual(moveHasBeenBlocked);
+            expect(steps[i][j].entityState.positionBlocked).toEqual(positionBlocked);
+        }
 
         beforeEach(function (done) {
             testGame = new TestGame(true);
             testGame.state.start('test');
-            //spyOn(console, "log").and.stub();
-            //spyOn(console, "warn").and.stub();
-            //spyOn(testGame, "add").and.stub();
-
-            //spyOn(testGame.state, 'onInitCallback').and.callFake(() => {
-            //    console.log('o');
-            //});
-
             testGame.state.onStateChange.add(function() {
                 currentState = testGame.state.getCurrentState();
-
                 setTimeout(function() {
                     currentState.pawns = [];
                     currentState.pathTilesGroup = currentState.add.group();
                     currentState.pawnsSpritesGroup = currentState.add.group();
                     currentState.pawns.push(new Entity.Pawn(currentState, 8, 8, 'E', 'skeleton', 1, false, 'Eikio'));
                     currentState.pawns.push(new Entity.Pawn(currentState, 10, 8, 'W', 'skeleton', 2, false, 'Dormammu'));
-
                     done();
                 }, 200);
             });
@@ -48,515 +51,162 @@ module TacticArena.Specs {
                 });
             });
 
-            it("nothing is played", function (done) {
-                setTimeout(function () {
-                    let steps = currentState.orderManager.getSteps();
-                    expect(steps.length).toEqual(2);
-                    expect(steps[0].length).toEqual(2);
-
-                    expect(steps[0][0].entity._id).toEqual(1);
-                    expect(steps[0][0].order.action).toEqual('stand');
-                    expect(steps[0][0].order.direction).toEqual('E');
-                    expect(steps[0][0].order.x).toEqual(8);
-                    expect(steps[0][0].order.y).toEqual(8);
-                    expect(steps[0][0].entityState.ap).toEqual(3);
-
-                    expect(steps[0][1].entity._id).toEqual(2);
-                    expect(steps[0][1].order.action).toEqual('stand');
-                    expect(steps[0][1].order.direction).toEqual('W');
-                    expect(steps[0][1].order.x).toEqual(10);
-                    expect(steps[0][1].order.y).toEqual(8);
-                    expect(steps[0][1].entityState.ap).toEqual(3);
-
-                    expect(steps[1][0].entity._id).toEqual(1);
-                    expect(steps[1][0].order.action).toEqual('stand');
-                    expect(steps[1][0].order.direction).toEqual('E');
-                    expect(steps[1][0].order.x).toEqual(8);
-                    expect(steps[1][0].order.y).toEqual(8);
-                    expect(steps[1][0].entityState.ap).toEqual(2);
-
-                    expect(steps[1][1].entity._id).toEqual(2);
-                    expect(steps[1][1].order.action).toEqual('stand');
-                    expect(steps[1][1].order.direction).toEqual('W');
-                    expect(steps[1][1].order.x).toEqual(10);
-                    expect(steps[1][1].order.y).toEqual(8);
-                    expect(steps[1][1].entityState.ap).toEqual(2);
-
-                    done();
-                }, 200);
+            it("nothing is played", function () {
+                let steps = currentState.orderManager.getSteps();
+                expect(steps.length).toEqual(2);
+                expect(steps[0].length).toEqual(2);
+                testStep(steps, 0, 0, 1, 'stand', 'E', {x: 8, y: 8}, 3, 4, false, {});
+                testStep(steps, 0, 1, 2, 'stand', 'W', {x: 10, y: 8}, 3, 4, false, {});
+                testStep(steps, 1, 0, 1, 'stand', 'E', {x: 8, y: 8}, 2, 4, false, {});
+                testStep(steps, 1, 1, 2, 'stand', 'W', {x: 10, y: 8}, 2, 4, false, {});
             });
 
-            it("1st one stands same position for 1 step", function (done) {
-                setTimeout(function () {
-                    currentState.orderManager.orders = [
-                        {
-                            entity: currentState.pawns[0],
-                            list: [
-                                {
-                                    action: "stand",
-                                    direction: "E",
-                                    x: 8,
-                                    y: 8
-                                }
-                            ]
-                        }
-                    ];
-                    let steps = currentState.orderManager.getSteps();
-                    expect(steps.length).toEqual(2);
-                    expect(steps[0].length).toEqual(2);
-
-                    expect(steps[0][0].entity._id).toEqual(1);
-                    expect(steps[0][0].order.action).toEqual('stand');
-                    expect(steps[0][0].order.direction).toEqual('E');
-                    expect(steps[0][0].order.x).toEqual(8);
-                    expect(steps[0][0].order.y).toEqual(8);
-                    expect(steps[0][0].entityState.ap).toEqual(3);
-
-                    expect(steps[0][1].entity._id).toEqual(2);
-                    expect(steps[0][1].order.action).toEqual('stand');
-                    expect(steps[0][1].order.direction).toEqual('W');
-                    expect(steps[0][1].order.x).toEqual(10);
-                    expect(steps[0][1].order.y).toEqual(8);
-                    expect(steps[0][1].entityState.ap).toEqual(3);
-
-                    expect(steps[1][0].entity._id).toEqual(1);
-                    expect(steps[1][0].order.action).toEqual('stand');
-                    expect(steps[1][0].order.direction).toEqual('E');
-                    expect(steps[1][0].order.x).toEqual(8);
-                    expect(steps[1][0].order.y).toEqual(8);
-                    expect(steps[1][0].entityState.ap).toEqual(2);
-
-                    expect(steps[1][1].entity._id).toEqual(2);
-                    expect(steps[1][1].order.action).toEqual('stand');
-                    expect(steps[1][1].order.direction).toEqual('W');
-                    expect(steps[1][1].order.x).toEqual(10);
-                    expect(steps[1][1].order.y).toEqual(8);
-                    expect(steps[1][1].entityState.ap).toEqual(2);
-
-                    done();
-                }, 200);
+            it("1st one stands same position for 1 step", function () {
+                currentState.orderManager.orders = [
+                    {
+                        entity: currentState.pawns[0],
+                        list: [
+                            { action: "stand", direction: "E", x: 8, y: 8 }
+                        ]
+                    }
+                ];
+                let steps = currentState.orderManager.getSteps();
+                expect(steps.length).toEqual(2);
+                expect(steps[0].length).toEqual(2);
+                testStep(steps, 0, 0, 1, 'stand', 'E', {x: 8, y: 8}, 3, 4, false, {});
+                testStep(steps, 0, 1, 2, 'stand', 'W', {x: 10, y: 8}, 3, 4, false, {});
+                testStep(steps, 1, 0, 1, 'stand', 'E', {x: 8, y: 8}, 2, 4, false, {});
+                testStep(steps, 1, 1, 2, 'stand', 'W', {x: 10, y: 8}, 2, 4, false, {});
             });
 
-            it("1st one moves toward the 2nd for 2 steps", function (done) {
-                setTimeout(function () {
-                    currentState.orderManager.orders = [
-                        {
-                            entity: currentState.pawns[0],
-                            list: [
-                                {
-                                    action: "move",
-                                    direction: "E",
-                                    x: 9,
-                                    y: 8
-                                },
-                                {
-                                    action: "move",
-                                    direction: "E",
-                                    x: 10,
-                                    y: 8
-                                },
-                            ]
-                        }
-                    ];
-                    let steps = currentState.orderManager.getSteps();
-                    expect(steps.length).toEqual(3);
-                    expect(steps[0].length).toEqual(2);
-
-                    expect(steps[1][0].entity._id).toEqual(1);
-                    expect(steps[1][0].order.action).toEqual('move');
-                    expect(steps[1][0].order.direction).toEqual('E');
-                    expect(steps[1][0].order.x).toEqual(9);
-                    expect(steps[1][0].order.y).toEqual(8);
-                    expect(steps[1][0].entityState.ap).toEqual(2);
-
-                    expect(steps[1][1].entity._id).toEqual(2);
-                    expect(steps[1][1].order.action).toEqual('stand');
-                    expect(steps[1][1].order.direction).toEqual('W');
-                    expect(steps[1][1].order.x).toEqual(10);
-                    expect(steps[1][1].order.y).toEqual(8);
-                    expect(steps[1][1].entityState.ap).toEqual(2);
-
-                    expect(steps[2][0].entity._id).toEqual(1);
-                    expect(steps[2][0].order.action).toEqual('attack');
-                    expect(steps[2][0].order.direction).toEqual('E');
-                    expect(steps[2][0].order.x).toEqual(9);
-                    expect(steps[2][0].order.y).toEqual(8);
-                    expect(steps[2][0].entityState.ap).toEqual(1);
-
-                    expect(steps[2][1].entity._id).toEqual(2);
-                    expect(steps[2][1].order.action).toEqual('attack');
-                    expect(steps[2][1].order.direction).toEqual('W');
-                    expect(steps[2][1].order.x).toEqual(10);
-                    expect(steps[2][1].order.y).toEqual(8);
-                    expect(steps[2][1].entityState.ap).toEqual(1);
-
-                    done();
-                }, 200);
+            it("1st one moves toward the 2nd for 2 steps", function () {
+                currentState.orderManager.orders = [
+                    {
+                        entity: currentState.pawns[0],
+                        list: [
+                            { action: "move", direction: "E", x: 9, y: 8 },
+                            { action: "move", direction: "E", x: 10, y: 8 }
+                        ]
+                    }
+                ];
+                let steps = currentState.orderManager.getSteps();
+                expect(steps.length).toEqual(3);
+                expect(steps[0].length).toEqual(2);
+                testStep(steps, 0, 0, 1, 'stand', 'E', {x: 8, y: 8}, 3, 4, false, {});
+                testStep(steps, 0, 1, 2, 'stand', 'W', {x: 10, y: 8}, 3, 4, false, {});
+                testStep(steps, 1, 0, 1, 'move', 'E', {x: 9, y: 8}, 2, 4, false, {});
+                testStep(steps, 1, 1, 2, 'stand', 'W', {x: 10, y: 8}, 2, 4, false, {});
+                testStep(steps, 2, 0, 1, 'attack', 'E', {x: 9, y: 8}, 1, 3, true, {x: 10, y: 8});
+                testStep(steps, 2, 1, 2, 'attack', 'W', {x: 10, y: 8}, 1, 3, false, {});
             });
 
-            it("both going same position then the first one wants to continue moving", function (done) {
-                setTimeout(function () {
-                    currentState.orderManager.orders = [
-                        {
-                            entity: currentState.pawns[0],
-                            list: [
-                                {
-                                    action: "move",
-                                    direction: "E",
-                                    x: 9,
-                                    y: 8
-                                },
-                                {
-                                    action: "move",
-                                    direction: "E",
-                                    x: 9,
-                                    y: 9
-                                },
-                            ]
-                        },
-                        {
-                            entity: currentState.pawns[1],
-                            list: [
-                                {
-                                    action: "move",
-                                    direction: "W",
-                                    x: 9,
-                                    y: 8
-                                }
-                            ]
-                        }
-                    ];
-                    let steps = currentState.orderManager.getSteps();
-                    expect(steps.length).toEqual(3);
-                    expect(steps[0].length).toEqual(2);
-
-                    expect(steps[1][0].entity._id).toEqual(1);
-                    expect(steps[1][0].order.action).toEqual('move');
-                    expect(steps[1][0].order.direction).toEqual('E');
-                    expect(steps[1][0].order.x).toEqual(8);
-                    expect(steps[1][0].order.y).toEqual(8);
-                    expect(steps[1][0].entityState.ap).toEqual(2);
-                    expect(steps[1][0].entityState.moveHasBeenBlocked).toBeTruthy();
-                    expect(steps[1][0].entityState.positionBlocked).toEqual({x: 8, y: 8});
-
-                    expect(steps[1][1].entity._id).toEqual(2);
-                    expect(steps[1][1].order.action).toEqual('move');
-                    expect(steps[1][1].order.direction).toEqual('W');
-                    expect(steps[1][1].order.x).toEqual(10);
-                    expect(steps[1][1].order.y).toEqual(8);
-                    expect(steps[1][1].entityState.ap).toEqual(2);
-                    expect(steps[1][1].entityState.moveHasBeenBlocked).toBeTruthy();
-                    expect(steps[1][1].entityState.positionBlocked).toEqual({x: 10, y: 8});
-
-                    expect(steps[2][0].entity._id).toEqual(1);
-                    expect(steps[2][0].order.action).toEqual('stand');
-                    expect(steps[2][0].order.direction).toEqual('E');
-                    expect(steps[2][0].order.x).toEqual(8);
-                    expect(steps[2][0].order.y).toEqual(8);
-                    expect(steps[2][0].entityState.ap).toEqual(1);
-                    expect(steps[2][0].entityState.moveHasBeenBlocked).toBeFalsy();
-
-                    expect(steps[2][1].entity._id).toEqual(2);
-                    expect(steps[2][1].order.action).toEqual('stand');
-                    expect(steps[2][1].order.direction).toEqual('W');
-                    expect(steps[2][1].order.x).toEqual(10);
-                    expect(steps[2][1].order.y).toEqual(8);
-                    expect(steps[2][1].entityState.ap).toEqual(1);
-                    expect(steps[2][1].entityState.moveHasBeenBlocked).toBeFalsy();
-
-                    done();
-                }, 200);
+            it("both going same position then the first one wants to continue moving", function () {
+                currentState.orderManager.orders = [
+                    {
+                        entity: currentState.pawns[0],
+                        list: [
+                            { action: "move",  direction: "E", x: 9, y: 8 },
+                            { action: "move", direction: "E", x: 9, y: 9 },
+                        ]
+                    },
+                    {
+                        entity: currentState.pawns[1],
+                        list: [
+                            { action: "move", direction: "W", x: 9, y: 8 }
+                        ]
+                    }
+                ];
+                let steps = currentState.orderManager.getSteps();
+                expect(steps.length).toEqual(3);
+                expect(steps[0].length).toEqual(2);
+                testStep(steps, 0, 0, 1, 'stand', 'E', {x: 8, y: 8}, 3, 4, false, {});
+                testStep(steps, 0, 1, 2, 'stand', 'W', {x: 10, y: 8}, 3, 4, false, {});
+                testStep(steps, 1, 0, 1, 'move', 'E', {x: 8, y: 8}, 2, 4, true, {x: 9, y: 8});
+                testStep(steps, 1, 1, 2, 'move', 'W', {x: 10, y: 8}, 2, 4, true, {x: 9, y: 8});
+                testStep(steps, 2, 0, 1, 'stand', 'E', {x: 8, y: 8}, 1, 4, false, {});
+                testStep(steps, 2, 1, 2, 'stand', 'W', {x: 10, y: 8}, 1, 4, false, {});
             });
 
-            it("the first one wants moves in front of the second, then continues moving, facing the other", function (done) {
-                setTimeout(function () {
-                    console.log(currentState.pawns);
-                    currentState.orderManager.orders = [
-                        {
-                            entity: currentState.pawns[0],
-                            list: [
-                                {
-                                    action: "move",
-                                    direction: "E",
-                                    x: 9,
-                                    y: 8
-                                },
-                                {
-                                    action: "move",
-                                    direction: "E",
-                                    x: 9,
-                                    y: 9
-                                },
-                                {
-                                    action: "move",
-                                    direction: "E",
-                                    x: 10,
-                                    y: 9
-                                }
-                            ]
-                        }
-                    ];
-                    let steps = currentState.orderManager.getSteps();
-                    expect(steps.length).toEqual(4);
-                    expect(steps[0].length).toEqual(2);
-
-                    expect(steps[1][0].entity._id).toEqual(1);
-                    expect(steps[1][0].order.action).toEqual('move');
-                    expect(steps[1][0].order.direction).toEqual('E');
-                    expect(steps[1][0].order.x).toEqual(9);
-                    expect(steps[1][0].order.y).toEqual(8);
-                    expect(steps[1][0].entityState.ap).toEqual(2);
-                    expect(steps[1][0].entityState.hp).toEqual(4);
-                    expect(steps[1][0].entityState.moveHasBeenBlocked).toBeFalsy();
-                    expect(steps[1][0].entityState.positionBlocked).toEqual({});
-
-                    expect(steps[1][1].entity._id).toEqual(2);
-                    expect(steps[1][1].order.action).toEqual('stand');
-                    expect(steps[1][1].order.direction).toEqual('W');
-                    expect(steps[1][1].order.x).toEqual(10);
-                    expect(steps[1][1].order.y).toEqual(8);
-                    expect(steps[1][1].entityState.hp).toEqual(4);
-                    expect(steps[1][1].entityState.moveHasBeenBlocked).toBeFalsy();
-                    expect(steps[1][1].entityState.positionBlocked).toEqual({});
-
-                    expect(steps[2][0].entity._id).toEqual(1);
-                    expect(steps[2][0].order.action).toEqual('attack');
-                    expect(steps[2][0].order.direction).toEqual('E');
-                    expect(steps[2][0].order.x).toEqual(9);
-                    expect(steps[2][0].order.y).toEqual(8);
-                    expect(steps[2][0].entityState.ap).toEqual(1);
-                    expect(steps[2][0].entityState.hp).toEqual(3);
-                    expect(steps[2][0].entityState.moveHasBeenBlocked).toBeTruthy();
-                    expect(steps[2][0].entityState.positionBlocked).toEqual({x: 9, y: 8});
-
-                    expect(steps[2][1].entity._id).toEqual(2);
-                    expect(steps[2][1].order.action).toEqual('attack');
-                    expect(steps[2][1].order.direction).toEqual('W');
-                    expect(steps[2][1].order.x).toEqual(10);
-                    expect(steps[2][1].order.y).toEqual(8);
-                    expect(steps[2][1].entityState.ap).toEqual(1);
-                    expect(steps[2][1].entityState.hp).toEqual(3);
-                    expect(steps[2][1].entityState.moveHasBeenBlocked).toBeFalsy();
-
-                    expect(steps[3][0].entity._id).toEqual(1);
-                    expect(steps[3][0].order.action).toEqual('attack');
-                    expect(steps[3][0].order.direction).toEqual('E');
-                    expect(steps[3][0].order.x).toEqual(9);
-                    expect(steps[3][0].order.y).toEqual(8);
-                    expect(steps[3][0].entityState.ap).toEqual(0);
-                    expect(steps[3][0].entityState.hp).toEqual(2);
-                    expect(steps[3][0].entityState.moveHasBeenBlocked).toBeTruthy();
-                    expect(steps[3][0].entityState.positionBlocked).toEqual({x: 9, y: 8});
-
-                    expect(steps[3][1].entity._id).toEqual(2);
-                    expect(steps[3][1].order.action).toEqual('attack');
-                    expect(steps[3][1].order.direction).toEqual('W');
-                    expect(steps[3][1].order.x).toEqual(10);
-                    expect(steps[3][1].order.y).toEqual(8);
-                    expect(steps[3][1].entityState.ap).toEqual(0);
-                    expect(steps[3][1].entityState.hp).toEqual(2);
-                    expect(steps[3][1].entityState.moveHasBeenBlocked).toBeFalsy();
-
-                    done();
-                }, 200);
+            it("the first one wants moves in front of the second, then continues moving, facing the other", function () {
+                currentState.orderManager.orders = [
+                    {
+                        entity: currentState.pawns[0],
+                        list: [
+                            { action: "move", direction: "E", x: 9, y: 8 },
+                            { action: "move", direction: "E", x: 9, y: 9 },
+                            { action: "move", direction: "E", x: 10, y: 9 }
+                        ]
+                    }
+                ];
+                let steps = currentState.orderManager.getSteps();
+                expect(steps.length).toEqual(4);
+                expect(steps[0].length).toEqual(2);
+                testStep(steps, 0, 0, 1, 'stand', 'E', {x: 8, y: 8}, 3, 4, false, {});
+                testStep(steps, 0, 1, 2, 'stand', 'W', {x: 10, y: 8}, 3, 4, false, {});
+                testStep(steps, 1, 0, 1, 'move', 'E', {x: 9, y: 8}, 2, 4, false, {});
+                testStep(steps, 1, 1, 2, 'stand', 'W', {x: 10, y: 8}, 2, 4, false, {});
+                testStep(steps, 2, 0, 1, 'move', 'E', {x: 9, y: 8}, 1, 3, true, {x: 9, y: 9});
+                testStep(steps, 2, 1, 2, 'attack', 'W', {x: 10, y: 8}, 1, 4, false, {});
+                testStep(steps, 3, 0, 1, 'attack', 'E', {x: 9, y: 8}, 0, 2, false, {});
+                testStep(steps, 3, 1, 2, 'attack', 'W', {x: 10, y: 8}, 0, 3, false, {});
             });
 
-            it("the first one wants moves in front of the second, then continues moving, without facing the other", function (done) {
-                setTimeout(function () {
-                    console.log(currentState.pawns);
-                    currentState.orderManager.orders = [
-                        {
-                            entity: currentState.pawns[0],
-                            list: [
-                                {
-                                    action: "stand",
-                                    direction: "S",
-                                    x: 8,
-                                    y: 8
-                                },
-                                {
-                                    action: "move",
-                                    direction: "S",
-                                    x: 9,
-                                    y: 8
-                                },
-                                {
-                                    action: "move",
-                                    direction: "S",
-                                    x: 9,
-                                    y: 9
-                                }
-                            ]
-                        }
-                    ];
-                    let steps = currentState.orderManager.getSteps();
-                    expect(steps.length).toEqual(4);
-                    expect(steps[0].length).toEqual(2);
-
-                    expect(steps[1][0].entity._id).toEqual(1);
-                    expect(steps[1][0].order.action).toEqual('stand');
-                    expect(steps[1][0].order.direction).toEqual('S');
-                    expect(steps[1][0].order.x).toEqual(8);
-                    expect(steps[1][0].order.y).toEqual(8);
-                    expect(steps[1][0].entityState.ap).toEqual(2);
-                    expect(steps[1][0].entityState.hp).toEqual(4);
-                    expect(steps[1][0].entityState.moveHasBeenBlocked).toBeFalsy();
-                    expect(steps[1][0].entityState.positionBlocked).toEqual({});
-
-                    expect(steps[1][1].entity._id).toEqual(2);
-                    expect(steps[1][1].order.action).toEqual('stand');
-                    expect(steps[1][1].order.direction).toEqual('W');
-                    expect(steps[1][1].order.x).toEqual(10);
-                    expect(steps[1][1].order.y).toEqual(8);
-                    expect(steps[1][1].entityState.ap).toEqual(2);
-                    expect(steps[1][1].entityState.hp).toEqual(4);
-                    expect(steps[1][1].entityState.moveHasBeenBlocked).toBeFalsy();
-                    expect(steps[1][1].entityState.positionBlocked).toEqual({});
-
-                    expect(steps[2][0].entity._id).toEqual(1);
-                    expect(steps[2][0].order.action).toEqual('move');
-                    expect(steps[2][0].order.direction).toEqual('S');
-                    expect(steps[2][0].order.x).toEqual(9);
-                    expect(steps[2][0].order.y).toEqual(8);
-                    expect(steps[2][0].entityState.ap).toEqual(1);
-                    expect(steps[2][0].entityState.hp).toEqual(4);
-                    expect(steps[2][0].entityState.moveHasBeenBlocked).toBeFalsy();
-                    expect(steps[2][0].entityState.positionBlocked).toEqual({});
-
-                    expect(steps[2][1].entity._id).toEqual(2);
-                    expect(steps[2][1].order.action).toEqual('stand');
-                    expect(steps[2][1].order.direction).toEqual('W');
-                    expect(steps[2][1].order.x).toEqual(10);
-                    expect(steps[2][1].order.y).toEqual(8);
-                    expect(steps[2][1].entityState.ap).toEqual(1);
-                    expect(steps[2][1].entityState.hp).toEqual(4);
-                    expect(steps[2][1].entityState.moveHasBeenBlocked).toBeFalsy();
-
-                    expect(steps[3][0].entity._id).toEqual(1);
-                    expect(steps[3][0].order.action).toEqual('move');
-                    expect(steps[3][0].order.direction).toEqual('S');
-                    expect(steps[3][0].order.x).toEqual(9);
-                    expect(steps[3][0].order.y).toEqual(8);
-                    expect(steps[3][0].entityState.ap).toEqual(0);
-                    expect(steps[3][0].entityState.hp).toEqual(3);
-                    expect(steps[3][0].entityState.moveHasBeenBlocked).toBeTruthy();
-                    expect(steps[3][0].entityState.positionBlocked).toEqual({x: 9, y: 8});
-
-                    expect(steps[3][1].entity._id).toEqual(2);
-                    expect(steps[3][1].order.action).toEqual('attack');
-                    expect(steps[3][1].order.direction).toEqual('W');
-                    expect(steps[3][1].order.x).toEqual(10);
-                    expect(steps[3][1].order.y).toEqual(8);
-                    expect(steps[3][1].entityState.ap).toEqual(0);
-                    expect(steps[3][1].entityState.hp).toEqual(4);
-                    expect(steps[3][1].entityState.moveHasBeenBlocked).toBeFalsy();
-
-                    done();
-                }, 200);
+            it("the first one wants moves in front of the second, then continues moving, without facing the other", function () {
+                currentState.orderManager.orders = [
+                    {
+                        entity: currentState.pawns[0],
+                        list: [
+                            { action: "stand", direction: "S", x: 8, y: 8 },
+                            { action: "move", direction: "S", x: 9, y: 8 },
+                            { action: "move", direction: "S", x: 9, y: 9 }
+                        ]
+                    }
+                ];
+                let steps = currentState.orderManager.getSteps();
+                expect(steps.length).toEqual(4);
+                expect(steps[0].length).toEqual(2);
+                testStep(steps, 0, 0, 1, 'stand', 'E', {x: 8, y: 8}, 3, 4, false, {});
+                testStep(steps, 0, 1, 2, 'stand', 'W', {x: 10, y: 8}, 3, 4, false, {});
+                testStep(steps, 1, 0, 1, 'stand', 'S', {x: 8, y: 8}, 2, 4, false, {});
+                testStep(steps, 1, 1, 2, 'stand', 'W', {x: 10, y: 8}, 2, 4, false, {});
+                testStep(steps, 2, 0, 1, 'move', 'S', {x: 9, y: 8}, 1, 4, false, {});
+                testStep(steps, 2, 1, 2, 'stand', 'W', {x: 10, y: 8}, 1, 4, false, {});
+                testStep(steps, 3, 0, 1, 'move', 'S', {x: 9, y: 8}, 0, 3, true, {x: 9, y: 9});
+                testStep(steps, 3, 1, 2, 'attack', 'W', {x: 10, y: 8}, 0, 4, false, {});
             });
 
-            it("the first one wants moves north then casts to the east while the other moves in the dmg area then comes cac", function (done) {
-                setTimeout(function () {
-                    console.log(currentState.pawns);
-                    currentState.orderManager.orders = [
-                        {
-                            entity: currentState.pawns[0],
-                            list: [
-                                {
-                                    action: "move",
-                                    direction: "E",
-                                    x: 8,
-                                    y: 7
-                                },
-                                {
-                                    action: "cast",
-                                    direction: "E",
-                                    x: 8,
-                                    y: 7
-                                }
-                            ]
-                        },
-                        {
-                            entity: currentState.pawns[1],
-                            list: [
-                                {
-                                    action: "move",
-                                    direction: "W",
-                                    x: 10,
-                                    y: 7
-                                },
-                                {
-                                    action: "move",
-                                    direction: "W",
-                                    x: 9,
-                                    y: 7
-                                },
-                                {
-                                    action: "move",
-                                    direction: "W",
-                                    x: 9,
-                                    y: 6
-                                }
-                            ]
-                        },
-                    ];
-                    let steps = currentState.orderManager.getSteps();
-                    expect(steps.length).toEqual(4);
-                    expect(steps[0].length).toEqual(2);
-
-                    expect(steps[1][0].entity._id).toEqual(1);
-                    expect(steps[1][0].order.action).toEqual('move');
-                    expect(steps[1][0].order.direction).toEqual('E');
-                    expect(steps[1][0].order.x).toEqual(8);
-                    expect(steps[1][0].order.y).toEqual(7);
-                    expect(steps[1][0].entityState.ap).toEqual(2);
-                    expect(steps[1][0].entityState.hp).toEqual(4);
-
-                    expect(steps[1][1].entity._id).toEqual(2);
-                    expect(steps[1][1].order.action).toEqual('move');
-                    expect(steps[1][1].order.direction).toEqual('W');
-                    expect(steps[1][1].order.x).toEqual(10);
-                    expect(steps[1][1].order.y).toEqual(7);
-                    expect(steps[1][1].entityState.ap).toEqual(2);
-                    expect(steps[1][1].entityState.hp).toEqual(4);
-
-                    expect(steps[2][0].entity._id).toEqual(1);
-                    expect(steps[2][0].order.action).toEqual('cast');
-                    expect(steps[2][0].order.direction).toEqual('E');
-                    expect(steps[2][0].order.x).toEqual(8);
-                    expect(steps[2][0].order.y).toEqual(7);
-                    expect(steps[2][0].order.targets).toEqual([{entity: currentState.pawns[1], state: steps[2][1].entityState}]);
-                    expect(steps[2][0].entityState.ap).toEqual(0);
-                    expect(steps[2][0].entityState.hp).toEqual(4);
-
-                    expect(steps[2][1].entity._id).toEqual(2);
-                    expect(steps[2][1].order.action).toEqual('move');
-                    expect(steps[2][1].order.direction).toEqual('W');
-                    expect(steps[2][1].order.x).toEqual(9);
-                    expect(steps[2][1].order.y).toEqual(7);
-                    expect(steps[2][1].entityState.ap).toEqual(1);
-                    expect(steps[2][1].entityState.hp).toEqual(2);
-                    expect(steps[2][1].entityState.isBurned).toBeTruthy();
-
-                    expect(steps[3][0].entity._id).toEqual(1);
-                    expect(steps[3][0].order.action).toEqual('attack');
-                    expect(steps[3][0].order.direction).toEqual('E');
-                    expect(steps[3][0].order.x).toEqual(8);
-                    expect(steps[3][0].order.y).toEqual(7);
-                    // FIXME Ne devrait pas etre inférieur à -1 car plus de AP donc ne devrait pas attack non plus
-                    expect(steps[3][0].entityState.ap).toEqual(-1);
-                    expect(steps[3][0].entityState.hp).toEqual(3);
-
-                    expect(steps[3][1].entity._id).toEqual(2);
-                    expect(steps[3][1].order.action).toEqual('attack');
-                    expect(steps[3][1].order.direction).toEqual('W');
-                    expect(steps[3][1].order.x).toEqual(9);
-                    expect(steps[3][1].order.y).toEqual(7);
-                    expect(steps[3][1].entityState.ap).toEqual(0);
-                    expect(steps[3][1].entityState.hp).toEqual(1);
-
-                    done();
-                }, 200);
+            it("the first one wants moves north then casts to the east while the other moves in the dmg area then comes cac", function () {
+                currentState.orderManager.orders = [
+                    {
+                        entity: currentState.pawns[0],
+                        list: [
+                            { action: "move", direction: "E", x: 8, y: 7 },
+                            { action: "cast", direction: "E", x: 8, y: 7 }
+                        ]
+                    },
+                    {
+                        entity: currentState.pawns[1],
+                        list: [
+                            { action: "move", direction: "W", x: 10, y: 7 },
+                            { action: "move", direction: "W", x: 9, y: 7 },
+                            { action: "move", direction: "W", x: 9, y: 6 }
+                        ]
+                    },
+                ];
+                let steps = currentState.orderManager.getSteps();
+                expect(steps.length).toEqual(4);
+                expect(steps[0].length).toEqual(2);
+                testStep(steps, 0, 0, 1, 'stand', 'E', {x: 8, y: 8}, 3, 4, false, {});
+                testStep(steps, 0, 1, 2, 'stand', 'W', {x: 10, y: 8}, 3, 4, false, {});
+                testStep(steps, 1, 0, 1, 'move', 'E', {x: 8, y: 7}, 2, 4, false, {});
+                testStep(steps, 1, 1, 2, 'move', 'W', {x: 10, y: 7}, 2, 4, false, {});
+                testStep(steps, 2, 0, 1, 'cast', 'E', {x: 8, y: 7}, 0, 4, false, {});
+                expect(steps[2][0].order.targets).toEqual([{entity: currentState.pawns[1], state: steps[2][1].entityState}]);
+                testStep(steps, 2, 1, 2, 'move', 'W', {x: 9, y: 7}, 1, 2, false, {});
+                expect(steps[2][1].entityState.isBurned).toBeTruthy();
+                // FIXME Ne devrait pas etre inférieur à -1 car plus de AP donc ne devrait pas attack non plus
+                testStep(steps, 3, 0, 1, 'attack', 'E', {x: 8, y: 7}, -1, 3, false, {});
+                testStep(steps, 3, 1, 2, 'attack', 'W', {x: 9, y: 7}, 0, 1, true, {x: 9, y: 6});
             });
         });
     });

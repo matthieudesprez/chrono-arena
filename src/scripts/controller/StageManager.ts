@@ -38,7 +38,7 @@ module TacticArena.Controller {
             return false;
         }
 
-        getLinearPath(pawn, distance, direction = null, position) {
+        getLinearPath(pawn, distance, direction = null, position = null) {
             let p = position ? position : pawn.getPosition();
             let d = direction ? direction : pawn.getDirection();
             let path = [];
@@ -113,7 +113,6 @@ module TacticArena.Controller {
         }
 
         isFacing(coordsA, directionA, coordsB) {
-            console.log(coordsA, directionA, coordsB);
             return (
                 coordsA.x == coordsB.x && (
                     (coordsA.y == coordsB.y + 1 && directionA == 'N') || (coordsA.y == coordsB.y - 1 && directionA == 'S')

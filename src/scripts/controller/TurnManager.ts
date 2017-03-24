@@ -20,7 +20,6 @@ module TacticArena.Controller {
 	        	}
 				if(firstTurnCall) {
 					this.currentTurnIndex++;
-					console.log(firstTurnCall, this.currentTurnIndex);
 				}
                 pawn.active = true;
 	        	resolve(true);

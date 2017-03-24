@@ -17,7 +17,7 @@ module TacticArena.Specs {
             this.state.add('test', State.Test);
 
             this.state.onCreateCallback = function() {
-                console.log('ok');
+
             };
             this.state.start('test');
         }

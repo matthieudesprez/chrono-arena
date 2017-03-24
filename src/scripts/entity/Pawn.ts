@@ -81,7 +81,9 @@ module TacticArena.Entity {
         cast(targets) {
             var that = this;
             return new Promise((resolve, reject) => {
-                this.projection.hide();
+                if(this.projection) {
+                    this.projection.hide();
+                }
                 this.sprite.cast(targets, function() {
                     that.sprite.stand();
                     resolve(true);
