@@ -4,6 +4,6 @@ before_script:
 
 job1:
   script:
-    - lftp -u edistra,mJaQF7zW ftp.edistra.com -e "mirror -e -R ./build www/cronus-arena-tactics ; quit"
+    - lftp -u $FTP_USER,$FTP_PASSWORD ftp.edistra.com -e "mirror -e -R ./build www/cronus-arena-tactics ; quit"
   only:
     - master
