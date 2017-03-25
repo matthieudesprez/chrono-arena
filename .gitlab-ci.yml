@@ -1,11 +1,11 @@
 before_script:
   - apt-get update
   - apt-get install lftp
-  - npm install
+  - run npm install
 
 job1:
   script:
-    - npm run test
+    - run karma start spec/support/karma.conf.js
 
 job2:
   script:
