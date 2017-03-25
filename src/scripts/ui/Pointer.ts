@@ -91,7 +91,7 @@ module TacticArena.UI {
                                     this.game.orderManager.add('move', activePawn, path[i].x, path[i].y, activePawn.getProjectionOrReal().getDirection());
                                 }
                                 this.game.process = false;
-                                this.game.onActionPlayed.dispatch(activePawn.getProjectionOrReal());
+                                this.game.signalManager.onActionPlayed.dispatch(activePawn.getProjectionOrReal());
                             });
                         }
                     }

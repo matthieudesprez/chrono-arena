@@ -67,7 +67,7 @@ module TacticArena.UI {
                     });
                 }
                 this.init();
-                this.game.turnInitialized.dispatch(pawn);
+                this.game.signalManager.turnInitialized.dispatch(pawn);
             });
         }
 
@@ -91,7 +91,6 @@ module TacticArena.UI {
                             this.game.logManager.add(steps);
                             this.timelineUI.build(<any>steps.length).then((res) => {
                                 this.game.resolveManager.processSteps(0);
-                                this.game.resolveManager.activate();
                             });
                         });
                     } else {
@@ -125,7 +124,7 @@ module TacticArena.UI {
                 activePawn.getProjectionOrReal().faceDirection(this.directionUI.savedDirection);
                 this.directionUI.init(this.directionUI.savedDirection);
                 this.game.orderManager.removeEntityOrder(activePawn);
-                this.game.onActionPlayed.dispatch(activePawn);
+                this.game.signalManager.onActionPlayed.dispatch(activePawn);
             }
         }
     }

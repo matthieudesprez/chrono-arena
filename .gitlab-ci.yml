@@ -1,8 +1,13 @@
 before_script:
   - apt-get update
   - apt-get install lftp
+  - npm install
 
 job1:
+  script:
+    - npm run test
+
+job2:
   script:
     - lftp -u $FTP_USER,$FTP_PASSWORD ftp.edistra.com -e "mirror -e -R ./build www/cronus-arena-tactics ; quit"
   only:

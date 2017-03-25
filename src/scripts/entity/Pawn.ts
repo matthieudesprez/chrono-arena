@@ -142,12 +142,7 @@ module TacticArena.Entity {
                 var newY = tile.y * this.game.tileSize - this.sprite._size / 2;
                 if(animate) {
                     this.sprite.walk();
-                    var t = this.game.add.tween(
-                        this.sprite).to({x: newX, y: newY},
-                        this.sprite._speed,
-                        Phaser.Easing.Linear.None,
-                        true
-                    );
+                    var t = this.game.add.tween(this.sprite).to({x: newX, y: newY}, this.sprite._speed, Phaser.Easing.Linear.None, true);
                     t.onComplete.add(function () {
                         if (path != undefined && path.length > 0) {
                             this.moveTo(0, 0, path).then((res) => {
@@ -240,7 +235,7 @@ module TacticArena.Entity {
 
         setAp(ap) {
             this._ap = ap;
-            this.game.onApChange.dispatch(this._ap);
+            this.game.signalManager.onApChange.dispatch(this._ap);
         }
 
         getHp() {
@@ -249,7 +244,7 @@ module TacticArena.Entity {
 
         setHp(hp) {
             this._hp = hp;
-            this.game.onHpChange.dispatch(this._hp);
+            this.game.signalManager.onHpChange.dispatch(this._hp);
         }
     }
 }

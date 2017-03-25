@@ -5,7 +5,6 @@ module TacticArena.Controller {
         processing;
         currentIndex;
         active;
-        processedIndexes;
 
         constructor(game) {
             this.steps = [];
@@ -13,7 +12,6 @@ module TacticArena.Controller {
             this.currentIndex = 0;
             this.processing = false;
             this.active = false;
-            this.processedIndexes = [];
         }
 
         createPromiseMove(entity, x, y, animate, direction = null) {
@@ -57,15 +55,10 @@ module TacticArena.Controller {
         }
 
         init(steps) {
+            console.info(steps);
             this.steps = steps;
             this.manageProjectionDislay(steps[0], true);
-
-            this.processedIndexes = [];
             this.currentIndex = 0;
-        }
-
-        activate() {
-            this.active = true;
         }
 
         handleBackwardPromise(promise, entity, order, position, animate) {
@@ -87,8 +80,9 @@ module TacticArena.Controller {
 
         processSteps(index, animate:boolean = true, backward:boolean = false) {
             this.processing = true;
+            this.active = true;
             this.processStep(index, animate, backward).then((res) => {
-                this.game.resolvePhaseFinished.dispatch();
+                this.game.signalManager.resolvePhaseFinished.dispatch();
             }, (res) => {
 
             });
@@ -101,8 +95,7 @@ module TacticArena.Controller {
                     return true;
                 }
                 this.currentIndex = index;
-                this.processedIndexes.push(index);
-                this.game.uiManager.timelineUI.update(index);
+                this.game.signalManager.stepResolutionIndexChange.dispatch(index);
                 let step = this.steps[index];
                 let previousStep = index > 0 ? this.steps[index - 1] : null;
                 console.info('processStep', index, step);
@@ -145,7 +138,7 @@ module TacticArena.Controller {
                     if(!backward) {
                         this.manageProjectionDislay(step);
                     }
-                    this.game.stepResolutionFinished.dispatch(index);
+                    this.game.signalManager.stepResolutionFinished.dispatch(index);
                     if (this.steps.length > (index + 1) && !this.game.isPaused) {
                         this.processStep(index + 1).then((res) => {
                             resolve(res);

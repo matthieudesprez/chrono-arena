@@ -146,7 +146,7 @@ module TacticArena.Entity {
 
                 if (targets) {
                     for (var i = 0; i < targets.length; i++) {
-                        targets[i].entity.hurt(2);
+                        targets[i].hurt(2);
                     }
                 }
 
@@ -158,7 +158,7 @@ module TacticArena.Entity {
         attack(target?, callback?) {
             this._animationCompleteCallback = callback;
             this.playAnimation('attack' + this._ext);
-            if(target.state.isDodging) {
+            if(target.dodge) {
                 target.entity.dodge();
             } else {
                 target.entity.hurt();

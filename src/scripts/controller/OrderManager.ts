@@ -2,10 +2,12 @@ module TacticArena.Controller {
     export class OrderManager {
         orders;
         game;
+        alteredPawns;
 
         constructor(game) {
             this.orders = [];
             this.game = game;
+            this.alteredPawns = [];
         }
 
         removeEntityOrder(pawn) {
@@ -17,7 +19,7 @@ module TacticArena.Controller {
                 }
             }
             this.orders = result;
-            this.game.onOrderChange.dispatch(pawn);
+            this.game.signalManager.onOrderChange.dispatch(pawn);
         }
 
         hasOrder(id) {
@@ -47,7 +49,7 @@ module TacticArena.Controller {
                     this.orders[i].list.push(order);
                 }
             }
-            this.game.onOrderChange.dispatch(entity);
+            this.game.signalManager.onOrderChange.dispatch(entity);
         }
 
         getMaxOrderListLength() {
@@ -96,12 +98,7 @@ module TacticArena.Controller {
         }
 
         resolutionEsquive(fleeRate) {
-            //return false;
             return (Math.floor(Math.random() * 100) > fleeRate);
-        }
-
-        movesTo(p1, p2) {
-            return (p1.x == p2.x && p1.y == p2.y);
         }
 
         blockEntity(steps, startI, j, order, entity) {
@@ -115,12 +112,13 @@ module TacticArena.Controller {
                     steps[i][j].order.y = order.y;
                 }
             }
-            steps[startI][j].entityState.moveHasBeenBlockedProcessed = true;
+            this.alteredPawns.push(entity._id);
             entity.destroyProjection();
             return steps;
         }
 
         getSteps() {
+            this.alteredPawns = [];
             this.formatOrders();
             let steps = new Array(this.getMaxOrderListLength());
             for (var j = 0; j < steps.length; j++) {
@@ -141,12 +139,7 @@ module TacticArena.Controller {
 
         getDefaultEntityState() {
             return {
-                isDodging: false,
-                isAttacking: false,
-                isHurt: false,
                 moveHasBeenBlocked: false,
-                moveHasBeenBlockedProcessed: false,
-                isBurned: false,
                 positionBlocked: {}
             };
         }
@@ -184,15 +177,14 @@ module TacticArena.Controller {
                         let positionBBeforeOrder = {x: previousStep[j].order.x, y: previousStep[j].order.y};
 
                         let aIsFacingB = this.game.stageManager.isFacing(positionABeforeOrder, orderA.direction, positionBBeforeOrder);
+                        let aWasNextToB = this.game.stageManager.getNbTilesBetween(positionABeforeOrder, positionBBeforeOrder) == 1;
                         let fleeRate = 100;
-                        let apCost = 1;
-                        let hpLost = 0;
+                        let entityAApCost = 1;
+                        let entityBHpLost = 0;
 
                         let aIsActive = previousStep[i].entityState['ap'] > 0; // INACTIF = stand mais pas le droit d'attaquer
 
-                        if (['stand', 'move'].indexOf(actionA) >= 0 &&
-                            this.game.stageManager.getNbTilesBetween(positionABeforeOrder, positionBBeforeOrder) == 1 &&
-                            aIsFacingB && aIsActive) {
+                        if (['stand', 'move'].indexOf(actionA) >= 0 && aWasNextToB && aIsFacingB && aIsActive) {
                             // Possible cases :
                             // [  ][A v][  ]
                             // [A>][ B ][<A]
@@ -201,63 +193,50 @@ module TacticArena.Controller {
                             let keepPosition = (orderA.x == positionABeforeOrder.x && orderA.y == positionABeforeOrder.y);
                             // Si A reste dans sa direction (aIsFacingB), et ne va pas pas se détourner de B
                             // ET si A reste adjacent à B OU si A va vers B (en lui faisant face)
-                            if (keepDirection && (keepPosition || this.movesTo(orderA, orderB))) {
-                                entityAState.isAttacking = true;
+                            if (keepDirection && (keepPosition || this.game.stageManager.equalPositions(orderA, orderB))) {
+                                let entityBIsDodge = true;
                                 if (this.resolutionEsquive(fleeRate)) {
-                                    entityBState.isHurt = true;
-                                    if (!entityBState.moveHasBeenBlockedProcessed) {
+                                    entityBHpLost += 1;
+                                    entityBIsDodge = false;
+                                    if (this.alteredPawns.indexOf(entityB._id) < 0) {
                                         entityBState.moveHasBeenBlocked = (actionB == 'move');
                                     }
-                                    entityBState.isDodging = false;
-                                } else {
-                                    entityBState.isHurt = false;
-                                    entityBState.isDodging = true;
                                 }
 
-                                step[i].order.action = 'attack';
-                                step[i].order.target = {
-                                    entity: entityB,
-                                    state: entityBState
-                                };
+                                orderA.action = 'attack';
+                                orderA.target = { entity: entityB, dodge: entityBIsDodge };
                             }
                         }
 
                         if (orderA.x == orderB.x && orderA.y == orderB.y) {
                             // Si A veut aller sur la même case que B (qu'il y soit déjà où qu'il veuille y aller)
-                            if (!entityAState.moveHasBeenBlockedProcessed)   entityAState.moveHasBeenBlocked = (actionA == 'move');
-                            if (!entityBState.moveHasBeenBlockedProcessed)   entityBState.moveHasBeenBlocked = (actionB == 'move');
+                            if (this.alteredPawns.indexOf(entityA._id) < 0) entityAState.moveHasBeenBlocked = (actionA == 'move');
+                            if (this.alteredPawns.indexOf(entityB._id) < 0) entityBState.moveHasBeenBlocked = (actionB == 'move');
                         }
 
-                        if (entityBState.moveHasBeenBlocked && !entityBState.moveHasBeenBlockedProcessed) {
+                        if (entityBState.moveHasBeenBlocked && this.alteredPawns.indexOf(entityB._id) < 0) {
                             this.blockEntity(steps, l, j, this.getDefaultOrder(previousStep[j].order, previousStep[j].order.direction), entityB);
                         }
-                        if (entityAState.moveHasBeenBlocked && !entityAState.moveHasBeenBlockedProcessed) {
+                        if (entityAState.moveHasBeenBlocked && this.alteredPawns.indexOf(entityA._id) < 0) {
                             this.blockEntity(steps, l, i, this.getDefaultOrder(previousStep[i].order, previousStep[i].order.direction), entityA);
                         }
 
                         if (actionA == 'cast') {
-                            apCost++;
-                            let path = this.game.stageManager.getLinearPath(entityA, 4, orderA.direction, {
-                                x: orderA.x,
-                                y: orderA.y
-                            });
+                            entityAApCost++;
+                            let path = this.game.stageManager.getLinearPath(entityA, 4, orderA.direction, orderA);
                             let targets = [];
                             for (var k = 0; k < path.length; k++) {
                                 let targetPosition = entityBState.moveHasBeenBlocked ? positionBBeforeOrder : positionB;
                                 if (path[k].x == targetPosition.x && path[k].y == targetPosition.y) {
-                                    targets.push({entity: entityB, state: entityBState});
-                                    entityBState.isBurned = true;
+                                    targets.push(entityB);
+                                    entityBHpLost += 2;
                                 }
                             }
                             orderA.targets = targets;
                         }
 
-                        if (entityBState.isHurt) { hpLost = 1; }
-                        if (entityBState.isBurned) { hpLost = 2; }
-
-                        step[j].entityState['hp'] = previousStep[j].entityState['hp'] - hpLost;
-
-                        step[i].entityState['ap'] = aIsActive ? previousStep[i].entityState['ap'] - apCost : 0;
+                        entityBState.hp = previousStep[j].entityState['hp'] - entityBHpLost;
+                        entityAState.ap = aIsActive ? previousStep[i].entityState['ap'] - entityAApCost : 0;
                     }
                 }
             }
