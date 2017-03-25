@@ -1,13 +1,19 @@
-before_script:
-  - apt-get update
-  - apt-get install lftp
-  - run npm install
+stages:
+  - test
+  - deploy
 
-job1:
+test:
+  stage: test
+  before_script:
+    - npm install
   script:
-    - run karma start spec/support/karma.conf.js
+    - karma start spec/support/karma.conf.js
 
-job2:
+deploy:
+  stage: deploy
+  before_script:
+    - apt-get update
+    - apt-get install lftp
   script:
     - lftp -u $FTP_USER,$FTP_PASSWORD ftp.edistra.com -e "mirror -e -R ./build www/cronus-arena-tactics ; quit"
   only:
