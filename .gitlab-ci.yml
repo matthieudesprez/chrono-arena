@@ -1,4 +1,4 @@
-image: node:4.2.2
+image: node
 
 stages:
   - test
@@ -9,7 +9,8 @@ test:
   before_script:
     - npm install
   script:
-    - karma start spec/support/karma.conf.js
+    - npm run serve
+    - npm run test
 
 deploy:
   stage: deploy
