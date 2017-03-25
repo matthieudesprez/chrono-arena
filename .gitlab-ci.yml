@@ -9,7 +9,7 @@ test:
   before_script:
     - npm install
   script:
-    - npm run serve
+    - npm run serve_headless
     - npm run test
 
 deploy:
