@@ -13,8 +13,9 @@ module TacticArena.Entity {
         type;
         selected;
         isBot;
+        team;
 
-        constructor(game, x, y, ext, type, id, bot, name = "") {
+        constructor(game, x, y, ext, type, id, bot, team, name = "") {
             this.game = game;
             this._id = id;
             this._name = name;
@@ -31,6 +32,7 @@ module TacticArena.Entity {
             this._apMax = 3;
             this.selected = false;
             this.isBot = bot;
+            this.team = team;
         }
 
         getReal() {
@@ -144,7 +146,8 @@ module TacticArena.Entity {
                     this.sprite._ext,
                     this.type,
                     null,
-                    false
+                    false,
+                    this.team
                 );
                 this.projection.parent = this;
                 this.projection.sprite.alpha = 0.7;

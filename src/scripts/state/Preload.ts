@@ -12,6 +12,7 @@ module TacticArena.State {
       this.load.atlasJSONArray('orc', 'assets/images/orc.png', 'assets/images/orc.json');
       this.load.atlasJSONArray('redhead', 'assets/images/redhead.png', 'assets/images/redhead.json');
       this.load.atlasJSONArray('skeleton', 'assets/images/skeleton.png', 'assets/images/skeleton.json');
+      this.load.atlasJSONArray('blondy', 'assets/images/blondy.png', 'assets/images/blondy.json');
       this.load.atlasJSONArray('fireball', 'assets/images/fireball.png', 'assets/images/fireball.json');
     }
 

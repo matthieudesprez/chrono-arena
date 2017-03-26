@@ -1048,6 +1048,7 @@ var TacticArena;
                 this.resolvePhaseFinished = new Phaser.Signal();
                 this.stepResolutionIndexChange = new Phaser.Signal();
                 this.onTurnEnded = new Phaser.Signal();
+                this.onActivePawnChange = new Phaser.Signal();
             }
             SignalManager.prototype.init = function () {
                 var self = this;
@@ -1058,7 +1059,6 @@ var TacticArena;
                     self.game.uiManager.pawnsinfosUI.updateInfos();
                 });
                 this.onOrderChange.add(function (pawn) {
-                    //self.game.uiManager.pawnsinfosUI.updateOrders(pawn, self.game.orderManager.orders);
                     self.game.uiManager.ordersnotificationsUI.update(self.game.orderManager.getOrders(pawn._id).length - 1);
                 });
                 this.onActionPlayed.add(function (pawn) {
@@ -1087,6 +1087,13 @@ var TacticArena;
                 });
                 this.onTurnEnded.add(function (activePawn) {
                     self.game.uiManager.ordersnotificationsUI.clean();
+                });
+                this.onActivePawnChange.add(function (activePawn) {
+                    self.game.uiManager.ordersnotificationsUI.clean();
+                    //this.consolelogsUI.write('au tour du joueur ' + activePawn._id);
+                    self.game.uiManager.pawnsinfosUI.select(activePawn._id);
+                    self.game.uiManager.directionUI.init(activePawn.getDirection());
+                    self.game.uiManager.actionUI.select('walk');
                 });
             };
             return SignalManager;
@@ -1227,25 +1234,21 @@ var TacticArena;
     (function (Controller) {
         var TurnManager = (function () {
             function TurnManager(game) {
-                this.pawns = game.pawns;
+                this.game = game;
                 this.currentTurnIndex = -1;
             }
             TurnManager.prototype.init = function (pawn, firstTurnCall) {
                 var _this = this;
                 if (firstTurnCall === void 0) { firstTurnCall = false; }
                 return new Promise(function (resolve, reject) {
-                    for (var i = 0; i < _this.pawns.length; i++) {
-                        _this.pawns[i].active = false;
-                        //distribution des ap va se faire à chaque début de tour
-                        if (firstTurnCall) {
-                            _this.pawns[i].setAp(3);
-                            _this.pawns[i].ghost = null;
-                        }
-                    }
                     if (firstTurnCall) {
+                        for (var i = 0; i < _this.game.pawns.length; i++) {
+                            _this.game.pawns[i].setAp(3);
+                            _this.game.pawns[i].ghost = null;
+                        }
                         _this.currentTurnIndex++;
                     }
-                    pawn.active = true;
+                    _this.setActivePawn(pawn);
                     resolve(true);
                 });
             };
@@ -1253,21 +1256,28 @@ var TacticArena;
                 var _this = this;
                 return new Promise(function (resolve, reject) {
                     var nextIndex = 0;
-                    for (var i = 0; i < _this.pawns.length; i++) {
-                        if (_this.pawns[i].active && (i + 1) < _this.pawns.length) {
+                    for (var i = 0; i < _this.game.pawns.length; i++) {
+                        if (_this.game.pawns[i].active && (i + 1) < _this.game.pawns.length) {
                             nextIndex = i + 1;
                         }
                     }
-                    resolve(_this.pawns[nextIndex]);
+                    resolve(_this.game.pawns[nextIndex]);
                 });
             };
             TurnManager.prototype.getActivePawn = function () {
-                for (var i = 0; i < this.pawns.length; i++) {
-                    if (this.pawns[i].active) {
-                        return this.pawns[i];
+                for (var i = 0; i < this.game.pawns.length; i++) {
+                    if (this.game.pawns[i].active) {
+                        return this.game.pawns[i];
                     }
                 }
                 return null;
+            };
+            TurnManager.prototype.setActivePawn = function (pawn) {
+                for (var i = 0; i < this.game.pawns.length; i++) {
+                    this.game.pawns[i].active = (this.game.pawns[i]._id == pawn._id);
+                }
+                this.currentTeam = pawn.team;
+                this.game.signalManager.onActivePawnChange.dispatch(pawn);
             };
             return TurnManager;
         }());
@@ -1279,7 +1289,7 @@ var TacticArena;
     var Entity;
     (function (Entity) {
         var Pawn = (function () {
-            function Pawn(game, x, y, ext, type, id, bot, name) {
+            function Pawn(game, x, y, ext, type, id, bot, team, name) {
                 if (name === void 0) { name = ""; }
                 this.game = game;
                 this._id = id;
@@ -1297,6 +1307,7 @@ var TacticArena;
                 this._apMax = 3;
                 this.selected = false;
                 this.isBot = bot;
+                this.team = team;
             }
             Pawn.prototype.getReal = function () {
                 return this._parent ? this._parent : this;
@@ -1401,7 +1412,7 @@ var TacticArena;
             };
             Pawn.prototype.createProjection = function () {
                 if (this.projection == null) {
-                    this.projection = new Entity.Pawn(this.game, this.getPosition().x, this.getPosition().y, this.sprite._ext, this.type, null, false);
+                    this.projection = new Entity.Pawn(this.game, this.getPosition().x, this.getPosition().y, this.sprite._ext, this.type, null, false, this.team);
                     this.projection.parent = this;
                     this.projection.sprite.alpha = 0.7;
                 }
@@ -1667,8 +1678,9 @@ var TacticArena;
                 this.pathTilesGroup = this.add.group();
                 this.pathOrdersTilesGroup = this.add.group();
                 this.pawnsSpritesGroup = this.add.group();
-                this.pawns.push(new TacticArena.Entity.Pawn(this, 8, 8, 'E', 'redhead', this.getUniqueId(), false, 'Eikio'));
-                this.pawns.push(new TacticArena.Entity.Pawn(this, 10, 8, 'W', 'skeleton', this.getUniqueId(), false, 'Dormammu'));
+                this.pawns.push(new TacticArena.Entity.Pawn(this, 8, 8, 'E', 'redhead', this.getUniqueId(), false, 1, 'Eikio'));
+                this.pawns.push(new TacticArena.Entity.Pawn(this, 7, 7, 'E', 'blondy', this.getUniqueId(), false, 1, 'Diana'));
+                this.pawns.push(new TacticArena.Entity.Pawn(this, 10, 8, 'W', 'skeleton', this.getUniqueId(), false, 2, 'Dormammu'));
                 this.stageManager.addDecorations();
                 this.pathfinder = new EasyStar.js();
                 this.pathfinder.setAcceptableTiles([-1]);
@@ -1740,6 +1752,7 @@ var TacticArena;
                 this.load.atlasJSONArray('orc', 'assets/images/orc.png', 'assets/images/orc.json');
                 this.load.atlasJSONArray('redhead', 'assets/images/redhead.png', 'assets/images/redhead.json');
                 this.load.atlasJSONArray('skeleton', 'assets/images/skeleton.png', 'assets/images/skeleton.json');
+                this.load.atlasJSONArray('blondy', 'assets/images/blondy.png', 'assets/images/blondy.json');
                 this.load.atlasJSONArray('fireball', 'assets/images/fireball.png', 'assets/images/fireball.json');
             };
             Preload.prototype.create = function () {
@@ -1822,11 +1835,9 @@ var TacticArena;
                     self.menu.cancelAction();
                 });
                 this.element.find('.walk').on('click', function () {
-                    self.deselectAll();
                     self.select('walk');
                 });
                 this.element.find('.fire').on('click', function () {
-                    self.deselectAll();
                     self.select('fire');
                 });
                 this.element.find('.walk').trigger('click');
@@ -1835,6 +1846,7 @@ var TacticArena;
                 this.element.find('li').removeClass('selected');
             };
             Action.prototype.select = function (name) {
+                this.deselectAll();
                 this.element.find('.' + name).addClass('selected');
             };
             Action.prototype.canOrderMove = function () {
@@ -2029,8 +2041,8 @@ var TacticArena;
             function Notifications(menu) {
                 var self = this;
                 this.menu = menu;
-                this.menu.element.append('<div class="ui-notifications"></div>');
-                this.element = this.menu.element.find('.ui-notifications');
+                this.menu.element.append('<div class="ui-notifications ui-steps-notifications"></div>');
+                this.element = this.menu.element.find('.ui-steps-notifications');
                 this.directionMapping = {
                     'W': "l'Ouest",
                     'E': "l'Est",
@@ -2183,9 +2195,10 @@ var TacticArena;
         var PawnsInfos = (function () {
             function PawnsInfos(menu) {
                 this.menu = menu;
+                var self = this;
                 var html = '<div class="ui-pawns-infos">';
                 for (var i = 0; i < this.menu.game.pawns.length; i++) {
-                    html += '<div class="pawn pawn0' + this.menu.game.pawns[i]._id + '">' +
+                    html += '<div pawn-index="' + i + '" class="pawn pawn0' + this.menu.game.pawns[i]._id + ' ' + this.menu.game.pawns[i].type + ' team-' + this.menu.game.pawns[i].team + '">' +
                         '<div class="avatar"><div class="picture shiny"></div></div>' +
                         '<div class="name">' + this.menu.game.pawns[i]._name + '</div>' +
                         //'<div class="orders"></div> ' +
@@ -2208,6 +2221,12 @@ var TacticArena;
                 html += '</div>';
                 this.menu.element.append(html);
                 this.element = this.menu.element.find('.ui-pawns-infos');
+                this.element.find('.pawn').on('click', function () {
+                    var selectedPawn = self.menu.game.pawns[parseInt($(this).attr('pawn-index'))];
+                    if (selectedPawn.team == self.menu.game.turnManager.currentTeam) {
+                        self.menu.game.turnManager.setActivePawn(selectedPawn);
+                    }
+                });
             }
             PawnsInfos.prototype.select = function (id) {
                 this.deselectAll();
@@ -2657,9 +2676,6 @@ var TacticArena;
             }
             UIManager.prototype.init = function () {
                 var activePawn = this.game.turnManager.getActivePawn();
-                this.directionUI.init(activePawn.getDirection());
-                //this.consolelogsUI.write('au tour du joueur ' + activePawn._id);
-                this.pawnsinfosUI.select(activePawn._id);
             };
             UIManager.prototype.initOrderPhase = function (pawn, first) {
                 var _this = this;
@@ -2719,7 +2735,7 @@ var TacticArena;
                 }, 500);
                 this.timelineUI.clean();
                 this.timeUI.updatePauseFromSelected();
-                this.initOrderPhase(this.game.turnManager.pawns[0], true);
+                this.initOrderPhase(this.game.pawns[0], true);
             };
             UIManager.prototype.cancelAction = function () {
                 if (!this.game.process) {

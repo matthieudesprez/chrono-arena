@@ -10,6 +10,7 @@ module TacticArena.Controller {
         resolvePhaseFinished:Phaser.Signal;
         stepResolutionIndexChange:Phaser.Signal;
         onTurnEnded:Phaser.Signal;
+        onActivePawnChange:Phaser.Signal;
 
         constructor(game) {
             this.game = game;
@@ -23,6 +24,7 @@ module TacticArena.Controller {
             this.resolvePhaseFinished = new Phaser.Signal();
             this.stepResolutionIndexChange = new Phaser.Signal();
             this.onTurnEnded = new Phaser.Signal();
+            this.onActivePawnChange = new Phaser.Signal();
         }
 
         init() {
@@ -37,7 +39,6 @@ module TacticArena.Controller {
             });
 
             this.onOrderChange.add(function(pawn) {
-                //self.game.uiManager.pawnsinfosUI.updateOrders(pawn, self.game.orderManager.orders);
                 self.game.uiManager.ordersnotificationsUI.update(self.game.orderManager.getOrders(pawn._id).length - 1);
             });
 
@@ -71,6 +72,15 @@ module TacticArena.Controller {
 
             this.onTurnEnded.add(function(activePawn) {
                 self.game.uiManager.ordersnotificationsUI.clean();
+            });
+
+            this.onActivePawnChange.add(function(activePawn) {
+                self.game.uiManager.ordersnotificationsUI.clean();
+                //this.consolelogsUI.write('au tour du joueur ' + activePawn._id);
+                self.game.uiManager.pawnsinfosUI.select(activePawn._id);
+                self.game.uiManager.directionUI.init(activePawn.getDirection());
+                self.game.uiManager.actionUI.select('walk');
+
             });
         }
     }

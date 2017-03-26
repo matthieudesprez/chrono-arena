@@ -5,9 +5,10 @@ module TacticArena.UI {
 
         constructor(menu) {
             this.menu = menu;
+            var self = this;
             var html = '<div class="ui-pawns-infos">';
             for(var i = 0; i < this.menu.game.pawns.length; i++) {
-                html += '<div class="pawn pawn0' + this.menu.game.pawns[i]._id + '">' +
+                html += '<div pawn-index="' + i + '" class="pawn pawn0' + this.menu.game.pawns[i]._id + ' ' + this.menu.game.pawns[i].type + ' team-' + this.menu.game.pawns[i].team + '">' +
                 '<div class="avatar"><div class="picture shiny"></div></div>' +
                 '<div class="name">' + this.menu.game.pawns[i]._name + '</div>' +
                 //'<div class="orders"></div> ' +
@@ -30,6 +31,13 @@ module TacticArena.UI {
             html += '</div>';
             this.menu.element.append(html);
             this.element = this.menu.element.find('.ui-pawns-infos');
+
+            this.element.find('.pawn').on('click', function () {
+                let selectedPawn = self.menu.game.pawns[parseInt($(this).attr('pawn-index'))];
+                if(selectedPawn.team == self.menu.game.turnManager.currentTeam) {
+                    self.menu.game.turnManager.setActivePawn(selectedPawn);
+                }
+            });
         }
 
         select(id) {

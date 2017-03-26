@@ -53,9 +53,6 @@ module TacticArena.UI {
 
         init() {
             var activePawn = this.game.turnManager.getActivePawn();
-            this.directionUI.init(activePawn.getDirection());
-            //this.consolelogsUI.write('au tour du joueur ' + activePawn._id);
-            this.pawnsinfosUI.select(activePawn._id);
         }
 
         initOrderPhase(pawn, first) {
@@ -115,7 +112,7 @@ module TacticArena.UI {
             }, 500);
             this.timelineUI.clean();
             this.timeUI.updatePauseFromSelected();
-            this.initOrderPhase(this.game.turnManager.pawns[0], true);
+            this.initOrderPhase(this.game.pawns[0], true);
         }
 
         cancelAction() {

@@ -9,8 +9,8 @@ module TacticArena.UI {
         constructor(menu) {
             var self = this;
             this.menu = menu;
-            this.menu.element.append('<div class="ui-notifications"></div>');
-            this.element = this.menu.element.find('.ui-notifications');
+            this.menu.element.append('<div class="ui-notifications ui-steps-notifications"></div>');
+            this.element = this.menu.element.find('.ui-steps-notifications');
             this.directionMapping = {
                 'W': "l'Ouest",
                 'E': "l'Est",

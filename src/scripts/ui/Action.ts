@@ -24,11 +24,9 @@ module TacticArena.UI {
                 self.menu.cancelAction();
             });
             this.element.find('.walk').on('click', function () {
-                self.deselectAll();
                 self.select('walk');
             });
             this.element.find('.fire').on('click', function () {
-                self.deselectAll();
                 self.select('fire');
             });
 
@@ -40,6 +38,7 @@ module TacticArena.UI {
         }
 
         select(name) {
+            this.deselectAll();
             this.element.find('.' + name).addClass('selected');
         }
 

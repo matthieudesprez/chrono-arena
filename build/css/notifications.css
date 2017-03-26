@@ -19,6 +19,6 @@
     margin: 0 0 10px 0;
 }
 
-.ui-notifications .item-0 {
-    /*display: none !important;*/
+.ui-steps-notifications .item-0 {
+    display: none !important;
 }

@@ -1,22 +1,22 @@
-image: node
+#image: node
 
-cache:
-  untracked: true
-  key: "$CI_BUILD_REF_NAME"
-  paths:
-    - node_modules/
+#cache:
+#  untracked: true
+#  key: "$CI_BUILD_REF_NAME"
+#  paths:
+#    - node_modules/
 
 stages:
-  - test
+#  - test
   - deploy
 
-test:
-  stage: test
-  before_script:
-    - npm install
-  script:
-    - npm run serve_headless
-    - npm run test
+#test:
+#  stage: test
+#  before_script:
+#    - npm install
+#  script:
+#    - npm run serve_headless
+#    - npm run test
 
 deploy:
   stage: deploy

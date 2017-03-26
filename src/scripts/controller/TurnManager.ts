@@ -1,27 +1,24 @@
 module TacticArena.Controller {
     export class TurnManager {
-        pawns;
 		currentTurnIndex;
+		currentTeam;
+		game;
 
         constructor(game) {
-            this.pawns = game.pawns;
+			this.game = game;
 			this.currentTurnIndex = -1;
         }
 
         init(pawn, firstTurnCall = false) {
             return new Promise((resolve, reject) => {
-	        	for(var i = 0; i < this.pawns.length; i++) {
-	        		this.pawns[i].active = false;
-                    //distribution des ap va se faire à chaque début de tour
-					if(firstTurnCall) {
-						this.pawns[i].setAp(3);
-                        this.pawns[i].ghost = null;
-					}
-	        	}
 				if(firstTurnCall) {
+					for (var i = 0; i < this.game.pawns.length; i++) {
+						this.game.pawns[i].setAp(3);
+						this.game.pawns[i].ghost = null;
+					}
 					this.currentTurnIndex++;
 				}
-                pawn.active = true;
+                this.setActivePawn(pawn);
 	        	resolve(true);
         	});
         }
@@ -29,22 +26,30 @@ module TacticArena.Controller {
         endTurn() {
             return new Promise((resolve, reject) => {
 	        	var nextIndex = 0;
-	        	for(var i = 0; i < this.pawns.length; i++) {
-	        		if(this.pawns[i].active && (i + 1) < this.pawns.length) {
+	        	for(var i = 0; i < this.game.pawns.length; i++) {
+	        		if(this.game.pawns[i].active && (i + 1) < this.game.pawns.length) {
 	        			nextIndex = i + 1;
 	        		}
 	        	}
-	        	resolve(this.pawns[nextIndex]);
+	        	resolve(this.game.pawns[nextIndex]);
         	});
         }
 
         getActivePawn():Entity.Pawn {
-        	for(var i = 0; i < this.pawns.length; i++) {
-        		if(this.pawns[i].active) {
-        			return this.pawns[i];
+        	for(var i = 0; i < this.game.pawns.length; i++) {
+        		if(this.game.pawns[i].active) {
+        			return this.game.pawns[i];
         		}
         	}
         	return null;
         }
-    }
+
+		setActivePawn(pawn) {
+			for(var i = 0; i < this.game.pawns.length; i++) {
+				this.game.pawns[i].active = (this.game.pawns[i]._id == pawn._id);
+			}
+			this.currentTeam = pawn.team;
+			this.game.signalManager.onActivePawnChange.dispatch(pawn);
+		}
+	}
 }
