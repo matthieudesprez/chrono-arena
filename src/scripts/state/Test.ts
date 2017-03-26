@@ -20,7 +20,6 @@ module TacticArena.State {
         pointer;
         isPaused: Boolean;
 
-
         preload() {
             this.load.tilemap('map', 'assets/json/map.json', null, Phaser.Tilemap.TILED_JSON);
             this.load.image('tiles-collection', 'assets/images/maptiles.png');
@@ -36,8 +35,6 @@ module TacticArena.State {
 
             this.stageManager = new Controller.StageManager(this);
             this.stageManager.init();
-
-            this.pointer = new UI.Pointer(this);
 
             this.pawns = [];
             this.pathTilesGroup = this.add.group();

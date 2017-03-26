@@ -39,7 +39,8 @@ module TacticArena.State {
             this.pawnsSpritesGroup = this.add.group();
             this.pawns.push(new Entity.Pawn(this, 8, 8, 'E', 'redhead', this.getUniqueId(), false, 1, 'Eikio'));
             this.pawns.push(new Entity.Pawn(this, 7, 7, 'E', 'blondy', this.getUniqueId(), false, 1, 'Diana'));
-            this.pawns.push(new Entity.Pawn(this, 10, 8, 'W', 'skeleton', this.getUniqueId(), false, 2, 'Dormammu'));
+            this.pawns.push(new Entity.Pawn(this, 11, 8, 'W', 'skeleton', this.getUniqueId(), false, 2, 'Fétide'));
+            this.pawns.push(new Entity.Pawn(this, 12, 7, 'W', 'skeleton', this.getUniqueId(), false, 2, 'Oscar'));
 
             this.stageManager.addDecorations();
 

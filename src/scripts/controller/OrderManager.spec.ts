@@ -25,14 +25,14 @@ module TacticArena.Specs {
             spyOn(console, 'warn').and.stub();
             testGame = new TestGame(true);
             testGame.state.start('test');
-            testGame.state.onStateChange.add(function() {
+            testGame.state.onStateChange.add(function () {
                 currentState = testGame.state.getCurrentState();
-                setTimeout(function() {
+                setTimeout(function () {
                     currentState.pawns = [];
                     currentState.pathTilesGroup = currentState.add.group();
                     currentState.pawnsSpritesGroup = currentState.add.group();
-                    currentState.pawns.push(new Entity.Pawn(currentState, 8, 8, 'E', 'skeleton', 1, false, 'Eikio'));
-                    currentState.pawns.push(new Entity.Pawn(currentState, 10, 8, 'W', 'skeleton', 2, false, 'Dormammu'));
+                    currentState.pawns.push(new Entity.Pawn(currentState, 8, 8, 'E', 'skeleton', 1, false, 1, 'Eikio'));
+                    currentState.pawns.push(new Entity.Pawn(currentState, 10, 8, 'W', 'skeleton', 2, false, 2, 'Dormammu'));
                     done();
                 }, 200);
             });
@@ -45,8 +45,8 @@ module TacticArena.Specs {
 
         describe("2 players / Fleerate 0%", () => {
             beforeEach(function () {
-                spyOn(currentState.orderManager, 'resolutionEsquive').and.callFake(() => {
-                   return true;
+                spyOn(TacticArena.Controller.OrderManager, 'resolutionEsquive').and.callFake(() => {
+                    return true;
                 });
             });
 
@@ -65,7 +65,7 @@ module TacticArena.Specs {
                     {
                         entity: currentState.pawns[0],
                         list: [
-                            { action: "stand", direction: "E", x: 8, y: 8 }
+                            {action: "stand", direction: "E", x: 8, y: 8}
                         ]
                     }
                 ];
@@ -83,8 +83,8 @@ module TacticArena.Specs {
                     {
                         entity: currentState.pawns[0],
                         list: [
-                            { action: "move", direction: "E", x: 9, y: 8 },
-                            { action: "move", direction: "E", x: 10, y: 8 }
+                            {action: "move", direction: "E", x: 9, y: 8},
+                            {action: "move", direction: "E", x: 10, y: 8}
                         ]
                     }
                 ];
@@ -104,14 +104,14 @@ module TacticArena.Specs {
                     {
                         entity: currentState.pawns[0],
                         list: [
-                            { action: "move",  direction: "E", x: 9, y: 8 },
-                            { action: "move", direction: "E", x: 9, y: 9 },
+                            {action: "move", direction: "E", x: 9, y: 8},
+                            {action: "move", direction: "E", x: 9, y: 9},
                         ]
                     },
                     {
                         entity: currentState.pawns[1],
                         list: [
-                            { action: "move", direction: "W", x: 9, y: 8 }
+                            {action: "move", direction: "W", x: 9, y: 8}
                         ]
                     }
                 ];
@@ -131,9 +131,9 @@ module TacticArena.Specs {
                     {
                         entity: currentState.pawns[0],
                         list: [
-                            { action: "move", direction: "E", x: 9, y: 8 },
-                            { action: "move", direction: "E", x: 9, y: 9 },
-                            { action: "move", direction: "E", x: 10, y: 9 }
+                            {action: "move", direction: "E", x: 9, y: 8},
+                            {action: "move", direction: "E", x: 9, y: 9},
+                            {action: "move", direction: "E", x: 10, y: 9}
                         ]
                     }
                 ];
@@ -155,9 +155,9 @@ module TacticArena.Specs {
                     {
                         entity: currentState.pawns[0],
                         list: [
-                            { action: "stand", direction: "S", x: 8, y: 8 },
-                            { action: "move", direction: "S", x: 9, y: 8 },
-                            { action: "move", direction: "S", x: 9, y: 9 }
+                            {action: "stand", direction: "S", x: 8, y: 8},
+                            {action: "move", direction: "S", x: 9, y: 8},
+                            {action: "move", direction: "S", x: 9, y: 9}
                         ]
                     }
                 ];
@@ -179,16 +179,16 @@ module TacticArena.Specs {
                     {
                         entity: currentState.pawns[0],
                         list: [
-                            { action: "move", direction: "E", x: 8, y: 7 },
-                            { action: "cast", direction: "E", x: 8, y: 7 }
+                            {action: "move", direction: "E", x: 8, y: 7},
+                            {action: "cast", direction: "E", x: 8, y: 7}
                         ]
                     },
                     {
                         entity: currentState.pawns[1],
                         list: [
-                            { action: "move", direction: "W", x: 10, y: 7 },
-                            { action: "move", direction: "W", x: 9, y: 7 },
-                            { action: "move", direction: "W", x: 8, y: 7 }
+                            {action: "move", direction: "W", x: 10, y: 7},
+                            {action: "move", direction: "W", x: 9, y: 7},
+                            {action: "move", direction: "W", x: 8, y: 7}
                         ]
                     },
                 ];
@@ -211,15 +211,15 @@ module TacticArena.Specs {
                     {
                         entity: currentState.pawns[0],
                         list: [
-                            { action: "cast", direction: "E", x: 8, y: 8 }
+                            {action: "cast", direction: "E", x: 8, y: 8}
                         ]
                     },
                     {
                         entity: currentState.pawns[1],
                         list: [
-                            { action: "move", direction: "W", x: 9, y: 8 },
-                            { action: "move", direction: "W", x: 8, y: 8 },
-                            { action: "move", direction: "W", x: 7, y: 8 }
+                            {action: "move", direction: "W", x: 9, y: 8},
+                            {action: "move", direction: "W", x: 8, y: 8},
+                            {action: "move", direction: "W", x: 7, y: 8}
                         ]
                     },
                 ];

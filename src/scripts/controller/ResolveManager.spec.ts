@@ -50,8 +50,8 @@ module TacticArena.Specs {
                     currentState.pawns = [];
                     currentState.pathTilesGroup = currentState.add.group();
                     currentState.pawnsSpritesGroup = currentState.add.group();
-                    currentState.pawns.push(new Entity.Pawn(currentState, 8, 8, 'E', 'skeleton', 1, false, 'Eikio'));
-                    currentState.pawns.push(new Entity.Pawn(currentState, 10, 8, 'W', 'skeleton', 2, false, 'Dormammu'));
+                    currentState.pawns.push(new Entity.Pawn(currentState, 8, 8, 'E', 'skeleton', 1, false, 1, 'Eikio'));
+                    currentState.pawns.push(new Entity.Pawn(currentState, 10, 8, 'W', 'skeleton', 2, false, 2, 'Dormammu'));
                     currentState.isPaused = true;
                     done();
                 }, 200);

@@ -39,7 +39,7 @@ module TacticArena.Controller {
             });
 
             this.onOrderChange.add(function(pawn) {
-                self.game.uiManager.ordersnotificationsUI.update(self.game.orderManager.getOrders(pawn._id).length - 1);
+                self.game.uiManager.ordersnotificationsUI.update(self.game.orderManager.getOrders(pawn._id));
             });
 
             this.onActionPlayed.add(function(pawn) {
@@ -76,11 +76,11 @@ module TacticArena.Controller {
 
             this.onActivePawnChange.add(function(activePawn) {
                 self.game.uiManager.ordersnotificationsUI.clean();
-                //this.consolelogsUI.write('au tour du joueur ' + activePawn._id);
+                self.game.uiManager.ordersnotificationsUI.update(self.game.orderManager.getOrders(activePawn._id));
                 self.game.uiManager.pawnsinfosUI.select(activePawn._id);
                 self.game.uiManager.directionUI.init(activePawn.getDirection());
                 self.game.uiManager.actionUI.select('walk');
-
+                //this.consolelogsUI.write('au tour du joueur ' + activePawn._id);
             });
         }
     }

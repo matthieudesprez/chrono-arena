@@ -18,7 +18,8 @@ module TacticArena.UI {
         }
 
         clean() {
-            this.remove(this.element.find('div[class*="item-"]'));
+            //this.remove(this.element.find('div[class*="item-"]'));
+            this.element.html('');
             this.menu.game.stageManager.clearPath(this.menu.game.pathOrdersTilesGroup);
         }
 
@@ -32,10 +33,13 @@ module TacticArena.UI {
             }
         }
 
-        update(index) {
-            console.log(index);
-            if(index >= 0) {
-                this.add($('<div class="item-' + index + '" style="opacity:0; margin-right:-200px;">' + this.getMessage(index) + '</div>'));
+        update(orders) {
+            if(orders.length > 0) {
+                for(var i = 0; i < orders.length; i++) {
+                    if(this.element.find('.item-' + i).length == 0) {
+                        this.add($('<div class="item-' + i + '" style="opacity:0; margin-right:-200px;">' + this.getMessage(orders[i]) + '</div>'));
+                    }
+                }
             } else {
                 this.clean();
             }
@@ -51,26 +55,18 @@ module TacticArena.UI {
             }
         }
 
-        getMessage(index) {
+        getMessage(order) {
             let activePawn = this.menu.game.turnManager.getActivePawn();
-            let order = this.menu.game.orderManager.getOrders(activePawn._id)[index];
-            console.log(order);
             this.menu.game.stageManager.showPath([order], this.menu.game.pathOrdersTilesGroup, 0xffffff);
-            let o = order;
             let msg = '<b>' + activePawn._name + '</b>';
             if (order.action == 'move') {
-                msg += ' se déplacera en ' + o.x + ', ' + o.y;
-            } else if (o.action == 'cast') {
-                msg += ' lancera une boule de feu vers ' + this.directionMapping[o.direction];
-            } else if (o.action == 'stand') {
-                msg += ' restera en position ' + o.x + ', ' + o.y + ' et surveillera vers ' + this.directionMapping[o.direction];
+                msg += ' se déplacera en ' + order.x + ', ' + order.y;
+            } else if (order.action == 'cast') {
+                msg += ' lancera une boule de feu vers ' + this.directionMapping[order.direction];
+            } else if (order.action == 'stand') {
+                msg += ' restera en position ' + order.x + ', ' + order.y + ' et surveillera vers ' + this.directionMapping[order.direction];
             }
-            console.log(msg);
             return '<span style="color:#ffffff;">' + msg + '</span>';
-        }
-
-        hilightPath(position) {
-
         }
     }
 }
