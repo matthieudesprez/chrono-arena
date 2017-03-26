@@ -1,13 +1,23 @@
 image: node
 
+cache:
+  untracked: true
+  key: "$CI_BUILD_REF_NAME"
+  paths:
+    - node_modules/
+
 stages:
+  - setup
   - test
   - deploy
 
+setup:
+  stage: setup
+  script:
+    - npm install
+
 test:
   stage: test
-  before_script:
-    - npm install
   script:
     - npm run serve_headless
     - npm run test
