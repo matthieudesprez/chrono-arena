@@ -31,11 +31,23 @@ module TacticArena.Controller {
             this.map.createLayer('Decorations3');
         }
 
-        canMove(x, y) {
-            if (this.grid[y]) {
-                return this.grid[y][x] == -1;
-            }
-            return false;
+        canMove(entity, x, y, ap) {
+            return new Promise((resolve, reject) => {
+                this.equalPositions(entity.getPosition(), {x: x, y: y});
+                this.game.pathfinder.findPath(entity.getPosition().x, entity.getPosition().y, x, y, function (path) {
+                    if (path && path.length > 0) {
+                        path.shift();
+                        if (path.length > ap) {
+                            reject(path);
+                        } else {
+                            resolve(path);
+                        }
+                    } else {
+                        reject(path);
+                    }
+                });
+                this.game.pathfinder.calculate();
+            });
         }
 
         getLinearPath(pawn, distance, direction = null, position = null) {
@@ -87,25 +99,25 @@ module TacticArena.Controller {
             this.map.layers[0].dirty = true;
         }
 
-        showPath(path, tint = null) {
+        showPath(path, group, tint = null) {
             for (var i = 0; i < (path as any).length; i++) {
                 let tile = this.map.getTile(path[i].x, path[i].y, this.map.layer[0], true);
                 let tileSprite = new Phaser.Sprite(this.game, tile.x * this.game.tileSize, tile.y * this.game.tileSize, 'path-tile', '');
                 if (tint) {
                     tileSprite.tint = tint;
                 }
-                this.game.pathTilesGroup.add(tileSprite);
+                group.add(tileSprite);
             }
         }
 
 
-        clearPath() {
-            this.game.pathTilesGroup.removeAll();
+        clearPath(group) {
+            group.removeAll();
         }
 
         clearHelp() {
             this.clearPossibleMove();
-            this.clearPath();
+            this.clearPath(this.game.pathTilesGroup);
         }
 
         getNbTilesBetween(coordsA, coordsB) {

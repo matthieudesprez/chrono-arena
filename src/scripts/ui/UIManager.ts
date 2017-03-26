@@ -10,6 +10,7 @@ module TacticArena.UI {
         pawnsinfosUI;
         keyManager;
         notificationsUI;
+        ordersnotificationsUI;
         transitionUI;
         turnIndicatorUI;
         process;
@@ -27,6 +28,7 @@ module TacticArena.UI {
             this.pawnsinfosUI = new UI.PawnsInfos(this);
             this.keyManager = new UI.KeyManager(this);
             this.notificationsUI = new UI.Notifications(this);
+            this.ordersnotificationsUI = new UI.OrdersNotifications(this);
             this.transitionUI = new UI.Transition(this);
             this.turnIndicatorUI = new UI.TurnIndicator(this);
 
@@ -75,10 +77,11 @@ module TacticArena.UI {
             var activePawn = this.game.turnManager.getActivePawn();
             if (!this.game.process) {
                 this.game.stageManager.clearPossibleMove();
-                this.game.stageManager.clearPath();
+                this.game.stageManager.clearPath(this.game.pathTilesGroup);
                 this.game.process = true;
                 this.game.selecting = false;
                 this.game.turnManager.endTurn().then((nextPawn) => {
+                    this.game.signalManager.onTurnEnded.dispatch(activePawn);
                     if (activePawn._id == this.game.pawns[this.game.pawns.length-1]._id) { // Si le dernier pawn a joué
                         this.actionUI.clean();
                         this.directionUI.clean();

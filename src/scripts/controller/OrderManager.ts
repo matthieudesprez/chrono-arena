@@ -31,7 +31,7 @@ module TacticArena.Controller {
             return false;
         }
 
-        add(action, entity, x, y, direction = null) {
+        add(action, entity, x, y, direction = null, triggerDispatch = true) {
             if (!this.hasOrder(entity._id)) {
                 this.orders.push({
                     'entity': entity,
@@ -49,7 +49,18 @@ module TacticArena.Controller {
                     this.orders[i].list.push(order);
                 }
             }
-            this.game.signalManager.onOrderChange.dispatch(entity);
+            if(triggerDispatch) {
+                this.game.signalManager.onOrderChange.dispatch(entity);
+            }
+        }
+
+        getOrders(entity_id) {
+            for (var i = 0; i < this.orders.length; i++) {
+                if (this.orders[i].entity._id == entity_id) {
+                    return this.orders[i].list;
+                }
+            }
+            return [];
         }
 
         getMaxOrderListLength() {
@@ -76,7 +87,7 @@ module TacticArena.Controller {
                 let p = this.game.pawns[i];
                 if (!this.hasOrder(p._id)) {
                     let position = p.getPosition();
-                    this.game.orderManager.add('stand', p, position.x, position.y, p.getDirection());
+                    this.game.orderManager.add('stand', p, position.x, position.y, p.getDirection(), false);
                 }
             }
         }

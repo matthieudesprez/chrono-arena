@@ -7,7 +7,7 @@
     "watch": "tsc -w --outDir build",
     "clean": "rm -rf build",
     "serve": "lite-server",
-    "serve_headless": "lite-server -c ./bs-config-gitalb-ci.json",
+    "serve_headless": "lite-server -c ./bs-config-gitlab-ci.json",
     "test": "karma start spec/support/karma.conf.js",
     "build": "tsc && concurrent \"cp src/index.html build\" \"cp -R src/vendor src/css src/assets build\"",
     "cp": "concurrent \"cp src/index.html build\" \"cp src/tests.html build\" \"cp -R src/vendor src/css src/assets build\"",

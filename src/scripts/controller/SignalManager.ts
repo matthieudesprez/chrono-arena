@@ -9,6 +9,7 @@ module TacticArena.Controller {
         stepResolutionFinished:Phaser.Signal;
         resolvePhaseFinished:Phaser.Signal;
         stepResolutionIndexChange:Phaser.Signal;
+        onTurnEnded:Phaser.Signal;
 
         constructor(game) {
             this.game = game;
@@ -21,6 +22,7 @@ module TacticArena.Controller {
             this.stepResolutionFinished = new Phaser.Signal();
             this.resolvePhaseFinished = new Phaser.Signal();
             this.stepResolutionIndexChange = new Phaser.Signal();
+            this.onTurnEnded = new Phaser.Signal();
         }
 
         init() {
@@ -35,7 +37,8 @@ module TacticArena.Controller {
             });
 
             this.onOrderChange.add(function(pawn) {
-                self.game.uiManager.pawnsinfosUI.updateOrders(pawn, self.game.orderManager.orders);
+                //self.game.uiManager.pawnsinfosUI.updateOrders(pawn, self.game.orderManager.orders);
+                self.game.uiManager.ordersnotificationsUI.update(self.game.orderManager.getOrders(pawn._id).length - 1);
             });
 
             this.onActionPlayed.add(function(pawn) {
@@ -64,6 +67,10 @@ module TacticArena.Controller {
             this.stepResolutionIndexChange.add(function(stepIndex) {
                 self.game.uiManager.notificationsUI.update(stepIndex);
                 self.game.uiManager.timelineUI.update(stepIndex);
+            });
+
+            this.onTurnEnded.add(function(activePawn) {
+                self.game.uiManager.ordersnotificationsUI.clean();
             });
         }
     }

@@ -100,32 +100,6 @@ module TacticArena.Entity {
             this.sprite.addChild(label);
         }
 
-        preMoveTo(targetX, targetY) {
-            var self = this;
-            return new Promise((resolve, reject) => {
-                if(!this.game.stageManager.canMove(targetX, targetY)) {
-                    reject(false);
-                }
-                this.game.pathfinder.findPath(
-                    this.getPosition().x,
-                    this.getPosition().y,
-                    targetX,
-                    targetY,
-                    function(path) {
-                        if(path && path.length > 0) {
-                            path.shift();
-                            var result = JSON.parse(JSON.stringify(path));
-                            self.moveTo(0, 0, path).then((res) => {
-                                self.destroyProjectionIfSamePosition();
-                                resolve(result);
-                            });
-                        }
-                    }
-                );
-                this.game.pathfinder.calculate();
-            });
-        }
-
         moveTo(x, y, path, animate = true) {
             return new Promise((resolve, reject) => {
                 var tile_y, tile_x;

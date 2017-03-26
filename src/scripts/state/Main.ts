@@ -4,6 +4,7 @@ module TacticArena.State {
         layer: Phaser.TilemapLayer;
         pawns: Entity.Pawn[];
         pathTilesGroup;
+        pathOrdersTilesGroup;
         pawnsSpritesGroup;
         pathfinder;
         tileSize: number;
@@ -34,6 +35,7 @@ module TacticArena.State {
 
             this.pawns = [];
             this.pathTilesGroup = this.add.group();
+            this.pathOrdersTilesGroup = this.add.group();
             this.pawnsSpritesGroup = this.add.group();
             this.pawns.push(new Entity.Pawn(this, 8, 8, 'E', 'redhead', this.getUniqueId(), false, 'Eikio'));
             this.pawns.push(new Entity.Pawn(this, 10, 8, 'W', 'skeleton', this.getUniqueId(), false, 'Dormammu'));
