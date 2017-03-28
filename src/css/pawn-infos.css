@@ -1,19 +1,20 @@
 .ui-pawns-infos {
     position: absolute;
-    width: 200px;
-    left: -210px;
+    width: 300px;
+    left: -310px;
     top: 0px;
     height: auto;
 }
 
 .ui-pawns-infos .pawn {
-    height: 200px;
-    width: 150px;
+    height: 120px;
+    width: 300px;
     margin: 0 0 10px auto;
     position: relative;
     background: rgba(100, 100, 100, 0.8);
     opacity: 0.5;
     border: 2px solid black;
+    cursor: pointer;
 }
 
 .ui-pawns-infos .pawn.team-1 { background: rgba(100, 100, 100, 0.8); }
@@ -29,14 +30,14 @@
     width: 98px;
     height: 98px;
     border-radius: 50%;
-    left: 26px;
+    left: 10px;
     top: 10px;
     overflow: hidden;
 }
 
-.ui-pawns-infos .pawn.active {
-    opacity: 1;
-}
+.ui-pawns-infos .pawn.active { opacity: 1; }
+.ui-pawns-infos .pawn.dead { opacity: 0.2; }
+.ui-pawns-infos .pawn.dead .name:before { content:"✝ " }
 
 .ui-pawns-infos .avatar .picture {
     position: relative;
@@ -50,18 +51,20 @@
 
 .ui-pawns-infos .name {
     position: absolute;
-    top: 115px;
+    top: 10px;
+    right: 10px;
     width: 100%;
-    text-align: center;
+    text-align: right;
     color: #ffffff;
 }
 
 .ui-pawns-infos .infos {
     position: absolute;
-    width: 100%;
+    width: 60%;
     bottom: 10px;
     text-align: left;
     font-size: 18px;
+    right: 0px;
 }
 
 .ui-pawns-infos .infos .bar {

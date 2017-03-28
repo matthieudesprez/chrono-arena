@@ -56,6 +56,7 @@ module TacticArena.UI {
         updateInfos() {
             for(var i=0; i < this.menu.game.pawns.length; i++) {
                 let entity = this.menu.game.pawns[i];
+                this.element.find('.pawn0' + entity._id).toggleClass('dead', !entity.isAlive());
                 this.element.find('.pawn0' + entity._id + ' .infos .hp .value').html(entity.getHp());
                 this.element.find('.pawn0' + entity._id + ' .infos .hp .bar .content').css('width', ((entity.getHp() / entity._hpMax) * 100) + '%');
                 this.element.find('.pawn0' + entity._id + ' .infos .ap .value').html(entity.getAp());

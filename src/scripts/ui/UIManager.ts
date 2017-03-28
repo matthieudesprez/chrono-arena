@@ -51,10 +51,6 @@ module TacticArena.UI {
             //});
         }
 
-        init() {
-            var activePawn = this.game.turnManager.getActivePawn();
-        }
-
         initOrderPhase(pawn, first) {
             this.game.turnManager.init(pawn, first).then((data) => {
                 if(first) {
@@ -65,7 +61,6 @@ module TacticArena.UI {
                         return true;
                     });
                 }
-                this.init();
                 this.game.signalManager.turnInitialized.dispatch(pawn);
             });
         }
@@ -79,7 +74,7 @@ module TacticArena.UI {
                 this.game.selecting = false;
                 this.game.turnManager.endTurn().then((nextPawn) => {
                     this.game.signalManager.onTurnEnded.dispatch(activePawn);
-                    if (activePawn._id == this.game.pawns[this.game.pawns.length-1]._id) { // Si le dernier pawn a joué
+                    if(this.game.turnManager.getRemainingPawns().length == 0) {
                         this.actionUI.clean();
                         this.directionUI.clean();
                         let steps = this.game.orderManager.getSteps();

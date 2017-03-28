@@ -2,11 +2,13 @@ module TacticArena.Controller {
     export class TurnManager {
 		currentTurnIndex;
 		currentTeam;
+		playedPawns;
 		game;
 
         constructor(game) {
 			this.game = game;
 			this.currentTurnIndex = -1;
+			this.playedPawns = [];
         }
 
         init(pawn, firstTurnCall = false) {
@@ -17,21 +19,30 @@ module TacticArena.Controller {
 						this.game.pawns[i].ghost = null;
 					}
 					this.currentTurnIndex++;
+					this.playedPawns = [];
 				}
                 this.setActivePawn(pawn);
 	        	resolve(true);
         	});
         }
 
+		getRemainingPawns() {
+			return this.game.pawns.filter((pawn) => { return pawn.isAlive() && this.playedPawns.indexOf(pawn._id) < 0;});
+		}
+
         endTurn() {
             return new Promise((resolve, reject) => {
-	        	var nextIndex = 0;
-	        	for(var i = 0; i < this.game.pawns.length; i++) {
-	        		if(this.game.pawns[i].active && (i + 1) < this.game.pawns.length) {
-	        			nextIndex = i + 1;
-	        		}
-	        	}
-	        	resolve(this.game.pawns[nextIndex]);
+				this.setActivePawnAsPlayed();
+				var nextPawn;
+				let remainingPawns = this.getRemainingPawns();
+				if(remainingPawns.length > 0) {
+					nextPawn = remainingPawns[0];
+
+					if(nextPawn.team != this.currentTeam) {
+						this.game.signalManager.onTeamChange.dispatch();
+					}
+				}
+	        	resolve(nextPawn);
         	});
         }
 
@@ -45,11 +56,17 @@ module TacticArena.Controller {
         }
 
 		setActivePawn(pawn) {
-			for(var i = 0; i < this.game.pawns.length; i++) {
-				this.game.pawns[i].active = (this.game.pawns[i]._id == pawn._id);
+			if(pawn.isAlive()) {
+				for (var i = 0; i < this.game.pawns.length; i++) {
+					this.game.pawns[i].active = (this.game.pawns[i]._id == pawn._id);
+				}
+				this.currentTeam = pawn.team;
+				this.game.signalManager.onActivePawnChange.dispatch(pawn);
 			}
-			this.currentTeam = pawn.team;
-			this.game.signalManager.onActivePawnChange.dispatch(pawn);
+		}
+
+		setActivePawnAsPlayed() {
+			this.playedPawns.push(this.getActivePawn()._id);
 		}
 	}
 }

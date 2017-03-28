@@ -10,8 +10,8 @@ module TacticArena.UI {
                 '<div class="ui-menu-container">' +
                     '<ul class="ui-menu">' +
                         '<li class="cancel"></li>' +
-                        '<li class="fire"></li>' +
-                        '<li class="walk"></li>' +
+                        '<li class="walk">1</li>' +
+                        '<li class="fire">2</li>' +
                         '<li class="submit">Confirm</li>' +
                     '</ul>' +
                 '</div>'
@@ -40,6 +40,7 @@ module TacticArena.UI {
         select(name) {
             this.deselectAll();
             this.element.find('.' + name).addClass('selected');
+            this.menu.game.pointer.update();
         }
 
         canOrderMove() {

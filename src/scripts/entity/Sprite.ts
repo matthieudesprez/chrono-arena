@@ -42,6 +42,7 @@ module TacticArena.Entity {
             this.animations.add('halfcastN', ["castN1","castN2","castN3"], 10, false);
             this.animations.add('halfcastW', ["castW1","castW2","castW3"], 10, false);
             this.animations.add('halfcastE', ["castE1","castE2","castE3"], 10, false);
+            this.animations.add('dying', ["dying1","dying2","dying3","dying4","dying5","dying6"], 10, false);
             this.events.onAnimationComplete.add(this.animationComplete, this);
         }
 
@@ -170,6 +171,10 @@ module TacticArena.Entity {
                 tint : 0.65 * 0xffffff,
                 alpha : 0.5
             }, 100, Phaser.Easing.Exponential.Out, true, 0, 0, true);
+        }
+
+        die() {
+            this.playAnimation('dying');
         }
     }
 }

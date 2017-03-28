@@ -20,6 +20,7 @@ module TacticArena.State {
         selecting: Boolean;
         pointer;
         isPaused: Boolean;
+        hideProjections: Boolean;
 
         create() {
             var self = this;
@@ -27,6 +28,7 @@ module TacticArena.State {
             this.selecting = false;
             this.tileSize = 32;
             this.isPaused = false;
+            this.hideProjections = false;
 
             this.stageManager = new Controller.StageManager(this);
             this.stageManager.init();
@@ -60,6 +62,8 @@ module TacticArena.State {
             this.uiManager = new UI.UIManager(this);
 
             self.uiManager.initOrderPhase(this.pawns[0], true);
+
+            this.pawns[2].setHp(0);
         }
 
         update() {

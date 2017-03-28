@@ -102,6 +102,10 @@ module TacticArena.Entity {
             this.sprite.addChild(label);
         }
 
+        isAlive() {
+            return this._hp > 0;
+        }
+
         moveTo(x, y, path, animate = true) {
             return new Promise((resolve, reject) => {
                 var tile_y, tile_x;
@@ -220,6 +224,8 @@ module TacticArena.Entity {
         }
 
         setHp(hp) {
+            console.log(this._id, hp);
+            if(this.isAlive() && hp <= 0) { this.sprite.die(); }
             this._hp = hp;
             this.game.signalManager.onHpChange.dispatch(this._hp);
         }

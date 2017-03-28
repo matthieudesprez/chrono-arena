@@ -25,6 +25,10 @@
     border: 1px solid #333;
     background-size: 85%;
     transition-duration: 0.7s;
+    color: white;
+    font-size: 8px;
+    text-align: left;
+    padding: 2px;
 }
 
 .ui-menu li:hover, .ui-menu li.selected { border: 2px solid #fff; }
@@ -48,6 +52,7 @@
     width: auto;
     border: 0 none;
     background: transparent;
+    padding: 0;
 }
 .ui-menu li.pause { background-image: url('../assets/images/icons/icon-pause.png'); }
 .ui-menu li.play { background-image: url('../assets/images/icons/icon-play.png'); }

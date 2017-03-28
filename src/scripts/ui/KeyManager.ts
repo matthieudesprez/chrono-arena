@@ -8,6 +8,9 @@ module TacticArena.UI {
         upKey;
         backKey;
         spacebarKey;
+        pKey;
+        oneKey;
+        twoKey;
 
         constructor(menu) {
             this.menu = menu;
@@ -32,6 +35,15 @@ module TacticArena.UI {
 
             this.backKey = this.menu.game.input.keyboard.addKey(Phaser.KeyCode.BACKSPACE);
             this.backKey.onDown.add(this.backKeyPressed, this, 0, this.menu);
+
+            this.pKey = this.menu.game.input.keyboard.addKey(Phaser.KeyCode.P);
+            this.pKey.onDown.add(this.pKeyPress, this, 0, this.menu);
+
+            this.oneKey = this.menu.game.input.keyboard.addKey(Phaser.KeyCode.ONE);
+            this.oneKey.onDown.add(this.oneKeyPress, this, 0, this.menu);
+
+            this.twoKey = this.menu.game.input.keyboard.addKey(Phaser.KeyCode.TWO);
+            this.twoKey.onDown.add(this.twoKeyPress, this, 0, this.menu);
         }
 
        leftKeyPressed(self, uiManager) {
@@ -83,6 +95,27 @@ module TacticArena.UI {
 
         pauseResolve(self, uiManager) {
             uiManager.timeUI.togglePause();
+        }
+
+        pKeyPress(self, uiManager) {
+            if(self.altKey) {
+                uiManager.game.hideProjections = !uiManager.game.hideProjections;
+                console.log('hidden projections', uiManager.game.hideProjections);
+            }
+        }
+        oneKeyPress(self, uiManager) {
+            if(self.altKey) {
+                $('.pawn01').trigger('click');
+            } else {
+                uiManager.actionUI.select('walk');
+            }
+        }
+        twoKeyPress(self, uiManager) {
+            if(self.altKey) {
+                $('.pawn02').trigger('click');
+            } else {
+                uiManager.actionUI.select('fire');
+            }
         }
     }
 }

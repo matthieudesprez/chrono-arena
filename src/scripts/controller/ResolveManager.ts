@@ -54,6 +54,15 @@ module TacticArena.Controller {
             });
         }
 
+        createPromiseDie(entity) {
+            return new Promise((resolve, reject) => {
+                entity.die();
+                setTimeout(function () {
+                    resolve(true);
+                }, 250);
+            });
+        }
+
         init(steps) {
             console.info(steps);
             this.steps = steps;
@@ -109,9 +118,9 @@ module TacticArena.Controller {
                     let position = e.getPosition();
 
                     e.setAp(s.ap);
-                    e.setHp(s.hp);
-
-                    if (o.action == 'move') {
+                    if (s.hp <= 0) {
+                        //p = this.handleBackwardPromise(this.createPromiseDie(e), e, o, position, animate);
+                    } else if (o.action == 'move') {
                         if (s.moveHasBeenBlocked) {
                             p = this.createPromiseBlock(e, {x: o.x, y: o.y}, s.positionBlocked, animate);
                         } else {
@@ -138,6 +147,9 @@ module TacticArena.Controller {
                     if(!backward) {
                         this.manageProjectionDislay(step);
                     }
+                    step.forEach((s) => {
+                        s.entity.setHp(s.entityState.hp);
+                    });
                     this.game.signalManager.stepResolutionFinished.dispatch(index);
                     if (this.steps.length > (index + 1) && !this.game.isPaused) {
                         this.processStep(index + 1).then((res) => {
