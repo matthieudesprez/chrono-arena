@@ -237,5 +237,63 @@ module TacticArena.Specs {
                 testStep(steps, 3, 1, 2, 'attack', 'W', {x: 9, y: 8}, 0, 1, false, {});
             });
         });
+
+
+        describe("4 players / Fleerate 0%", () => {
+            beforeEach(function () {
+                spyOn(TacticArena.Controller.OrderManager, 'resolutionEsquive').and.callFake(() => {
+                    return true;
+                });
+
+                currentState.pawns.push(new Entity.Pawn(currentState, 7, 7, 'E', 'skeleton', 3, false, 2, 'Oscar'));
+                currentState.pawns.push(new Entity.Pawn(currentState, 12, 7, 'W', 'skeleton', 4, false, 1, 'Diana'));
+            });
+
+            it("with 1 dead - nothing is played", function () {
+                currentState.pawns[2].setHp(0);
+                let steps = currentState.orderManager.getSteps();
+                expect(steps.length).toEqual(2);
+                expect(steps[0].length).toEqual(4);
+                testStep(steps, 0, 0, 1, 'stand', 'E', {x: 8, y: 8}, 3, 4, false, {});
+                testStep(steps, 0, 1, 2, 'stand', 'W', {x: 10, y: 8}, 3, 4, false, {});
+                testStep(steps, 0, 2, 3, 'stand', 'E', {x: 7, y: 7}, 0, 0, false, {});
+                testStep(steps, 0, 3, 4, 'stand', 'W', {x: 12, y: 7}, 3, 4, false, {});
+                testStep(steps, 1, 0, 1, 'stand', 'E', {x: 8, y: 8}, 2, 4, false, {});
+                testStep(steps, 1, 1, 2, 'stand', 'W', {x: 10, y: 8}, 2, 4, false, {});
+                testStep(steps, 1, 2, 3, 'stand', 'E', {x: 7, y: 7}, 0, 0, false, {});
+                testStep(steps, 1, 3, 4, 'stand', 'W', {x: 12, y: 7}, 2, 4, false, {});
+            });
+
+            it("with 1 dead - 4th pawn moves", function () {
+                currentState.pawns[2].setHp(0);
+                currentState.orderManager.orders = [
+                    {
+                        entity: currentState.pawns[3],
+                        list: [
+                            {action: "move", direction: "W", x: 11, y: 7},
+                            {action: "move", direction: "W", x: 11, y: 6}
+                        ]
+                    },
+                ];
+                let steps = currentState.orderManager.getSteps();
+                expect(steps.length).toEqual(3);
+                expect(steps[0].length).toEqual(4);
+                testStep(steps, 0, 0, 4, 'stand', 'W', {x: 12, y: 7}, 3, 4, false, {});
+                testStep(steps, 0, 1, 1, 'stand', 'E', {x: 8, y: 8}, 3, 4, false, {});
+                testStep(steps, 0, 2, 2, 'stand', 'W', {x: 10, y: 8}, 3, 4, false, {});
+                testStep(steps, 0, 3, 3, 'stand', 'E', {x: 7, y: 7}, 0, 0, false, {});
+
+                testStep(steps, 1, 0, 4, 'move', 'W', {x: 11, y: 7}, 2, 4, false, {});
+                testStep(steps, 1, 1, 1, 'stand', 'E', {x: 8, y: 8}, 2, 4, false, {});
+                testStep(steps, 1, 2, 2, 'stand', 'W', {x: 10, y: 8}, 2, 4, false, {});
+                testStep(steps, 1, 3, 3, 'stand', 'E', {x: 7, y: 7}, 0, 0, false, {});
+
+                testStep(steps, 2, 0, 4, 'move', 'W', {x: 11, y: 6}, 1, 4, false, {});
+                testStep(steps, 2, 1, 1, 'stand', 'E', {x: 8, y: 8}, 1, 4, false, {});
+                testStep(steps, 2, 2, 2, 'stand', 'W', {x: 10, y: 8}, 1, 4, false, {});
+                testStep(steps, 2, 3, 3, 'stand', 'E', {x: 7, y: 7}, 0, 0, false, {});
+            });
+
+        });
     });
 }

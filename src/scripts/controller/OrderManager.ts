@@ -94,11 +94,12 @@ module TacticArena.Controller {
 
         getInitialStep() {
             var step = [];
-            for (var i = 0; i < this.game.pawns.length; i++) {
+            for (var i = 0; i < this.orders.length; i++) {
                 let state = OrderManager.getDefaultEntityState();
-                let pawn = this.game.pawns[i];
-                state['ap'] = pawn._apMax;
-                state['hp'] = pawn.getHp();
+                let pawn = this.orders[i].entity;
+                let hp = pawn.getHp();
+                state['ap'] = hp > 0 ? pawn._apMax : 0;
+                state['hp'] = hp;
                 step.push({
                     entity: pawn,
                     entityState: state,
@@ -163,6 +164,7 @@ module TacticArena.Controller {
                     step[i].entityState = OrderManager.getDefaultEntityState();
                     // Dans le cas où une entité à moins d'actions à jouer que les autres
                     // On lui en assigne un par défaut pour qu'elle ne soit pas inactive
+                    // Mais si elle n'a plus de AP elle ne fera rien à part rester dans sa position
                     if (step[i].order == null) {
                         step[i].order = OrderManager.getDefaultOrder(previousStep[i].order, previousStep[i].order.direction);
                     }
