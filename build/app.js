@@ -403,6 +403,56 @@ var TacticArena;
                     testStep(steps, 3, 1, 2, 'attack', 'W', { x: 9, y: 8 }, 0, 1, false, {});
                 });
             });
+            describe("4 players / Fleerate 0%", function () {
+                beforeEach(function () {
+                    spyOn(TacticArena.Controller.OrderManager, 'resolutionEsquive').and.callFake(function () {
+                        return true;
+                    });
+                    currentState.pawns.push(new TacticArena.Entity.Pawn(currentState, 7, 7, 'E', 'skeleton', 3, false, 2, 'Oscar'));
+                    currentState.pawns.push(new TacticArena.Entity.Pawn(currentState, 12, 7, 'W', 'skeleton', 4, false, 1, 'Diana'));
+                });
+                it("with 1 dead - nothing is played", function () {
+                    currentState.pawns[2].setHp(0);
+                    var steps = currentState.orderManager.getSteps();
+                    expect(steps.length).toEqual(2);
+                    expect(steps[0].length).toEqual(4);
+                    testStep(steps, 0, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 3, 4, false, {});
+                    testStep(steps, 0, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 3, 4, false, {});
+                    testStep(steps, 0, 2, 3, 'stand', 'E', { x: 7, y: 7 }, 0, 0, false, {});
+                    testStep(steps, 0, 3, 4, 'stand', 'W', { x: 12, y: 7 }, 3, 4, false, {});
+                    testStep(steps, 1, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 2, 4, false, {});
+                    testStep(steps, 1, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 2, 4, false, {});
+                    testStep(steps, 1, 2, 3, 'stand', 'E', { x: 7, y: 7 }, 0, 0, false, {});
+                    testStep(steps, 1, 3, 4, 'stand', 'W', { x: 12, y: 7 }, 2, 4, false, {});
+                });
+                it("with 1 dead - 4th pawn moves", function () {
+                    currentState.pawns[2].setHp(0);
+                    currentState.orderManager.orders = [
+                        {
+                            entity: currentState.pawns[3],
+                            list: [
+                                { action: "move", direction: "W", x: 11, y: 7 },
+                                { action: "move", direction: "W", x: 11, y: 6 }
+                            ]
+                        },
+                    ];
+                    var steps = currentState.orderManager.getSteps();
+                    expect(steps.length).toEqual(3);
+                    expect(steps[0].length).toEqual(4);
+                    testStep(steps, 0, 0, 4, 'stand', 'W', { x: 12, y: 7 }, 3, 4, false, {});
+                    testStep(steps, 0, 1, 1, 'stand', 'E', { x: 8, y: 8 }, 3, 4, false, {});
+                    testStep(steps, 0, 2, 2, 'stand', 'W', { x: 10, y: 8 }, 3, 4, false, {});
+                    testStep(steps, 0, 3, 3, 'stand', 'E', { x: 7, y: 7 }, 0, 0, false, {});
+                    testStep(steps, 1, 0, 4, 'move', 'W', { x: 11, y: 7 }, 2, 4, false, {});
+                    testStep(steps, 1, 1, 1, 'stand', 'E', { x: 8, y: 8 }, 2, 4, false, {});
+                    testStep(steps, 1, 2, 2, 'stand', 'W', { x: 10, y: 8 }, 2, 4, false, {});
+                    testStep(steps, 1, 3, 3, 'stand', 'E', { x: 7, y: 7 }, 0, 0, false, {});
+                    testStep(steps, 2, 0, 4, 'move', 'W', { x: 11, y: 6 }, 1, 4, false, {});
+                    testStep(steps, 2, 1, 1, 'stand', 'E', { x: 8, y: 8 }, 1, 4, false, {});
+                    testStep(steps, 2, 2, 2, 'stand', 'W', { x: 10, y: 8 }, 1, 4, false, {});
+                    testStep(steps, 2, 3, 3, 'stand', 'E', { x: 7, y: 7 }, 0, 0, false, {});
+                });
+            });
         });
     })(Specs = TacticArena.Specs || (TacticArena.Specs = {}));
 })(TacticArena || (TacticArena = {}));
@@ -495,11 +545,12 @@ var TacticArena;
             };
             OrderManager.prototype.getInitialStep = function () {
                 var step = [];
-                for (var i = 0; i < this.game.pawns.length; i++) {
+                for (var i = 0; i < this.orders.length; i++) {
                     var state = OrderManager.getDefaultEntityState();
-                    var pawn = this.game.pawns[i];
-                    state['ap'] = pawn._apMax;
-                    state['hp'] = pawn.getHp();
+                    var pawn = this.orders[i].entity;
+                    var hp = pawn.getHp();
+                    state['ap'] = hp > 0 ? pawn._apMax : 0;
+                    state['hp'] = hp;
                     step.push({
                         entity: pawn,
                         entityState: state,
@@ -559,6 +610,7 @@ var TacticArena;
                         step[i].entityState = OrderManager.getDefaultEntityState();
                         // Dans le cas où une entité à moins d'actions à jouer que les autres
                         // On lui en assigne un par défaut pour qu'elle ne soit pas inactive
+                        // Mais si elle n'a plus de AP elle ne fera rien à part rester dans sa position
                         if (step[i].order == null) {
                             step[i].order = OrderManager.getDefaultOrder(previousStep[i].order, previousStep[i].order.direction);
                         }
@@ -1103,6 +1155,7 @@ var TacticArena;
                 });
                 this.onTurnEnded.add(function (activePawn) {
                     self.game.uiManager.ordersnotificationsUI.clean();
+                    self.game.uiSpritesGroup.removeAll();
                 });
                 this.onActivePawnChange.add(function (activePawn) {
                     self.game.uiManager.ordersnotificationsUI.clean();
@@ -1110,6 +1163,10 @@ var TacticArena;
                     self.game.uiManager.pawnsinfosUI.select(activePawn._id);
                     self.game.uiManager.directionUI.init(activePawn.getDirection());
                     self.game.uiManager.actionUI.select('walk');
+                    var position = activePawn.getPosition();
+                    self.game.uiSpritesGroup.removeAll();
+                    var circleSprite = new Phaser.Sprite(self.game, position.x * self.game.tileSize - 1, position.y * self.game.tileSize + 15, 'selected-circle', '');
+                    self.game.uiSpritesGroup.add(circleSprite);
                     //this.consolelogsUI.write('au tour du joueur ' + activePawn._id);
                 });
                 this.onTeamChange.add(function () {
@@ -1727,6 +1784,7 @@ var TacticArena;
                 this.pawns = [];
                 this.pathTilesGroup = this.add.group();
                 this.pathOrdersTilesGroup = this.add.group();
+                this.uiSpritesGroup = this.add.group();
                 this.pawnsSpritesGroup = this.add.group();
                 this.pawns.push(new TacticArena.Entity.Pawn(this, 8, 8, 'E', 'redhead', this.getUniqueId(), false, 1, 'Eikio'));
                 this.pawns.push(new TacticArena.Entity.Pawn(this, 7, 7, 'E', 'blondy', this.getUniqueId(), false, 1, 'Diana'));
@@ -1799,6 +1857,7 @@ var TacticArena;
                  this.load.setPreloadSprite(this.preloadBar);*/
                 this.load.tilemap('map', 'assets/json/map.json', null, Phaser.Tilemap.TILED_JSON);
                 this.load.image('tiles-collection', 'assets/images/maptiles.png');
+                this.load.image('selected-circle', 'assets/images/selected_circle.png');
                 this.load.image('path-tile', 'assets/images/path_tile.png');
                 this.load.atlasJSONArray('player', 'assets/images/character.png', 'assets/images/character.json');
                 this.load.atlasJSONArray('orc', 'assets/images/orc.png', 'assets/images/orc.json');

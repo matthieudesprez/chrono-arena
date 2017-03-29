@@ -6,6 +6,7 @@ module TacticArena.State {
         pathTilesGroup;
         pathOrdersTilesGroup;
         pawnsSpritesGroup;
+        uiSpritesGroup;
         pathfinder;
         tileSize: number;
         turnManager: Controller.TurnManager;
@@ -38,6 +39,7 @@ module TacticArena.State {
             this.pawns = [];
             this.pathTilesGroup = this.add.group();
             this.pathOrdersTilesGroup = this.add.group();
+            this.uiSpritesGroup = this.add.group();
             this.pawnsSpritesGroup = this.add.group();
             this.pawns.push(new Entity.Pawn(this, 8, 8, 'E', 'redhead', this.getUniqueId(), false, 1, 'Eikio'));
             this.pawns.push(new Entity.Pawn(this, 7, 7, 'E', 'blondy', this.getUniqueId(), false, 1, 'Diana'));

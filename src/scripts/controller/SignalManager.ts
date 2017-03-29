@@ -74,6 +74,7 @@ module TacticArena.Controller {
 
             this.onTurnEnded.add(function(activePawn) {
                 self.game.uiManager.ordersnotificationsUI.clean();
+                self.game.uiSpritesGroup.removeAll();
             });
 
             this.onActivePawnChange.add(function(activePawn) {
@@ -82,6 +83,12 @@ module TacticArena.Controller {
                 self.game.uiManager.pawnsinfosUI.select(activePawn._id);
                 self.game.uiManager.directionUI.init(activePawn.getDirection());
                 self.game.uiManager.actionUI.select('walk');
+
+                let position = activePawn.getPosition();
+
+                self.game.uiSpritesGroup.removeAll();
+                let circleSprite = new Phaser.Sprite(self.game, position.x * self.game.tileSize - 1, position.y * self.game.tileSize + 15, 'selected-circle', '');
+                self.game.uiSpritesGroup.add(circleSprite);
                 //this.consolelogsUI.write('au tour du joueur ' + activePawn._id);
             });
 
