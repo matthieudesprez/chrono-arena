@@ -1165,8 +1165,9 @@ var TacticArena;
                     self.game.uiManager.actionUI.select('walk');
                     var position = activePawn.getPosition();
                     self.game.uiSpritesGroup.removeAll();
-                    var circleSprite = new Phaser.Sprite(self.game, position.x * self.game.tileSize - 1, position.y * self.game.tileSize + 15, 'selected-circle', '');
-                    self.game.uiSpritesGroup.add(circleSprite);
+                    var s = self.game.uiSpritesGroup.create(position.x * self.game.tileSize - 1, position.y * self.game.tileSize + 15, 'circle');
+                    s.animations.add('turn', ["selected_circle_01", "selected_circle_02"], 4, true);
+                    s.play('turn');
                     //this.consolelogsUI.write('au tour du joueur ' + activePawn._id);
                 });
                 this.onTeamChange.add(function () {
@@ -1363,7 +1364,8 @@ var TacticArena;
                 return null;
             };
             TurnManager.prototype.setActivePawn = function (pawn) {
-                if (pawn.isAlive()) {
+                var activePawn = this.getActivePawn();
+                if (pawn.isAlive() && (!activePawn || pawn._id != activePawn._id)) {
                     for (var i = 0; i < this.game.pawns.length; i++) {
                         this.game.pawns[i].active = (this.game.pawns[i]._id == pawn._id);
                     }
@@ -1565,7 +1567,6 @@ var TacticArena;
                 return this._hp;
             };
             Pawn.prototype.setHp = function (hp) {
-                console.log(this._id, hp);
                 if (this.isAlive() && hp <= 0) {
                     this.sprite.die();
                 }
@@ -1857,7 +1858,6 @@ var TacticArena;
                  this.load.setPreloadSprite(this.preloadBar);*/
                 this.load.tilemap('map', 'assets/json/map.json', null, Phaser.Tilemap.TILED_JSON);
                 this.load.image('tiles-collection', 'assets/images/maptiles.png');
-                this.load.image('selected-circle', 'assets/images/selected_circle.png');
                 this.load.image('path-tile', 'assets/images/path_tile.png');
                 this.load.atlasJSONArray('player', 'assets/images/character.png', 'assets/images/character.json');
                 this.load.atlasJSONArray('orc', 'assets/images/orc.png', 'assets/images/orc.json');
@@ -1865,6 +1865,7 @@ var TacticArena;
                 this.load.atlasJSONArray('skeleton', 'assets/images/skeleton.png', 'assets/images/skeleton.json');
                 this.load.atlasJSONArray('blondy', 'assets/images/blondy.png', 'assets/images/blondy.json');
                 this.load.atlasJSONArray('fireball', 'assets/images/fireball.png', 'assets/images/fireball.json');
+                this.load.atlasJSONArray('circle', 'assets/images/circle.png', 'assets/images/circle.json');
             };
             Preload.prototype.create = function () {
                 var that = this;

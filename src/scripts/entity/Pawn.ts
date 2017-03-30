@@ -224,7 +224,6 @@ module TacticArena.Entity {
         }
 
         setHp(hp) {
-            console.log(this._id, hp);
             if(this.isAlive() && hp <= 0) { this.sprite.die(); }
             this._hp = hp;
             this.game.signalManager.onHpChange.dispatch(this._hp);

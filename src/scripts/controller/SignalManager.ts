@@ -87,8 +87,9 @@ module TacticArena.Controller {
                 let position = activePawn.getPosition();
 
                 self.game.uiSpritesGroup.removeAll();
-                let circleSprite = new Phaser.Sprite(self.game, position.x * self.game.tileSize - 1, position.y * self.game.tileSize + 15, 'selected-circle', '');
-                self.game.uiSpritesGroup.add(circleSprite);
+                let s = self.game.uiSpritesGroup.create(position.x * self.game.tileSize - 1, position.y * self.game.tileSize + 15, 'circle');
+                s.animations.add('turn', ["selected_circle_01", "selected_circle_02"], 4, true);
+                s.play('turn');
                 //this.consolelogsUI.write('au tour du joueur ' + activePawn._id);
             });
 

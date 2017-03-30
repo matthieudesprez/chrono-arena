@@ -7,7 +7,6 @@ module TacticArena.State {
       this.load.setPreloadSprite(this.preloadBar);*/
       this.load.tilemap('map', 'assets/json/map.json', null, Phaser.Tilemap.TILED_JSON);
       this.load.image('tiles-collection', 'assets/images/maptiles.png');
-      this.load.image('selected-circle', 'assets/images/selected_circle.png');
       this.load.image('path-tile', 'assets/images/path_tile.png');
       this.load.atlasJSONArray('player', 'assets/images/character.png', 'assets/images/character.json');
       this.load.atlasJSONArray('orc', 'assets/images/orc.png', 'assets/images/orc.json');
@@ -15,6 +14,7 @@ module TacticArena.State {
       this.load.atlasJSONArray('skeleton', 'assets/images/skeleton.png', 'assets/images/skeleton.json');
       this.load.atlasJSONArray('blondy', 'assets/images/blondy.png', 'assets/images/blondy.json');
       this.load.atlasJSONArray('fireball', 'assets/images/fireball.png', 'assets/images/fireball.json');
+      this.load.atlasJSONArray('circle', 'assets/images/circle.png', 'assets/images/circle.json');
     }
 
     create() {

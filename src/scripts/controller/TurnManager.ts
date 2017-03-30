@@ -56,7 +56,8 @@ module TacticArena.Controller {
         }
 
 		setActivePawn(pawn) {
-			if(pawn.isAlive()) {
+			let activePawn = this.getActivePawn();
+			if(pawn.isAlive() && (!activePawn || pawn._id != activePawn._id)) {
 				for (var i = 0; i < this.game.pawns.length; i++) {
 					this.game.pawns[i].active = (this.game.pawns[i]._id == pawn._id);
 				}
