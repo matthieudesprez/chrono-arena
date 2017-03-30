@@ -46,6 +46,7 @@ module TacticArena.Controller {
 
             this.onActionPlayed.add(function(pawn) {
                 self.game.pointer.update();
+                self.game.uiManager.actionUI.update(pawn.getAp());
             });
 
             this.turnInitialized.add(function(pawn) {
@@ -83,6 +84,7 @@ module TacticArena.Controller {
                 self.game.uiManager.pawnsinfosUI.select(activePawn._id);
                 self.game.uiManager.directionUI.init(activePawn.getDirection());
                 self.game.uiManager.actionUI.select('walk');
+                self.game.uiManager.actionUI.update(activePawn.getAp());
 
                 let position = activePawn.getPosition();
 

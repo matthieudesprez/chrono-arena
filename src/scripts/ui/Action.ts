@@ -10,8 +10,12 @@ module TacticArena.UI {
                 '<div class="ui-menu-container">' +
                     '<ul class="ui-menu">' +
                         '<li class="cancel"></li>' +
-                        '<li class="walk">1</li>' +
-                        '<li class="fire">2</li>' +
+                        '<li class="walk" min-cost="1">1' +
+                            ' <span class="tooltip">Move<br/>Cost: 1 AP / case</span>' +
+                        '</li>' +
+                        '<li class="fire" min-cost="2">2' +
+                            '<span class="tooltip">Fireball<br/>Cost: 2 AP<br/>Range: 4</span>' +
+                        '</li>' +
                         '<li class="submit">Confirm</li>' +
                     '</ul>' +
                 '</div>'
@@ -38,6 +42,7 @@ module TacticArena.UI {
         }
 
         select(name) {
+            if(this.element.find('.' + name).hasClass('disabled')) return;
             this.deselectAll();
             this.element.find('.' + name).addClass('selected');
             this.menu.game.pointer.update();
@@ -57,6 +62,15 @@ module TacticArena.UI {
 
         show() {
             $('.ui-menu-container').fadeIn();
+        }
+
+        update(cost) {
+            this.element.find('li').removeClass('disabled');
+            this.element.find('li').each(function(e) {
+                if($(this).attr('min-cost') > 0 && $(this).attr('min-cost') > cost) {
+                    $(this).addClass('disabled');
+                }
+            });
         }
     }
 }

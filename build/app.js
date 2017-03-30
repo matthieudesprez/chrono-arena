@@ -1131,6 +1131,7 @@ var TacticArena;
                 });
                 this.onActionPlayed.add(function (pawn) {
                     self.game.pointer.update();
+                    self.game.uiManager.actionUI.update(pawn.getAp());
                 });
                 this.turnInitialized.add(function (pawn) {
                     self.game.process = false;
@@ -1163,6 +1164,7 @@ var TacticArena;
                     self.game.uiManager.pawnsinfosUI.select(activePawn._id);
                     self.game.uiManager.directionUI.init(activePawn.getDirection());
                     self.game.uiManager.actionUI.select('walk');
+                    self.game.uiManager.actionUI.update(activePawn.getAp());
                     var position = activePawn.getPosition();
                     self.game.uiSpritesGroup.removeAll();
                     var s = self.game.uiSpritesGroup.create(position.x * self.game.tileSize - 1, position.y * self.game.tileSize + 15, 'circle');
@@ -1933,8 +1935,12 @@ var TacticArena;
                     '<div class="ui-menu-container">' +
                     '<ul class="ui-menu">' +
                     '<li class="cancel"></li>' +
-                    '<li class="walk">1</li>' +
-                    '<li class="fire">2</li>' +
+                    '<li class="walk" min-cost="1">1' +
+                    ' <span class="tooltip">Move<br/>Cost: 1 AP / case</span>' +
+                    '</li>' +
+                    '<li class="fire" min-cost="2">2' +
+                    '<span class="tooltip">Fireball<br/>Cost: 2 AP<br/>Range: 4</span>' +
+                    '</li>' +
                     '<li class="submit">Confirm</li>' +
                     '</ul>' +
                     '</div>');
@@ -1957,6 +1963,8 @@ var TacticArena;
                 this.element.find('li').removeClass('selected');
             };
             Action.prototype.select = function (name) {
+                if (this.element.find('.' + name).hasClass('disabled'))
+                    return;
                 this.deselectAll();
                 this.element.find('.' + name).addClass('selected');
                 this.menu.game.pointer.update();
@@ -1972,6 +1980,14 @@ var TacticArena;
             };
             Action.prototype.show = function () {
                 $('.ui-menu-container').fadeIn();
+            };
+            Action.prototype.update = function (cost) {
+                this.element.find('li').removeClass('disabled');
+                this.element.find('li').each(function (e) {
+                    if ($(this).attr('min-cost') > 0 && $(this).attr('min-cost') > cost) {
+                        $(this).addClass('disabled');
+                    }
+                });
             };
             return Action;
         }());
@@ -2343,13 +2359,14 @@ var TacticArena;
                         '<div class="infos">' +
                         '<div class="hp">' +
                         '<div class="bar">' +
-                        '<div class="content"></div>' +
+                        '<div class="content current"></div>' +
                         '<div class="text"><span class="value"></span> / ' + this.menu.game.pawns[i]._hpMax + ' HP</div>' +
                         '</div>' +
                         '</div>' +
                         '<div class="ap">' +
                         '<div class="bar">' +
-                        '<div class="content"></div>' +
+                        '<div class="content remaining"></div>' +
+                        '<div class="content current"></div>' +
                         '<div class="text"><span class="value"></span> / ' + this.menu.game.pawns[i]._apMax + ' AP</div>' +
                         '</div>' +
                         '</div>' +
@@ -2381,10 +2398,17 @@ var TacticArena;
                     var entity = this.menu.game.pawns[i];
                     this.element.find('.pawn0' + entity._id).toggleClass('dead', !entity.isAlive());
                     this.element.find('.pawn0' + entity._id + ' .infos .hp .value').html(entity.getHp());
-                    this.element.find('.pawn0' + entity._id + ' .infos .hp .bar .content').css('width', ((entity.getHp() / entity._hpMax) * 100) + '%');
+                    this.element.find('.pawn0' + entity._id + ' .infos .hp .bar .current').css('width', ((entity.getHp() / entity._hpMax) * 100) + '%');
                     this.element.find('.pawn0' + entity._id + ' .infos .ap .value').html(entity.getAp());
-                    this.element.find('.pawn0' + entity._id + ' .infos .ap .bar .content').css('width', ((entity.getAp() / entity._apMax) * 100) + '%');
+                    this.element.find('.pawn0' + entity._id + ' .infos .ap .bar .current').css('width', ((entity.getAp() / entity._apMax) * 100) + '%');
+                    this.element.find('.pawn0' + entity._id + ' .infos .ap .bar .remaining').css('width', '0%');
                 }
+            };
+            PawnsInfos.prototype.showApCost = function (pawn, apCost) {
+                var percentRemaining = apCost > 0 ? ((pawn.getAp() / pawn._apMax) * 100) : 0;
+                this.element.find('.pawn0' + pawn._id + ' .infos .ap .bar .current').css('width', (((pawn.getAp() - apCost) / pawn._apMax) * 100) + '%');
+                this.element.find('.pawn0' + pawn._id + ' .infos .ap .bar .remaining').css('width', percentRemaining + '%');
+                this.element.find('.pawn0' + pawn._id + ' .infos .ap .value').html(pawn.getAp() - apCost);
             };
             PawnsInfos.prototype.updateOrders = function (pawn, orders) {
                 //let orders_list = '';
@@ -2425,22 +2449,29 @@ var TacticArena;
                     y: this.game.stageManager.layer.getTileY(this.game.input.activePointer.worldY)
                 };
             };
+            Pointer.prototype.clearHelp = function () {
+                var activePawn = this.game.turnManager.getActivePawn();
+                this.game.stageManager.clearHelp();
+                this.game.uiManager.pawnsinfosUI.showApCost(activePawn, 0);
+            };
             Pointer.prototype.update = function () {
                 var _this = this;
                 var self = this;
                 var pointerPosition = this.getPosition();
                 this.marker.x = pointerPosition.x * this.game.tileSize;
                 this.marker.y = pointerPosition.y * this.game.tileSize;
-                this.game.stageManager.clearHelp();
                 if (!self.game.process) {
                     var activePawn_1 = this.game.turnManager.getActivePawn();
                     var position = activePawn_1.getProjectionOrReal().getPosition();
                     var distance = this.game.stageManager.getNbTilesBetween({ 'x': pointerPosition.x, 'y': pointerPosition.y }, { 'x': position.x, 'y': position.y });
                     if (self.game.uiManager.actionUI.canOrderMove()) {
                         this.game.stageManager.canMove(activePawn_1.getProjectionOrReal(), pointerPosition.x, pointerPosition.y, activePawn_1.getAp()).then(function (path) {
+                            _this.clearHelp();
                             _this.game.stageManager.showPath(path, self.game.pathTilesGroup);
                             _this.game.stageManager.showPossibleMove(activePawn_1.getProjectionOrReal().getPosition(), activePawn_1.getReal().getAp());
+                            _this.game.uiManager.pawnsinfosUI.showApCost(activePawn_1, path.length);
                         }, function (res) {
+                            _this.clearHelp();
                         });
                     }
                     else if (self.game.uiManager.actionUI.canOrderFire() && activePawn_1.getAp() >= 2) {
@@ -2454,8 +2485,13 @@ var TacticArena;
                                 }
                             }
                             if (isInPath) {
+                                this.clearHelp();
                                 this.game.stageManager.showPath(path, self.game.pathTilesGroup, 0xfc000f);
+                                this.game.uiManager.pawnsinfosUI.showApCost(activePawn_1, 2);
                             }
+                        }
+                        else {
+                            this.clearHelp();
                         }
                     }
                 }
@@ -2479,7 +2515,7 @@ var TacticArena;
                                     self.game.orderManager.add('move', activePawn, resultPath[i].x, resultPath[i].y, activePawn.getProjectionOrReal().getDirection());
                                 }
                                 self.game.process = false;
-                                self.game.signalManager.onActionPlayed.dispatch(activePawn.getProjectionOrReal());
+                                self.game.signalManager.onActionPlayed.dispatch(activePawn);
                             });
                         }, function (res) {
                         });
@@ -2504,7 +2540,10 @@ var TacticArena;
                                 activePawn.createProjection();
                                 activePawn.getProjectionOrReal().halfcast();
                                 activePawn.setAp(activePawn.getAp() - 2);
+                                this.game.uiManager.pawnsinfosUI.showApCost(activePawn, 0);
                                 this.game.orderManager.add('cast', activePawn, position.x, position.y, activePawn.getProjectionOrReal().getDirection());
+                                this.clearHelp();
+                                self.game.signalManager.onActionPlayed.dispatch(activePawn);
                             }
                         }
                     }

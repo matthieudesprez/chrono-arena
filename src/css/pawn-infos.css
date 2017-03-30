@@ -104,6 +104,9 @@
 .ui-pawns-infos .infos .ap .bar .content {
     background-color: dodgerblue;
 }
+.ui-pawns-infos .infos .ap .bar .content.remaining {
+    background-color: #267ac9;
+}
 
 .ui-pawns-infos .infos .hp .bar .content {
     background-color: darkred;

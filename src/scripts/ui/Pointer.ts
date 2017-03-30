@@ -21,13 +21,18 @@ module TacticArena.UI {
             }
         }
 
+        clearHelp() {
+            let activePawn = this.game.turnManager.getActivePawn();
+            this.game.stageManager.clearHelp();
+            this.game.uiManager.pawnsinfosUI.showApCost(activePawn, 0);
+        }
+
         update() {
             let self = this;
             let pointerPosition = this.getPosition();
             this.marker.x = pointerPosition.x * this.game.tileSize;
             this.marker.y = pointerPosition.y * this.game.tileSize;
 
-            this.game.stageManager.clearHelp();
 
             if(!self.game.process) {
                 let activePawn = this.game.turnManager.getActivePawn();
@@ -37,10 +42,12 @@ module TacticArena.UI {
                 );
                 if(self.game.uiManager.actionUI.canOrderMove()) {
                     this.game.stageManager.canMove(activePawn.getProjectionOrReal(), pointerPosition.x, pointerPosition.y, activePawn.getAp()).then((path) => {
+                        this.clearHelp();
                         this.game.stageManager.showPath(path, self.game.pathTilesGroup);
                         this.game.stageManager.showPossibleMove(activePawn.getProjectionOrReal().getPosition(), activePawn.getReal().getAp());
+                        this.game.uiManager.pawnsinfosUI.showApCost(activePawn, path.length);
                     }, (res) => {
-
+                        this.clearHelp();
                     });
                 } else if(self.game.uiManager.actionUI.canOrderFire() && activePawn.getAp() >= 2) {
                     if (distance <= 4) {
@@ -53,8 +60,12 @@ module TacticArena.UI {
                             }
                         }
                         if(isInPath) {
+                            this.clearHelp();
                             this.game.stageManager.showPath(path, self.game.pathTilesGroup, 0xfc000f);
+                            this.game.uiManager.pawnsinfosUI.showApCost(activePawn, 2);
                         }
+                    } else {
+                        this.clearHelp();
                     }
                 }
             }
@@ -81,7 +92,7 @@ module TacticArena.UI {
                                 self.game.orderManager.add('move', activePawn, resultPath[i].x, resultPath[i].y, activePawn.getProjectionOrReal().getDirection());
                             }
                             self.game.process = false;
-                            self.game.signalManager.onActionPlayed.dispatch(activePawn.getProjectionOrReal());
+                            self.game.signalManager.onActionPlayed.dispatch(activePawn);
                         });
                     }, (res) => {
 
@@ -106,7 +117,10 @@ module TacticArena.UI {
                             activePawn.createProjection();
                             activePawn.getProjectionOrReal().halfcast();
                             activePawn.setAp(activePawn.getAp() - 2);
+                            this.game.uiManager.pawnsinfosUI.showApCost(activePawn, 0);
                             this.game.orderManager.add('cast', activePawn, position.x, position.y, activePawn.getProjectionOrReal().getDirection());
+                            this.clearHelp();
+                            self.game.signalManager.onActionPlayed.dispatch(activePawn);
                         }
                     }
 

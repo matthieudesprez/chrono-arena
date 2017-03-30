@@ -15,13 +15,14 @@ module TacticArena.UI {
                 '<div class="infos">' +
                 '<div class="hp">' +
                     '<div class="bar">' +
-                        '<div class="content"></div>' +
+                        '<div class="content current"></div>' +
                         '<div class="text"><span class="value"></span> / ' + this.menu.game.pawns[i]._hpMax + ' HP</div>' +
                     '</div>' +
                 '</div>' +
                 '<div class="ap">' +
                     '<div class="bar">' +
-                        '<div class="content"></div>' +
+                        '<div class="content remaining"></div>' +
+                        '<div class="content current"></div>' +
                         '<div class="text"><span class="value"></span> / ' + this.menu.game.pawns[i]._apMax + ' AP</div>' +
                     '</div>' +
                 '</div>' +
@@ -58,10 +59,18 @@ module TacticArena.UI {
                 let entity = this.menu.game.pawns[i];
                 this.element.find('.pawn0' + entity._id).toggleClass('dead', !entity.isAlive());
                 this.element.find('.pawn0' + entity._id + ' .infos .hp .value').html(entity.getHp());
-                this.element.find('.pawn0' + entity._id + ' .infos .hp .bar .content').css('width', ((entity.getHp() / entity._hpMax) * 100) + '%');
+                this.element.find('.pawn0' + entity._id + ' .infos .hp .bar .current').css('width', ((entity.getHp() / entity._hpMax) * 100) + '%');
                 this.element.find('.pawn0' + entity._id + ' .infos .ap .value').html(entity.getAp());
-                this.element.find('.pawn0' + entity._id + ' .infos .ap .bar .content').css('width', ((entity.getAp() / entity._apMax) * 100) + '%');
+                this.element.find('.pawn0' + entity._id + ' .infos .ap .bar .current').css('width', ((entity.getAp() / entity._apMax) * 100) + '%');
+                this.element.find('.pawn0' + entity._id + ' .infos .ap .bar .remaining').css('width', '0%');
             }
+        }
+
+        showApCost(pawn, apCost) {
+            let percentRemaining = apCost > 0 ? ((pawn.getAp() / pawn._apMax) * 100) : 0;
+            this.element.find('.pawn0' + pawn._id + ' .infos .ap .bar .current').css('width', (((pawn.getAp() - apCost) / pawn._apMax) * 100) + '%');
+            this.element.find('.pawn0' + pawn._id + ' .infos .ap .bar .remaining').css('width', percentRemaining + '%');
+            this.element.find('.pawn0' + pawn._id + ' .infos .ap .value').html(pawn.getAp() - apCost);
         }
 
         updateOrders(pawn, orders) {
