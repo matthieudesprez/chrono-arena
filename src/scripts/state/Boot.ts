@@ -1,11 +1,12 @@
 module TacticArena.State {
   export class Boot extends Phaser.State {
     preload() {
-      this.load.image('preload-bar', 'assets/images/preloader.gif');
+        this.load.image('logo', 'assets/images/logo.png');
+        this.load.image('loading', 'assets/images/loading.png');
     }
 
     create() {
-      this.game.stage.backgroundColor = 0xFFFFFF;
+      this.game.stage.backgroundColor = 0x333333;
 
       this.input.maxPointers = 1;
       this.stage.disableVisibilityChange = true;

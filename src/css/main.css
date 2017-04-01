@@ -163,6 +163,24 @@ html, body {
     text-shadow: -2px 0 #FAF394, 0 2px #FAF394, 2px 0 #FAF394, 0 -2px #FAF394;
 }
 
+#game-menu {
+    position: absolute;
+    top: 285px;
+    width: 100%;
+}
+#game-menu .button a {
+    font-size: 40px;
+    color: #AB9352;
+    font-family: Iceland;
+    text-shadow: -2px 0 #FFFFFF, 0 2px #FFFFFF, 2px 0 #FFFFFF, 0 -2px #FFFFFF;
+    cursor: pointer;
+    display: inline-block;
+    text-decoration: none;
+}
+#game-menu .button a:hover {
+    text-shadow: -4px 0 #FFFFFF, 0 4px #FFFFFF, 4px 0 #FFFFFF, 0 -4px #FFFFFF;
+}
+
 
 
 /*.ui-logs {*/

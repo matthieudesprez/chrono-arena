@@ -42,6 +42,8 @@ var TacticArena;
             }) || this;
             _this.state.add('boot', TacticArena.State.Boot);
             _this.state.add('preload', TacticArena.State.Preload);
+            _this.state.add('menu', TacticArena.State.Menu);
+            _this.state.add('options', TacticArena.State.Options);
             _this.state.add('main', TacticArena.State.Main);
             _this.state.start('boot');
             return _this;
@@ -1752,10 +1754,11 @@ var TacticArena;
                 return _super !== null && _super.apply(this, arguments) || this;
             }
             Boot.prototype.preload = function () {
-                this.load.image('preload-bar', 'assets/images/preloader.gif');
+                this.load.image('logo', 'assets/images/logo.png');
+                this.load.image('loading', 'assets/images/loading.png');
             };
             Boot.prototype.create = function () {
-                this.game.stage.backgroundColor = 0xFFFFFF;
+                this.game.stage.backgroundColor = 0x333333;
                 this.input.maxPointers = 1;
                 this.stage.disableVisibilityChange = true;
                 this.game.state.start('preload');
@@ -1775,6 +1778,7 @@ var TacticArena;
                 return _super !== null && _super.apply(this, arguments) || this;
             }
             Main.prototype.create = function () {
+                $('#game-menu').remove();
                 var self = this;
                 this.process = true;
                 this.selecting = false;
@@ -1850,14 +1854,95 @@ var TacticArena;
 (function (TacticArena) {
     var State;
     (function (State) {
+        var Menu = (function (_super) {
+            __extends(Menu, _super);
+            function Menu() {
+                return _super !== null && _super.apply(this, arguments) || this;
+            }
+            Menu.prototype.create = function () {
+                var that = this;
+                this.logo = this.add.image(640 / 2, 150, "logo");
+                this.logo.anchor.setTo(0.5);
+                $('#game-menu').remove();
+                $('#game-container').append('<div id="game-menu">' +
+                    '<div class="button singleplayer"><a>Single Player</a></div>' +
+                    '<div class="button multiplayerlocal"><a>Multi Player Local</a></div>' +
+                    '<div class="button multiplayeronline"><a>Single Player Online</a></div>' +
+                    '<div class="button options"><a>Options</a></div>' +
+                    '</div>');
+                $('.singleplayer').click(function () {
+                    that.singlePlayer();
+                });
+                $('.multiplayerlocal').click(function () {
+                    that.multiPlayerLocal();
+                });
+                $('.multiplayeronline').click(function () {
+                    that.multiplayerOnline();
+                });
+                $('.options').click(function () {
+                    that.options();
+                });
+            };
+            Menu.prototype.singlePlayer = function () {
+                this.game.state.start('main');
+            };
+            Menu.prototype.multiPlayerLocal = function () {
+                this.game.state.start('main');
+            };
+            Menu.prototype.multiplayerOnline = function () {
+                this.game.state.start('main');
+            };
+            Menu.prototype.options = function () {
+                this.game.state.start('options');
+            };
+            return Menu;
+        }(Phaser.State));
+        State.Menu = Menu;
+    })(State = TacticArena.State || (TacticArena.State = {}));
+})(TacticArena || (TacticArena = {}));
+var TacticArena;
+(function (TacticArena) {
+    var State;
+    (function (State) {
+        var Options = (function (_super) {
+            __extends(Options, _super);
+            function Options() {
+                return _super !== null && _super.apply(this, arguments) || this;
+            }
+            Options.prototype.create = function () {
+                var that = this;
+                this.logo = this.add.image(640 / 2, 150, "logo");
+                this.logo.anchor.setTo(0.5);
+                $('#game-menu').remove();
+                $('#game-container').append('<div id="game-menu">' +
+                    '<div class="button back"><a>Back</a></div>' +
+                    '</div>');
+                $('.back').click(function () {
+                    that.game.state.start('menu');
+                });
+            };
+            return Options;
+        }(Phaser.State));
+        State.Options = Options;
+    })(State = TacticArena.State || (TacticArena.State = {}));
+})(TacticArena || (TacticArena = {}));
+var TacticArena;
+(function (TacticArena) {
+    var State;
+    (function (State) {
         var Preload = (function (_super) {
             __extends(Preload, _super);
             function Preload() {
                 return _super !== null && _super.apply(this, arguments) || this;
             }
             Preload.prototype.preload = function () {
-                /* this.preloadBar = this.add.sprite(290, 290, 'preload-bar');
-                 this.load.setPreloadSprite(this.preloadBar);*/
+                this.status = this.add.text(640 / 2, this.game.world.centerY / 2 + 200, 'Loading...', { fill: 'white' });
+                this.status.anchor.setTo(0.5);
+                this.preloadBar = this.add.image(640 / 2, this.game.world.centerY / 2 + 150, "loading");
+                this.preloadBar.anchor.setTo(0.5);
+                this.logo = this.add.image(640 / 2, 150, "logo");
+                this.logo.anchor.setTo(0.5);
+                this.load.setPreloadSprite(this.preloadBar);
                 this.load.tilemap('map', 'assets/json/map.json', null, Phaser.Tilemap.TILED_JSON);
                 this.load.image('tiles-collection', 'assets/images/maptiles.png');
                 this.load.image('path-tile', 'assets/images/path_tile.png');
@@ -1868,12 +1953,18 @@ var TacticArena;
                 this.load.atlasJSONArray('blondy', 'assets/images/blondy.png', 'assets/images/blondy.json');
                 this.load.atlasJSONArray('fireball', 'assets/images/fireball.png', 'assets/images/fireball.json');
                 this.load.atlasJSONArray('circle', 'assets/images/circle.png', 'assets/images/circle.json');
+                this.load.start();
             };
             Preload.prototype.create = function () {
                 var that = this;
-                $(document).ready(function () {
-                    that.game.state.start('main');
-                });
+                //$(document).ready(function() {
+                //  that.game.state.start('main');
+                //});
+                //
+                this.status.setText('Ready!');
+                setTimeout(function () {
+                    that.game.state.start("menu");
+                }, 1000);
             };
             return Preload;
         }(Phaser.State));
@@ -1984,7 +2075,7 @@ var TacticArena;
             Action.prototype.update = function (cost) {
                 this.element.find('li').removeClass('disabled');
                 this.element.find('li').each(function (e) {
-                    if ($(this).attr('min-cost') > 0 && $(this).attr('min-cost') > cost) {
+                    if (parseInt($(this).attr('min-cost')) > 0 && parseInt($(this).attr('min-cost')) > cost) {
                         $(this).addClass('disabled');
                     }
                 });

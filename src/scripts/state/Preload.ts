@@ -1,10 +1,18 @@
 module TacticArena.State {
   export class Preload extends Phaser.State {
-    private preloadBar:Phaser.Sprite;
+    private preloadBar:Phaser.Image;
+    private status;
+    private logo;
 
     preload() {
-     /* this.preloadBar = this.add.sprite(290, 290, 'preload-bar');
-      this.load.setPreloadSprite(this.preloadBar);*/
+      this.status = this.add.text(640/2, this.game.world.centerY / 2 + 200, 'Loading...', {fill: 'white'});
+      this.status.anchor.setTo(0.5);
+      this.preloadBar = this.add.image(640 / 2, this.game.world.centerY / 2 + 150, "loading");
+      this.preloadBar.anchor.setTo(0.5);
+      this.logo = this.add.image(640 / 2, 150, "logo");
+      this.logo.anchor.setTo(0.5);
+      this.load.setPreloadSprite(this.preloadBar);
+
       this.load.tilemap('map', 'assets/json/map.json', null, Phaser.Tilemap.TILED_JSON);
       this.load.image('tiles-collection', 'assets/images/maptiles.png');
       this.load.image('path-tile', 'assets/images/path_tile.png');
@@ -15,13 +23,21 @@ module TacticArena.State {
       this.load.atlasJSONArray('blondy', 'assets/images/blondy.png', 'assets/images/blondy.json');
       this.load.atlasJSONArray('fireball', 'assets/images/fireball.png', 'assets/images/fireball.json');
       this.load.atlasJSONArray('circle', 'assets/images/circle.png', 'assets/images/circle.json');
+
+      this.load.start();
     }
 
     create() {
       var that = this;
-      $(document).ready(function() {
-        that.game.state.start('main');
-      });
+      //$(document).ready(function() {
+      //  that.game.state.start('main');
+      //});
+      //
+      this.status.setText('Ready!');
+
+      setTimeout(function () {
+        that.game.state.start("menu");
+      }, 1000);
     }
   }
 }

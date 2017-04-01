@@ -16,6 +16,8 @@ module TacticArena {
 
             this.state.add('boot', State.Boot);
             this.state.add('preload', State.Preload);
+            this.state.add('menu', State.Menu);
+            this.state.add('options', State.Options);
             this.state.add('main', State.Main);
 
             this.state.start('boot');

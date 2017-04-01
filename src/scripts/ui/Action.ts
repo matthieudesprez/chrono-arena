@@ -67,7 +67,7 @@ module TacticArena.UI {
         update(cost) {
             this.element.find('li').removeClass('disabled');
             this.element.find('li').each(function(e) {
-                if($(this).attr('min-cost') > 0 && $(this).attr('min-cost') > cost) {
+                if(parseInt($(this).attr('min-cost')) > 0 && parseInt($(this).attr('min-cost')) > cost) {
                     $(this).addClass('disabled');
                 }
             });

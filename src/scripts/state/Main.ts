@@ -24,6 +24,7 @@ module TacticArena.State {
         hideProjections: Boolean;
 
         create() {
+            $('#game-menu').remove();
             var self = this;
             this.process = true;
             this.selecting = false;

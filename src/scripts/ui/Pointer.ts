@@ -45,7 +45,7 @@ module TacticArena.UI {
                         this.clearHelp();
                         this.game.stageManager.showPath(path, self.game.pathTilesGroup);
                         this.game.stageManager.showPossibleMove(activePawn.getProjectionOrReal().getPosition(), activePawn.getReal().getAp());
-                        this.game.uiManager.pawnsinfosUI.showApCost(activePawn, path.length);
+                        this.game.uiManager.pawnsinfosUI.showApCost(activePawn, (<any>path).length);
                     }, (res) => {
                         this.clearHelp();
                     });
