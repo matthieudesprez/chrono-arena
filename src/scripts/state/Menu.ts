@@ -1,53 +1,20 @@
 module TacticArena.State {
-    export class Menu extends Phaser.State {
-        private preloadBar:Phaser.Image;
-        private status;
-        private logo;
+    export class Menu extends TacticArena.State.BaseState {
 
         create() {
             var that = this;
-            this.logo = this.add.image(640 / 2, 150, "logo");
-            this.logo.anchor.setTo(0.5);
-
-            $('#game-menu').remove();
-            $('#game-container').append('<div id="game-menu">' +
+            super.createMenu();
+            $('#game-menu .ui').html(
                 '<div class="button singleplayer"><a>Single Player</a></div>' +
                 '<div class="button multiplayerlocal"><a>Multi Player Local</a></div>' +
                 '<div class="button multiplayeronline"><a>Single Player Online</a></div>' +
-                '<div class="button options"><a>Options</a></div>' +
-                '</div>');
+                '<div class="button options"><a>Options</a></div>'
+            );
 
-            $('.singleplayer').click(function () {
-                that.singlePlayer();
-            });
-            $('.multiplayerlocal').click(function () {
-                that.multiPlayerLocal();
-            });
-            $('.multiplayeronline').click(function () {
-                that.multiplayerOnline();
-            });
-            $('.options').click(function () {
-                that.options();
-            });
-        }
-
-        singlePlayer() {
-            this.game.state.start('main');
-        }
-
-        multiPlayerLocal() {
-            this.game.state.start('main');
-
-        }
-
-        multiplayerOnline() {
-            this.game.state.start('main');
-
-        }
-
-        options() {
-            this.game.state.start('options');
-
+            $('.singleplayer').click(function () { that.game.state.start('main'); });
+            $('.multiplayerlocal').click(function () { that.game.state.start('main'); });
+            $('.multiplayeronline').click(function () { that.game.state.start('main'); });
+            $('.options').click(function () { that.game.state.start('options'); });
         }
     }
 }

@@ -13,6 +13,7 @@ module TacticArena.UI {
         ordersnotificationsUI;
         transitionUI;
         turnIndicatorUI;
+        ingamemenuUI;
         process;
 
         constructor(game) {
@@ -31,6 +32,7 @@ module TacticArena.UI {
             this.ordersnotificationsUI = new UI.OrdersNotifications(this);
             this.transitionUI = new UI.Transition(this);
             this.turnIndicatorUI = new UI.TurnIndicator(this);
+            this.ingamemenuUI = new UI.IngameMenu(this);
 
             //this.game.pointer.dealWith(this.consolelogsUI.element);
             this.game.pointer.dealWith(this.actionUI.element);

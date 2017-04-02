@@ -1,6 +1,6 @@
 declare var EasyStar;
 module TacticArena.State {
-    export class Main extends Phaser.State {
+    export class Main extends TacticArena.State.BaseState {
         layer: Phaser.TilemapLayer;
         pawns: Entity.Pawn[];
         pathTilesGroup;
@@ -24,7 +24,6 @@ module TacticArena.State {
         hideProjections: Boolean;
 
         create() {
-            $('#game-menu').remove();
             var self = this;
             this.process = true;
             this.selecting = false;

@@ -7,8 +7,8 @@ module TacticArena.UI {
         constructor(menu) {
             var self = this;
             this.menu = menu;
-            this.menu.element.append('<div class="timeline-container"></div>');
-            this.container = this.menu.element.find('.timeline-container');
+            this.menu.element.append('<div class="ui-timeline-container"></div>');
+            this.container = this.menu.element.find('.ui-timeline-container');
             this.container.append('<ul class="ui-timeline-menu"></ul>');
             this.container.append('<a class="prev inactive"><</a><a class="next">></a>');
             this.element = this.menu.element.find('.ui-timeline-menu');
@@ -74,7 +74,7 @@ module TacticArena.UI {
                 });
                 $('.timeline-item .square').css('opacity', '0');
                 $('.timeline-item .line').css('width', '0px');
-                $('.timeline-container .prev, .timeline-container .next').css('opacity', '0');
+                $('.ui-timeline-container .prev, .ui-timeline-container .next').css('opacity', '0');
                 this.container.show();
                 this.display($('.timeline-item')).then(() => {
                     resolve(true);
@@ -94,8 +94,8 @@ module TacticArena.UI {
                         });
                     });
                 } else {
-                    $('.timeline-container .prev').css('opacity', '0.2');
-                    $('.timeline-container .next').css('opacity', '1');
+                    $('.ui-timeline-container .prev').css('opacity', '0.2');
+                    $('.ui-timeline-container .next').css('opacity', '1');
                     resolve(true);
                 }
             });

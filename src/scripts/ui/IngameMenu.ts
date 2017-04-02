@@ -1,0 +1,31 @@
+module TacticArena.UI {
+    export class IngameMenu {
+        menu;
+        element;
+
+        constructor(menu) {
+            var self = this;
+            this.menu = menu;
+            this.menu.element.append('<div class="ui-ingame-menu"><a class="menu-icon"></a></div>');
+            this.element = this.menu.element.find('.ui-ingame-menu');
+
+            this.element.find('.menu-icon').on('click', function () {
+                self.menu.element.append(
+                    '<div class="ui-overlay"></div>' +
+                    '<div class="ui-popin">' +
+                        '<a class="close">x</a>' +
+                        '<a class="button quit">Quit</a>' +
+                    '</div>'
+                );
+                self.menu.element.find('.close').on('click', function() {
+                    self.menu.element.find('.overlay').remove();
+                    self.menu.element.find('.ui-popin').remove();
+                });
+                self.menu.element.find('.button.quit').on('click', function() {
+                    self.menu.game.state.start('menu');
+                });
+            });
+        }
+
+    }
+}

@@ -1,6 +1,6 @@
 declare var EasyStar;
 module TacticArena.State {
-    export class Test extends Phaser.State {
+    export class Test extends TacticArena.State.BaseState {
         layer: Phaser.TilemapLayer;
         pawns: Entity.Pawn[];
         pathTilesGroup;
@@ -19,6 +19,10 @@ module TacticArena.State {
         selecting: Boolean;
         pointer;
         isPaused: Boolean;
+
+        init() {
+
+        }
 
         preload() {
             this.load.tilemap('map', 'assets/json/map.json', null, Phaser.Tilemap.TILED_JSON);

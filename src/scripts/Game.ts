@@ -6,7 +6,7 @@
 
 module TacticArena {
     export class Game extends Phaser.Game {
-        constructor(headless: boolean = false) {
+        constructor(headless:boolean = false) {
             super({
                 width: 640,
                 height: 640,

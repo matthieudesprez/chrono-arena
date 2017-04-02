@@ -1748,13 +1748,38 @@ var TacticArena;
 (function (TacticArena) {
     var State;
     (function (State) {
+        var BaseState = (function (_super) {
+            __extends(BaseState, _super);
+            function BaseState() {
+                return _super.call(this) || this;
+            }
+            BaseState.prototype.init = function () {
+                $('[class*="ui-"]').remove();
+                $('#game-menu').remove();
+                _super.prototype.init.call(this);
+            };
+            BaseState.prototype.createMenu = function () {
+                $('#game-container').append('' +
+                    '<div id="game-menu">' +
+                    '<div class="logo"></div>' +
+                    ' <div class="ui"></div>' +
+                    '</div>');
+            };
+            return BaseState;
+        }(Phaser.State));
+        State.BaseState = BaseState;
+    })(State = TacticArena.State || (TacticArena.State = {}));
+})(TacticArena || (TacticArena = {}));
+var TacticArena;
+(function (TacticArena) {
+    var State;
+    (function (State) {
         var Boot = (function (_super) {
             __extends(Boot, _super);
             function Boot() {
                 return _super !== null && _super.apply(this, arguments) || this;
             }
             Boot.prototype.preload = function () {
-                this.load.image('logo', 'assets/images/logo.png');
                 this.load.image('loading', 'assets/images/loading.png');
             };
             Boot.prototype.create = function () {
@@ -1764,7 +1789,7 @@ var TacticArena;
                 this.game.state.start('preload');
             };
             return Boot;
-        }(Phaser.State));
+        }(TacticArena.State.BaseState));
         State.Boot = Boot;
     })(State = TacticArena.State || (TacticArena.State = {}));
 })(TacticArena || (TacticArena = {}));
@@ -1778,7 +1803,6 @@ var TacticArena;
                 return _super !== null && _super.apply(this, arguments) || this;
             }
             Main.prototype.create = function () {
-                $('#game-menu').remove();
                 var self = this;
                 this.process = true;
                 this.selecting = false;
@@ -1846,7 +1870,7 @@ var TacticArena;
                 return id;
             };
             return Main;
-        }(Phaser.State));
+        }(TacticArena.State.BaseState));
         State.Main = Main;
     })(State = TacticArena.State || (TacticArena.State = {}));
 })(TacticArena || (TacticArena = {}));
@@ -1861,42 +1885,18 @@ var TacticArena;
             }
             Menu.prototype.create = function () {
                 var that = this;
-                this.logo = this.add.image(640 / 2, 150, "logo");
-                this.logo.anchor.setTo(0.5);
-                $('#game-menu').remove();
-                $('#game-container').append('<div id="game-menu">' +
-                    '<div class="button singleplayer"><a>Single Player</a></div>' +
+                _super.prototype.createMenu.call(this);
+                $('#game-menu .ui').html('<div class="button singleplayer"><a>Single Player</a></div>' +
                     '<div class="button multiplayerlocal"><a>Multi Player Local</a></div>' +
                     '<div class="button multiplayeronline"><a>Single Player Online</a></div>' +
-                    '<div class="button options"><a>Options</a></div>' +
-                    '</div>');
-                $('.singleplayer').click(function () {
-                    that.singlePlayer();
-                });
-                $('.multiplayerlocal').click(function () {
-                    that.multiPlayerLocal();
-                });
-                $('.multiplayeronline').click(function () {
-                    that.multiplayerOnline();
-                });
-                $('.options').click(function () {
-                    that.options();
-                });
-            };
-            Menu.prototype.singlePlayer = function () {
-                this.game.state.start('main');
-            };
-            Menu.prototype.multiPlayerLocal = function () {
-                this.game.state.start('main');
-            };
-            Menu.prototype.multiplayerOnline = function () {
-                this.game.state.start('main');
-            };
-            Menu.prototype.options = function () {
-                this.game.state.start('options');
+                    '<div class="button options"><a>Options</a></div>');
+                $('.singleplayer').click(function () { that.game.state.start('main'); });
+                $('.multiplayerlocal').click(function () { that.game.state.start('main'); });
+                $('.multiplayeronline').click(function () { that.game.state.start('main'); });
+                $('.options').click(function () { that.game.state.start('options'); });
             };
             return Menu;
-        }(Phaser.State));
+        }(TacticArena.State.BaseState));
         State.Menu = Menu;
     })(State = TacticArena.State || (TacticArena.State = {}));
 })(TacticArena || (TacticArena = {}));
@@ -1911,18 +1911,14 @@ var TacticArena;
             }
             Options.prototype.create = function () {
                 var that = this;
-                this.logo = this.add.image(640 / 2, 150, "logo");
-                this.logo.anchor.setTo(0.5);
-                $('#game-menu').remove();
-                $('#game-container').append('<div id="game-menu">' +
-                    '<div class="button back"><a>Back</a></div>' +
-                    '</div>');
+                _super.prototype.createMenu.call(this);
+                $('#game-menu .ui').html('<div class="button back"><a>Back</a></div>');
                 $('.back').click(function () {
                     that.game.state.start('menu');
                 });
             };
             return Options;
-        }(Phaser.State));
+        }(TacticArena.State.BaseState));
         State.Options = Options;
     })(State = TacticArena.State || (TacticArena.State = {}));
 })(TacticArena || (TacticArena = {}));
@@ -1936,12 +1932,11 @@ var TacticArena;
                 return _super !== null && _super.apply(this, arguments) || this;
             }
             Preload.prototype.preload = function () {
+                _super.prototype.createMenu.call(this);
                 this.status = this.add.text(640 / 2, this.game.world.centerY / 2 + 200, 'Loading...', { fill: 'white' });
                 this.status.anchor.setTo(0.5);
                 this.preloadBar = this.add.image(640 / 2, this.game.world.centerY / 2 + 150, "loading");
                 this.preloadBar.anchor.setTo(0.5);
-                this.logo = this.add.image(640 / 2, 150, "logo");
-                this.logo.anchor.setTo(0.5);
                 this.load.setPreloadSprite(this.preloadBar);
                 this.load.tilemap('map', 'assets/json/map.json', null, Phaser.Tilemap.TILED_JSON);
                 this.load.image('tiles-collection', 'assets/images/maptiles.png');
@@ -1962,12 +1957,13 @@ var TacticArena;
                 //});
                 //
                 this.status.setText('Ready!');
-                setTimeout(function () {
-                    that.game.state.start("menu");
-                }, 1000);
+                //setTimeout(function () {
+                //    that.game.state.start("menu");
+                //}, 1000);
+                that.game.state.start("main");
             };
             return Preload;
-        }(Phaser.State));
+        }(TacticArena.State.BaseState));
         State.Preload = Preload;
     })(State = TacticArena.State || (TacticArena.State = {}));
 })(TacticArena || (TacticArena = {}));
@@ -1980,6 +1976,8 @@ var TacticArena;
             function Test() {
                 return _super !== null && _super.apply(this, arguments) || this;
             }
+            Test.prototype.init = function () {
+            };
             Test.prototype.preload = function () {
                 this.load.tilemap('map', 'assets/json/map.json', null, Phaser.Tilemap.TILED_JSON);
                 this.load.image('tiles-collection', 'assets/images/maptiles.png');
@@ -2010,7 +2008,7 @@ var TacticArena;
                 this.turnManager = new TacticArena.Controller.TurnManager(this);
             };
             return Test;
-        }(Phaser.State));
+        }(TacticArena.State.BaseState));
         State.Test = Test;
     })(State = TacticArena.State || (TacticArena.State = {}));
 })(TacticArena || (TacticArena = {}));
@@ -2169,6 +2167,36 @@ var TacticArena;
             return Direction;
         }());
         UI.Direction = Direction;
+    })(UI = TacticArena.UI || (TacticArena.UI = {}));
+})(TacticArena || (TacticArena = {}));
+var TacticArena;
+(function (TacticArena) {
+    var UI;
+    (function (UI) {
+        var IngameMenu = (function () {
+            function IngameMenu(menu) {
+                var self = this;
+                this.menu = menu;
+                this.menu.element.append('<div class="ui-ingame-menu"><a class="menu-icon"></a></div>');
+                this.element = this.menu.element.find('.ui-ingame-menu');
+                this.element.find('.menu-icon').on('click', function () {
+                    self.menu.element.append('<div class="ui-overlay"></div>' +
+                        '<div class="ui-popin">' +
+                        '<a class="close">x</a>' +
+                        '<a class="button quit">Quit</a>' +
+                        '</div>');
+                    self.menu.element.find('.close').on('click', function () {
+                        self.menu.element.find('.overlay').remove();
+                        self.menu.element.find('.ui-popin').remove();
+                    });
+                    self.menu.element.find('.button.quit').on('click', function () {
+                        self.menu.game.state.start('menu');
+                    });
+                });
+            }
+            return IngameMenu;
+        }());
+        UI.IngameMenu = IngameMenu;
     })(UI = TacticArena.UI || (TacticArena.UI = {}));
 })(TacticArena || (TacticArena = {}));
 var TacticArena;
@@ -2746,8 +2774,8 @@ var TacticArena;
             function TimeLine(menu) {
                 var self = this;
                 this.menu = menu;
-                this.menu.element.append('<div class="timeline-container"></div>');
-                this.container = this.menu.element.find('.timeline-container');
+                this.menu.element.append('<div class="ui-timeline-container"></div>');
+                this.container = this.menu.element.find('.ui-timeline-container');
                 this.container.append('<ul class="ui-timeline-menu"></ul>');
                 this.container.append('<a class="prev inactive"><</a><a class="next">></a>');
                 this.element = this.menu.element.find('.ui-timeline-menu');
@@ -2809,7 +2837,7 @@ var TacticArena;
                     });
                     $('.timeline-item .square').css('opacity', '0');
                     $('.timeline-item .line').css('width', '0px');
-                    $('.timeline-container .prev, .timeline-container .next').css('opacity', '0');
+                    $('.ui-timeline-container .prev, .ui-timeline-container .next').css('opacity', '0');
                     _this.container.show();
                     _this.display($('.timeline-item')).then(function () {
                         resolve(true);
@@ -2830,8 +2858,8 @@ var TacticArena;
                         });
                     }
                     else {
-                        $('.timeline-container .prev').css('opacity', '0.2');
-                        $('.timeline-container .next').css('opacity', '1');
+                        $('.ui-timeline-container .prev').css('opacity', '0.2');
+                        $('.ui-timeline-container .next').css('opacity', '1');
                         resolve(true);
                     }
                 });
@@ -2927,6 +2955,7 @@ var TacticArena;
                 this.ordersnotificationsUI = new UI.OrdersNotifications(this);
                 this.transitionUI = new UI.Transition(this);
                 this.turnIndicatorUI = new UI.TurnIndicator(this);
+                this.ingamemenuUI = new UI.IngameMenu(this);
                 //this.game.pointer.dealWith(this.consolelogsUI.element);
                 this.game.pointer.dealWith(this.actionUI.element);
                 this.game.pointer.dealWith(this.timeUI.element);

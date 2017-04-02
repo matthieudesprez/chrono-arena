@@ -1,21 +1,16 @@
 module TacticArena.State {
-    export class Options extends Phaser.State {
-        private logo;
+    export class Options extends TacticArena.State.BaseState {
 
         create() {
             var that = this;
-            this.logo = this.add.image(640 / 2, 150, "logo");
-            this.logo.anchor.setTo(0.5);
-
-            $('#game-menu').remove();
-            $('#game-container').append('<div id="game-menu">' +
-                '<div class="button back"><a>Back</a></div>' +
-                '</div>');
+            super.createMenu();
+            $('#game-menu .ui').html(
+                '<div class="button back"><a>Back</a></div>'
+            );
 
             $('.back').click(function () {
                 that.game.state.start('menu');
             });
-
         }
     }
 }

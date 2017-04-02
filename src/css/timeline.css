@@ -1,4 +1,4 @@
-.timeline-container {
+.ui-timeline-container {
     position: absolute;
     bottom: -40px;
     left: 0px;
@@ -7,7 +7,7 @@
     display: none;
 }
 
-.timeline-container .prev, .timeline-container .next {
+.ui-timeline-container .prev, .ui-timeline-container .next {
     position: absolute;
     top: -8px;
     color: #d3d3d3;
@@ -21,11 +21,11 @@
     cursor: pointer;
 }
 
-.timeline-container .prev {
+.ui-timeline-container .prev {
     left: 0px;
 }
 
-.timeline-container .next {
+.ui-timeline-container .next {
     right: 0px;
 }
 
