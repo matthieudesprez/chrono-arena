@@ -5,8 +5,6 @@ module TacticArena.State {
         }
 
         create() {
-            this.game.stage.backgroundColor = 0x333333;
-
             this.input.maxPointers = 1;
             this.stage.disableVisibilityChange = true;
 

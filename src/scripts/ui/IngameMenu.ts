@@ -10,15 +10,15 @@ module TacticArena.UI {
             this.element = this.menu.element.find('.ui-ingame-menu');
 
             this.element.find('.menu-icon').on('click', function () {
+                self.showOverlay();
                 self.menu.element.append(
-                    '<div class="ui-overlay"></div>' +
                     '<div class="ui-popin">' +
                         '<a class="close">x</a>' +
                         '<a class="button quit">Quit</a>' +
                     '</div>'
                 );
                 self.menu.element.find('.close').on('click', function() {
-                    self.menu.element.find('.overlay').remove();
+                    self.menu.element.find('.ui-overlay').remove();
                     self.menu.element.find('.ui-popin').remove();
                 });
                 self.menu.element.find('.button.quit').on('click', function() {
@@ -27,5 +27,23 @@ module TacticArena.UI {
             });
         }
 
+        showOverlay() {
+            this.menu.element.append('<div class="ui-overlay"></div>');
+        }
+
+        gameOver(msg) {
+            let self = this;
+            this.showOverlay();
+            this.menu.element.append(
+                '<div class="ui-popin">' +
+                '<a class="button">' + msg + '</a>' +
+                '<a class="button">-</a>' +
+                '<a class="button quit">Quit</a>' +
+                '</div>'
+            );
+            this.menu.element.find('.button.quit').on('click', function() {
+                self.menu.game.state.start('menu');
+            });
+        }
     }
 }

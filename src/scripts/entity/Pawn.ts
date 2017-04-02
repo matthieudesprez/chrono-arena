@@ -14,6 +14,7 @@ module TacticArena.Entity {
         selected;
         isBot;
         team;
+        hurting;
 
         constructor(game, x, y, ext, type, id, bot, team, name = "") {
             this.game = game;
@@ -22,8 +23,9 @@ module TacticArena.Entity {
             this.type = type;
             this.projection = null;
             this._parent = null;
+            let tint = null;//team != this.game.playerTeam ? this.game.teamColors[team-1] : null;
             if(type) {
-                this.sprite = new Entity.Sprite(game, x, y, ext, type, this, 64);
+                this.sprite = new Entity.Sprite(game, x, y, ext, type, this, 64, tint);
                 this.game.pawnsSpritesGroup.add(this.sprite);
                 this.sprite.stand();
             }
@@ -33,6 +35,7 @@ module TacticArena.Entity {
             this.selected = false;
             this.isBot = bot;
             this.team = team;
+            this.hurting = 0;
         }
 
         getReal() {
@@ -60,12 +63,31 @@ module TacticArena.Entity {
         }
 
         hurt(hp=1) {
-            this.sprite.hurt();
-            this.destroyProjection();
-            let label_dmg = this.game.add.text(20, 10, "-" + hp, { font: '12px Press Start 2P', fill: "#ff021b", stroke: '#000000', strokeThickness: 6 });
-            let t = this.game.add.tween(label_dmg).to({x: 20,y: -20, alpha: 0}, 1000, Phaser.Easing.Linear.None, true);
-            t.onComplete.add(function() { label_dmg.destroy(); }, this);
-            this.sprite.addChild(label_dmg);
+            let self = this;
+            self.hurting++;
+            let timeOut = self.hurting * 300;
+            setTimeout( function() {
+                if(self.hurting == 1) {
+                    self.sprite.hurt();
+                }
+                self.destroyProjection();
+                let label_dmg = self.game.add.text(20, 10, "-" + hp, {
+                    font: '12px Press Start 2P',
+                    fill: "#ff021b",
+                    stroke: '#000000',
+                    strokeThickness: 6
+                }, self.game.pawnsSpritesGroup);
+                let t = self.game.add.tween(label_dmg).to({
+                    x: 20,
+                    y: -20,
+                    alpha: 0
+                }, 1000, Phaser.Easing.Linear.None, true);
+                t.onComplete.add(function () {
+                    label_dmg.destroy();
+                }, self);
+                self.sprite.addChild(label_dmg);
+                self.hurting--;
+            }, timeOut);
         }
 
         halfcast() {
@@ -226,7 +248,7 @@ module TacticArena.Entity {
         setHp(hp) {
             if(this.isAlive() && hp <= 0) { this.sprite.die(); }
             this._hp = hp;
-            this.game.signalManager.onHpChange.dispatch(this._hp);
+            this.game.signalManager.onHpChange.dispatch(this);
         }
     }
 }

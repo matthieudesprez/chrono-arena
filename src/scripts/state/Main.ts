@@ -22,14 +22,21 @@ module TacticArena.State {
         pointer;
         isPaused: Boolean;
         hideProjections: Boolean;
+        teamColors;
+        playerTeam;
+        teams;
 
         create() {
+            this.game.stage.backgroundColor = 0xffffff;
             var self = this;
             this.process = true;
             this.selecting = false;
             this.tileSize = 32;
             this.isPaused = false;
             this.hideProjections = false;
+            this.teamColors = ['0x8ad886', '0xd68686', '0x87bfdb', '0xcdd385'];
+            this.playerTeam = 1;
+            this.teams = {};
 
             this.stageManager = new Controller.StageManager(this);
             this.stageManager.init();
@@ -83,6 +90,18 @@ module TacticArena.State {
                     setTimeout(isGameReady, 300);
                 })();
             });
+        }
+
+        isOver() {
+            let everyoneElseIsDead = true;
+            this.pawns.forEach( pawn => {
+                this.teams[pawn.team] = this.teams[pawn.team] || pawn.isAlive();
+                if(pawn.team != this.playerTeam) {
+                    everyoneElseIsDead = everyoneElseIsDead && !this.teams[pawn.team];
+                }
+            });
+            console.log(this.teams, !this.teams[this.playerTeam], everyoneElseIsDead);
+            return (!this.teams[this.playerTeam] || everyoneElseIsDead);
         }
 
         getUniqueId() {

@@ -6,7 +6,7 @@ module TacticArena.Entity {
         private _ext:string;
         _animationCompleteCallback;
 
-        constructor(game, x, y, ext, type, parent, size) {
+        constructor(game, x, y, ext, type, parent, size, tint=null) {
             super(
                 game.game, 
                 game.tileSize * x - (size / 4), 
@@ -19,6 +19,9 @@ module TacticArena.Entity {
             this._size = size;
             this.setAnimations();
             this._animationCompleteCallback = null;
+            //if(tint) {
+            //    this.tint = tint;
+            //}
         }
 
         setAnimations() {

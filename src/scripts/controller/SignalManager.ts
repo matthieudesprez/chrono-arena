@@ -36,8 +36,9 @@ module TacticArena.Controller {
                 self.game.uiManager.pawnsinfosUI.updateInfos();
             });
 
-            this.onHpChange.add(function() {
+            this.onHpChange.add(function(pawn) {
                 self.game.uiManager.pawnsinfosUI.updateInfos();
+                self.game.stageManager.handleTile(pawn);
             });
 
             this.onOrderChange.add(function(pawn) {
@@ -83,8 +84,8 @@ module TacticArena.Controller {
                 self.game.uiManager.ordersnotificationsUI.update(self.game.orderManager.getOrders(activePawn._id));
                 self.game.uiManager.pawnsinfosUI.select(activePawn._id);
                 self.game.uiManager.directionUI.init(activePawn.getDirection());
-                self.game.uiManager.actionUI.select('walk');
                 self.game.uiManager.actionUI.update(activePawn.getAp());
+                self.game.uiManager.actionUI.select('walk');
 
                 let position = activePawn.getPosition();
 

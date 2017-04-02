@@ -57,7 +57,9 @@ module TacticArena.UI {
 
         getMessage(order) {
             let activePawn = this.menu.game.turnManager.getActivePawn();
-            this.menu.game.stageManager.showPath([order], this.menu.game.pathOrdersTilesGroup, 0xffffff);
+            if(!this.menu.game.stageManager.equalPositions(activePawn.getPosition(), order)) {
+                this.menu.game.stageManager.showPath([order], this.menu.game.pathOrdersTilesGroup, 0xffffff);
+            }
             let msg = '<b>' + activePawn._name + '</b>';
             if (order.action == 'move') {
                 msg += ' se déplacera en ' + order.x + ', ' + order.y;

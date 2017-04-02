@@ -4,6 +4,7 @@ module TacticArena.State {
         private status;
 
         preload() {
+            this.game.add.text(0, 0, "f", {font: '1px Press Start 2P', fill: "#333333"});
             super.createMenu();
             this.status = this.add.text(640 / 2, this.game.world.centerY / 2 + 200, 'Loading...', {fill: 'white'});
             this.status.anchor.setTo(0.5);

@@ -31,6 +31,11 @@ module TacticArena.Controller {
             this.map.createLayer('Decorations3');
         }
 
+        handleTile(pawn) {
+            let p = pawn.getPosition();
+            this.grid[p.y][p.x] = pawn.isAlive() ? -1 : 3;
+        }
+
         canMove(entity, x, y, ap) {
             return new Promise((resolve, reject) => {
                 this.equalPositions(entity.getPosition(), {x: x, y: y});

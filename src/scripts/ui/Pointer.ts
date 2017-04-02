@@ -59,8 +59,8 @@ module TacticArena.UI {
                                 isInPath = true;
                             }
                         }
+                        this.game.stageManager.clearPath(self.game.pathTilesGroup);
                         if(isInPath) {
-                            this.clearHelp();
                             this.game.stageManager.showPath(path, self.game.pathTilesGroup, 0xfc000f);
                             this.game.uiManager.pawnsinfosUI.showApCost(activePawn, 2);
                         }

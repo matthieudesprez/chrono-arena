@@ -1125,8 +1125,9 @@ var TacticArena;
                 this.onApChange.add(function () {
                     self.game.uiManager.pawnsinfosUI.updateInfos();
                 });
-                this.onHpChange.add(function () {
+                this.onHpChange.add(function (pawn) {
                     self.game.uiManager.pawnsinfosUI.updateInfos();
+                    self.game.stageManager.handleTile(pawn);
                 });
                 this.onOrderChange.add(function (pawn) {
                     self.game.uiManager.ordersnotificationsUI.update(self.game.orderManager.getOrders(pawn._id));
@@ -1165,8 +1166,8 @@ var TacticArena;
                     self.game.uiManager.ordersnotificationsUI.update(self.game.orderManager.getOrders(activePawn._id));
                     self.game.uiManager.pawnsinfosUI.select(activePawn._id);
                     self.game.uiManager.directionUI.init(activePawn.getDirection());
-                    self.game.uiManager.actionUI.select('walk');
                     self.game.uiManager.actionUI.update(activePawn.getAp());
+                    self.game.uiManager.actionUI.select('walk');
                     var position = activePawn.getPosition();
                     self.game.uiSpritesGroup.removeAll();
                     var s = self.game.uiSpritesGroup.create(position.x * self.game.tileSize - 1, position.y * self.game.tileSize + 15, 'circle');
@@ -1214,6 +1215,10 @@ var TacticArena;
             };
             StageManager.prototype.addDecorations = function () {
                 this.map.createLayer('Decorations3');
+            };
+            StageManager.prototype.handleTile = function (pawn) {
+                var p = pawn.getPosition();
+                this.grid[p.y][p.x] = pawn.isAlive() ? -1 : 3;
             };
             StageManager.prototype.canMove = function (entity, x, y, ap) {
                 var _this = this;
@@ -1398,8 +1403,9 @@ var TacticArena;
                 this.type = type;
                 this.projection = null;
                 this._parent = null;
+                var tint = null; //team != this.game.playerTeam ? this.game.teamColors[team-1] : null;
                 if (type) {
-                    this.sprite = new Entity.Sprite(game, x, y, ext, type, this, 64);
+                    this.sprite = new Entity.Sprite(game, x, y, ext, type, this, 64, tint);
                     this.game.pawnsSpritesGroup.add(this.sprite);
                     this.sprite.stand();
                 }
@@ -1409,6 +1415,7 @@ var TacticArena;
                 this.selected = false;
                 this.isBot = bot;
                 this.team = team;
+                this.hurting = 0;
             }
             Pawn.prototype.getReal = function () {
                 return this._parent ? this._parent : this;
@@ -1434,12 +1441,31 @@ var TacticArena;
             };
             Pawn.prototype.hurt = function (hp) {
                 if (hp === void 0) { hp = 1; }
-                this.sprite.hurt();
-                this.destroyProjection();
-                var label_dmg = this.game.add.text(20, 10, "-" + hp, { font: '12px Press Start 2P', fill: "#ff021b", stroke: '#000000', strokeThickness: 6 });
-                var t = this.game.add.tween(label_dmg).to({ x: 20, y: -20, alpha: 0 }, 1000, Phaser.Easing.Linear.None, true);
-                t.onComplete.add(function () { label_dmg.destroy(); }, this);
-                this.sprite.addChild(label_dmg);
+                var self = this;
+                self.hurting++;
+                var timeOut = self.hurting * 300;
+                setTimeout(function () {
+                    if (self.hurting == 1) {
+                        self.sprite.hurt();
+                    }
+                    self.destroyProjection();
+                    var label_dmg = self.game.add.text(20, 10, "-" + hp, {
+                        font: '12px Press Start 2P',
+                        fill: "#ff021b",
+                        stroke: '#000000',
+                        strokeThickness: 6
+                    }, self.game.pawnsSpritesGroup);
+                    var t = self.game.add.tween(label_dmg).to({
+                        x: 20,
+                        y: -20,
+                        alpha: 0
+                    }, 1000, Phaser.Easing.Linear.None, true);
+                    t.onComplete.add(function () {
+                        label_dmg.destroy();
+                    }, self);
+                    self.sprite.addChild(label_dmg);
+                    self.hurting--;
+                }, timeOut);
             };
             Pawn.prototype.halfcast = function () {
                 this.sprite.halfcast();
@@ -1575,7 +1601,7 @@ var TacticArena;
                     this.sprite.die();
                 }
                 this._hp = hp;
-                this.game.signalManager.onHpChange.dispatch(this._hp);
+                this.game.signalManager.onHpChange.dispatch(this);
             };
             return Pawn;
         }());
@@ -1588,7 +1614,8 @@ var TacticArena;
     (function (Entity) {
         var Sprite = (function (_super) {
             __extends(Sprite, _super);
-            function Sprite(game, x, y, ext, type, parent, size) {
+            function Sprite(game, x, y, ext, type, parent, size, tint) {
+                if (tint === void 0) { tint = null; }
                 var _this = _super.call(this, game.game, game.tileSize * x - (size / 4), game.tileSize * y - (size / 2), type) || this;
                 _this._parent = parent;
                 _this._ext = ext;
@@ -1597,6 +1624,9 @@ var TacticArena;
                 _this.setAnimations();
                 _this._animationCompleteCallback = null;
                 return _this;
+                //if(tint) {
+                //    this.tint = tint;
+                //}
             }
             Sprite.prototype.setAnimations = function () {
                 this.animations.add('standS', ["walkS1"], 6, false);
@@ -1754,6 +1784,7 @@ var TacticArena;
                 return _super.call(this) || this;
             }
             BaseState.prototype.init = function () {
+                this.game.stage.backgroundColor = 0x333333;
                 $('[class*="ui-"]').remove();
                 $('#game-menu').remove();
                 _super.prototype.init.call(this);
@@ -1783,7 +1814,6 @@ var TacticArena;
                 this.load.image('loading', 'assets/images/loading.png');
             };
             Boot.prototype.create = function () {
-                this.game.stage.backgroundColor = 0x333333;
                 this.input.maxPointers = 1;
                 this.stage.disableVisibilityChange = true;
                 this.game.state.start('preload');
@@ -1803,12 +1833,16 @@ var TacticArena;
                 return _super !== null && _super.apply(this, arguments) || this;
             }
             Main.prototype.create = function () {
+                this.game.stage.backgroundColor = 0xffffff;
                 var self = this;
                 this.process = true;
                 this.selecting = false;
                 this.tileSize = 32;
                 this.isPaused = false;
                 this.hideProjections = false;
+                this.teamColors = ['0x8ad886', '0xd68686', '0x87bfdb', '0xcdd385'];
+                this.playerTeam = 1;
+                this.teams = {};
                 this.stageManager = new TacticArena.Controller.StageManager(this);
                 this.stageManager.init();
                 this.pointer = new TacticArena.UI.Pointer(this);
@@ -1853,6 +1887,18 @@ var TacticArena;
                         setTimeout(isGameReady, 300);
                     })();
                 });
+            };
+            Main.prototype.isOver = function () {
+                var _this = this;
+                var everyoneElseIsDead = true;
+                this.pawns.forEach(function (pawn) {
+                    _this.teams[pawn.team] = _this.teams[pawn.team] || pawn.isAlive();
+                    if (pawn.team != _this.playerTeam) {
+                        everyoneElseIsDead = everyoneElseIsDead && !_this.teams[pawn.team];
+                    }
+                });
+                console.log(this.teams, !this.teams[this.playerTeam], everyoneElseIsDead);
+                return (!this.teams[this.playerTeam] || everyoneElseIsDead);
             };
             Main.prototype.getUniqueId = function () {
                 var id = 0; //Math.floor(Math.random() * 1000);
@@ -1932,6 +1978,7 @@ var TacticArena;
                 return _super !== null && _super.apply(this, arguments) || this;
             }
             Preload.prototype.preload = function () {
+                this.game.add.text(0, 0, "f", { font: '1px Press Start 2P', fill: "#333333" });
                 _super.prototype.createMenu.call(this);
                 this.status = this.add.text(640 / 2, this.game.world.centerY / 2 + 200, 'Loading...', { fill: 'white' });
                 this.status.anchor.setTo(0.5);
@@ -2180,13 +2227,13 @@ var TacticArena;
                 this.menu.element.append('<div class="ui-ingame-menu"><a class="menu-icon"></a></div>');
                 this.element = this.menu.element.find('.ui-ingame-menu');
                 this.element.find('.menu-icon').on('click', function () {
-                    self.menu.element.append('<div class="ui-overlay"></div>' +
-                        '<div class="ui-popin">' +
+                    self.showOverlay();
+                    self.menu.element.append('<div class="ui-popin">' +
                         '<a class="close">x</a>' +
                         '<a class="button quit">Quit</a>' +
                         '</div>');
                     self.menu.element.find('.close').on('click', function () {
-                        self.menu.element.find('.overlay').remove();
+                        self.menu.element.find('.ui-overlay').remove();
                         self.menu.element.find('.ui-popin').remove();
                     });
                     self.menu.element.find('.button.quit').on('click', function () {
@@ -2194,6 +2241,21 @@ var TacticArena;
                     });
                 });
             }
+            IngameMenu.prototype.showOverlay = function () {
+                this.menu.element.append('<div class="ui-overlay"></div>');
+            };
+            IngameMenu.prototype.gameOver = function (msg) {
+                var self = this;
+                this.showOverlay();
+                this.menu.element.append('<div class="ui-popin">' +
+                    '<a class="button">' + msg + '</a>' +
+                    '<a class="button">-</a>' +
+                    '<a class="button quit">Quit</a>' +
+                    '</div>');
+                this.menu.element.find('.button.quit').on('click', function () {
+                    self.menu.game.state.start('menu');
+                });
+            };
             return IngameMenu;
         }());
         UI.IngameMenu = IngameMenu;
@@ -2443,7 +2505,9 @@ var TacticArena;
             };
             OrdersNotifications.prototype.getMessage = function (order) {
                 var activePawn = this.menu.game.turnManager.getActivePawn();
-                this.menu.game.stageManager.showPath([order], this.menu.game.pathOrdersTilesGroup, 0xffffff);
+                if (!this.menu.game.stageManager.equalPositions(activePawn.getPosition(), order)) {
+                    this.menu.game.stageManager.showPath([order], this.menu.game.pathOrdersTilesGroup, 0xffffff);
+                }
                 var msg = '<b>' + activePawn._name + '</b>';
                 if (order.action == 'move') {
                     msg += ' se déplacera en ' + order.x + ', ' + order.y;
@@ -2603,8 +2667,8 @@ var TacticArena;
                                     isInPath = true;
                                 }
                             }
+                            this.game.stageManager.clearPath(self.game.pathTilesGroup);
                             if (isInPath) {
-                                this.clearHelp();
                                 this.game.stageManager.showPath(path, self.game.pathTilesGroup, 0xfc000f);
                                 this.game.uiManager.pawnsinfosUI.showApCost(activePawn_1, 2);
                             }
@@ -3029,7 +3093,13 @@ var TacticArena;
                 }, 500);
                 this.timelineUI.clean();
                 this.timeUI.updatePauseFromSelected();
-                this.initOrderPhase(this.game.pawns[0], true);
+                if (this.game.isOver()) {
+                    var msg = this.game.teams[this.game.playerTeam] ? 'You win' : 'You lose';
+                    this.ingamemenuUI.gameOver(msg);
+                }
+                else {
+                    this.initOrderPhase(this.game.pawns[0], true);
+                }
             };
             UIManager.prototype.cancelAction = function () {
                 if (!this.game.process) {
