@@ -14,7 +14,10 @@ module TacticArena.UI {
 
         constructor(menu) {
             this.menu = menu;
+            this.setEvents();
+        }
 
+        setEvents() {
             this.enterKey = this.menu.game.input.keyboard.addKey(Phaser.KeyCode.ENTER);
             this.enterKey.onDown.add(this.enterKeyPressed, this, 0, this.menu);
 

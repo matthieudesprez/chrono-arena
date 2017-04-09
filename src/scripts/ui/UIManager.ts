@@ -14,6 +14,7 @@ module TacticArena.UI {
         transitionUI;
         turnIndicatorUI;
         ingamemenuUI;
+        chatUI;
         process;
 
         constructor(game) {
@@ -33,6 +34,7 @@ module TacticArena.UI {
             this.transitionUI = new UI.Transition(this);
             this.turnIndicatorUI = new UI.TurnIndicator(this);
             this.ingamemenuUI = new UI.IngameMenu(this);
+            this.chatUI = new UI.Chat(this);
 
             //this.game.pointer.dealWith(this.consolelogsUI.element);
             this.game.pointer.dealWith(this.actionUI.element);
@@ -42,15 +44,15 @@ module TacticArena.UI {
 
             this.process = false;
 
-            //this.consolelogsUI.element.ready(function() {
-            //    self.consolelogsUI.write('##################');
-            //    self.consolelogsUI.write('<b># Tactical <span style="color:orangered;">A</span>' +
-            //        '<span style="color:limegreen;">r</span>' +
-            //        '<span style="color:cyan;">e</span>' +
-            //        '<span style="color:yellow;">n</span>' +
-            //        '<span style="color:orangered;">a</span> #</b>');
-            //    self.consolelogsUI.write('##################<br/>');
-            //});
+            this.chatUI.element.ready(function() {
+                self.chatUI.write('##################');
+                self.chatUI.write('<b># Chrono <span style="color:orangered;">A</span>' +
+                    '<span style="color:limegreen;">r</span>' +
+                    '<span style="color:cyan;">e</span>' +
+                    '<span style="color:yellow;">n</span>' +
+                    '<span style="color:orangered;">a</span> #</b>');
+                self.chatUI.write('##################<br/>'); //
+            });
         }
 
         initOrderPhase(pawn, first) {

@@ -16,6 +16,7 @@ module TacticArena.State {
         aiManager: Controller.AiManager;
         logManager: Controller.LogManager;
         signalManager: Controller.SignalManager;
+        serverManager: Controller.ServerManager;
         uiManager: UI.UIManager;
         process: Boolean;
         selecting: Boolean;
@@ -37,6 +38,8 @@ module TacticArena.State {
             this.teamColors = ['0x8ad886', '0xd68686', '0x87bfdb', '0xcdd385'];
             this.playerTeam = 1;
             this.teams = {};
+
+            this.serverManager = new Controller.ServerManager(this);
 
             this.stageManager = new Controller.StageManager(this);
             this.stageManager.init();

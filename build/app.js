@@ -1105,6 +1105,50 @@ var TacticArena;
 (function (TacticArena) {
     var Controller;
     (function (Controller) {
+        var ServerManager = (function () {
+            function ServerManager(game) {
+                this.game = game;
+                this.connect();
+            }
+            ServerManager.prototype.connect = function () {
+                this.socket = new WebSocket('ws://localhost:3000');
+                this.socket.onmessage = function (message) {
+                    console.log('Connection 1', message.data);
+                };
+                this.send(JSON.stringify({ name: 'Bob', message: 'Hello' }));
+            };
+            ServerManager.prototype.send = function (message, callback) {
+                if (callback === void 0) { callback = null; }
+                var self = this;
+                this.waitForConnection(function () {
+                    self.socket.send(message);
+                    if (typeof callback === "function") {
+                        callback();
+                    }
+                }, 1000);
+            };
+            ServerManager.prototype.waitForConnection = function (callback, interval) {
+                if (this.socket.readyState === 1) {
+                    callback();
+                }
+                else {
+                    var that = this;
+                    // optional: implement backoff for interval here
+                    setTimeout(function () {
+                        that.waitForConnection(callback, interval);
+                    }, interval);
+                }
+            };
+            ;
+            return ServerManager;
+        }());
+        Controller.ServerManager = ServerManager;
+    })(Controller = TacticArena.Controller || (TacticArena.Controller = {}));
+})(TacticArena || (TacticArena = {}));
+var TacticArena;
+(function (TacticArena) {
+    var Controller;
+    (function (Controller) {
         var SignalManager = (function () {
             function SignalManager(game) {
                 this.game = game;
@@ -1843,6 +1887,7 @@ var TacticArena;
                 this.teamColors = ['0x8ad886', '0xd68686', '0x87bfdb', '0xcdd385'];
                 this.playerTeam = 1;
                 this.teams = {};
+                this.serverManager = new TacticArena.Controller.ServerManager(this);
                 this.stageManager = new TacticArena.Controller.StageManager(this);
                 this.stageManager.init();
                 this.pointer = new TacticArena.UI.Pointer(this);
@@ -2134,6 +2179,50 @@ var TacticArena;
 (function (TacticArena) {
     var UI;
     (function (UI) {
+        var Chat = (function () {
+            function Chat(menu) {
+                var self = this;
+                this.menu = menu;
+                $('body').append('<div class="ui-chat"><div class="content"></div><input type="text"/></div>');
+                this.element = $('.ui-chat');
+                this.element.find('input').on('focus', function () {
+                    console.log('focus');
+                    self.menu.game.input.enabled = false;
+                });
+                this.element.find('input').focusout(function () {
+                    self.menu.game.input.enabled = true;
+                });
+                this.element.find('input').on('keyup', function (e) {
+                    if (e.keyCode == 13) {
+                        self.send();
+                    }
+                });
+            }
+            Chat.prototype.write = function (msg) {
+                this.element.find('.content').append(msg + '<br/>');
+                this.element.find('.content').scrollTop(this.element.find('.content')[0].scrollHeight - this.element.find('.content').height());
+            };
+            Chat.prototype.send = function () {
+                var msg = this.element.find('input').val();
+                //this.menu.game.serverManager.send({
+                //    "data": {
+                //        "name": "Bob",
+                //        "message": msg
+                //    }
+                //});
+                this.menu.game.serverManager.send(JSON.stringify({ name: 'Bobi', message: 'Hellllllo' }));
+                this.write(msg);
+                this.element.find('input').val('');
+            };
+            return Chat;
+        }());
+        UI.Chat = Chat;
+    })(UI = TacticArena.UI || (TacticArena.UI = {}));
+})(TacticArena || (TacticArena = {}));
+var TacticArena;
+(function (TacticArena) {
+    var UI;
+    (function (UI) {
         var ConsoleLogs = (function () {
             function ConsoleLogs(menu) {
                 var self = this;
@@ -2268,6 +2357,9 @@ var TacticArena;
         var KeyManager = (function () {
             function KeyManager(menu) {
                 this.menu = menu;
+                this.setEvents();
+            }
+            KeyManager.prototype.setEvents = function () {
                 this.enterKey = this.menu.game.input.keyboard.addKey(Phaser.KeyCode.ENTER);
                 this.enterKey.onDown.add(this.enterKeyPressed, this, 0, this.menu);
                 this.spacebarKey = this.menu.game.input.keyboard.addKey(Phaser.KeyCode.SPACEBAR);
@@ -2288,7 +2380,7 @@ var TacticArena;
                 this.oneKey.onDown.add(this.oneKeyPress, this, 0, this.menu);
                 this.twoKey = this.menu.game.input.keyboard.addKey(Phaser.KeyCode.TWO);
                 this.twoKey.onDown.add(this.twoKeyPress, this, 0, this.menu);
-            }
+            };
             KeyManager.prototype.leftKeyPressed = function (self, uiManager) {
                 if (uiManager.process)
                     return false;
@@ -3020,21 +3112,22 @@ var TacticArena;
                 this.transitionUI = new UI.Transition(this);
                 this.turnIndicatorUI = new UI.TurnIndicator(this);
                 this.ingamemenuUI = new UI.IngameMenu(this);
+                this.chatUI = new UI.Chat(this);
                 //this.game.pointer.dealWith(this.consolelogsUI.element);
                 this.game.pointer.dealWith(this.actionUI.element);
                 this.game.pointer.dealWith(this.timeUI.element);
                 this.game.pointer.dealWith(this.timelineUI.element);
                 this.game.pointer.dealWith(this.directionUI.element);
                 this.process = false;
-                //this.consolelogsUI.element.ready(function() {
-                //    self.consolelogsUI.write('##################');
-                //    self.consolelogsUI.write('<b># Tactical <span style="color:orangered;">A</span>' +
-                //        '<span style="color:limegreen;">r</span>' +
-                //        '<span style="color:cyan;">e</span>' +
-                //        '<span style="color:yellow;">n</span>' +
-                //        '<span style="color:orangered;">a</span> #</b>');
-                //    self.consolelogsUI.write('##################<br/>');
-                //});
+                this.chatUI.element.ready(function () {
+                    self.chatUI.write('##################');
+                    self.chatUI.write('<b># Chrono <span style="color:orangered;">A</span>' +
+                        '<span style="color:limegreen;">r</span>' +
+                        '<span style="color:cyan;">e</span>' +
+                        '<span style="color:yellow;">n</span>' +
+                        '<span style="color:orangered;">a</span> #</b>');
+                    self.chatUI.write('##################<br/>'); //
+                });
             }
             UIManager.prototype.initOrderPhase = function (pawn, first) {
                 var _this = this;

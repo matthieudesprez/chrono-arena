@@ -229,6 +229,40 @@ html, body {
     cursor: pointer;
 }
 
+.ui-chat {
+    display: block;
+    height: 200px;
+    width: 50%;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 10px;
+    bottom: 0px;
+    border: 1px solid black;
+    left: 0px;
+    overflow: auto;
+    position: absolute;
+    text-align: left;
+    font-family: Menlo, Courier New;
+    font-size: 14px;
+    text-rendering: optimizeLegibility;
+    color: #ffffff;
+}
+.ui-chat .content {
+    padding: 10px;
+    top: 0px;
+    left: 0px;
+    position: absolute;
+    text-rendering: optimizeLegibility;
+    height: 176px;
+    overflow: hidden;
+}
+.ui-chat input {
+    position: absolute;
+    left: 0px;
+    bottom: 0px;
+    display: block;
+    width: 100%;
+    background: transparent;
+}
 
 
 /*.ui-logs {*/
