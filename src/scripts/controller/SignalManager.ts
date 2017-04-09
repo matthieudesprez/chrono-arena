@@ -12,6 +12,7 @@ module TacticArena.Controller {
         onTurnEnded:Phaser.Signal;
         onActivePawnChange:Phaser.Signal;
         onTeamChange:Phaser.Signal;
+        onChatMessageReception:Phaser.Signal;
 
         constructor(game) {
             this.game = game;
@@ -27,6 +28,7 @@ module TacticArena.Controller {
             this.onTurnEnded = new Phaser.Signal();
             this.onActivePawnChange = new Phaser.Signal();
             this.onTeamChange = new Phaser.Signal();
+            this.onChatMessageReception = new Phaser.Signal();
         }
 
         init() {
@@ -102,6 +104,11 @@ module TacticArena.Controller {
                         pawn.destroyProjection();
                     });
                 }
+            });
+
+            this.onChatMessageReception.add(function(data) {
+                console.log(data);
+                self.game.uiManager.chatUI.write(data.name + ': ' + data.message)
             });
         }
     }

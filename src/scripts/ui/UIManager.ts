@@ -43,16 +43,6 @@ module TacticArena.UI {
             this.game.pointer.dealWith(this.directionUI.element);
 
             this.process = false;
-
-            this.chatUI.element.ready(function() {
-                self.chatUI.write('##################');
-                self.chatUI.write('<b># Chrono <span style="color:orangered;">A</span>' +
-                    '<span style="color:limegreen;">r</span>' +
-                    '<span style="color:cyan;">e</span>' +
-                    '<span style="color:yellow;">n</span>' +
-                    '<span style="color:orangered;">a</span> #</b>');
-                self.chatUI.write('##################<br/>'); //
-            });
         }
 
         initOrderPhase(pawn, first) {
