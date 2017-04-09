@@ -2,15 +2,17 @@ module TacticArena.Controller {
     export class ServerManager {
         game;
         socket;
+        url;
 
         constructor(game) {
             this.game = game;
+            this.url = 'wss://polar-fortress-51758.herokuapp.com'; //'ws://localhost:3000'
             this.connect();
         }
 
         connect() {
             let self = this;
-            this.socket = new WebSocket('ws://localhost:3000');
+            this.socket = new WebSocket(this.url);
             this.socket.onmessage = function (message) {
                 console.log('Connection 1', message.data);
                 self.game.signalManager.onChatMessageReception.dispatch(JSON.parse(message.data).data);

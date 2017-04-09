@@ -1108,24 +1108,31 @@ var TacticArena;
         var ServerManager = (function () {
             function ServerManager(game) {
                 this.game = game;
+                this.url = 'wss://polar-fortress-51758.herokuapp.com'; //'ws://localhost:3000'
                 this.connect();
             }
             ServerManager.prototype.connect = function () {
-                this.socket = new WebSocket('ws://localhost:3000');
+                var self = this;
+                this.socket = new WebSocket(this.url);
                 this.socket.onmessage = function (message) {
                     console.log('Connection 1', message.data);
+                    self.game.signalManager.onChatMessageReception.dispatch(JSON.parse(message.data).data);
                 };
-                this.send(JSON.stringify({ name: 'Bob', message: 'Hello' }));
+                this.send(JSON.stringify({ name: 'Chrono', message: 'Hello !' })).then(function (res) {
+                });
             };
             ServerManager.prototype.send = function (message, callback) {
                 if (callback === void 0) { callback = null; }
                 var self = this;
-                this.waitForConnection(function () {
-                    self.socket.send(message);
-                    if (typeof callback === "function") {
-                        callback();
-                    }
-                }, 1000);
+                return new Promise(function (resolve, reject) {
+                    self.waitForConnection(function () {
+                        self.socket.send(message);
+                        if (typeof callback === "function") {
+                            callback();
+                        }
+                        resolve(true);
+                    }, 1000);
+                });
             };
             ServerManager.prototype.waitForConnection = function (callback, interval) {
                 if (this.socket.readyState === 1) {
@@ -1163,6 +1170,7 @@ var TacticArena;
                 this.onTurnEnded = new Phaser.Signal();
                 this.onActivePawnChange = new Phaser.Signal();
                 this.onTeamChange = new Phaser.Signal();
+                this.onChatMessageReception = new Phaser.Signal();
             }
             SignalManager.prototype.init = function () {
                 var self = this;
@@ -1225,6 +1233,10 @@ var TacticArena;
                             pawn.destroyProjection();
                         });
                     }
+                });
+                this.onChatMessageReception.add(function (data) {
+                    console.log(data);
+                    self.game.uiManager.chatUI.write(data.name + ': ' + data.message);
                 });
             };
             return SignalManager;
@@ -2183,10 +2195,14 @@ var TacticArena;
             function Chat(menu) {
                 var self = this;
                 this.menu = menu;
+                this.playerName = '';
                 $('body').append('<div class="ui-chat"><div class="content"></div><input type="text"/></div>');
                 this.element = $('.ui-chat');
                 this.element.find('input').on('focus', function () {
                     console.log('focus');
+                    if (self.playerName.trim() == '') {
+                        self.write('Chrono: What\'s your name ?');
+                    }
                     self.menu.game.input.enabled = false;
                 });
                 this.element.find('input').focusout(function () {
@@ -2194,8 +2210,24 @@ var TacticArena;
                 });
                 this.element.find('input').on('keyup', function (e) {
                     if (e.keyCode == 13) {
-                        self.send();
+                        if (self.playerName.trim() == '') {
+                            self.playerName = self.element.find('input').val();
+                            self.element.find('input').val('');
+                            self.write('Chrono: Nice to meet you ' + self.playerName);
+                        }
+                        else {
+                            self.send();
+                        }
                     }
+                });
+                this.element.ready(function () {
+                    self.write('##################');
+                    self.write('<b># Chrono <span style="color:orangered;">A</span>' +
+                        '<span style="color:limegreen;">r</span>' +
+                        '<span style="color:cyan;">e</span>' +
+                        '<span style="color:yellow;">n</span>' +
+                        '<span style="color:orangered;">a</span> #</b>');
+                    self.write('##################<br/>');
                 });
             }
             Chat.prototype.write = function (msg) {
@@ -2203,16 +2235,13 @@ var TacticArena;
                 this.element.find('.content').scrollTop(this.element.find('.content')[0].scrollHeight - this.element.find('.content').height());
             };
             Chat.prototype.send = function () {
-                var msg = this.element.find('input').val();
-                //this.menu.game.serverManager.send({
-                //    "data": {
-                //        "name": "Bob",
-                //        "message": msg
-                //    }
-                //});
-                this.menu.game.serverManager.send(JSON.stringify({ name: 'Bobi', message: 'Hellllllo' }));
-                this.write(msg);
-                this.element.find('input').val('');
+                var self = this;
+                this.menu.game.serverManager.send(JSON.stringify({
+                    name: self.playerName,
+                    message: this.element.find('input').val()
+                })).then(function (res) {
+                    self.element.find('input').val('');
+                });
             };
             return Chat;
         }());
@@ -3119,15 +3148,6 @@ var TacticArena;
                 this.game.pointer.dealWith(this.timelineUI.element);
                 this.game.pointer.dealWith(this.directionUI.element);
                 this.process = false;
-                this.chatUI.element.ready(function () {
-                    self.chatUI.write('##################');
-                    self.chatUI.write('<b># Chrono <span style="color:orangered;">A</span>' +
-                        '<span style="color:limegreen;">r</span>' +
-                        '<span style="color:cyan;">e</span>' +
-                        '<span style="color:yellow;">n</span>' +
-                        '<span style="color:orangered;">a</span> #</b>');
-                    self.chatUI.write('##################<br/>'); //
-                });
             }
             UIManager.prototype.initOrderPhase = function (pawn, first) {
                 var _this = this;

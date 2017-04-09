@@ -253,7 +253,8 @@ html, body {
     position: absolute;
     text-rendering: optimizeLegibility;
     height: 176px;
-    overflow: hidden;
+    overflow: auto;
+    width: 100%;
 }
 .ui-chat input {
     position: absolute;
