@@ -39,7 +39,12 @@ module TacticArena.State {
             this.playerTeam = 1;
             this.teams = {};
 
-            this.serverManager = new Controller.ServerManager(this);
+            this.signalManager = new Controller.SignalManager(this);
+            this.signalManager.init();
+
+            //this.serverManager = new Controller.ServerManager(this, function(data) {
+            //    self.signalManager.onChatMessageReception.dispatch(data);
+            //});
 
             this.stageManager = new Controller.StageManager(this);
             this.stageManager.init();
@@ -64,8 +69,6 @@ module TacticArena.State {
             this.pathfinder.disableSync();
             this.pathfinder.setGrid(this.stageManager.grid);
 
-            this.signalManager = new Controller.SignalManager(this);
-            this.signalManager.init();
             this.logManager = new Controller.LogManager(this);
             this.orderManager = new Controller.OrderManager(this);
             this.resolveManager = new Controller.ResolveManager(this);

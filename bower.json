@@ -6,7 +6,8 @@
     "easystarjs": "~0.2.3",
     "jquery": "^2.0.3",
     "jquery-ui": "^1.12.1",
-    "jasmine-core": "jasmine#^2.5.2"
+    "jasmine-core": "jasmine#^2.5.2",
+    "jQuery-contextMenu": "^2.4.4"
   },
   "ignore": [
     "**/.*",

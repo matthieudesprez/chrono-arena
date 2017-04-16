@@ -37,7 +37,8 @@ module TacticArena.State {
             //setTimeout(function () {
             //    that.game.state.start("menu");
             //}, 1000);
-            that.game.state.start("main");
+            //that.game.state.start("main");
+            that.game.state.start("lobby");
         }
     }
 }

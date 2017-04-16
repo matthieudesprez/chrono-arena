@@ -2,6 +2,7 @@
 /// <reference path="./definitions/jasmine.d.ts"/>
 /// <reference path="./definitions/jquery.d.ts" />
 /// <reference path="./definitions/jqueryui.d.ts" />
+/// <reference path="./definitions/jquery.contextMenu.d.ts" />
 /// <reference path="./definitions/easystarjs.d.ts"/>
 
 module TacticArena {
@@ -17,6 +18,7 @@ module TacticArena {
             this.state.add('boot', State.Boot);
             this.state.add('preload', State.Preload);
             this.state.add('menu', State.Menu);
+            this.state.add('lobby', State.Lobby);
             this.state.add('options', State.Options);
             this.state.add('main', State.Main);
 

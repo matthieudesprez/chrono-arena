@@ -27,6 +27,7 @@ var TacticArena;
 /// <reference path="./definitions/jasmine.d.ts"/>
 /// <reference path="./definitions/jquery.d.ts" />
 /// <reference path="./definitions/jqueryui.d.ts" />
+/// <reference path="./definitions/jquery.contextMenu.d.ts" />
 /// <reference path="./definitions/easystarjs.d.ts"/>
 var TacticArena;
 (function (TacticArena) {
@@ -43,6 +44,7 @@ var TacticArena;
             _this.state.add('boot', TacticArena.State.Boot);
             _this.state.add('preload', TacticArena.State.Preload);
             _this.state.add('menu', TacticArena.State.Menu);
+            _this.state.add('lobby', TacticArena.State.Lobby);
             _this.state.add('options', TacticArena.State.Options);
             _this.state.add('main', TacticArena.State.Main);
             _this.state.start('boot');
@@ -1106,19 +1108,50 @@ var TacticArena;
     var Controller;
     (function (Controller) {
         var ServerManager = (function () {
-            function ServerManager(game) {
+            function ServerManager(game, login, onChatMessageReceptionCallback, onPlayersListUpdateCallback) {
                 this.game = game;
-                this.url = 'wss://polar-fortress-51758.herokuapp.com'; //'ws://localhost:3000'
+                //this.url = 'wss://polar-fortress-51758.herokuapp.com';
+                this.url = 'ws://localhost:3000';
+                this.login = login;
+                this.token = '';
+                this.socketId = null;
+                this.playersList = [];
+                this.onChatMessageReceptionCallback = onChatMessageReceptionCallback;
+                this.onPlayersListUpdateCallback = onPlayersListUpdateCallback;
+                this.intervalCount = 0;
                 this.connect();
+                this.notifyNewConnection(this.login);
             }
             ServerManager.prototype.connect = function () {
                 var self = this;
                 this.socket = new WebSocket(this.url);
                 this.socket.onmessage = function (message) {
-                    console.log('Connection 1', message.data);
-                    self.game.signalManager.onChatMessageReception.dispatch(JSON.parse(message.data).data);
+                    console.log(message.data);
+                    var data = JSON.parse(message.data).data;
+                    var server_msg = data.type == 'SERVER_NOTIFICATION';
+                    if (data.type == 'SERVER_PLAYERS_LIST') {
+                        self.onPlayersListUpdateCallback(data);
+                    }
+                    else {
+                        self.onChatMessageReceptionCallback(data, server_msg);
+                    }
                 };
-                this.send(JSON.stringify({ name: 'Chrono', message: 'Hello !' })).then(function (res) {
+                this.socket.onclose = function (e) {
+                    console.log('close', e);
+                };
+                this.socket.onerror = function (e) {
+                    console.log('error', e);
+                };
+                this.socket.onopen = function (e) {
+                    console.log('open', e);
+                };
+                //self.send({name: 'Chrono', content: 'Hello !'}).then( (res) => {
+                //
+                //});
+                $(window).on('beforeunload', function () {
+                    console.log('disconnect');
+                    self.socket.close();
+                    //return null;
                 });
             };
             ServerManager.prototype.send = function (message, callback) {
@@ -1126,7 +1159,7 @@ var TacticArena;
                 var self = this;
                 return new Promise(function (resolve, reject) {
                     self.waitForConnection(function () {
-                        self.socket.send(message);
+                        self.socket.send(JSON.stringify(message));
                         if (typeof callback === "function") {
                             callback();
                         }
@@ -1136,17 +1169,30 @@ var TacticArena;
             };
             ServerManager.prototype.waitForConnection = function (callback, interval) {
                 if (this.socket.readyState === 1) {
+                    this.intervalCount = 0;
                     callback();
                 }
                 else {
+                    this.intervalCount++;
                     var that = this;
                     // optional: implement backoff for interval here
-                    setTimeout(function () {
-                        that.waitForConnection(callback, interval);
-                    }, interval);
+                    if (this.intervalCount > 2) {
+                        this.intervalCount = 0;
+                        this.connect();
+                    }
+                    else {
+                        setTimeout(function () {
+                            that.waitForConnection(callback, interval);
+                        }, interval);
+                    }
                 }
             };
             ;
+            ServerManager.prototype.notifyNewConnection = function (name) {
+                console.log(name);
+                this.send({ type: 'NEW_CONNECTION', name: name, content: ' ' }).then(function (res) {
+                });
+            };
             return ServerManager;
         }());
         Controller.ServerManager = ServerManager;
@@ -1883,6 +1929,48 @@ var TacticArena;
 (function (TacticArena) {
     var State;
     (function (State) {
+        var Lobby = (function (_super) {
+            __extends(Lobby, _super);
+            function Lobby() {
+                return _super !== null && _super.apply(this, arguments) || this;
+            }
+            Lobby.prototype.create = function () {
+                var self = this;
+                _super.prototype.createMenu.call(this);
+                $('#game-menu .ui').html('<div><h2>Entrez un login :</h2></div>' +
+                    '<div><input type="text" class="login-input" value="Matt"/></div>' +
+                    '<div class="button submit-login"><a>Confirmer</a></div>');
+                $('#game-menu .ui .submit-login').bind('click', function (e) {
+                    self.initChat($('#game-menu .ui .login-input').val());
+                });
+                //$('#game-menu .ui .login-input').on('keyup', function (e) {
+                //    if (e.keyCode == 13) {
+                //        self.initChat($('#game-menu .ui .login-input').val());
+                //    }
+                //});
+            };
+            Lobby.prototype.initChat = function (login) {
+                $('#game-menu .ui').html('');
+                var self = this;
+                this.serverManager = new TacticArena.Controller.ServerManager(this, login, function (data, server) {
+                    if (server === void 0) { server = false; }
+                    console.log(data);
+                    var msg = server ? '<span class="notification">' + data.content + '</span>' : data.name + ': ' + data.content;
+                    self.chatUI.write(msg);
+                }, function (data) {
+                    self.chatUI.updatePlayersList(data);
+                });
+                this.chatUI = new TacticArena.UI.Chat(this, this.serverManager);
+            };
+            return Lobby;
+        }(TacticArena.State.BaseState));
+        State.Lobby = Lobby;
+    })(State = TacticArena.State || (TacticArena.State = {}));
+})(TacticArena || (TacticArena = {}));
+var TacticArena;
+(function (TacticArena) {
+    var State;
+    (function (State) {
         var Main = (function (_super) {
             __extends(Main, _super);
             function Main() {
@@ -1899,7 +1987,11 @@ var TacticArena;
                 this.teamColors = ['0x8ad886', '0xd68686', '0x87bfdb', '0xcdd385'];
                 this.playerTeam = 1;
                 this.teams = {};
-                this.serverManager = new TacticArena.Controller.ServerManager(this);
+                this.signalManager = new TacticArena.Controller.SignalManager(this);
+                this.signalManager.init();
+                //this.serverManager = new Controller.ServerManager(this, function(data) {
+                //    self.signalManager.onChatMessageReception.dispatch(data);
+                //});
                 this.stageManager = new TacticArena.Controller.StageManager(this);
                 this.stageManager.init();
                 this.pointer = new TacticArena.UI.Pointer(this);
@@ -1918,8 +2010,6 @@ var TacticArena;
                 this.pathfinder.disableDiagonals();
                 this.pathfinder.disableSync();
                 this.pathfinder.setGrid(this.stageManager.grid);
-                this.signalManager = new TacticArena.Controller.SignalManager(this);
-                this.signalManager.init();
                 this.logManager = new TacticArena.Controller.LogManager(this);
                 this.orderManager = new TacticArena.Controller.OrderManager(this);
                 this.resolveManager = new TacticArena.Controller.ResolveManager(this);
@@ -1990,12 +2080,12 @@ var TacticArena;
                 var that = this;
                 _super.prototype.createMenu.call(this);
                 $('#game-menu .ui').html('<div class="button singleplayer"><a>Single Player</a></div>' +
-                    '<div class="button multiplayerlocal"><a>Multi Player Local</a></div>' +
-                    '<div class="button multiplayeronline"><a>Single Player Online</a></div>' +
+                    //'<div class="button multiplayerlocal"><a>Multi Player Local</a></div>' +
+                    '<div class="button multiplayeronline"><a>Multi Player Online</a></div>' +
                     '<div class="button options"><a>Options</a></div>');
                 $('.singleplayer').click(function () { that.game.state.start('main'); });
                 $('.multiplayerlocal').click(function () { that.game.state.start('main'); });
-                $('.multiplayeronline').click(function () { that.game.state.start('main'); });
+                $('.multiplayeronline').click(function () { that.game.state.start('lobby'); });
                 $('.options').click(function () { that.game.state.start('options'); });
             };
             return Menu;
@@ -2064,7 +2154,8 @@ var TacticArena;
                 //setTimeout(function () {
                 //    that.game.state.start("menu");
                 //}, 1000);
-                that.game.state.start("main");
+                //that.game.state.start("main");
+                that.game.state.start("lobby");
             };
             return Preload;
         }(TacticArena.State.BaseState));
@@ -2192,17 +2283,13 @@ var TacticArena;
     var UI;
     (function (UI) {
         var Chat = (function () {
-            function Chat(menu) {
+            function Chat(menu, serverManager) {
                 var self = this;
                 this.menu = menu;
-                this.playerName = '';
-                $('body').append('<div class="ui-chat"><div class="content"></div><input type="text"/></div>');
+                this.serverManager = serverManager;
+                $('body').append('<div class="ui-chat"><div class="channels-list"></div><div class="content"></div><input id="ui-chat-input" type="text"/></div>');
                 this.element = $('.ui-chat');
                 this.element.find('input').on('focus', function () {
-                    console.log('focus');
-                    if (self.playerName.trim() == '') {
-                        self.write('Chrono: What\'s your name ?');
-                    }
                     self.menu.game.input.enabled = false;
                 });
                 this.element.find('input').focusout(function () {
@@ -2210,38 +2297,62 @@ var TacticArena;
                 });
                 this.element.find('input').on('keyup', function (e) {
                     if (e.keyCode == 13) {
-                        if (self.playerName.trim() == '') {
-                            self.playerName = self.element.find('input').val();
-                            self.element.find('input').val('');
-                            self.write('Chrono: Nice to meet you ' + self.playerName);
-                        }
-                        else {
-                            self.send();
-                        }
+                        self.send();
                     }
                 });
                 this.element.ready(function () {
-                    self.write('##################');
+                    self.write('################');
                     self.write('<b># Chrono <span style="color:orangered;">A</span>' +
                         '<span style="color:limegreen;">r</span>' +
                         '<span style="color:cyan;">e</span>' +
                         '<span style="color:yellow;">n</span>' +
                         '<span style="color:orangered;">a</span> #</b>');
-                    self.write('##################<br/>');
+                    self.write('################<br/>');
                 });
+                this.currentChannel = 'general';
             }
             Chat.prototype.write = function (msg) {
                 this.element.find('.content').append(msg + '<br/>');
                 this.element.find('.content').scrollTop(this.element.find('.content')[0].scrollHeight - this.element.find('.content').height());
             };
+            Chat.prototype.updatePlayersList = function (data) {
+                var self = this;
+                var playersList = '<li class="channel-general">General</li>';
+                data.content.forEach(function (p) {
+                    //if (p.token != self.serverManager.token) {
+                    playersList += '<li class="channel-player channel-' + p.token + '">' + p.name + '</li>';
+                    //}
+                });
+                this.element.find('.channels-list').html('<ul>' + playersList + '</ul>');
+                //this.element.find('.channel-player').on('click', function() {
+                //
+                //});
+                $.contextMenu({
+                    selector: ".channel-player",
+                    items: {
+                        duel: {
+                            name: "Provoquer en duel", callback: function (key, opt) {
+                                alert("Foo!");
+                                //wait for acceptation
+                                //then go state selection
+                            }
+                        }
+                    }
+                });
+                this.selectChannel(this.currentChannel);
+            };
             Chat.prototype.send = function () {
                 var self = this;
-                this.menu.game.serverManager.send(JSON.stringify({
-                    name: self.playerName,
-                    message: this.element.find('input').val()
-                })).then(function (res) {
+                this.serverManager.send({
+                    name: self.serverManager.login,
+                    content: this.element.find('input').val()
+                }).then(function (res) {
                     self.element.find('input').val('');
                 });
+            };
+            Chat.prototype.selectChannel = function (name) {
+                this.element.find('.channels-list').find('li').removeClass('selected');
+                this.element.find('.channels-list').find('.channel-' + name).addClass('selected');
             };
             return Chat;
         }());
@@ -3141,7 +3252,7 @@ var TacticArena;
                 this.transitionUI = new UI.Transition(this);
                 this.turnIndicatorUI = new UI.TurnIndicator(this);
                 this.ingamemenuUI = new UI.IngameMenu(this);
-                this.chatUI = new UI.Chat(this);
+                this.chatUI = new UI.Chat(this, this.game.serverManager);
                 //this.game.pointer.dealWith(this.consolelogsUI.element);
                 this.game.pointer.dealWith(this.actionUI.element);
                 this.game.pointer.dealWith(this.timeUI.element);

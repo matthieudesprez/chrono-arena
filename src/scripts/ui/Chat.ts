@@ -2,20 +2,17 @@ module TacticArena.UI {
     export class Chat {
         menu;
         element;
-        playerName;
+        serverManager;
+        currentChannel;
 
-        constructor(menu) {
+        constructor(menu, serverManager) {
             var self = this;
             this.menu = menu;
-            this.playerName = '';
-            $('body').append('<div class="ui-chat"><div class="content"></div><input type="text"/></div>');
+            this.serverManager = serverManager;
+            $('body').append('<div class="ui-chat"><div class="channels-list"></div><div class="content"></div><input id="ui-chat-input" type="text"/></div>');
             this.element = $('.ui-chat');
 
             this.element.find('input').on('focus', function () {
-                console.log('focus');
-                if(self.playerName.trim() == '') {
-                    self.write('Chrono: What\'s your name ?');
-                }
                 self.menu.game.input.enabled = false;
             });
             this.element.find('input').focusout(function () {
@@ -23,25 +20,21 @@ module TacticArena.UI {
             });
             this.element.find('input').on('keyup', function (e) {
                 if (e.keyCode == 13) {
-                    if(self.playerName.trim() == '') {
-                        self.playerName = self.element.find('input').val();
-                        self.element.find('input').val('');
-                        self.write('Chrono: Nice to meet you ' + self.playerName);
-                    } else {
-                        self.send();
-                    }
+                    self.send();
                 }
             });
 
-            this.element.ready(function() {
-                self.write('##################');
+            this.element.ready(function () {
+                self.write('################');
                 self.write('<b># Chrono <span style="color:orangered;">A</span>' +
                     '<span style="color:limegreen;">r</span>' +
                     '<span style="color:cyan;">e</span>' +
                     '<span style="color:yellow;">n</span>' +
                     '<span style="color:orangered;">a</span> #</b>');
-                self.write('##################<br/>');
+                self.write('################<br/>');
             });
+
+            this.currentChannel = 'general';
         }
 
         write(msg) {
@@ -49,15 +42,47 @@ module TacticArena.UI {
             this.element.find('.content').scrollTop(this.element.find('.content')[0].scrollHeight - this.element.find('.content').height());
         }
 
+        updatePlayersList(data) {
+            let self = this;
+            let playersList = '<li class="channel-general">General</li>';
+            data.content.forEach(p => {
+                //if (p.token != self.serverManager.token) {
+                    playersList += '<li class="channel-player channel-' + p.token + '">' + p.name + '</li>';
+                //}
+            });
+            this.element.find('.channels-list').html('<ul>' + playersList + '</ul>');
+            //this.element.find('.channel-player').on('click', function() {
+            //
+            //});
+            $.contextMenu({
+                selector: ".channel-player",
+                items: {
+                    duel: {
+                        name: "Provoquer en duel", callback: function (key, opt) {
+                            alert("Foo!");
+                            //wait for acceptation
+                            //then go state selection
+                        }
+                    }
+                }
+            });
+            this.selectChannel(this.currentChannel);
+        }
+
         send() {
             let self = this;
-            this.menu.game.serverManager.send(JSON.stringify({
-                name: self.playerName,
-                message: this.element.find('input').val()})
-            ).then( (res) => {
+            this.serverManager.send({
+                    name: self.serverManager.login,
+                    content: this.element.find('input').val()
+                }
+            ).then((res) => {
                 self.element.find('input').val('');
             });
         }
 
+        selectChannel(name) {
+            this.element.find('.channels-list').find('li').removeClass('selected');
+            this.element.find('.channels-list').find('.channel-' + name).addClass('selected');
+        }
     }
 }

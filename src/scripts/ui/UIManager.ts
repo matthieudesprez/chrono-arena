@@ -34,7 +34,7 @@ module TacticArena.UI {
             this.transitionUI = new UI.Transition(this);
             this.turnIndicatorUI = new UI.TurnIndicator(this);
             this.ingamemenuUI = new UI.IngameMenu(this);
-            this.chatUI = new UI.Chat(this);
+            this.chatUI = new UI.Chat(this, this.game.serverManager);
 
             //this.game.pointer.dealWith(this.consolelogsUI.element);
             this.game.pointer.dealWith(this.actionUI.element);

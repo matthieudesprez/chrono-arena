@@ -1,4 +1,11 @@
 {
   "port": 8000,
-  "server": { "baseDir": "./build" }
+  "server": {
+    "baseDir": "./build"
+  },
+  "ghostMode": {
+    "clicks": false,
+    "forms": false,
+    "scroll": false
+  }
 }

@@ -3,7 +3,6 @@
   "version": "0.0.0",
   "dependencies": {},
   "scripts": {
-    "tsc": "tsc",
     "watch": "tsc -w --outDir build",
     "clean": "rm -rf build",
     "serve": "lite-server",
@@ -11,7 +10,6 @@
     "test": "karma start spec/support/karma.conf.js",
     "build": "tsc && concurrent \"cp src/index.html build\" \"cp -R src/vendor src/css src/assets build\"",
     "cp": "concurrent \"cp src/index.html build\" \"cp src/tests.html build\" \"cp -R src/vendor src/css src/assets build\"",
-    "start": "concurrent \"npm run watch\" \"npm run lite\"",
     "clean_vendors": "find ./src/vendor/jquery-ui/ ! -name \"jquery-ui.min.js\" -type f -delete && find ./src/vendor/jquery-ui/ -type d -empty -delete && find ./src/vendor/phaser-official/ ! -name \"phaser.js\" -type f -delete && find ./src/vendor/phaser-official/ -type d -empty -delete && find ./src/vendor/easystarjs/ ! -name \"easystar-0.2.3.min.js\" -type f -delete && find ./src/vendor/easystarjs/ -type d -empty -delete && find ./src/vendor/jquery/ ! -name \"jquery.min.js\" -type f -delete && find ./src/vendor/jquery/ -type d -empty -delete"
   },
   "devDependencies": {
