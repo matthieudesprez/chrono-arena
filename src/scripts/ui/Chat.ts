@@ -45,10 +45,11 @@ module TacticArena.UI {
         updatePlayersList(data) {
             let self = this;
             let playersList = '<li class="channel-general">General</li>';
+            console.log(self.serverManager.token);
             data.content.forEach(p => {
-                //if (p.token != self.serverManager.token) {
-                    playersList += '<li class="channel-player channel-' + p.token + '">' + p.name + '</li>';
-                //}
+                if (p.token != self.serverManager.token) {
+                    playersList += '<li class="channel-player" id="' + p.token + '">' + p.name + '</li>';
+                }
             });
             this.element.find('.channels-list').html('<ul>' + playersList + '</ul>');
             //this.element.find('.channel-player').on('click', function() {
@@ -59,9 +60,9 @@ module TacticArena.UI {
                 items: {
                     duel: {
                         name: "Provoquer en duel", callback: function (key, opt) {
-                            alert("Foo!");
-                            //wait for acceptation
-                            //then go state selection
+                            let token = opt.$trigger.attr("id");
+                            self.serverManager.ask('ASK_DUEL', token);
+                            self.write('<span class="notification">La demande a été envoyée à ' + opt.$trigger.html() + '</span>');
                         }
                     }
                 }

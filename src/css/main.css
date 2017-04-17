@@ -301,6 +301,54 @@ html, body {
     color: #333;
 }
 
+.faction-selector {
+    display: inline-block;
+    width: 96px;
+    height: 130px;
+    position: relative;
+}
+.faction-selector .control {
+    position: absolute;
+    top: 70px;
+    color: #fff;
+    cursor: pointer;
+}
+.faction-selector .control.left {
+    left: -30px;
+}
+.faction-selector .control.right {
+    right: -30px;
+}
+
+.faction-selector .faction {
+    display: inline-block;
+    width: 96px;
+    height: 130px;
+    background-repeat: no-repeat;
+    background-position: 0 0;
+    background-color: #333;
+    position: absolute;
+    left: 0px;
+    top: 0px;
+}
+.faction-selector .faction .name{
+    display: inline-block;
+    width: 96px;
+    text-align: center;
+    color: #fff;
+    font-family: Iceland;
+    position: absolute;
+    bottom: 0px;
+    font-size: 20px;
+    left: 0px;
+}
+.faction-selector .faction.human {
+    background-image: url('../assets/images/blondy_avatar.png');
+}
+.faction-selector .faction.undead {
+    display: none;
+    background-image: url('../assets/images/evil_avatar.png');
+}
 
 /*.ui-logs {*/
 /*display: none;*/

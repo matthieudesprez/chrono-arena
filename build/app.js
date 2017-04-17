@@ -47,6 +47,7 @@ var TacticArena;
             _this.state.add('lobby', TacticArena.State.Lobby);
             _this.state.add('options', TacticArena.State.Options);
             _this.state.add('main', TacticArena.State.Main);
+            _this.state.add('mainmultiplayeronline', TacticArena.State.MainMultiplayerOnline);
             _this.state.start('boot');
             return _this;
         }
@@ -1108,16 +1109,19 @@ var TacticArena;
     var Controller;
     (function (Controller) {
         var ServerManager = (function () {
-            function ServerManager(game, login, onChatMessageReceptionCallback, onPlayersListUpdateCallback) {
+            function ServerManager(game, login, onChatMessageReceptionCallback, onPlayersListUpdateCallback, onDuelAskReceptionCallback, onDuelAcceptedCallback, onDuelStartCallback) {
                 this.game = game;
-                //this.url = 'wss://polar-fortress-51758.herokuapp.com';
-                this.url = 'ws://localhost:3000';
+                this.url = 'wss://polar-fortress-51758.herokuapp.com';
+                //this.url = 'ws://localhost:3000';
                 this.login = login;
                 this.token = '';
                 this.socketId = null;
                 this.playersList = [];
                 this.onChatMessageReceptionCallback = onChatMessageReceptionCallback;
                 this.onPlayersListUpdateCallback = onPlayersListUpdateCallback;
+                this.onDuelAskReceptionCallback = onDuelAskReceptionCallback;
+                this.onDuelAcceptedCallback = onDuelAcceptedCallback;
+                this.onDuelStartCallback = onDuelStartCallback;
                 this.intervalCount = 0;
                 this.connect();
                 this.notifyNewConnection(this.login);
@@ -1131,6 +1135,23 @@ var TacticArena;
                     var server_msg = data.type == 'SERVER_NOTIFICATION';
                     if (data.type == 'SERVER_PLAYERS_LIST') {
                         self.onPlayersListUpdateCallback(data);
+                    }
+                    else if (data.type == 'SERVER_TOKEN') {
+                        self.token = data.content;
+                    }
+                    else if (data.type == 'ASK_DUEL') {
+                        self.onDuelAskReceptionCallback(data.content, data.name);
+                    }
+                    else if (data.type == 'DECLINE_DUEL') {
+                        self.onChatMessageReceptionCallback(data, true);
+                    }
+                    else if (data.type == 'ACCEPT_DUEL') {
+                        self.onChatMessageReceptionCallback(data, true);
+                        self.onDuelAcceptedCallback(data);
+                    }
+                    else if (data.type == 'START_DUEL') {
+                        self.onChatMessageReceptionCallback({ content: 'Début du duel' }, true);
+                        self.onDuelStartCallback(data);
                     }
                     else {
                         self.onChatMessageReceptionCallback(data, server_msg);
@@ -1191,6 +1212,11 @@ var TacticArena;
             ServerManager.prototype.notifyNewConnection = function (name) {
                 console.log(name);
                 this.send({ type: 'NEW_CONNECTION', name: name, content: ' ' }).then(function (res) {
+                });
+            };
+            ServerManager.prototype.ask = function (type, content) {
+                var self = this;
+                this.send({ type: type, name: self.token, content: content }).then(function (res) {
                 });
             };
             return ServerManager;
@@ -1885,7 +1911,7 @@ var TacticArena;
             function BaseState() {
                 return _super.call(this) || this;
             }
-            BaseState.prototype.init = function () {
+            BaseState.prototype.init = function (data) {
                 this.game.stage.backgroundColor = 0x333333;
                 $('[class*="ui-"]').remove();
                 $('#game-menu').remove();
@@ -1959,8 +1985,44 @@ var TacticArena;
                     self.chatUI.write(msg);
                 }, function (data) {
                     self.chatUI.updatePlayersList(data);
+                }, function (message, token) {
+                    self.dialogUI.show('Duel !', message, 'Accepter', 'Décliner', function () {
+                        self.serverManager.ask('ACCEPT_DUEL', token);
+                        self.showFactionSelection();
+                        $(this).dialog("close");
+                    }, function () {
+                        self.serverManager.ask('DECLINE_DUEL', token);
+                        $(this).dialog("close");
+                    });
+                }, function (data) {
+                    self.showFactionSelection();
+                }, function (data) {
+                    self.game.state.start('mainmultiplayeronline', true, false, data);
                 });
                 this.chatUI = new TacticArena.UI.Chat(this, this.serverManager);
+                this.dialogUI = new TacticArena.UI.Dialog(this);
+            };
+            Lobby.prototype.showFactionSelection = function () {
+                var self = this;
+                $('#game-menu .ui').html('<div><h2>Choisissez votre faction :</h2></div>' +
+                    '<div class="faction-selector">' +
+                    '   <span class="control left fa fa-chevron-left"></span>' +
+                    '   <span class="control right fa fa-chevron-right"></span>' +
+                    '   <div class="faction human"><span class="name">Human</span></div>' +
+                    '   <div class="faction undead"><span class="name">Undead</span></div>' +
+                    '</div>' +
+                    '<div class="button submit-faction"><a>Confirmer</a></div>');
+                $('#game-menu .ui .control').on('click', function () {
+                    $('#game-menu .ui .faction.human').toggle();
+                    $('#game-menu .ui .faction.undead').toggle();
+                });
+                $('#game-menu .ui .submit-faction').on('click', function () {
+                    self.selected_faction = $('#game-menu .ui .faction.human').is(':visible') ? 'human' : 'undead';
+                    $(this).hide();
+                    $('#game-menu .ui .control').hide();
+                    $('#game-menu .ui h2').html('En attente de votre adversaire');
+                    self.serverManager.ask('FACTION_CHOSEN', self.selected_faction);
+                });
             };
             return Lobby;
         }(TacticArena.State.BaseState));
@@ -2071,6 +2133,110 @@ var TacticArena;
 (function (TacticArena) {
     var State;
     (function (State) {
+        var MainMultiplayerOnline = (function (_super) {
+            __extends(MainMultiplayerOnline, _super);
+            function MainMultiplayerOnline() {
+                return _super !== null && _super.apply(this, arguments) || this;
+            }
+            MainMultiplayerOnline.prototype.init = function (data) {
+                _super.prototype.init.call(this);
+                console.log(data);
+            };
+            MainMultiplayerOnline.prototype.create = function () {
+                this.game.stage.backgroundColor = 0xffffff;
+                var self = this;
+                this.process = true;
+                this.selecting = false;
+                this.tileSize = 32;
+                this.isPaused = false;
+                this.hideProjections = false;
+                this.teamColors = ['0x8ad886', '0xd68686', '0x87bfdb', '0xcdd385'];
+                this.playerTeam = 1;
+                this.teams = {};
+                this.signalManager = new TacticArena.Controller.SignalManager(this);
+                this.signalManager.init();
+                //this.serverManager = new Controller.ServerManager(this, function(data) {
+                //    self.signalManager.onChatMessageReception.dispatch(data);
+                //});
+                this.stageManager = new TacticArena.Controller.StageManager(this);
+                this.stageManager.init();
+                this.pointer = new TacticArena.UI.Pointer(this);
+                this.pawns = [];
+                this.pathTilesGroup = this.add.group();
+                this.pathOrdersTilesGroup = this.add.group();
+                this.uiSpritesGroup = this.add.group();
+                this.pawnsSpritesGroup = this.add.group();
+                this.pawns.push(new TacticArena.Entity.Pawn(this, 8, 8, 'E', 'redhead', this.getUniqueId(), false, 1, 'Eikio'));
+                this.pawns.push(new TacticArena.Entity.Pawn(this, 7, 7, 'E', 'blondy', this.getUniqueId(), false, 1, 'Diana'));
+                this.pawns.push(new TacticArena.Entity.Pawn(this, 11, 8, 'W', 'skeleton', this.getUniqueId(), false, 2, 'Fétide'));
+                this.pawns.push(new TacticArena.Entity.Pawn(this, 12, 7, 'W', 'skeleton', this.getUniqueId(), false, 2, 'Oscar'));
+                this.stageManager.addDecorations();
+                this.pathfinder = new EasyStar.js();
+                this.pathfinder.setAcceptableTiles([-1]);
+                this.pathfinder.disableDiagonals();
+                this.pathfinder.disableSync();
+                this.pathfinder.setGrid(this.stageManager.grid);
+                this.logManager = new TacticArena.Controller.LogManager(this);
+                this.orderManager = new TacticArena.Controller.OrderManager(this);
+                this.resolveManager = new TacticArena.Controller.ResolveManager(this);
+                this.aiManager = new TacticArena.Controller.AiManager(this);
+                this.turnManager = new TacticArena.Controller.TurnManager(this);
+                this.uiManager = new TacticArena.UI.UIManager(this);
+                self.uiManager.initOrderPhase(this.pawns[0], true);
+                this.pawns[2].setHp(0);
+            };
+            MainMultiplayerOnline.prototype.update = function () {
+                this.pathTilesGroup.sort('y', Phaser.Group.SORT_ASCENDING);
+                this.pawnsSpritesGroup.sort('y', Phaser.Group.SORT_ASCENDING);
+                this.world.bringToTop(this.pointer.marker);
+                this.world.bringToTop(this.pawnsSpritesGroup);
+            };
+            MainMultiplayerOnline.prototype.isGameReadyPromise = function () {
+                var self = this;
+                return new Promise(function (resolve, reject) {
+                    (function isGameReady() {
+                        if (!self.isPaused)
+                            return resolve();
+                        setTimeout(isGameReady, 300);
+                    })();
+                });
+            };
+            MainMultiplayerOnline.prototype.isOver = function () {
+                var _this = this;
+                var everyoneElseIsDead = true;
+                this.pawns.forEach(function (pawn) {
+                    _this.teams[pawn.team] = _this.teams[pawn.team] || pawn.isAlive();
+                    if (pawn.team != _this.playerTeam) {
+                        everyoneElseIsDead = everyoneElseIsDead && !_this.teams[pawn.team];
+                    }
+                });
+                console.log(this.teams, !this.teams[this.playerTeam], everyoneElseIsDead);
+                return (!this.teams[this.playerTeam] || everyoneElseIsDead);
+            };
+            MainMultiplayerOnline.prototype.getUniqueId = function () {
+                var id = 0; //Math.floor(Math.random() * 1000);
+                var isUnique = false;
+                while (!isUnique) {
+                    isUnique = true;
+                    id++;
+                    for (var i = 0; i < this.pawns.length; i++) {
+                        if (this.pawns[i]._id && this.pawns[i]._id == id) {
+                            isUnique = false;
+                            break;
+                        }
+                    }
+                }
+                return id;
+            };
+            return MainMultiplayerOnline;
+        }(TacticArena.State.BaseState));
+        State.MainMultiplayerOnline = MainMultiplayerOnline;
+    })(State = TacticArena.State || (TacticArena.State = {}));
+})(TacticArena || (TacticArena = {}));
+var TacticArena;
+(function (TacticArena) {
+    var State;
+    (function (State) {
         var Menu = (function (_super) {
             __extends(Menu, _super);
             function Menu() {
@@ -2140,6 +2306,7 @@ var TacticArena;
                 this.load.atlasJSONArray('redhead', 'assets/images/redhead.png', 'assets/images/redhead.json');
                 this.load.atlasJSONArray('skeleton', 'assets/images/skeleton.png', 'assets/images/skeleton.json');
                 this.load.atlasJSONArray('blondy', 'assets/images/blondy.png', 'assets/images/blondy.json');
+                this.load.atlasJSONArray('evil', 'assets/images/evil.png', 'assets/images/evil.json');
                 this.load.atlasJSONArray('fireball', 'assets/images/fireball.png', 'assets/images/fireball.json');
                 this.load.atlasJSONArray('circle', 'assets/images/circle.png', 'assets/images/circle.json');
                 this.load.start();
@@ -2318,10 +2485,11 @@ var TacticArena;
             Chat.prototype.updatePlayersList = function (data) {
                 var self = this;
                 var playersList = '<li class="channel-general">General</li>';
+                console.log(self.serverManager.token);
                 data.content.forEach(function (p) {
-                    //if (p.token != self.serverManager.token) {
-                    playersList += '<li class="channel-player channel-' + p.token + '">' + p.name + '</li>';
-                    //}
+                    if (p.token != self.serverManager.token) {
+                        playersList += '<li class="channel-player" id="' + p.token + '">' + p.name + '</li>';
+                    }
                 });
                 this.element.find('.channels-list').html('<ul>' + playersList + '</ul>');
                 //this.element.find('.channel-player').on('click', function() {
@@ -2332,9 +2500,9 @@ var TacticArena;
                     items: {
                         duel: {
                             name: "Provoquer en duel", callback: function (key, opt) {
-                                alert("Foo!");
-                                //wait for acceptation
-                                //then go state selection
+                                var token = opt.$trigger.attr("id");
+                                self.serverManager.ask('ASK_DUEL', token);
+                                self.write('<span class="notification">La demande a été envoyée à ' + opt.$trigger.html() + '</span>');
                             }
                         }
                     }
@@ -2377,6 +2545,43 @@ var TacticArena;
             return ConsoleLogs;
         }());
         UI.ConsoleLogs = ConsoleLogs;
+    })(UI = TacticArena.UI || (TacticArena.UI = {}));
+})(TacticArena || (TacticArena = {}));
+var TacticArena;
+(function (TacticArena) {
+    var UI;
+    (function (UI) {
+        var Dialog = (function () {
+            function Dialog(menu) {
+                var self = this;
+                this.menu = menu;
+                $('body').append('<div id="dialog-confirm" class="ui-dialog" title=""><p></p></div>');
+                this.element = $('#dialog-confirm');
+            }
+            Dialog.prototype.show = function (title, message, confirmTitle, cancelTitle, confirmFunction, cancelFunction) {
+                console.log('show');
+                $("#dialog-confirm").attr('title', title);
+                $("#dialog-confirm p").html(message);
+                $("#dialog-confirm").dialog({
+                    resizable: false,
+                    height: "auto",
+                    width: 400,
+                    modal: true,
+                    buttons: [
+                        {
+                            text: confirmTitle,
+                            click: confirmFunction
+                        },
+                        {
+                            text: cancelTitle,
+                            click: cancelFunction
+                        }
+                    ]
+                });
+            };
+            return Dialog;
+        }());
+        UI.Dialog = Dialog;
     })(UI = TacticArena.UI || (TacticArena.UI = {}));
 })(TacticArena || (TacticArena = {}));
 var TacticArena;

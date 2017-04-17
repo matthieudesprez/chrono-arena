@@ -48,6 +48,7 @@
 .ui-pawns-infos .redhead .avatar .picture { background-image: url('../assets/images/redhead_avatar.png'); }
 .ui-pawns-infos .blondy .avatar .picture { background-image: url('../assets/images/blondy_avatar.png'); }
 .ui-pawns-infos .skeleton .avatar .picture { background-image: url('../assets/images/skeleton_avatar.png'); }
+.ui-pawns-infos .evil .avatar .picture { background-image: url('../assets/images/evil_avatar.png'); }
 
 .ui-pawns-infos .name {
     position: absolute;

@@ -9,18 +9,24 @@ module TacticArena.Controller {
         playersList;
         onChatMessageReceptionCallback;
         onPlayersListUpdateCallback;
+        onDuelAskReceptionCallback;
+        onDuelAcceptedCallback;
+        onDuelStartCallback;
         intervalCount;
 
-        constructor(game, login, onChatMessageReceptionCallback, onPlayersListUpdateCallback) {
+        constructor(game, login, onChatMessageReceptionCallback, onPlayersListUpdateCallback, onDuelAskReceptionCallback, onDuelAcceptedCallback, onDuelStartCallback) {
             this.game = game;
-            //this.url = 'wss://polar-fortress-51758.herokuapp.com';
-            this.url = 'ws://localhost:3000';
+            this.url = 'wss://polar-fortress-51758.herokuapp.com';
+            //this.url = 'ws://localhost:3000';
             this.login = login;
             this.token = '';
             this.socketId = null;
             this.playersList = [];
             this.onChatMessageReceptionCallback = onChatMessageReceptionCallback;
             this.onPlayersListUpdateCallback = onPlayersListUpdateCallback;
+            this.onDuelAskReceptionCallback = onDuelAskReceptionCallback;
+            this.onDuelAcceptedCallback = onDuelAcceptedCallback;
+            this.onDuelStartCallback = onDuelStartCallback;
             this.intervalCount = 0;
             this.connect();
             this.notifyNewConnection(this.login);
@@ -35,6 +41,18 @@ module TacticArena.Controller {
                 let server_msg = data.type == 'SERVER_NOTIFICATION';
                 if(data.type == 'SERVER_PLAYERS_LIST') {
                     self.onPlayersListUpdateCallback(data);
+                } else if (data.type == 'SERVER_TOKEN') {
+                    self.token = data.content;
+                } else if (data.type == 'ASK_DUEL') {
+                    self.onDuelAskReceptionCallback(data.content, data.name);
+                } else if (data.type == 'DECLINE_DUEL') {
+                    self.onChatMessageReceptionCallback(data, true);
+                } else if (data.type == 'ACCEPT_DUEL') {
+                    self.onChatMessageReceptionCallback(data, true);
+                    self.onDuelAcceptedCallback(data);
+                }  else if (data.type == 'START_DUEL') {
+                    self.onChatMessageReceptionCallback({content: 'Début du duel'}, true);
+                    self.onDuelStartCallback(data);
                 } else {
                     self.onChatMessageReceptionCallback(data, server_msg);
                 }
@@ -93,6 +111,13 @@ module TacticArena.Controller {
         notifyNewConnection(name) {
             console.log(name);
             this.send({type: 'NEW_CONNECTION', name: name, content: ' '}).then( (res) => {
+
+            });
+        }
+
+        ask(type, content) {
+            var self = this;
+            this.send({type: type, name: self.token, content: content}).then( (res) => {
 
             });
         }
