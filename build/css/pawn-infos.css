@@ -17,10 +17,10 @@
     cursor: pointer;
 }
 
-.ui-pawns-infos .pawn.team-1 { background: rgba(100, 100, 100, 0.8); }
-.ui-pawns-infos .pawn.team-2 { background: rgba(0, 0, 0, 0.8); }
-.ui-pawns-infos .pawn.team-3 { background: rgba(0, 70, 100, 0.8); }
-.ui-pawns-infos .pawn.team-4 { background: rgba(70, 0, 100, 0.8); }
+.ui-pawns-infos .pawn.team-0 { background: rgba(100, 100, 100, 0.8); }
+.ui-pawns-infos .pawn.team-1 { background: rgba(0, 0, 0, 0.8); }
+.ui-pawns-infos .pawn.team-2 { background: rgba(0, 70, 100, 0.8); }
+.ui-pawns-infos .pawn.team-3 { background: rgba(70, 0, 100, 0.8); }
 
 .ui-pawns-infos .pawn .avatar {
     background-position: 0 0;

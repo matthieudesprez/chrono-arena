@@ -522,6 +522,18 @@ var TacticArena;
                 }
                 return [];
             };
+            OrderManager.prototype.getPlayerOrders = function (teamId) {
+                var result = [];
+                for (var i = 0; i < this.orders.length; i++) {
+                    if (this.orders[i].entity.team == teamId) {
+                        result.push({
+                            entityId: this.orders[i].entity._id,
+                            list: this.orders[i].list
+                        });
+                    }
+                }
+                return result;
+            };
             OrderManager.prototype.getMaxOrderListLength = function () {
                 var max = 0;
                 for (var i = 0; i < this.orders.length; i++) {
@@ -583,6 +595,7 @@ var TacticArena;
                 return steps;
             };
             OrderManager.prototype.getSteps = function () {
+                console.log(this.orders);
                 this.alteredPawns = [];
                 this.formatOrders();
                 var steps = new Array(this.getMaxOrderListLength());
@@ -1111,8 +1124,8 @@ var TacticArena;
         var ServerManager = (function () {
             function ServerManager(game, login, onChatMessageReceptionCallback, onPlayersListUpdateCallback, onDuelAskReceptionCallback, onDuelAcceptedCallback, onDuelStartCallback) {
                 this.game = game;
-                this.url = 'wss://polar-fortress-51758.herokuapp.com';
-                //this.url = 'ws://localhost:3000';
+                //this.url = 'wss://polar-fortress-51758.herokuapp.com';
+                this.url = 'ws://localhost:3000';
                 this.login = login;
                 this.token = '';
                 this.socketId = null;
@@ -1124,14 +1137,14 @@ var TacticArena;
                 this.onDuelStartCallback = onDuelStartCallback;
                 this.intervalCount = 0;
                 this.connect();
-                this.notifyNewConnection(this.login);
+                this.request('NEW_CONNECTION', ' ', this.login);
             }
             ServerManager.prototype.connect = function () {
                 var self = this;
                 this.socket = new WebSocket(this.url);
                 this.socket.onmessage = function (message) {
-                    console.log(message.data);
                     var data = JSON.parse(message.data).data;
+                    console.log(data);
                     var server_msg = data.type == 'SERVER_NOTIFICATION';
                     if (data.type == 'SERVER_PLAYERS_LIST') {
                         self.onPlayersListUpdateCallback(data);
@@ -1153,6 +1166,53 @@ var TacticArena;
                         self.onChatMessageReceptionCallback({ content: 'Début du duel' }, true);
                         self.onDuelStartCallback(data);
                     }
+                    else if (data.type == 'PROCESS_ORDERS') {
+                        var orders = [];
+                        for (var i = 0; i < data.content.length; i++) {
+                            if (data.content[i].orders) {
+                                for (var j = 0; j < data.content[i].orders.length; j++) {
+                                    if (data.content[i].orders[j].entityId) {
+                                        data.content[i].orders[j].entity = self.game.pawns.find(function (o) {
+                                            return o._id == data.content[i].orders[j].entityId;
+                                        });
+                                    }
+                                    orders = orders.concat(data.content[i].orders[j]);
+                                }
+                            }
+                        }
+                        self.game.orderManager.orders = orders;
+                        var steps = self.game.orderManager.getSteps();
+                        console.log(steps);
+                        var serializedSteps = [];
+                        for (var i = 0; i < steps.length; i++) {
+                            serializedSteps.push([]);
+                            for (var j = 0; j < steps[i].length; j++) {
+                                var s = {
+                                    entityId: steps[i][j].entity._id,
+                                    entityState: steps[i][j].entityState,
+                                    order: steps[i][j].order,
+                                };
+                                serializedSteps[i].push(s);
+                            }
+                        }
+                        self.request('PROCESSED_ORDERS', serializedSteps);
+                    }
+                    else if (data.type == 'PROCESSED_ORDERS') {
+                        var serializedSteps_1 = data.content;
+                        var steps = [];
+                        for (var i = 0; i < serializedSteps_1.length; i++) {
+                            steps.push([]);
+                            for (var j = 0; j < serializedSteps_1[i].length; j++) {
+                                var s = {
+                                    entity: self.game.pawns.find(function (o) { return o._id == serializedSteps_1[i][j].entityId; }),
+                                    entityState: serializedSteps_1[i][j].entityState,
+                                    order: serializedSteps_1[i][j].order,
+                                };
+                                steps[i].push(s);
+                            }
+                        }
+                        self.game.signalManager.onProcessedOrders.dispatch(steps);
+                    }
                     else {
                         self.onChatMessageReceptionCallback(data, server_msg);
                     }
@@ -1166,13 +1226,9 @@ var TacticArena;
                 this.socket.onopen = function (e) {
                     console.log('open', e);
                 };
-                //self.send({name: 'Chrono', content: 'Hello !'}).then( (res) => {
-                //
-                //});
                 $(window).on('beforeunload', function () {
                     console.log('disconnect');
                     self.socket.close();
-                    //return null;
                 });
             };
             ServerManager.prototype.send = function (message, callback) {
@@ -1209,14 +1265,10 @@ var TacticArena;
                 }
             };
             ;
-            ServerManager.prototype.notifyNewConnection = function (name) {
-                console.log(name);
-                this.send({ type: 'NEW_CONNECTION', name: name, content: ' ' }).then(function (res) {
-                });
-            };
-            ServerManager.prototype.ask = function (type, content) {
+            ServerManager.prototype.request = function (type, content, name) {
+                if (name === void 0) { name = null; }
                 var self = this;
-                this.send({ type: type, name: self.token, content: content }).then(function (res) {
+                this.send({ type: type, name: (name ? name : self.token), content: content }).then(function (res) {
                 });
             };
             return ServerManager;
@@ -1243,6 +1295,7 @@ var TacticArena;
                 this.onActivePawnChange = new Phaser.Signal();
                 this.onTeamChange = new Phaser.Signal();
                 this.onChatMessageReception = new Phaser.Signal();
+                this.onProcessedOrders = new Phaser.Signal();
             }
             SignalManager.prototype.init = function () {
                 var self = this;
@@ -1309,6 +1362,9 @@ var TacticArena;
                 this.onChatMessageReception.add(function (data) {
                     console.log(data);
                     self.game.uiManager.chatUI.write(data.name + ': ' + data.message);
+                });
+                this.onProcessedOrders.add(function (steps) {
+                    self.game.uiManager.initResolvePhase(steps);
                 });
             };
             return SignalManager;
@@ -1473,9 +1529,16 @@ var TacticArena;
                     resolve(true);
                 });
             };
-            TurnManager.prototype.getRemainingPawns = function () {
+            TurnManager.prototype.getRemainingPawns = function (teamId) {
                 var _this = this;
-                return this.game.pawns.filter(function (pawn) { return pawn.isAlive() && _this.playedPawns.indexOf(pawn._id) < 0; });
+                if (teamId === void 0) { teamId = null; }
+                return this.game.pawns.filter(function (pawn) {
+                    var condition = pawn.isAlive() && _this.playedPawns.indexOf(pawn._id) < 0;
+                    if (teamId !== null) {
+                        condition = condition && pawn.team == teamId;
+                    }
+                    return condition;
+                });
             };
             TurnManager.prototype.endTurn = function () {
                 var _this = this;
@@ -1751,10 +1814,10 @@ var TacticArena;
                 _this._size = size;
                 _this.setAnimations();
                 _this._animationCompleteCallback = null;
+                if (tint) {
+                    _this.tint = tint;
+                }
                 return _this;
-                //if(tint) {
-                //    this.tint = tint;
-                //}
             }
             Sprite.prototype.setAnimations = function () {
                 this.animations.add('standS', ["walkS1"], 6, false);
@@ -1911,7 +1974,7 @@ var TacticArena;
             function BaseState() {
                 return _super.call(this) || this;
             }
-            BaseState.prototype.init = function (data) {
+            BaseState.prototype.init = function (data, server, chat) {
                 this.game.stage.backgroundColor = 0x333333;
                 $('[class*="ui-"]').remove();
                 $('#game-menu').remove();
@@ -1963,17 +2026,18 @@ var TacticArena;
             Lobby.prototype.create = function () {
                 var self = this;
                 _super.prototype.createMenu.call(this);
+                this.generator = new TacticArena.Utils.Generator();
                 $('#game-menu .ui').html('<div><h2>Entrez un login :</h2></div>' +
-                    '<div><input type="text" class="login-input" value="Matt"/></div>' +
+                    '<div><input type="text" class="login-input" value="' + this.generator.generate() + '"/></div>' +
                     '<div class="button submit-login"><a>Confirmer</a></div>');
                 $('#game-menu .ui .submit-login').bind('click', function (e) {
                     self.initChat($('#game-menu .ui .login-input').val());
                 });
-                //$('#game-menu .ui .login-input').on('keyup', function (e) {
-                //    if (e.keyCode == 13) {
-                //        self.initChat($('#game-menu .ui .login-input').val());
-                //    }
-                //});
+                $('#game-menu .ui .login-input').on('keyup', function (e) {
+                    if (e.keyCode == 13) {
+                        self.initChat($('#game-menu .ui .login-input').val());
+                    }
+                });
             };
             Lobby.prototype.initChat = function (login) {
                 $('#game-menu .ui').html('');
@@ -1987,17 +2051,17 @@ var TacticArena;
                     self.chatUI.updatePlayersList(data);
                 }, function (message, token) {
                     self.dialogUI.show('Duel !', message, 'Accepter', 'Décliner', function () {
-                        self.serverManager.ask('ACCEPT_DUEL', token);
+                        self.serverManager.request('ACCEPT_DUEL', token);
                         self.showFactionSelection();
                         $(this).dialog("close");
                     }, function () {
-                        self.serverManager.ask('DECLINE_DUEL', token);
+                        self.serverManager.request('DECLINE_DUEL', token);
                         $(this).dialog("close");
                     });
                 }, function (data) {
                     self.showFactionSelection();
                 }, function (data) {
-                    self.game.state.start('mainmultiplayeronline', true, false, data);
+                    self.game.state.start('mainmultiplayeronline', true, false, data, self.serverManager, self.chatUI);
                 });
                 this.chatUI = new TacticArena.UI.Chat(this, this.serverManager);
                 this.dialogUI = new TacticArena.UI.Dialog(this);
@@ -2021,7 +2085,7 @@ var TacticArena;
                     $(this).hide();
                     $('#game-menu .ui .control').hide();
                     $('#game-menu .ui h2').html('En attente de votre adversaire');
-                    self.serverManager.ask('FACTION_CHOSEN', self.selected_faction);
+                    self.serverManager.request('FACTION_CHOSEN', self.selected_faction);
                 });
             };
             return Lobby;
@@ -2138,11 +2202,11 @@ var TacticArena;
             function MainMultiplayerOnline() {
                 return _super !== null && _super.apply(this, arguments) || this;
             }
-            MainMultiplayerOnline.prototype.init = function (data) {
+            MainMultiplayerOnline.prototype.init = function (data, serverManager, chatUI) {
+                var _this = this;
                 _super.prototype.init.call(this);
                 console.log(data);
-            };
-            MainMultiplayerOnline.prototype.create = function () {
+                this.playMode = 'online';
                 this.game.stage.backgroundColor = 0xffffff;
                 var self = this;
                 this.process = true;
@@ -2151,13 +2215,10 @@ var TacticArena;
                 this.isPaused = false;
                 this.hideProjections = false;
                 this.teamColors = ['0x8ad886', '0xd68686', '0x87bfdb', '0xcdd385'];
-                this.playerTeam = 1;
                 this.teams = {};
+                this.serializer = new TS.Serializer(TacticArena);
                 this.signalManager = new TacticArena.Controller.SignalManager(this);
                 this.signalManager.init();
-                //this.serverManager = new Controller.ServerManager(this, function(data) {
-                //    self.signalManager.onChatMessageReception.dispatch(data);
-                //});
                 this.stageManager = new TacticArena.Controller.StageManager(this);
                 this.stageManager.init();
                 this.pointer = new TacticArena.UI.Pointer(this);
@@ -2166,10 +2227,28 @@ var TacticArena;
                 this.pathOrdersTilesGroup = this.add.group();
                 this.uiSpritesGroup = this.add.group();
                 this.pawnsSpritesGroup = this.add.group();
-                this.pawns.push(new TacticArena.Entity.Pawn(this, 8, 8, 'E', 'redhead', this.getUniqueId(), false, 1, 'Eikio'));
-                this.pawns.push(new TacticArena.Entity.Pawn(this, 7, 7, 'E', 'blondy', this.getUniqueId(), false, 1, 'Diana'));
-                this.pawns.push(new TacticArena.Entity.Pawn(this, 11, 8, 'W', 'skeleton', this.getUniqueId(), false, 2, 'Fétide'));
-                this.pawns.push(new TacticArena.Entity.Pawn(this, 12, 7, 'W', 'skeleton', this.getUniqueId(), false, 2, 'Oscar'));
+                this.generator = new TacticArena.Utils.Generator();
+                this.chatUI = chatUI;
+                this.serverManager = serverManager;
+                this.serverManager.game = this;
+                this.players = data.content.players;
+                var startPositions = [[{ x: 8, y: 8, d: 'E' }, { x: 7, y: 7, d: 'E' }], [{ x: 11, y: 8, d: 'W' }, { x: 12, y: 7, d: 'W' }]];
+                this.players.forEach(function (p, k) {
+                    if (p.token == self.serverManager.token) {
+                        _this.playerTeam = k;
+                    }
+                    if (p.faction == 'human') {
+                        _this.pawns.push(new TacticArena.Entity.Pawn(_this, startPositions[k][0].x, startPositions[k][0].y, startPositions[k][0].d, 'redhead', _this.getUniqueId(), false, k, _this.generator.generate()));
+                        _this.pawns.push(new TacticArena.Entity.Pawn(_this, startPositions[k][1].x, startPositions[k][1].y, startPositions[k][1].d, 'blondy', _this.getUniqueId(), false, k, _this.generator.generate()));
+                    }
+                    else {
+                        _this.pawns.push(new TacticArena.Entity.Pawn(_this, startPositions[k][0].x, startPositions[k][0].y, startPositions[k][0].d, 'evil', _this.getUniqueId(), false, k, _this.generator.generate()));
+                        _this.pawns.push(new TacticArena.Entity.Pawn(_this, startPositions[k][1].x, startPositions[k][1].y, startPositions[k][1].d, 'skeleton', _this.getUniqueId(), false, k, _this.generator.generate()));
+                    }
+                });
+            };
+            MainMultiplayerOnline.prototype.create = function () {
+                var self = this;
                 this.stageManager.addDecorations();
                 this.pathfinder = new EasyStar.js();
                 this.pathfinder.setAcceptableTiles([-1]);
@@ -2179,11 +2258,12 @@ var TacticArena;
                 this.logManager = new TacticArena.Controller.LogManager(this);
                 this.orderManager = new TacticArena.Controller.OrderManager(this);
                 this.resolveManager = new TacticArena.Controller.ResolveManager(this);
-                this.aiManager = new TacticArena.Controller.AiManager(this);
+                //this.aiManager = new Controller.AiManager(this);
                 this.turnManager = new TacticArena.Controller.TurnManager(this);
                 this.uiManager = new TacticArena.UI.UIManager(this);
-                self.uiManager.initOrderPhase(this.pawns[0], true);
-                this.pawns[2].setHp(0);
+                this.chatUI.menu = this.uiManager;
+                var playerPawns = this.pawns.filter(function (pawn) { return pawn.team == self.playerTeam; });
+                this.uiManager.initOrderPhase(playerPawns[0], true);
             };
             MainMultiplayerOnline.prototype.update = function () {
                 this.pathTilesGroup.sort('y', Phaser.Group.SORT_ASCENDING);
@@ -2374,6 +2454,1833 @@ var TacticArena;
         State.Test = Test;
     })(State = TacticArena.State || (TacticArena.State = {}));
 })(TacticArena || (TacticArena = {}));
+var TS;
+(function (TS) {
+    describe("Iterators", function () {
+        function check(iterator) {
+            var values = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                values[_i - 1] = arguments[_i];
+            }
+            values.forEach(function (value) {
+                var _a = iterator(), head = _a[0], tail = _a[1];
+                expect(head).toEqual(value);
+                iterator = tail;
+            });
+        }
+        function checkarray(iterator, values) {
+            expect(TS.imaterialize(iterator)).toEqual(values);
+        }
+        it("calls a function for each yielded value", function () {
+            var iterator = TS.iarray([1, 2, 3]);
+            var result = [];
+            TS.iforeach(iterator, TS.bound(result, "push"));
+            expect(result).toEqual([1, 2, 3]);
+            result = [];
+            TS.iforeach(iterator, function (i) {
+                result.push(i);
+                if (i == 2) {
+                    return null;
+                }
+                else {
+                    return undefined;
+                }
+            });
+            expect(result).toEqual([1, 2]);
+            result = [];
+            TS.iforeach(iterator, function (i) {
+                result.push(i);
+                return i;
+            }, 2);
+            expect(result).toEqual([1, 2]);
+        });
+        it("creates an iterator from an array", function () {
+            check(TS.iarray([]), null, null, null);
+            check(TS.iarray([1, 2, 3]), 1, 2, 3, null, null, null);
+        });
+        it("creates an iterator from a single value", function () {
+            checkarray(TS.isingle(1), [1]);
+            checkarray(TS.isingle("a"), ["a"]);
+        });
+        it("finds the first item passing a predicate", function () {
+            expect(TS.ifirst(TS.iarray([]), function (i) { return i % 2 == 0; })).toBe(null);
+            expect(TS.ifirst(TS.iarray([1, 2, 3]), function (i) { return i % 2 == 0; })).toBe(2);
+            expect(TS.ifirst(TS.iarray([1, 3, 5]), function (i) { return i % 2 == 0; })).toBe(null);
+        });
+        it("finds the first item mapping to a value", function () {
+            var predicate = function (i) { return i % 2 == 0 ? (i * 4).toString() : null; };
+            expect(TS.ifirstmap(TS.iarray([]), predicate)).toBe(null);
+            expect(TS.ifirstmap(TS.iarray([1, 2, 3]), predicate)).toBe("8");
+            expect(TS.ifirstmap(TS.iarray([1, 3, 5]), predicate)).toBe(null);
+        });
+        it("materializes an array from an iterator", function () {
+            expect(TS.imaterialize(TS.iarray([1, 2, 3]))).toEqual([1, 2, 3]);
+            expect(function () { return TS.imaterialize(TS.iarray([1, 2, 3, 4, 5]), 2); }).toThrowError("Length limit on iterator materialize");
+        });
+        it("creates an iterator in a range of integers", function () {
+            checkarray(TS.irange(4), [0, 1, 2, 3]);
+            checkarray(TS.irange(4, 1), [1, 2, 3, 4]);
+            checkarray(TS.irange(5, 3, 2), [3, 5, 7, 9, 11]);
+            check(TS.irange(), 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12);
+        });
+        it("uses a step iterator to scan numbers", function () {
+            check(TS.istep(), 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12);
+            check(TS.istep(3), 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14);
+            checkarray(TS.istep(3, TS.irepeat(1, 4)), [3, 4, 5, 6, 7]);
+            checkarray(TS.istep(8, TS.IEMPTY), [8]);
+            check(TS.istep(1, TS.irange()), 1, 1, 2, 4, 7, 11, 16);
+        });
+        it("skips a number of values", function () {
+            checkarray(TS.iskip(TS.irange(7), 3), [3, 4, 5, 6]);
+            checkarray(TS.iskip(TS.irange(7), 12), []);
+            checkarray(TS.iskip(TS.IEMPTY, 3), []);
+        });
+        it("gets a value at an iterator position", function () {
+            expect(TS.iat(TS.irange(), -1)).toEqual(null);
+            expect(TS.iat(TS.irange(), 0)).toEqual(0);
+            expect(TS.iat(TS.irange(), 8)).toEqual(8);
+            expect(TS.iat(TS.irange(5), 8)).toEqual(null);
+            expect(TS.iat(TS.IEMPTY, 0)).toEqual(null);
+        });
+        it("chains iterators", function () {
+            checkarray(TS.ichain(), []);
+            checkarray(TS.ichain(TS.irange(3)), [0, 1, 2]);
+            checkarray(TS.ichain(TS.iarray([1, 2]), TS.iarray([]), TS.iarray([3, 4, 5])), [1, 2, 3, 4, 5]);
+        });
+        it("chains iterator of iterators", function () {
+            checkarray(TS.ichainit(TS.IEMPTY), []);
+            checkarray(TS.ichainit(TS.iarray([TS.iarray([1, 2, 3]), TS.iarray([]), TS.iarray([4, 5])])), [1, 2, 3, 4, 5]);
+        });
+        it("repeats a value", function () {
+            check(TS.irepeat("a"), "a", "a", "a", "a");
+            checkarray(TS.irepeat("a", 3), ["a", "a", "a"]);
+        });
+        it("loops an iterator", function () {
+            checkarray(TS.iloop(TS.irange(3), 2), [0, 1, 2, 0, 1, 2]);
+            check(TS.iloop(TS.irange(1)), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+            var onloop = jasmine.createSpy("onloop");
+            var iterator = TS.iloop(TS.irange(2), 3, onloop);
+            function next() {
+                var value;
+                _a = iterator(), value = _a[0], iterator = _a[1];
+                return value;
+                var _a;
+            }
+            expect(next()).toBe(0);
+            expect(onloop).toHaveBeenCalledTimes(0);
+            expect(next()).toBe(1);
+            expect(onloop).toHaveBeenCalledTimes(0);
+            expect(next()).toBe(0);
+            expect(onloop).toHaveBeenCalledTimes(1);
+            expect(next()).toBe(1);
+            expect(onloop).toHaveBeenCalledTimes(1);
+            expect(next()).toBe(0);
+            expect(onloop).toHaveBeenCalledTimes(2);
+            expect(next()).toBe(1);
+            expect(onloop).toHaveBeenCalledTimes(2);
+            expect(next()).toBe(null);
+            expect(onloop).toHaveBeenCalledTimes(2);
+        });
+        it("maps an iterator", function () {
+            checkarray(TS.imap(TS.IEMPTY, function (i) { return i * 2; }), []);
+            checkarray(TS.imap(TS.irange(3), function (i) { return i * 2; }), [0, 2, 4]);
+        });
+        it("filters an iterator", function () {
+            checkarray(TS.imap(TS.IEMPTY, function (i) { return i % 3 == 0; }), []);
+            checkarray(TS.ifilter(TS.irange(12), function (i) { return i % 3 == 0; }), [0, 3, 6, 9]);
+        });
+        it("combines iterators", function () {
+            var iterator = TS.icombine(TS.iarray([1, 2, 3]), TS.iarray(["a", "b"]));
+            checkarray(iterator, [[1, "a"], [1, "b"], [2, "a"], [2, "b"], [3, "a"], [3, "b"]]);
+        });
+        it("zips iterators", function () {
+            checkarray(TS.izip(TS.IEMPTY, TS.IEMPTY), []);
+            checkarray(TS.izip(TS.iarray([1, 2, 3]), TS.iarray(["a", "b"])), [[1, "a"], [2, "b"]]);
+            checkarray(TS.izipg(TS.IEMPTY, TS.IEMPTY), []);
+            checkarray(TS.izipg(TS.iarray([1, 2, 3]), TS.iarray(["a", "b"])), [[1, "a"], [2, "b"], [3, null]]);
+        });
+        it("partitions iterators", function () {
+            var _a = TS.ipartition(TS.IEMPTY, function () { return true; }), it1 = _a[0], it2 = _a[1];
+            checkarray(it1, []);
+            checkarray(it2, []);
+            _b = TS.ipartition(TS.irange(5), function (i) { return i % 2 == 0; }), it1 = _b[0], it2 = _b[1];
+            checkarray(it1, [0, 2, 4]);
+            checkarray(it2, [1, 3]);
+            var _b;
+        });
+        it("returns unique items", function () {
+            checkarray(TS.iunique(TS.IEMPTY), []);
+            checkarray(TS.iunique(TS.iarray([5, 3, 2, 3, 4, 5])), [5, 3, 2, 4]);
+            checkarray(TS.iunique(TS.iarray([5, 3, 2, 3, 4, 5]), 4), [5, 3, 2, 4]);
+            expect(function () { return TS.imaterialize(TS.iunique(TS.iarray([5, 3, 2, 3, 4, 5]), 3)); }).toThrowError("Unique count limit on iterator");
+        });
+        it("uses ireduce for some common functions", function () {
+            expect(TS.isum(TS.IEMPTY)).toEqual(0);
+            expect(TS.isum(TS.irange(4))).toEqual(6);
+            expect(TS.icat(TS.IEMPTY)).toEqual("");
+            expect(TS.icat(TS.iarray(["a", "bc", "d"]))).toEqual("abcd");
+            expect(TS.imin(TS.IEMPTY)).toEqual(Infinity);
+            expect(TS.imin(TS.iarray([3, 8, 2, 4]))).toEqual(2);
+            expect(TS.imax(TS.IEMPTY)).toEqual(-Infinity);
+            expect(TS.imax(TS.iarray([3, 8, 2, 4]))).toEqual(8);
+        });
+    });
+})(TS || (TS = {}));
+/**
+ * Lazy iterators to work on dynamic data sets without materializing them.
+ *
+ * They allow to work on infinite streams of values, with limited memory consumption.
+ *
+ * Functions in this file that do not return an Iterator are "materializing", meaning that they
+ * may consume iterators up to the end, and will not work well on infinite iterators.
+ */
+var TS;
+(function (TS) {
+    function _getIEND() {
+        return [null, _getIEND];
+    }
+    /**
+     * IEND is a return value for iterators, indicating end of iteration.
+     */
+    TS.IEND = [null, _getIEND];
+    /**
+     * Empty iterator, returning IEND
+     */
+    TS.IEMPTY = function () { return TS.IEND; };
+    /**
+     * Equivalent of Array.forEach for lazy iterators.
+     *
+     * If the callback returns *stopper*, the iteration is stopped.
+     */
+    function iforeach(iterator, callback, stopper) {
+        if (stopper === void 0) { stopper = null; }
+        var value;
+        _a = iterator(), value = _a[0], iterator = _a[1];
+        while (value !== null) {
+            var returned = callback(value);
+            if (returned === stopper) {
+                return;
+            }
+            _b = iterator(), value = _b[0], iterator = _b[1];
+        }
+        var _a, _b;
+    }
+    TS.iforeach = iforeach;
+    /**
+     * Get an iterator on an array
+     *
+     * The iterator will yield the next value each time it is called, then null when the array's end is reached.
+     */
+    function iarray(array, offset) {
+        if (offset === void 0) { offset = 0; }
+        return function () {
+            if (offset < array.length) {
+                return [array[offset], iarray(array, offset + 1)];
+            }
+            else {
+                return TS.IEND;
+            }
+        };
+    }
+    TS.iarray = iarray;
+    /**
+     * Get an iterator yielding a single value
+     */
+    function isingle(value) {
+        return iarray([value]);
+    }
+    TS.isingle = isingle;
+    /**
+     * Returns the first item passing a predicate
+     */
+    function ifirst(iterator, predicate) {
+        var result = null;
+        iforeach(iterator, function (item) {
+            if (predicate(item)) {
+                result = item;
+                return null;
+            }
+            else {
+                return undefined;
+            }
+        });
+        return result;
+    }
+    TS.ifirst = ifirst;
+    /**
+     * Returns the first non-null result of a value-yielding predicate, applied to each iterator element
+     */
+    function ifirstmap(iterator, predicate) {
+        var result = null;
+        iforeach(iterator, function (item) {
+            var mapped = predicate(item);
+            if (mapped) {
+                result = mapped;
+                return null;
+            }
+            else {
+                return undefined;
+            }
+        });
+        return result;
+    }
+    TS.ifirstmap = ifirstmap;
+    /**
+     * Materialize an array from consuming an iterator
+     *
+     * To avoid materializing infinite iterators (and bursting memory), the item count is limited to 1 million, and an
+     * exception is thrown when this limit is reached.
+     */
+    function imaterialize(iterator, limit) {
+        if (limit === void 0) { limit = 1000000; }
+        var result = [];
+        iforeach(iterator, function (value) {
+            result.push(value);
+            if (result.length >= limit) {
+                throw new Error("Length limit on iterator materialize");
+            }
+        });
+        return result;
+    }
+    TS.imaterialize = imaterialize;
+    /**
+     * Iterate over natural integers
+     *
+     * If *count* is not specified, the iterator is infinite
+     */
+    function irange(count, start, step) {
+        if (count === void 0) { count = -1; }
+        if (start === void 0) { start = 0; }
+        if (step === void 0) { step = 1; }
+        return function () { return (count != 0) ? [start, irange(count - 1, start + step, step)] : TS.IEND; };
+    }
+    TS.irange = irange;
+    /**
+     * Iterate over numbers, by applying a step taken from an other iterator
+     *
+     * This iterator stops when the "step iterator" stops
+     *
+     * With no argument, istep() == irange()
+     */
+    function istep(start, step) {
+        if (start === void 0) { start = 0; }
+        if (step === void 0) { step = irepeat(1); }
+        return function () {
+            var _a = step(), value = _a[0], iterator = _a[1];
+            return [start, value === null ? TS.IEMPTY : istep(start + value, iterator)];
+        };
+    }
+    TS.istep = istep;
+    /**
+     * Skip a given number of values from an iterator, discarding them.
+     */
+    function iskip(iterator, count) {
+        if (count === void 0) { count = 1; }
+        var value;
+        while (count--) {
+            _a = iterator(), value = _a[0], iterator = _a[1];
+        }
+        return iterator;
+        var _a;
+    }
+    TS.iskip = iskip;
+    /**
+     * Return the value at a given position in the iterator
+     */
+    function iat(iterator, position) {
+        if (position < 0) {
+            return null;
+        }
+        else {
+            if (position > 0) {
+                iterator = iskip(iterator, position);
+            }
+            return iterator()[0];
+        }
+    }
+    TS.iat = iat;
+    /**
+     * Chain an iterator of iterators.
+     *
+     * This will yield values from the first yielded iterator, then the second one, and so on...
+     */
+    function ichainit(iterators) {
+        return function () {
+            var _a = iterators(), iterators_head = _a[0], iterators_tail = _a[1];
+            if (iterators_head == null) {
+                return TS.IEND;
+            }
+            else {
+                var _b = iterators_head(), head = _b[0], tail = _b[1];
+                while (head == null) {
+                    _c = iterators_tail(), iterators_head = _c[0], iterators_tail = _c[1];
+                    if (iterators_head == null) {
+                        break;
+                    }
+                    _d = iterators_head(), head = _d[0], tail = _d[1];
+                }
+                return [head, ichain(tail, ichainit(iterators_tail))];
+            }
+            var _c, _d;
+        };
+    }
+    TS.ichainit = ichainit;
+    /**
+     * Chain iterators.
+     *
+     * This will yield values from the first iterator, then the second one, and so on...
+     */
+    function ichain() {
+        var iterators = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            iterators[_i] = arguments[_i];
+        }
+        if (iterators.length == 0) {
+            return TS.IEMPTY;
+        }
+        else {
+            return ichainit(iarray(iterators));
+        }
+    }
+    TS.ichain = ichain;
+    /**
+     * Wrap an iterator, calling *onstart* when the first value of the wrapped iterator is yielded.
+     */
+    function ionstart(iterator, onstart) {
+        return function () {
+            var _a = iterator(), head = _a[0], tail = _a[1];
+            if (head !== null) {
+                onstart();
+            }
+            return [head, tail];
+        };
+    }
+    /**
+     * Iterator that repeats the same value.
+     */
+    function irepeat(value, count) {
+        if (count === void 0) { count = -1; }
+        return iloop(iarray([value]), count);
+    }
+    TS.irepeat = irepeat;
+    /**
+     * Loop an iterator for a number of times.
+     *
+     * If count is negative, if will loop forever (infinite iterator).
+     *
+     * onloop may be used to know when the iterator resets.
+     */
+    function iloop(base, count, onloop) {
+        if (count === void 0) { count = -1; }
+        if (count == 0) {
+            return TS.IEMPTY;
+        }
+        else {
+            var next_1 = onloop ? ionstart(base, onloop) : base;
+            return ichainit(function () { return [base, iarray([iloop(next_1, count - 1)])]; });
+        }
+    }
+    TS.iloop = iloop;
+    /**
+     * Iterator version of "map".
+     */
+    function imap(iterator, mapfunc) {
+        return function () {
+            var _a = iterator(), head = _a[0], tail = _a[1];
+            if (head === null) {
+                return TS.IEND;
+            }
+            else {
+                return [mapfunc(head), imap(tail, mapfunc)];
+            }
+        };
+    }
+    TS.imap = imap;
+    /**
+     * Iterator version of "reduce".
+     */
+    function ireduce(iterator, reduce, init) {
+        var result = init;
+        iforeach(iterator, function (item) {
+            result = reduce(result, item);
+        });
+        return result;
+    }
+    TS.ireduce = ireduce;
+    /**
+     * Iterator version of "filter".
+     */
+    function ifilter(iterator, filterfunc) {
+        return function () {
+            var value;
+            _a = iterator(), value = _a[0], iterator = _a[1];
+            while (value !== null && !filterfunc(value)) {
+                _b = iterator(), value = _b[0], iterator = _b[1];
+            }
+            return [value, ifilter(iterator, filterfunc)];
+            var _a, _b;
+        };
+    }
+    TS.ifilter = ifilter;
+    /**
+     * Combine two iterators.
+     *
+     * This iterates through the second one several times, so if one iterator may be infinite,
+     * it should be the first one.
+     */
+    function icombine(it1, it2) {
+        return ichainit(imap(it1, function (v1) { return imap(it2, function (v2) { return [v1, v2]; }); }));
+    }
+    TS.icombine = icombine;
+    /**
+     * Advance two iterators at the same time, yielding item pairs
+     *
+     * Iteration will stop at the first of the two iterators that stops.
+     */
+    function izip(it1, it2) {
+        return function () {
+            var _a = it1(), val1 = _a[0], nit1 = _a[1];
+            var _b = it2(), val2 = _b[0], nit2 = _b[1];
+            if (val1 !== null && val2 !== null) {
+                return [[val1, val2], izip(nit1, nit2)];
+            }
+            else {
+                return TS.IEND;
+            }
+        };
+    }
+    TS.izip = izip;
+    /**
+     * Advance two iterators at the same time, yielding item pairs (greedy version)
+     *
+     * Iteration will stop when both iterators are consumed, returning partial couples (null in the peer) if needed.
+     */
+    function izipg(it1, it2) {
+        return function () {
+            var _a = it1(), val1 = _a[0], nit1 = _a[1];
+            var _b = it2(), val2 = _b[0], nit2 = _b[1];
+            if (val1 === null && val2 === null) {
+                return TS.IEND;
+            }
+            else {
+                return [[val1, val2], izipg(nit1, nit2)];
+            }
+        };
+    }
+    TS.izipg = izipg;
+    /**
+     * Partition in two iterators, one with values that pass the predicate, the other with values that don't
+     */
+    function ipartition(it, predicate) {
+        return [ifilter(it, predicate), ifilter(it, function (x) { return !predicate(x); })];
+    }
+    TS.ipartition = ipartition;
+    /**
+     * Yield items from an iterator only once.
+     *
+     * Beware that even if this function is not materializing, it keeps track of yielded item, and may choke on
+     * infinite or very long streams. Thus, no more than *limit* items will be yielded (an error is thrown
+     * when this limit is reached).
+     *
+     * This function is O(n²)
+     */
+    function iunique(it, limit) {
+        if (limit === void 0) { limit = 1000000; }
+        var done = [];
+        return ifilter(it, function (item) {
+            if (TS.contains(done, item)) {
+                return false;
+            }
+            else if (done.length >= limit) {
+                throw new Error("Unique count limit on iterator");
+            }
+            else {
+                done.push(item);
+                return true;
+            }
+        });
+    }
+    TS.iunique = iunique;
+    /**
+     * Common reduce shortcuts
+     */
+    TS.isum = function (iterator) { return ireduce(iterator, function (a, b) { return a + b; }, 0); };
+    TS.icat = function (iterator) { return ireduce(iterator, function (a, b) { return a + b; }, ""); };
+    TS.imin = function (iterator) { return ireduce(iterator, Math.min, Infinity); };
+    TS.imax = function (iterator) { return ireduce(iterator, Math.max, -Infinity); };
+})(TS || (TS = {}));
+var TS;
+(function (TS) {
+    describe("RandomGenerator", function () {
+        it("produces floats", function () {
+            var gen = new TS.RandomGenerator();
+            var i = 100;
+            while (i--) {
+                var value = gen.random();
+                expect(value).not.toBeLessThan(0);
+                expect(value).toBeLessThan(1);
+            }
+        });
+        it("produces integers", function () {
+            var gen = new TS.RandomGenerator();
+            var i = 100;
+            while (i--) {
+                var value = gen.randInt(5, 12);
+                expect(Math.round(value)).toEqual(value);
+                expect(value).toBeGreaterThan(4);
+                expect(value).toBeLessThan(13);
+            }
+        });
+        it("chooses from an array", function () {
+            var gen = new TS.RandomGenerator();
+            expect(gen.choice([5])).toEqual(5);
+            var i = 100;
+            while (i--) {
+                var value = gen.choice(["test", "thing"]);
+                expect(["thing", "test"]).toContain(value);
+            }
+        });
+        it("samples from an array", function () {
+            var gen = new TS.RandomGenerator();
+            var i = 100;
+            while (i-- > 1) {
+                var input = [1, 2, 3, 4, 5];
+                var sample = gen.sample(input, i % 5 + 1);
+                expect(sample.length).toBe(i % 5 + 1);
+                sample.forEach(function (num, idx) {
+                    expect(input).toContain(num);
+                    expect(sample.filter(function (ival, iidx) { return iidx != idx; })).not.toContain(num);
+                });
+            }
+        });
+        it("choose from weighted ranges", function () {
+            var gen = new TS.RandomGenerator();
+            expect(gen.weighted([])).toEqual(-1);
+            expect(gen.weighted([1])).toEqual(0);
+            expect(gen.weighted([0, 1, 0])).toEqual(1);
+            expect(gen.weighted([0, 12, 0])).toEqual(1);
+            gen = new TS.SkewedRandomGenerator([0, 0.5, 0.7, 0.8, 0.9999]);
+            expect(gen.weighted([4, 3, 0, 2, 1])).toEqual(0);
+            expect(gen.weighted([4, 3, 0, 2, 1])).toEqual(1);
+            expect(gen.weighted([4, 3, 0, 2, 1])).toEqual(3);
+            expect(gen.weighted([4, 3, 0, 2, 1])).toEqual(3);
+            expect(gen.weighted([4, 3, 0, 2, 1])).toEqual(4);
+        });
+        it("can be skewed", function () {
+            var gen = new TS.SkewedRandomGenerator([0, 0.5, 0.2, 0.9]);
+            expect(gen.random()).toEqual(0);
+            expect(gen.random()).toEqual(0.5);
+            expect(gen.randInt(4, 8)).toEqual(5);
+            expect(gen.random()).toEqual(0.9);
+            var value = gen.random();
+            expect(value).not.toBeLessThan(0);
+            expect(value).toBeLessThan(1);
+            gen = new TS.SkewedRandomGenerator([0.7], true);
+            expect(gen.random()).toEqual(0.7);
+            expect(gen.random()).toEqual(0.7);
+            expect(gen.random()).toEqual(0.7);
+        });
+    });
+})(TS || (TS = {}));
+var TS;
+(function (TS) {
+    /*
+     * Random generator.
+     */
+    var RandomGenerator = (function () {
+        function RandomGenerator() {
+            /**
+             * Get a random number in the (0.0 included -> 1.0 excluded) range
+             */
+            this.random = Math.random;
+        }
+        RandomGenerator.prototype.postUnserialize = function () {
+            this.random = Math.random;
+        };
+        /**
+         * Get a random number in the (*from* included -> *to* included) range
+         */
+        RandomGenerator.prototype.randInt = function (from, to) {
+            return Math.floor(this.random() * (to - from + 1)) + from;
+        };
+        /**
+         * Choose a random item in an array
+         */
+        RandomGenerator.prototype.choice = function (input) {
+            return input[this.randInt(0, input.length - 1)];
+        };
+        /**
+         * Choose a random sample of items from an array
+         */
+        RandomGenerator.prototype.sample = function (input, count) {
+            var minput = input.slice();
+            var result = [];
+            while (count--) {
+                var idx = this.randInt(0, minput.length - 1);
+                result.push(minput[idx]);
+                minput.splice(idx, 1);
+            }
+            return result;
+        };
+        /**
+         * Get a random boolean (coin toss)
+         */
+        RandomGenerator.prototype.bool = function () {
+            return this.randInt(0, 1) == 0;
+        };
+        /**
+         * Get the range in which the number falls, ranges being weighted
+         */
+        RandomGenerator.prototype.weighted = function (weights) {
+            if (weights.length == 0) {
+                return -1;
+            }
+            var total = TS.sum(weights);
+            if (total == 0) {
+                return 0;
+            }
+            else {
+                var cumul_1 = 0;
+                weights = weights.map(function (weight) {
+                    cumul_1 += weight / total;
+                    return cumul_1;
+                });
+                var r = this.random();
+                for (var i = 0; i < weights.length; i++) {
+                    if (r < weights[i]) {
+                        return i;
+                    }
+                }
+                return weights.length - 1;
+            }
+        };
+        return RandomGenerator;
+    }());
+    RandomGenerator.global = new RandomGenerator();
+    TS.RandomGenerator = RandomGenerator;
+    /*
+     * Random generator that produces a series of fixed numbers before going back to random ones.
+     */
+    var SkewedRandomGenerator = (function (_super) {
+        __extends(SkewedRandomGenerator, _super);
+        function SkewedRandomGenerator(suite, loop) {
+            if (loop === void 0) { loop = false; }
+            var _this = _super.call(this) || this;
+            _this.i = 0;
+            _this.random = function () {
+                var result = _this.suite[_this.i];
+                _this.i += 1;
+                if (_this.loop && _this.i == _this.suite.length) {
+                    _this.i = 0;
+                }
+                return (typeof result == "undefined") ? Math.random() : result;
+            };
+            _this.suite = suite;
+            _this.loop = loop;
+            return _this;
+        }
+        return SkewedRandomGenerator;
+    }(RandomGenerator));
+    TS.SkewedRandomGenerator = SkewedRandomGenerator;
+})(TS || (TS = {}));
+var TS;
+(function (TS) {
+    var Specs;
+    (function (Specs) {
+        var TestSerializerObj1 = (function () {
+            function TestSerializerObj1(a) {
+                if (a === void 0) { a = 0; }
+                this.a = a;
+            }
+            return TestSerializerObj1;
+        }());
+        Specs.TestSerializerObj1 = TestSerializerObj1;
+        var TestSerializerObj2 = (function () {
+            function TestSerializerObj2() {
+                this.a = function () { return 1; };
+                this.b = [function (obj) { return 2; }];
+            }
+            return TestSerializerObj2;
+        }());
+        Specs.TestSerializerObj2 = TestSerializerObj2;
+        var TestSerializerObj3 = (function () {
+            function TestSerializerObj3() {
+                this.a = [1, 2];
+            }
+            TestSerializerObj3.prototype.postUnserialize = function () {
+                TS.remove(this.a, 2);
+            };
+            return TestSerializerObj3;
+        }());
+        Specs.TestSerializerObj3 = TestSerializerObj3;
+        describe("Serializer", function () {
+            function checkReversability(obj, namespace) {
+                if (namespace === void 0) { namespace = TS.Specs; }
+                var serializer = new TS.Serializer(TS.Specs);
+                var data = serializer.serialize(obj);
+                serializer = new TS.Serializer(TS.Specs);
+                var loaded = serializer.unserialize(data);
+                expect(loaded).toEqual(obj);
+                return loaded;
+            }
+            it("serializes simple objects", function () {
+                var obj = {
+                    "a": 5,
+                    "b": null,
+                    "c": [{ "a": 2 }, "test"]
+                };
+                checkReversability(obj);
+            });
+            it("restores objects constructed from class", function () {
+                var loaded = checkReversability(new TestSerializerObj1(5));
+                expect(loaded.a).toEqual(5);
+                expect(loaded instanceof TestSerializerObj1).toBe(true, "not a TestSerializerObj1 instance");
+            });
+            it("stores one version of the same object", function () {
+                var a = new TestSerializerObj1(8);
+                var b = new TestSerializerObj1(8);
+                var c = {
+                    'r': a,
+                    's': ["test", a],
+                    't': a,
+                    'u': b
+                };
+                var loaded = checkReversability(c);
+                expect(loaded.t).toBe(loaded.r);
+                expect(loaded.s[1]).toBe(loaded.r);
+                expect(loaded.u).not.toBe(loaded.r);
+            });
+            it("handles circular references", function () {
+                var a = { b: {} };
+                a.b.c = a;
+                var loaded = checkReversability(a);
+            });
+            it("ignores some classes", function () {
+                var serializer = new TS.Serializer(TS.Specs);
+                serializer.addIgnoredClass("TestSerializerObj1");
+                var data = serializer.serialize({ a: 5, b: new TestSerializerObj1() });
+                var loaded = serializer.unserialize(data);
+                expect(loaded).toEqual({ a: 5, b: undefined });
+            });
+            it("ignores functions", function () {
+                var serializer = new TS.Serializer(TS.Specs);
+                var data = serializer.serialize({ obj: new TestSerializerObj2() });
+                var loaded = serializer.unserialize(data);
+                var expected = new TestSerializerObj2();
+                expected.a = undefined;
+                expected.b[0] = undefined;
+                expect(loaded).toEqual({ obj: expected });
+            });
+            it("calls specific postUnserialize", function () {
+                var serializer = new TS.Serializer(TS.Specs);
+                var data = serializer.serialize({ obj: new TestSerializerObj3() });
+                var loaded = serializer.unserialize(data);
+                var expected = new TestSerializerObj3();
+                expected.a = [1];
+                expect(loaded).toEqual({ obj: expected });
+            });
+            it("finds TS namespace, even from sub-namespace", function () {
+                checkReversability(new TS.Timer());
+                checkReversability(new TS.RandomGenerator());
+            });
+        });
+    })(Specs = TS.Specs || (TS.Specs = {}));
+})(TS || (TS = {}));
+var TS;
+(function (TS) {
+    function isObject(value) {
+        return value instanceof Object && !Array.isArray(value);
+    }
+    /**
+     * A typescript object serializer.
+     */
+    var Serializer = (function () {
+        function Serializer(namespace) {
+            if (namespace === void 0) { namespace = TS; }
+            this.ignored = [];
+            this.namespace = namespace;
+        }
+        /**
+         * Add a class to the ignore list
+         */
+        Serializer.prototype.addIgnoredClass = function (name) {
+            this.ignored.push(name);
+        };
+        /**
+         * Construct an object from a constructor name
+         */
+        Serializer.prototype.constructObject = function (ctype) {
+            if (ctype == "Object") {
+                return {};
+            }
+            else {
+                var cl = this.namespace[ctype];
+                if (cl) {
+                    return Object.create(cl.prototype);
+                }
+                else {
+                    cl = TS[ctype];
+                    if (cl) {
+                        return Object.create(cl.prototype);
+                    }
+                    else {
+                        console.error("Can't find class", ctype);
+                        return {};
+                    }
+                }
+            }
+        };
+        /**
+         * Serialize an object to a string
+         */
+        Serializer.prototype.serialize = function (obj) {
+            var _this = this;
+            // Collect objects
+            var objects = [];
+            var stats = {};
+            TS.crawl(obj, function (value) {
+                if (isObject(value)) {
+                    var vtype = TS.classname(value);
+                    if (vtype != "" && _this.ignored.indexOf(vtype) < 0) {
+                        stats[vtype] = (stats[vtype] || 0) + 1;
+                        TS.add(objects, value);
+                        return value;
+                    }
+                    else {
+                        return TS.STOP_CRAWLING;
+                    }
+                }
+                else {
+                    return value;
+                }
+            });
+            //console.log("Serialize stats", stats);
+            // Serialize objects list, transforming deeper objects to links
+            var fobjects = objects.map(function (value) { return ({ $c: TS.classname(value), $f: TS.merge({}, value) }); });
+            return JSON.stringify(fobjects, function (key, value) {
+                if (key != "$f" && isObject(value) && !value.hasOwnProperty("$c") && !value.hasOwnProperty("$i")) {
+                    return { $i: objects.indexOf(value) };
+                }
+                else {
+                    return value;
+                }
+            });
+        };
+        /**
+         * Unserialize a string to an object
+         */
+        Serializer.prototype.unserialize = function (data) {
+            var _this = this;
+            // Unserialize objects list
+            console.log(data);
+            var fobjects = [JSON.parse(data)];
+            console.log(fobjects);
+            // Reconstruct objects
+            var objects = fobjects.map(function (objdata) { return TS.merge(_this.constructObject(objdata['$c']), objdata['$f']); });
+            // Reconnect links
+            TS.crawl(objects, function (value) {
+                if (value instanceof Object && value.hasOwnProperty('$i')) {
+                    return objects[value['$i']];
+                }
+                else {
+                    return value;
+                }
+            }, true);
+            // Post unserialize hooks
+            TS.crawl(objects[0], function (value) {
+                if (value instanceof Object && typeof value.postUnserialize == "function") {
+                    value.postUnserialize();
+                }
+            });
+            // First object was the root
+            return objects[0];
+        };
+        return Serializer;
+    }());
+    TS.Serializer = Serializer;
+})(TS || (TS = {}));
+var TS;
+(function (TS) {
+    var Specs;
+    (function (Specs) {
+        describe("Timer", function () {
+            beforeEach(function () {
+                jasmine.clock().install();
+            });
+            afterEach(function () {
+                jasmine.clock().uninstall();
+            });
+            it("schedules and cancels future calls", function () {
+                var timer = new TS.Timer();
+                var called = [];
+                var callback = function (item) { return called.push(item); };
+                var s1 = timer.schedule(50, function () { return callback(1); });
+                var s2 = timer.schedule(150, function () { return callback(2); });
+                var s3 = timer.schedule(250, function () { return callback(3); });
+                expect(called).toEqual([]);
+                jasmine.clock().tick(100);
+                expect(called).toEqual([1]);
+                timer.cancel(s1);
+                expect(called).toEqual([1]);
+                jasmine.clock().tick(100);
+                expect(called).toEqual([1, 2]);
+                timer.cancel(s3);
+                jasmine.clock().tick(100);
+                expect(called).toEqual([1, 2]);
+                jasmine.clock().tick(1000);
+                expect(called).toEqual([1, 2]);
+            });
+            it("may cancel all scheduled", function () {
+                var timer = new TS.Timer();
+                var called = [];
+                var callback = function (item) { return called.push(item); };
+                timer.schedule(150, function () { return callback(1); });
+                timer.schedule(50, function () { return callback(2); });
+                timer.schedule(500, function () { return callback(3); });
+                expect(called).toEqual([]);
+                jasmine.clock().tick(100);
+                expect(called).toEqual([2]);
+                jasmine.clock().tick(100);
+                expect(called).toEqual([2, 1]);
+                timer.cancelAll();
+                jasmine.clock().tick(1000);
+                expect(called).toEqual([2, 1]);
+                timer.schedule(50, function () { return callback(4); });
+                timer.schedule(150, function () { return callback(5); });
+                jasmine.clock().tick(100);
+                expect(called).toEqual([2, 1, 4]);
+                timer.cancelAll(true);
+                jasmine.clock().tick(100);
+                expect(called).toEqual([2, 1, 4]);
+                timer.schedule(50, function () { return callback(6); });
+                jasmine.clock().tick(100);
+                expect(called).toEqual([2, 1, 4]);
+            });
+            it("may switch to synchronous mode", function () {
+                var timer = new TS.Timer(true);
+                var called = [];
+                var callback = function (item) { return called.push(item); };
+                timer.schedule(50, function () { return callback(1); });
+                expect(called).toEqual([1]);
+            });
+        });
+    })(Specs = TS.Specs || (TS.Specs = {}));
+})(TS || (TS = {}));
+var TS;
+(function (TS) {
+    /**
+     * Timing utility.
+     *
+     * This extends the standard setTimeout feature.
+     */
+    var Timer = (function () {
+        function Timer(sync) {
+            if (sync === void 0) { sync = false; }
+            this.sync = false;
+            this.locked = false;
+            this.scheduled = [];
+            this.sync = sync;
+        }
+        /**
+         * Return true if the timer is synchronous
+         */
+        Timer.prototype.isSynchronous = function () {
+            return this.sync;
+        };
+        /**
+         * Cancel all scheduled calls.
+         *
+         * If lock=true, no further scheduling will be allowed.
+         */
+        Timer.prototype.cancelAll = function (lock) {
+            if (lock === void 0) { lock = false; }
+            this.locked = lock;
+            var scheduled = this.scheduled;
+            this.scheduled = [];
+            scheduled.forEach(function (handle) { return clearTimeout(handle); });
+        };
+        /**
+         * Cancel a scheduled callback.
+         */
+        Timer.prototype.cancel = function (scheduled) {
+            if (TS.remove(this.scheduled, scheduled)) {
+                clearTimeout(scheduled);
+            }
+        };
+        /**
+         * Schedule a callback to be called later.
+         */
+        Timer.prototype.schedule = function (delay, callback) {
+            var _this = this;
+            if (this.locked) {
+                return null;
+            }
+            else if (this.sync || delay <= 0) {
+                callback();
+                return null;
+            }
+            else {
+                var handle_1 = setTimeout(function () {
+                    TS.remove(_this.scheduled, handle_1);
+                    callback();
+                }, delay);
+                TS.add(this.scheduled, handle_1);
+                return handle_1;
+            }
+        };
+        Timer.prototype.postUnserialize = function () {
+            this.scheduled = [];
+        };
+        return Timer;
+    }());
+    // Global timer shared by the whole project
+    Timer.global = new Timer();
+    // Global synchronous timer for unit tests
+    Timer.synchronous = new Timer(true);
+    TS.Timer = Timer;
+})(TS || (TS = {}));
+var TS;
+(function (TS) {
+    describe("Tools", function () {
+        it("checks for null value", function () {
+            var value = 5;
+            expect(TS.nn(value)).toBe(5);
+            value = 0;
+            expect(TS.nn(value)).toBe(0);
+            value = null;
+            expect(function () { return TS.nn(value); }).toThrowError("Null value");
+        });
+        it("removes null values from arrays", function () {
+            var value = [];
+            expect(TS.nna(value)).toEqual([]);
+            value = [1, 2];
+            expect(TS.nna(value)).toEqual([1, 2]);
+            value = [1, null, 3];
+            expect(TS.nna(value)).toEqual([1, 3]);
+        });
+        it("compare values", function () {
+            expect(TS.cmp(8, 5)).toBe(1);
+            expect(TS.cmp(5, 8)).toBe(-1);
+            expect(TS.cmp(5, 5)).toBe(0);
+            expect(TS.cmp("c", "b")).toBe(1);
+            expect(TS.cmp("b", "c")).toBe(-1);
+            expect(TS.cmp("b", "b")).toBe(0);
+        });
+        it("clamp values in a range", function () {
+            expect(TS.clamp(5, 3, 8)).toBe(5);
+            expect(TS.clamp(1, 3, 8)).toBe(3);
+            expect(TS.clamp(10, 3, 8)).toBe(8);
+        });
+        it("interpolates values linearly", function () {
+            expect(TS.lerp(0, 0, 4)).toBe(0);
+            expect(TS.lerp(0.5, 0, 4)).toBe(2);
+            expect(TS.lerp(1, 0, 4)).toBe(4);
+            expect(TS.lerp(2, 0, 4)).toBe(8);
+            expect(TS.lerp(-1, 0, 4)).toBe(-4);
+            expect(TS.lerp(0.5, 3, 4)).toBe(3.5);
+            expect(TS.lerp(0.5, 3, 3)).toBe(3);
+            expect(TS.lerp(0.5, 3, 2)).toBe(2.5);
+        });
+        it("copies arrays", function () {
+            var array = [1, 2, "test", null, { "a": 5 }];
+            var copied = TS.acopy(array);
+            expect(copied).toEqual(array);
+            expect(copied).not.toBe(array);
+            expect(copied[4]).toBe(array[4]);
+            expect(array[2]).toEqual("test");
+            expect(copied[2]).toEqual("test");
+            array[2] = "notest";
+            expect(array[2]).toEqual("notest");
+            expect(copied[2]).toEqual("test");
+            copied[2] = "ok";
+            expect(array[2]).toEqual("notest");
+            expect(copied[2]).toEqual("ok");
+            expect(array.length).toBe(5);
+            expect(copied.length).toBe(5);
+            TS.remove(copied, 2);
+            expect(array.length).toBe(5);
+            expect(copied.length).toBe(4);
+        });
+        it("iterates through sorted arrays", function () {
+            var result = [];
+            TS.itersorted([1, 2, 3], function (item) { return item; }, function (item) { return result.push(item); });
+            expect(result).toEqual([1, 2, 3]);
+            result = [];
+            TS.itersorted([1, 2, 3], function (item) { return -item; }, function (item) { return result.push(item); });
+            expect(result).toEqual([3, 2, 1]);
+        });
+        it("checks if an array contains an item", function () {
+            expect(TS.contains([], 5)).toBe(false);
+            expect(TS.contains([3, 5, 8], 5)).toBe(true);
+            expect(TS.contains([3, 5, 8], 4)).toBe(false);
+            expect(TS.contains([5, 5, 5], 5)).toBe(true);
+            expect(TS.contains([3, null, 8], null)).toBe(true);
+            expect(TS.contains(["a", "b"], "b")).toBe(true);
+            expect(TS.contains(["a", "b"], "c")).toBe(false);
+        });
+        it("capitalizes strings", function () {
+            expect(TS.capitalize("test")).toEqual("Test");
+            expect(TS.capitalize("test second")).toEqual("Test second");
+        });
+        it("produces range of numbers", function () {
+            expect(TS.range(-1)).toEqual([]);
+            expect(TS.range(0)).toEqual([]);
+            expect(TS.range(1)).toEqual([0]);
+            expect(TS.range(2)).toEqual([0, 1]);
+            expect(TS.range(5)).toEqual([0, 1, 2, 3, 4]);
+        });
+        it("zips arrays", function () {
+            expect(TS.zip([], [])).toEqual([]);
+            expect(TS.zip([], [1])).toEqual([]);
+            expect(TS.zip([0], [1])).toEqual([[0, 1]]);
+            expect(TS.zip([0, 2, 4], [1, 3])).toEqual([[0, 1], [2, 3]]);
+            expect(TS.zip([0, 1], ["a", "b"])).toEqual([[0, "a"], [1, "b"]]);
+        });
+        it("partitions arrays by a predicate", function () {
+            expect(TS.binpartition([], function (i) { return i % 2 == 0; })).toEqual([[], []]);
+            expect(TS.binpartition([1, 2, 3, 4], function (i) { return i % 2 == 0; })).toEqual([[2, 4], [1, 3]]);
+        });
+        it("produces neighbor tuples from array", function () {
+            expect(TS.neighbors([])).toEqual([]);
+            expect(TS.neighbors([1])).toEqual([]);
+            expect(TS.neighbors([1, 2])).toEqual([[1, 2]]);
+            expect(TS.neighbors([1, 2, 3])).toEqual([[1, 2], [2, 3]]);
+            expect(TS.neighbors([1, 2, 3, 4])).toEqual([[1, 2], [2, 3], [3, 4]]);
+            expect(TS.neighbors([], true)).toEqual([]);
+            expect(TS.neighbors([1], true)).toEqual([[1, 1]]);
+            expect(TS.neighbors([1, 2], true)).toEqual([[1, 2], [2, 1]]);
+            expect(TS.neighbors([1, 2, 3], true)).toEqual([[1, 2], [2, 3], [3, 1]]);
+            expect(TS.neighbors([1, 2, 3, 4], true)).toEqual([[1, 2], [2, 3], [3, 4], [4, 1]]);
+        });
+        it("counts items in array", function () {
+            expect(TS.counter([])).toEqual([]);
+            expect(TS.counter(["a"])).toEqual([["a", 1]]);
+            expect(TS.counter(["a", "b"])).toEqual([["a", 1], ["b", 1]]);
+            expect(TS.counter(["a", "b", "a"])).toEqual([["a", 2], ["b", 1]]);
+        });
+        it("find the first array item to pass a predicate", function () {
+            expect(TS.first([1, 2, 3], function (i) { return i % 2 == 0; })).toBe(2);
+            expect(TS.first([1, 2, 3], function (i) { return i % 4 == 0; })).toBeNull();
+            expect(TS.any([1, 2, 3], function (i) { return i % 2 == 0; })).toBe(true);
+            expect(TS.any([1, 2, 3], function (i) { return i % 4 == 0; })).toBe(false);
+        });
+        it("iterates an object keys and values", function () {
+            var array = {
+                "a": 1,
+                "c": [2.5],
+                "b": null
+            };
+            expect(TS.keys(array)).toEqual(["a", "c", "b"]);
+            expect(TS.values(array)).toEqual([1, [2.5], null]);
+            var result = {};
+            TS.iteritems(array, function (key, value) { result[key] = value; });
+            expect(result).toEqual(array);
+        });
+        it("iterates an enum", function () {
+            var Test;
+            (function (Test) {
+                Test[Test["ZERO"] = 0] = "ZERO";
+                Test[Test["ONE"] = 1] = "ONE";
+                Test[Test["TWO"] = 2] = "TWO";
+            })(Test || (Test = {}));
+            ;
+            var result = [];
+            TS.iterenum(Test, function (item) { return result.push(item); });
+            expect(result).toEqual([0, 1, 2]);
+        });
+        it("create an index from an array", function () {
+            expect(TS.index([2, 3, 4], function (i) { return (i - 1).toString(); })).toEqual({ "1": 2, "2": 3, "3": 4 });
+        });
+        it("add an item in an array", function () {
+            var result;
+            var array = [1];
+            result = TS.add(array, 8);
+            expect(array).toEqual([1, 8]);
+            expect(result).toBe(true);
+            result = TS.add(array, 2);
+            expect(array).toEqual([1, 8, 2]);
+            expect(result).toBe(true);
+            result = TS.add(array, 8);
+            expect(array).toEqual([1, 8, 2]);
+            expect(result).toBe(false);
+        });
+        it("removes an item from an array", function () {
+            var array = [1, 2, 3];
+            var result = TS.remove(array, 1);
+            expect(array).toEqual([2, 3]);
+            expect(result).toBe(true);
+            result = TS.remove(array, 1);
+            expect(array).toEqual([2, 3]);
+            expect(result).toBe(false);
+            result = TS.remove(array, 2);
+            expect(array).toEqual([3]);
+            expect(result).toBe(true);
+            result = TS.remove(array, 3);
+            expect(array).toEqual([]);
+            expect(result).toBe(true);
+            result = TS.remove(array, 3);
+            expect(array).toEqual([]);
+            expect(result).toBe(false);
+        });
+        it("checks objects equality", function () {
+            expect(TS.equals({}, {})).toBe(true);
+            expect(TS.equals({ "a": 1 }, { "a": 1 })).toBe(true);
+            expect(TS.equals({ "a": 1 }, { "a": 2 })).toBe(false);
+            expect(TS.equals({ "a": 1 }, { "b": 1 })).toBe(false);
+            expect(TS.equals({ "a": 1 }, { "a": null })).toBe(false);
+        });
+        it("combinate filters", function () {
+            var filter = TS.andfilter(function (item) { return item > 5; }, function (item) { return item < 12; });
+            expect(filter(4)).toBe(false);
+            expect(filter(5)).toBe(false);
+            expect(filter(6)).toBe(true);
+            expect(filter(8)).toBe(true);
+            expect(filter(11)).toBe(true);
+            expect(filter(12)).toBe(false);
+            expect(filter(13)).toBe(false);
+        });
+        it("get a class name", function () {
+            var Test = (function () {
+                function Test() {
+                }
+                return Test;
+            }());
+            var a = new Test();
+            expect(TS.classname(a)).toEqual("Test");
+        });
+        it("find lowest item of an array", function () {
+            expect(TS.lowest(["aaa", "b", "cc"], function (s) { return s.length; })).toBe("b");
+        });
+        it("binds callbacks", function () {
+            var Test = (function () {
+                function Test() {
+                    this.prop = 5;
+                }
+                Test.prototype.meth = function () {
+                    return this.prop + 1;
+                };
+                return Test;
+            }());
+            var inst = new Test();
+            var double = function (getter) { return getter() * 2; };
+            expect(double(inst.meth)).toBeNaN();
+            expect(double(TS.bound(inst, "meth"))).toEqual(12);
+        });
+        it("computes progress between two boundaries", function () {
+            expect(TS.progress(-1.0, 0.0, 1.0)).toEqual(0.0);
+            expect(TS.progress(0.0, 0.0, 1.0)).toEqual(0.0);
+            expect(TS.progress(0.4, 0.0, 1.0)).toEqual(0.4);
+            expect(TS.progress(1.8, 0.0, 1.0)).toEqual(1.0);
+            expect(TS.progress(1.5, 0.5, 2.5)).toEqual(0.5);
+        });
+        it("copies full javascript objects", function () {
+            var TestObj = (function () {
+                function TestObj() {
+                    this.a = "test";
+                    this.b = { c: 5.1, d: ["unit", "test", 5] };
+                }
+                TestObj.prototype.get = function () {
+                    return this.a;
+                };
+                return TestObj;
+            }());
+            var ini = new TestObj();
+            var cop = TS.copy(ini);
+            expect(cop).not.toBe(ini);
+            expect(cop).toEqual(ini);
+            expect(cop.get()).toEqual("test");
+        });
+        it("merges objects", function () {
+            expect(TS.merge({}, {})).toEqual({});
+            expect(TS.merge({ "a": 1 }, { "b": 2 })).toEqual({ "a": 1, "b": 2 });
+            expect(TS.merge({ "a": 1 }, { "a": 3, "b": 2 })).toEqual({ "a": 3, "b": 2 });
+        });
+        it("crawls through objects", function () {
+            var obj = {
+                "a": 1,
+                "b": "test",
+                "c": {
+                    "a": [2, "thing", { "a": 3, "b": {} }],
+                    "b": null,
+                    "c": undefined,
+                    "d": false
+                }
+            };
+            /*(<any>obj).jasmineToString = () => "obj1";
+            (<any>obj.c).jasmineToString = () => "obj2";
+            (<any>obj.c.a[2]).jasmineToString = () => "obj3";
+            (<any>obj.c.a[2].b).jasmineToString = () => "obj4";
+            (<any>obj.c.a).jasmineToString = () => "array1";*/
+            var crawled = [];
+            TS.crawl(obj, function (val) { return crawled.push(val); });
+            expect(crawled).toEqual([obj, 1, "test", obj.c, obj.c.a, 2, "thing", obj.c.a[2], 3, obj.c.a[2].b, false]);
+            expect(obj.a).toEqual(1);
+            // replace mode
+            TS.crawl(obj, function (val) { return typeof val == "number" ? 5 : val; }, true);
+            expect(obj).toEqual({ a: 5, b: "test", c: { a: [5, "thing", { a: 5, b: {} }], b: null, c: undefined, d: false } });
+        });
+        it("get minimal item of an array", function () {
+            expect(TS.min([5, 1, 8])).toEqual(1);
+        });
+        it("get maximal item of an array", function () {
+            expect(TS.max([5, 12, 8])).toEqual(12);
+        });
+        it("get sum of an array", function () {
+            expect(TS.sum([5, 1, 8])).toEqual(14);
+        });
+        it("get average of an array", function () {
+            expect(TS.avg([4, 2, 9])).toEqual(5);
+        });
+        it("converts to same sign", function () {
+            expect(TS.samesign(2, 1)).toEqual(2);
+            expect(TS.samesign(2, -1)).toEqual(-2);
+            expect(TS.samesign(-2, 1)).toEqual(2);
+            expect(TS.samesign(-2, -1)).toEqual(-2);
+        });
+    });
+})(TS || (TS = {}));
+/**
+ * Various utility functions.
+ */
+var TS;
+(function (TS) {
+    /**
+     * Check if a value if null, throwing an exception if its the case
+     */
+    function nn(value) {
+        if (value === null) {
+            throw new Error("Null value");
+        }
+        else {
+            return value;
+        }
+    }
+    TS.nn = nn;
+    /**
+     * Remove null values from an array
+     */
+    function nna(array) {
+        return array.filter(function (item) { return item !== null; });
+    }
+    TS.nna = nna;
+    /**
+     * Compare operator, that can be used in sort() calls.
+     */
+    function cmp(a, b) {
+        if (a > b) {
+            return 1;
+        }
+        else if (a < b) {
+            return -1;
+        }
+        else {
+            return 0;
+        }
+    }
+    TS.cmp = cmp;
+    /**
+     * Clamp a value in a range.
+     */
+    function clamp(value, min, max) {
+        if (value < min) {
+            return min;
+        }
+        else if (value > max) {
+            return max;
+        }
+        else {
+            return value;
+        }
+    }
+    TS.clamp = clamp;
+    /**
+     * Perform a linear interpolation between two values (factor is between 0 and 1).
+     */
+    function lerp(factor, min, max) {
+        return min + (max - min) * factor;
+    }
+    TS.lerp = lerp;
+    /**
+     * Make a shallow copy of an array.
+     */
+    function acopy(input) {
+        return input.slice();
+    }
+    TS.acopy = acopy;
+    /**
+     * Call a function for each member of an array, sorted by a key.
+     */
+    function itersorted(input, keyfunc, callback) {
+        var array = acopy(input);
+        array.sort(function (item1, item2) { return cmp(keyfunc(item1), keyfunc(item2)); });
+        array.forEach(callback);
+    }
+    TS.itersorted = itersorted;
+    /**
+     * Capitalize the first letter of an input string.
+     */
+    function capitalize(input) {
+        return input.charAt(0).toLocaleUpperCase() + input.slice(1);
+    }
+    TS.capitalize = capitalize;
+    ;
+    /**
+     * Check if an array contains an item.
+     */
+    function contains(array, item) {
+        return array.indexOf(item) >= 0;
+    }
+    TS.contains = contains;
+    /**
+     * Produce an n-sized array, with integers counting from 0
+     */
+    function range(n) {
+        var result = [];
+        for (var i = 0; i < n; i++) {
+            result.push(i);
+        }
+        return result;
+    }
+    TS.range = range;
+    /**
+     * Produce an array of couples, build from the common length of two arrays
+     */
+    function zip(array1, array2) {
+        var result = [];
+        var n = (array1.length > array2.length) ? array2.length : array1.length;
+        for (var i = 0; i < n; i++) {
+            result.push([array1[i], array2[i]]);
+        }
+        return result;
+    }
+    TS.zip = zip;
+    /**
+     * Partition a list by a predicate, returning the items that pass the predicate, then the ones that don't pass it
+     */
+    function binpartition(array, predicate) {
+        var pass = [];
+        var fail = [];
+        array.forEach(function (item) { return (predicate(item) ? pass : fail).push(item); });
+        return [pass, fail];
+    }
+    TS.binpartition = binpartition;
+    /**
+     * Yields the neighbors tuple list
+     */
+    function neighbors(array, wrap) {
+        if (wrap === void 0) { wrap = false; }
+        var result = [];
+        if (array.length > 0) {
+            var previous = array[0];
+            for (var i = 1; i < array.length; i++) {
+                result.push([previous, array[i]]);
+                previous = array[i];
+            }
+            if (wrap) {
+                result.push([previous, array[0]]);
+            }
+            return result;
+        }
+        else {
+            return [];
+        }
+    }
+    TS.neighbors = neighbors;
+    /**
+     * Count each element in an array
+     */
+    function counter(array, equals) {
+        if (equals === void 0) { equals = function (a, b) { return a === b; }; }
+        var result = [];
+        array.forEach(function (item) {
+            var found = first(result, function (iter) { return equals(iter[0], item); });
+            if (found) {
+                found[1]++;
+            }
+            else {
+                result.push([item, 1]);
+            }
+        });
+        return result;
+    }
+    TS.counter = counter;
+    /**
+     * Return the first element of the array that matches the predicate, null if not found
+     */
+    function first(array, predicate) {
+        for (var i = 0; i < array.length; i++) {
+            if (predicate(array[i])) {
+                return array[i];
+            }
+        }
+        return null;
+    }
+    TS.first = first;
+    /**
+     * Return whether if any element in the array matches the predicate
+     */
+    function any(array, predicate) {
+        return first(array, predicate) != null;
+    }
+    TS.any = any;
+    /**
+     * Iterate a list of (key, value) in an object.
+     */
+    function iteritems(obj, func) {
+        for (var key in obj) {
+            if (obj.hasOwnProperty(key)) {
+                func(key, obj[key]);
+            }
+        }
+    }
+    TS.iteritems = iteritems;
+    /**
+     * Return the list of keys from an object.
+     */
+    function keys(obj) {
+        var result = [];
+        for (var key in obj) {
+            if (obj.hasOwnProperty(key)) {
+                result.push(key);
+            }
+        }
+        return result;
+    }
+    TS.keys = keys;
+    /**
+     * Return the list of values from an object.
+     */
+    function values(obj) {
+        var result = [];
+        for (var key in obj) {
+            if (obj.hasOwnProperty(key)) {
+                result.push(obj[key]);
+            }
+        }
+        return result;
+    }
+    TS.values = values;
+    /**
+     * Iterate an enum values.
+     */
+    function iterenum(obj, callback) {
+        for (var val in obj) {
+            var parsed = parseInt(val, 10);
+            if (!isNaN(parsed)) {
+                callback(parsed);
+            }
+        }
+    }
+    TS.iterenum = iterenum;
+    /**
+     * Create a dictionnary index from a list of objects
+     */
+    function index(array, keyfunc) {
+        var result = {};
+        array.forEach(function (obj) { return result[keyfunc(obj)] = obj; });
+        return result;
+    }
+    TS.index = index;
+    /**
+     * Add an item in a list, only if not already there
+     */
+    function add(array, item) {
+        if (!contains(array, item)) {
+            array.push(item);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    TS.add = add;
+    /**
+     * Remove an item from a list if found. Return true if changed.
+     */
+    function remove(array, item) {
+        var idx = array.indexOf(item);
+        if (idx >= 0) {
+            array.splice(idx, 1);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    TS.remove = remove;
+    /**
+     * Check if two standard objects are equal.
+     */
+    function equals(obj1, obj2) {
+        return JSON.stringify(obj1) == JSON.stringify(obj2);
+    }
+    TS.equals = equals;
+    /**
+     * Call a function on any couple formed from combining two arrays.
+     */
+    function combicall(array1, array2, callback) {
+        array1.forEach(function (item1) { return array2.forEach(function (item2) { return callback(item1, item2); }); });
+    }
+    TS.combicall = combicall;
+    /**
+     * Combinate two filter functions (predicates), with a boolean and.
+     */
+    function andfilter(filt1, filt2) {
+        return function (item) { return filt1(item) && filt2(item); };
+    }
+    TS.andfilter = andfilter;
+    /**
+     * Get the class name of an object.
+     */
+    function classname(obj) {
+        return obj.constructor.name;
+    }
+    TS.classname = classname;
+    /**
+     * Get the lowest item of an array, using a mapping function.
+     */
+    function lowest(array, rating) {
+        var rated = array.map(function (item) { return [item, rating(item)]; });
+        rated.sort(function (a, b) { return cmp(a[1], b[1]); });
+        return rated[0][0];
+    }
+    TS.lowest = lowest;
+    /**
+     * Return a function bound to an object.
+     *
+     * This is useful to pass the bound function as callback directly.
+     */
+    function bound(obj, func) {
+        var attr = obj[func];
+        if (attr instanceof Function) {
+            return attr.bind(obj);
+        }
+        else {
+            return function () { return attr; };
+        }
+    }
+    TS.bound = bound;
+    /**
+     * Return a 0.0-1.0 factor of progress between two limits.
+     */
+    function progress(value, min, max) {
+        var result = (value - min) / (max - min);
+        return clamp(result, 0.0, 1.0);
+    }
+    TS.progress = progress;
+    /**
+     * Copy all fields of an object in another (shallow copy)
+     */
+    function copyfields(src, dest) {
+        for (var key in src) {
+            if (src.hasOwnProperty(key)) {
+                dest[key] = src[key];
+            }
+        }
+    }
+    TS.copyfields = copyfields;
+    /**
+     * Copy an object (only a shallow copy of immediate properties)
+     */
+    function copy(object) {
+        var objectCopy = Object.create(object.constructor.prototype);
+        copyfields(object, objectCopy);
+        return objectCopy;
+    }
+    TS.copy = copy;
+    /**
+     * Merge an object into another
+     */
+    function merge(base, incoming) {
+        var result = copy(base);
+        copyfields(incoming, result);
+        return result;
+    }
+    TS.merge = merge;
+    TS.STOP_CRAWLING = {};
+    /**
+     * Recursively crawl through an object, yielding any defined value found along the way
+     *
+     * If *replace* is set to true, the current object is replaced (in array or object attribute) by the result of the callback
+     *
+     * *memo* is used to prevent circular references to be traversed
+     */
+    function crawl(obj, callback, replace, memo) {
+        if (replace === void 0) { replace = false; }
+        if (memo === void 0) { memo = []; }
+        if (obj instanceof Object && !Array.isArray(obj)) {
+            if (memo.indexOf(obj) >= 0) {
+                return obj;
+            }
+            else {
+                memo.push(obj);
+            }
+        }
+        if (obj !== undefined && obj !== null && typeof obj != "function") {
+            var result = callback(obj);
+            if (result === TS.STOP_CRAWLING) {
+                return;
+            }
+            if (Array.isArray(obj)) {
+                var subresult = obj.map(function (value) { return crawl(value, callback, replace, memo); });
+                if (replace) {
+                    subresult.forEach(function (value, index) {
+                        obj[index] = value;
+                    });
+                }
+            }
+            else if (obj instanceof Object) {
+                var subresult_1 = {};
+                iteritems(obj, function (key, value) {
+                    subresult_1[key] = crawl(value, callback, replace, memo);
+                });
+                if (replace) {
+                    copyfields(subresult_1, obj);
+                }
+            }
+            return result;
+        }
+        else {
+            return obj;
+        }
+    }
+    TS.crawl = crawl;
+    /**
+     * Return the minimal value of an array
+     */
+    function min(array) {
+        return array.reduce(function (a, b) { return a < b ? a : b; });
+    }
+    TS.min = min;
+    /**
+     * Return the maximal value of an array
+     */
+    function max(array) {
+        return array.reduce(function (a, b) { return a > b ? a : b; });
+    }
+    TS.max = max;
+    /**
+     * Return the sum of an array
+     */
+    function sum(array) {
+        return array.reduce(function (a, b) { return a + b; }, 0);
+    }
+    TS.sum = sum;
+    /**
+     * Return the average of an array
+     */
+    function avg(array) {
+        return sum(array) / array.length;
+    }
+    TS.avg = avg;
+    /**
+     * Return value, with the same sign as base
+     */
+    function samesign(value, base) {
+        return Math.abs(value) * (base < 0 ? -1 : 1);
+    }
+    TS.samesign = samesign;
+})(TS || (TS = {}));
 var TacticArena;
 (function (TacticArena) {
     var UI;
@@ -2454,8 +4361,8 @@ var TacticArena;
                 var self = this;
                 this.menu = menu;
                 this.serverManager = serverManager;
-                $('body').append('<div class="ui-chat"><div class="channels-list"></div><div class="content"></div><input id="ui-chat-input" type="text"/></div>');
-                this.element = $('.ui-chat');
+                $('body').append('<div class="main-chat"><div class="channels-list"></div><div class="content"></div><input id="main-chat-input" type="text"/></div>');
+                this.element = $('.main-chat');
                 this.element.find('input').on('focus', function () {
                     self.menu.game.input.enabled = false;
                 });
@@ -2501,7 +4408,7 @@ var TacticArena;
                         duel: {
                             name: "Provoquer en duel", callback: function (key, opt) {
                                 var token = opt.$trigger.attr("id");
-                                self.serverManager.ask('ASK_DUEL', token);
+                                self.serverManager.request('ASK_DUEL', token);
                                 self.write('<span class="notification">La demande a été envoyée à ' + opt.$trigger.html() + '</span>');
                             }
                         }
@@ -2971,23 +4878,26 @@ var TacticArena;
                 this.menu = menu;
                 var self = this;
                 var html = '<div class="ui-pawns-infos">';
-                for (var i = 0; i < this.menu.game.pawns.length; i++) {
-                    html += '<div pawn-index="' + i + '" class="pawn pawn0' + this.menu.game.pawns[i]._id + ' ' + this.menu.game.pawns[i].type + ' team-' + this.menu.game.pawns[i].team + '">' +
+                // sort for displaying player pawns on top
+                var pawns = this.menu.game.pawns.sort(function (p) { return p.team != self.menu.game.playerTeam; });
+                for (var i = 0; i < pawns.length; i++) {
+                    var pawn = pawns[i];
+                    var classColor = pawn.team == self.menu.game.playerTeam ? 0 : 1;
+                    html += '<div pawn-index="' + i + '" class="pawn pawn0' + pawn._id + ' ' + pawn.type + ' team-' + classColor + '">' +
                         '<div class="avatar"><div class="picture shiny"></div></div>' +
-                        '<div class="name">' + this.menu.game.pawns[i]._name + '</div>' +
-                        //'<div class="orders"></div> ' +
+                        '<div class="name">' + pawn._name + '</div>' +
                         '<div class="infos">' +
                         '<div class="hp">' +
                         '<div class="bar">' +
                         '<div class="content current"></div>' +
-                        '<div class="text"><span class="value"></span> / ' + this.menu.game.pawns[i]._hpMax + ' HP</div>' +
+                        '<div class="text"><span class="value"></span> / ' + pawn._hpMax + ' HP</div>' +
                         '</div>' +
                         '</div>' +
                         '<div class="ap">' +
                         '<div class="bar">' +
                         '<div class="content remaining"></div>' +
                         '<div class="content current"></div>' +
-                        '<div class="text"><span class="value"></span> / ' + this.menu.game.pawns[i]._apMax + ' AP</div>' +
+                        '<div class="text"><span class="value"></span> / ' + pawn._apMax + ' AP</div>' +
                         '</div>' +
                         '</div>' +
                         '</div>' +
@@ -3029,21 +4939,6 @@ var TacticArena;
                 this.element.find('.pawn0' + pawn._id + ' .infos .ap .bar .current').css('width', (((pawn.getAp() - apCost) / pawn._apMax) * 100) + '%');
                 this.element.find('.pawn0' + pawn._id + ' .infos .ap .bar .remaining').css('width', percentRemaining + '%');
                 this.element.find('.pawn0' + pawn._id + ' .infos .ap .value').html(pawn.getAp() - apCost);
-            };
-            PawnsInfos.prototype.updateOrders = function (pawn, orders) {
-                //let orders_list = '';
-                //for(var i=0; i < orders.length; i++) {
-                //    if(orders[i].entity._id == pawn._id) {
-                //        for(var j = 0; j < orders[i].list.length; j++) {
-                //            let o = orders[i].list[j];
-                //            orders_list += '<div class="order"><span class="' + o.action + '"></span><span class="coordinates">' + o.x + ',' + o.y + '</span></div>';
-                //        }
-                //    }
-                //}
-                //this.element.find('.pawn0' + pawn._id + ' .orders').html(orders_list);
-            };
-            PawnsInfos.prototype.cleanOrders = function () {
-                // this.element.find('.orders').html('');
             };
             return PawnsInfos;
         }());
@@ -3457,7 +5352,6 @@ var TacticArena;
                 this.transitionUI = new UI.Transition(this);
                 this.turnIndicatorUI = new UI.TurnIndicator(this);
                 this.ingamemenuUI = new UI.IngameMenu(this);
-                this.chatUI = new UI.Chat(this, this.game.serverManager);
                 //this.game.pointer.dealWith(this.consolelogsUI.element);
                 this.game.pointer.dealWith(this.actionUI.element);
                 this.game.pointer.dealWith(this.timeUI.element);
@@ -3481,34 +5375,53 @@ var TacticArena;
             };
             UIManager.prototype.endOrderPhase = function () {
                 var _this = this;
-                var activePawn = this.game.turnManager.getActivePawn();
                 if (!this.game.process) {
-                    this.game.stageManager.clearPossibleMove();
-                    this.game.stageManager.clearPath(this.game.pathTilesGroup);
                     this.game.process = true;
                     this.game.selecting = false;
+                    this.game.stageManager.clearPossibleMove();
+                    this.game.stageManager.clearPath(this.game.pathTilesGroup);
+                    var activePawn_2 = this.game.turnManager.getActivePawn();
                     this.game.turnManager.endTurn().then(function (nextPawn) {
-                        _this.game.signalManager.onTurnEnded.dispatch(activePawn);
-                        if (_this.game.turnManager.getRemainingPawns().length == 0) {
-                            _this.actionUI.clean();
-                            _this.directionUI.clean();
-                            var steps_1 = _this.game.orderManager.getSteps();
-                            _this.game.resolveManager.init(steps_1);
-                            _this.transitionUI.show('Phase de Résolution').then(function (res) {
-                                return true;
-                            }).then(function (res) {
-                                _this.pawnsinfosUI.selectAll();
-                                _this.game.logManager.add(steps_1);
-                                _this.timelineUI.build(steps_1.length).then(function (res) {
-                                    _this.game.resolveManager.processSteps(0);
-                                });
+                        _this.game.signalManager.onTurnEnded.dispatch(activePawn_2);
+                        console.log(_this.game.playMode);
+                        console.log(_this.game.playerTeam);
+                        console.info(_this.game.turnManager.getRemainingPawns(_this.game.playerTeam));
+                        if (_this.game.playMode == 'online' && _this.game.turnManager.getRemainingPawns(_this.game.playerTeam).length == 0) {
+                            // s'il reste plus de pawn à jouer du playerteam
+                            // alors on signale au serveur qu'on a fini la phase de commandement
+                            // en lui envoyant les ordres
+                            _this.game.serverManager.request('VALID_ORDER_PHASE', {
+                                turn: _this.game.turnManager.currentTurnIndex,
+                                orders: _this.game.orderManager.getPlayerOrders(_this.game.playerTeam)
                             });
+                            console.log('waiting for other player');
                         }
                         else {
-                            _this.initOrderPhase(nextPawn, false);
+                            if (_this.game.turnManager.getRemainingPawns().length == 0) {
+                                var steps = _this.game.orderManager.getSteps();
+                                _this.initResolvePhase(steps);
+                            }
+                            else {
+                                _this.initOrderPhase(nextPawn, false);
+                            }
                         }
                     });
                 }
+            };
+            UIManager.prototype.initResolvePhase = function (steps) {
+                var _this = this;
+                this.actionUI.clean();
+                this.directionUI.clean();
+                this.game.resolveManager.init(steps);
+                this.transitionUI.show('Phase de Résolution').then(function (res) {
+                    return true;
+                }).then(function (res) {
+                    _this.pawnsinfosUI.selectAll();
+                    _this.game.logManager.add(steps);
+                    _this.timelineUI.build(steps.length).then(function (res) {
+                        _this.game.resolveManager.processSteps(0);
+                    });
+                });
             };
             UIManager.prototype.endResolvePhase = function () {
                 var self = this;
@@ -3546,5 +5459,63 @@ var TacticArena;
         }());
         UI.UIManager = UIManager;
     })(UI = TacticArena.UI || (TacticArena.UI = {}));
+})(TacticArena || (TacticArena = {}));
+var TacticArena;
+(function (TacticArena) {
+    var Utils;
+    (function (Utils) {
+        var Generator = (function () {
+            function Generator() {
+            }
+            Generator.prototype.generate = function (n) {
+                if (n === void 0) { n = 5; }
+                var letter = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
+                var consonant = ['b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'q', 'r', 's', 't', 'v', 'w', 'x', 'y', 'z'];
+                var vowel = ['a', 'e', 'i', 'o', 'u'];
+                var name = [];
+                var numLetters = n;
+                var selected;
+                var result = '';
+                for (var i = 0; i < numLetters; i++) {
+                    selected = Math.floor(Math.random() * 26);
+                    if (name.length > 2) {
+                        var lastLetter = name.length - 1;
+                        var penultLetter = name.length - 2;
+                        while (name[lastLetter] == selected && name[penultLetter] == selected)
+                            selected = Math.floor(Math.random() * 26);
+                        if (consonant.indexOf(name[lastLetter]) != -1 && consonant.indexOf(name[penultLetter]) != -1) {
+                            selected = Math.floor(Math.random() * 5);
+                            name[i] = vowel[selected];
+                            continue;
+                        }
+                    }
+                    else {
+                        if (vowel.indexOf(name[0]) != -1) {
+                            selected = Math.floor(Math.random() * 21);
+                            name[i] = consonant[selected];
+                            continue;
+                        }
+                        else if (consonant.indexOf(name[0]) != -1) {
+                            selected = Math.floor(Math.random() * 5);
+                            name[i] = vowel[selected];
+                            continue;
+                        }
+                    }
+                    name[i] = letter[selected];
+                }
+                if (consonant.indexOf(name[name.length - 1]) != -1 && consonant.indexOf(name[name.length - 2]) != -1) {
+                    selected = Math.floor(Math.random() * 5);
+                    name[name.length - 1] = vowel[selected];
+                }
+                result = name.join('');
+                result = result.substr(0, 1).toUpperCase() + result.substr(1);
+                return result;
+            };
+            Generator.prototype.serialize = function () {
+            };
+            return Generator;
+        }());
+        Utils.Generator = Generator;
+    })(Utils = TacticArena.Utils || (TacticArena.Utils = {}));
 })(TacticArena || (TacticArena = {}));
 //# sourceMappingURL=app.js.map

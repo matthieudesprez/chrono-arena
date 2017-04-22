@@ -1,6 +1,6 @@
 module TacticArena.UI {
     export class UIManager {
-        game:State.Main;
+        game;
         element;
         //consolelogsUI;
         directionUI;
@@ -14,7 +14,6 @@ module TacticArena.UI {
         transitionUI;
         turnIndicatorUI;
         ingamemenuUI;
-        chatUI;
         process;
 
         constructor(game) {
@@ -34,7 +33,6 @@ module TacticArena.UI {
             this.transitionUI = new UI.Transition(this);
             this.turnIndicatorUI = new UI.TurnIndicator(this);
             this.ingamemenuUI = new UI.IngameMenu(this);
-            this.chatUI = new UI.Chat(this, this.game.serverManager);
 
             //this.game.pointer.dealWith(this.consolelogsUI.element);
             this.game.pointer.dealWith(this.actionUI.element);
@@ -60,33 +58,51 @@ module TacticArena.UI {
         }
 
         endOrderPhase() {
-            var activePawn = this.game.turnManager.getActivePawn();
             if (!this.game.process) {
-                this.game.stageManager.clearPossibleMove();
-                this.game.stageManager.clearPath(this.game.pathTilesGroup);
                 this.game.process = true;
                 this.game.selecting = false;
+                this.game.stageManager.clearPossibleMove();
+                this.game.stageManager.clearPath(this.game.pathTilesGroup);
+                let activePawn = this.game.turnManager.getActivePawn();
                 this.game.turnManager.endTurn().then((nextPawn) => {
                     this.game.signalManager.onTurnEnded.dispatch(activePawn);
-                    if(this.game.turnManager.getRemainingPawns().length == 0) {
-                        this.actionUI.clean();
-                        this.directionUI.clean();
-                        let steps = this.game.orderManager.getSteps();
-                        this.game.resolveManager.init(steps);
-                        this.transitionUI.show('Phase de Résolution').then((res) => {
-                            return true;
-                        }).then((res) => {
-                            this.pawnsinfosUI.selectAll();
-                            this.game.logManager.add(steps);
-                            this.timelineUI.build(<any>steps.length).then((res) => {
-                                this.game.resolveManager.processSteps(0);
-                            });
+                    console.log(this.game.playMode);
+                    console.log(this.game.playerTeam);
+                    console.info(this.game.turnManager.getRemainingPawns(this.game.playerTeam));
+                    if(this.game.playMode == 'online' && this.game.turnManager.getRemainingPawns(this.game.playerTeam).length == 0) {
+                        // s'il reste plus de pawn à jouer du playerteam
+                        // alors on signale au serveur qu'on a fini la phase de commandement
+                        // en lui envoyant les ordres
+                        this.game.serverManager.request('VALID_ORDER_PHASE', {
+                            turn: this.game.turnManager.currentTurnIndex,
+                            orders: this.game.orderManager.getPlayerOrders(this.game.playerTeam)
                         });
+                        console.log('waiting for other player')
                     } else {
-                        this.initOrderPhase(nextPawn, false);
+                        if (this.game.turnManager.getRemainingPawns().length == 0) {
+                            let steps = this.game.orderManager.getSteps();
+                            this.initResolvePhase(steps);
+                        } else {
+                            this.initOrderPhase(nextPawn, false);
+                        }
                     }
                 });
             }
+        }
+
+        initResolvePhase(steps) {
+            this.actionUI.clean();
+            this.directionUI.clean();
+            this.game.resolveManager.init(steps);
+            this.transitionUI.show('Phase de Résolution').then((res) => {
+                return true;
+            }).then((res) => {
+                this.pawnsinfosUI.selectAll();
+                this.game.logManager.add(steps);
+                this.timelineUI.build(<any>steps.length).then((res) => {
+                    this.game.resolveManager.processSteps(0);
+                });
+            });
         }
 
         endResolvePhase() {

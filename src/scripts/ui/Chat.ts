@@ -9,8 +9,8 @@ module TacticArena.UI {
             var self = this;
             this.menu = menu;
             this.serverManager = serverManager;
-            $('body').append('<div class="ui-chat"><div class="channels-list"></div><div class="content"></div><input id="ui-chat-input" type="text"/></div>');
-            this.element = $('.ui-chat');
+            $('body').append('<div class="main-chat"><div class="channels-list"></div><div class="content"></div><input id="main-chat-input" type="text"/></div>');
+            this.element = $('.main-chat');
 
             this.element.find('input').on('focus', function () {
                 self.menu.game.input.enabled = false;
@@ -61,7 +61,7 @@ module TacticArena.UI {
                     duel: {
                         name: "Provoquer en duel", callback: function (key, opt) {
                             let token = opt.$trigger.attr("id");
-                            self.serverManager.ask('ASK_DUEL', token);
+                            self.serverManager.request('ASK_DUEL', token);
                             self.write('<span class="notification">La demande a été envoyée à ' + opt.$trigger.html() + '</span>');
                         }
                     }

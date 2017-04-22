@@ -19,9 +19,9 @@ module TacticArena.Entity {
             this._size = size;
             this.setAnimations();
             this._animationCompleteCallback = null;
-            //if(tint) {
-            //    this.tint = tint;
-            //}
+            if(tint) {
+                this.tint = tint;
+            }
         }
 
         setAnimations() {

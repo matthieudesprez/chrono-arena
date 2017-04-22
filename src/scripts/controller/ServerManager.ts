@@ -16,8 +16,8 @@ module TacticArena.Controller {
 
         constructor(game, login, onChatMessageReceptionCallback, onPlayersListUpdateCallback, onDuelAskReceptionCallback, onDuelAcceptedCallback, onDuelStartCallback) {
             this.game = game;
-            this.url = 'wss://polar-fortress-51758.herokuapp.com';
-            //this.url = 'ws://localhost:3000';
+            //this.url = 'wss://polar-fortress-51758.herokuapp.com';
+            this.url = 'ws://localhost:3000';
             this.login = login;
             this.token = '';
             this.socketId = null;
@@ -29,15 +29,15 @@ module TacticArena.Controller {
             this.onDuelStartCallback = onDuelStartCallback;
             this.intervalCount = 0;
             this.connect();
-            this.notifyNewConnection(this.login);
+            this.request('NEW_CONNECTION', ' ', this.login);
         }
 
         connect() {
             let self = this;
             this.socket = new WebSocket(this.url);
             this.socket.onmessage = function (message) {
-                console.log(message.data);
                 let data = JSON.parse(message.data).data;
+                console.log(data);
                 let server_msg = data.type == 'SERVER_NOTIFICATION';
                 if(data.type == 'SERVER_PLAYERS_LIST') {
                     self.onPlayersListUpdateCallback(data);
@@ -50,9 +50,54 @@ module TacticArena.Controller {
                 } else if (data.type == 'ACCEPT_DUEL') {
                     self.onChatMessageReceptionCallback(data, true);
                     self.onDuelAcceptedCallback(data);
-                }  else if (data.type == 'START_DUEL') {
+                } else if (data.type == 'START_DUEL') {
                     self.onChatMessageReceptionCallback({content: 'Début du duel'}, true);
                     self.onDuelStartCallback(data);
+                } else if (data.type == 'PROCESS_ORDERS') {
+                    let orders = [];
+                    for(var i = 0; i < data.content.length; i++) {
+                        if(data.content[i].orders) {
+                            for (var j = 0; j < data.content[i].orders.length; j++) {
+                                if(data.content[i].orders[j].entityId) {
+                                    data.content[i].orders[j].entity = self.game.pawns.find( o => {
+                                        return o._id == data.content[i].orders[j].entityId;
+                                    });
+                                }
+                                orders = orders.concat(data.content[i].orders[j]);
+                            }
+                        }
+                    }
+                    self.game.orderManager.orders = orders;
+                    let steps = self.game.orderManager.getSteps();
+                    console.log(steps);
+                    let serializedSteps = [];
+                    for(var i = 0; i < steps.length; i++) {
+                        serializedSteps.push([]);
+                        for (var j = 0; j < steps[i].length; j++) {
+                            let s = {
+                                entityId: steps[i][j].entity._id,
+                                entityState: steps[i][j].entityState,
+                                order: steps[i][j].order,
+                            };
+                            serializedSteps[i].push(s);
+                        }
+                    }
+                    self.request('PROCESSED_ORDERS', serializedSteps);
+                } else if (data.type == 'PROCESSED_ORDERS') {
+                    let serializedSteps = data.content;
+                    let steps = [];
+                    for(var i = 0; i < serializedSteps.length; i++) {
+                        steps.push([]);
+                        for (var j = 0; j < serializedSteps[i].length; j++) {
+                            let s = {
+                                entity: self.game.pawns.find( o => { return o._id == serializedSteps[i][j].entityId; }),
+                                entityState: serializedSteps[i][j].entityState,
+                                order: serializedSteps[i][j].order,
+                            };
+                            steps[i].push(s);
+                        }
+                    }
+                    self.game.signalManager.onProcessedOrders.dispatch(steps);
                 } else {
                     self.onChatMessageReceptionCallback(data, server_msg);
                 }
@@ -66,13 +111,10 @@ module TacticArena.Controller {
             this.socket.onopen = function (e) {
                 console.log('open', e);
             };
-            //self.send({name: 'Chrono', content: 'Hello !'}).then( (res) => {
-            //
-            //});
+
             $(window).on('beforeunload', function() {
                 console.log('disconnect');
                 self.socket.close();
-                //return null;
             });
         }
 
@@ -108,16 +150,9 @@ module TacticArena.Controller {
             }
         };
 
-        notifyNewConnection(name) {
-            console.log(name);
-            this.send({type: 'NEW_CONNECTION', name: name, content: ' '}).then( (res) => {
-
-            });
-        }
-
-        ask(type, content) {
+        request(type, content, name=null) {
             var self = this;
-            this.send({type: type, name: self.token, content: content}).then( (res) => {
+            this.send({type: type, name: (name ? name : self.token), content: content}).then( (res) => {
 
             });
         }

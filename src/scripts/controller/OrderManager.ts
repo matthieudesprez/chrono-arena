@@ -63,6 +63,19 @@ module TacticArena.Controller {
             return [];
         }
 
+        getPlayerOrders(teamId) {
+            let result = [];
+            for (var i = 0; i < this.orders.length; i++) {
+                if (this.orders[i].entity.team == teamId) {
+                    result.push({
+                        entityId: this.orders[i].entity._id,
+                        list: this.orders[i].list
+                    });
+                }
+            }
+            return result;
+        }
+
         getMaxOrderListLength() {
             var max = 0;
             for (var i = 0; i < this.orders.length; i++) {
@@ -130,6 +143,7 @@ module TacticArena.Controller {
         }
 
         getSteps() {
+            console.log(this.orders);
             this.alteredPawns = [];
             this.formatOrders();
             let steps = new Array(this.getMaxOrderListLength());

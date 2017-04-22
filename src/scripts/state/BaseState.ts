@@ -5,7 +5,7 @@ module TacticArena.State {
             super();
         }
 
-        init(data?) {
+        init(data?, server?, chat?) {
             this.game.stage.backgroundColor = 0x333333;
             $('[class*="ui-"]').remove();
             $('#game-menu').remove();

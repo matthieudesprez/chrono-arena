@@ -23,7 +23,7 @@ module TacticArena.Entity {
             this.type = type;
             this.projection = null;
             this._parent = null;
-            let tint = null;//team != this.game.playerTeam ? this.game.teamColors[team-1] : null;
+            let tint = null; //team != this.game.playerTeam ? this.game.teamColors[team-1] : null;
             if(type) {
                 this.sprite = new Entity.Sprite(game, x, y, ext, type, this, 64, tint);
                 this.game.pawnsSpritesGroup.add(this.sprite);

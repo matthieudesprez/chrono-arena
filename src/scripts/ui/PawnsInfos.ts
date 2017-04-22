@@ -7,23 +7,26 @@ module TacticArena.UI {
             this.menu = menu;
             var self = this;
             var html = '<div class="ui-pawns-infos">';
-            for(var i = 0; i < this.menu.game.pawns.length; i++) {
-                html += '<div pawn-index="' + i + '" class="pawn pawn0' + this.menu.game.pawns[i]._id + ' ' + this.menu.game.pawns[i].type + ' team-' + this.menu.game.pawns[i].team + '">' +
+            // sort for displaying player pawns on top
+            let pawns = this.menu.game.pawns.sort( p => { return p.team != self.menu.game.playerTeam; });
+            for(var i = 0; i < pawns.length; i++) {
+                let pawn = pawns[i];
+                let classColor = pawn.team == self.menu.game.playerTeam ? 0 : 1;
+                html += '<div pawn-index="' + i + '" class="pawn pawn0' + pawn._id + ' ' + pawn.type + ' team-' + classColor + '">' +
                 '<div class="avatar"><div class="picture shiny"></div></div>' +
-                '<div class="name">' + this.menu.game.pawns[i]._name + '</div>' +
-                //'<div class="orders"></div> ' +
+                '<div class="name">' + pawn._name + '</div>' +
                 '<div class="infos">' +
                 '<div class="hp">' +
                     '<div class="bar">' +
                         '<div class="content current"></div>' +
-                        '<div class="text"><span class="value"></span> / ' + this.menu.game.pawns[i]._hpMax + ' HP</div>' +
+                        '<div class="text"><span class="value"></span> / ' + pawn._hpMax + ' HP</div>' +
                     '</div>' +
                 '</div>' +
                 '<div class="ap">' +
                     '<div class="bar">' +
                         '<div class="content remaining"></div>' +
                         '<div class="content current"></div>' +
-                        '<div class="text"><span class="value"></span> / ' + this.menu.game.pawns[i]._apMax + ' AP</div>' +
+                        '<div class="text"><span class="value"></span> / ' + pawn._apMax + ' AP</div>' +
                     '</div>' +
                 '</div>' +
                 '</div>' +
@@ -71,23 +74,6 @@ module TacticArena.UI {
             this.element.find('.pawn0' + pawn._id + ' .infos .ap .bar .current').css('width', (((pawn.getAp() - apCost) / pawn._apMax) * 100) + '%');
             this.element.find('.pawn0' + pawn._id + ' .infos .ap .bar .remaining').css('width', percentRemaining + '%');
             this.element.find('.pawn0' + pawn._id + ' .infos .ap .value').html(pawn.getAp() - apCost);
-        }
-
-        updateOrders(pawn, orders) {
-            //let orders_list = '';
-            //for(var i=0; i < orders.length; i++) {
-            //    if(orders[i].entity._id == pawn._id) {
-            //        for(var j = 0; j < orders[i].list.length; j++) {
-            //            let o = orders[i].list[j];
-            //            orders_list += '<div class="order"><span class="' + o.action + '"></span><span class="coordinates">' + o.x + ',' + o.y + '</span></div>';
-            //        }
-            //    }
-            //}
-            //this.element.find('.pawn0' + pawn._id + ' .orders').html(orders_list);
-        }
-
-        cleanOrders() {
-           // this.element.find('.orders').html('');
         }
     }
 }

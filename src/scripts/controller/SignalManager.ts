@@ -13,6 +13,7 @@ module TacticArena.Controller {
         onActivePawnChange:Phaser.Signal;
         onTeamChange:Phaser.Signal;
         onChatMessageReception:Phaser.Signal;
+        onProcessedOrders:Phaser.Signal;
 
         constructor(game) {
             this.game = game;
@@ -29,6 +30,7 @@ module TacticArena.Controller {
             this.onActivePawnChange = new Phaser.Signal();
             this.onTeamChange = new Phaser.Signal();
             this.onChatMessageReception = new Phaser.Signal();
+            this.onProcessedOrders = new Phaser.Signal();
         }
 
         init() {
@@ -109,6 +111,10 @@ module TacticArena.Controller {
             this.onChatMessageReception.add(function(data) {
                 console.log(data);
                 self.game.uiManager.chatUI.write(data.name + ': ' + data.message)
+            });
+
+            this.onProcessedOrders.add(function(steps) {
+                self.game.uiManager.initResolvePhase(steps);
             });
         }
     }

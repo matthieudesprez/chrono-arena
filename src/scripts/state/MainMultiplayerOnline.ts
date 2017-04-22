@@ -26,13 +26,16 @@ module TacticArena.State {
         teamColors;
         playerTeam;
         teams;
+        players;
+        chatUI;
+        generator;
+        playMode;
+        serializer;
 
-        init(data) {
+        init(data, serverManager, chatUI) {
             super.init();
             console.log(data);
-        }
-
-        create() {
+            this.playMode = 'online';
             this.game.stage.backgroundColor = 0xffffff;
             var self = this;
             this.process = true;
@@ -41,15 +44,11 @@ module TacticArena.State {
             this.isPaused = false;
             this.hideProjections = false;
             this.teamColors = ['0x8ad886', '0xd68686', '0x87bfdb', '0xcdd385'];
-            this.playerTeam = 1;
             this.teams = {};
+            this.serializer = new TS.Serializer(TacticArena);
 
             this.signalManager = new Controller.SignalManager(this);
             this.signalManager.init();
-
-            //this.serverManager = new Controller.ServerManager(this, function(data) {
-            //    self.signalManager.onChatMessageReception.dispatch(data);
-            //});
 
             this.stageManager = new Controller.StageManager(this);
             this.stageManager.init();
@@ -61,11 +60,29 @@ module TacticArena.State {
             this.pathOrdersTilesGroup = this.add.group();
             this.uiSpritesGroup = this.add.group();
             this.pawnsSpritesGroup = this.add.group();
-            this.pawns.push(new Entity.Pawn(this, 8, 8, 'E', 'redhead', this.getUniqueId(), false, 1, 'Eikio'));
-            this.pawns.push(new Entity.Pawn(this, 7, 7, 'E', 'blondy', this.getUniqueId(), false, 1, 'Diana'));
-            this.pawns.push(new Entity.Pawn(this, 11, 8, 'W', 'skeleton', this.getUniqueId(), false, 2, 'Fétide'));
-            this.pawns.push(new Entity.Pawn(this, 12, 7, 'W', 'skeleton', this.getUniqueId(), false, 2, 'Oscar'));
 
+            this.generator = new Utils.Generator();
+            this.chatUI = chatUI;
+            this.serverManager = serverManager;
+            this.serverManager.game = this;
+            this.players = data.content.players;
+            let startPositions = [[{x: 8, y: 8, d: 'E'}, {x: 7, y: 7, d: 'E'}], [{x: 11, y: 8, d: 'W'}, {x: 12, y: 7, d: 'W'}]];
+            this.players.forEach( (p, k) => {
+                if (p.token == self.serverManager.token) {
+                    this.playerTeam = k;
+                }
+                if (p.faction == 'human') {
+                    this.pawns.push(new Entity.Pawn(this, startPositions[k][0].x, startPositions[k][0].y, startPositions[k][0].d, 'redhead', this.getUniqueId(), false, k, this.generator.generate()));
+                    this.pawns.push(new Entity.Pawn(this, startPositions[k][1].x, startPositions[k][1].y, startPositions[k][1].d, 'blondy', this.getUniqueId(), false, k, this.generator.generate()));
+                } else {
+                    this.pawns.push(new Entity.Pawn(this, startPositions[k][0].x, startPositions[k][0].y, startPositions[k][0].d, 'evil', this.getUniqueId(), false, k, this.generator.generate()));
+                    this.pawns.push(new Entity.Pawn(this, startPositions[k][1].x, startPositions[k][1].y, startPositions[k][1].d, 'skeleton', this.getUniqueId(), false, k, this.generator.generate()));
+                }
+            });
+        }
+
+        create() {
+            let self = this;
             this.stageManager.addDecorations();
 
             this.pathfinder = new EasyStar.js();
@@ -77,13 +94,13 @@ module TacticArena.State {
             this.logManager = new Controller.LogManager(this);
             this.orderManager = new Controller.OrderManager(this);
             this.resolveManager = new Controller.ResolveManager(this);
-            this.aiManager = new Controller.AiManager(this);
+            //this.aiManager = new Controller.AiManager(this);
             this.turnManager = new Controller.TurnManager(this);
             this.uiManager = new UI.UIManager(this);
+            this.chatUI.menu = this.uiManager;
 
-            self.uiManager.initOrderPhase(this.pawns[0], true);
-
-            this.pawns[2].setHp(0);
+            let playerPawns = this.pawns.filter( pawn => { return pawn.team == self.playerTeam; });
+            this.uiManager.initOrderPhase(playerPawns[0], true);
         }
 
         update() {

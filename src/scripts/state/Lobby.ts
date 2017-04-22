@@ -5,25 +5,28 @@ module TacticArena.State {
         serverManager:Controller.ServerManager;
         onChatMessageReception:Phaser.Signal;
         selected_faction;
+        generator;
 
         create() {
             var self = this;
             super.createMenu();
+            this.generator = new Utils.Generator();
+
 
             $('#game-menu .ui').html(
                 '<div><h2>Entrez un login :</h2></div>' +
-                '<div><input type="text" class="login-input" value="Matt"/></div>' +
+                '<div><input type="text" class="login-input" value="' + this.generator.generate() + '"/></div>' +
                 '<div class="button submit-login"><a>Confirmer</a></div>'
             );
 
             $('#game-menu .ui .submit-login').bind('click', function (e) {
                 self.initChat($('#game-menu .ui .login-input').val());
             });
-            //$('#game-menu .ui .login-input').on('keyup', function (e) {
-            //    if (e.keyCode == 13) {
-            //        self.initChat($('#game-menu .ui .login-input').val());
-            //    }
-            //});
+            $('#game-menu .ui .login-input').on('keyup', function (e) {
+                if (e.keyCode == 13) {
+                    self.initChat($('#game-menu .ui .login-input').val());
+                }
+            });
         }
 
         initChat(login) {
@@ -37,17 +40,17 @@ module TacticArena.State {
                 self.chatUI.updatePlayersList(data);
             }, function (message, token) {
                 self.dialogUI.show('Duel !', message, 'Accepter', 'Décliner', function () {
-                    self.serverManager.ask('ACCEPT_DUEL', token);
+                    self.serverManager.request('ACCEPT_DUEL', token);
                     self.showFactionSelection();
                     $(this).dialog("close");
                 }, function () {
-                    self.serverManager.ask('DECLINE_DUEL', token);
+                    self.serverManager.request('DECLINE_DUEL', token);
                     $(this).dialog("close");
                 });
             }, function (data) {
                 self.showFactionSelection();
             }, function (data) {
-                self.game.state.start('mainmultiplayeronline', true, false, data);
+                self.game.state.start('mainmultiplayeronline', true, false, data, self.serverManager, self.chatUI);
             });
             this.chatUI = new UI.Chat(this, this.serverManager);
             this.dialogUI = new UI.Dialog(this);
@@ -76,7 +79,7 @@ module TacticArena.State {
                 $(this).hide();
                 $('#game-menu .ui .control').hide();
                 $('#game-menu .ui h2').html('En attente de votre adversaire');
-                self.serverManager.ask('FACTION_CHOSEN', self.selected_faction);
+                self.serverManager.request('FACTION_CHOSEN', self.selected_faction);
             });
         }
     }

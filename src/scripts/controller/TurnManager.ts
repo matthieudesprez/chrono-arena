@@ -26,8 +26,12 @@ module TacticArena.Controller {
         	});
         }
 
-		getRemainingPawns() {
-			return this.game.pawns.filter((pawn) => { return pawn.isAlive() && this.playedPawns.indexOf(pawn._id) < 0;});
+		getRemainingPawns(teamId = null) {
+			return this.game.pawns.filter((pawn) => {
+				let condition = pawn.isAlive() && this.playedPawns.indexOf(pawn._id) < 0;
+				if (teamId !== null) { condition = condition && pawn.team == teamId; }
+				return condition;
+			});
 		}
 
         endTurn() {
@@ -37,7 +41,6 @@ module TacticArena.Controller {
 				let remainingPawns = this.getRemainingPawns();
 				if(remainingPawns.length > 0) {
 					nextPawn = remainingPawns[0];
-
 					if(nextPawn.team != this.currentTeam) {
 						this.game.signalManager.onTeamChange.dispatch();
 					}
