@@ -143,7 +143,6 @@ module TacticArena.Controller {
         }
 
         getSteps() {
-            console.log(this.orders);
             this.alteredPawns = [];
             this.formatOrders();
             let steps = new Array(this.getMaxOrderListLength());
@@ -168,6 +167,20 @@ module TacticArena.Controller {
                 moveHasBeenBlocked: false,
                 positionBlocked: {}
             };
+        }
+
+        getPawn(id) {
+            //return this.game.pawns.find( p => {
+            //    console.log(p._id, id);
+            //    return p._id == id;
+            //});
+            let result = null;
+            this.game.pawns.forEach( p => {
+                if(p._id == id) {
+                    result = p;
+                }
+            });
+            return result;
         }
 
         processOrders(steps) {
@@ -237,7 +250,7 @@ module TacticArena.Controller {
                                 }
                             }
                             orderA.action = 'attack';
-                            orderA.target = { entity: entityB, dodge: entityBIsDodging };
+                            orderA.target = { entityId: entityB._id, dodge: entityBIsDodging };
                         }
 
                         if (entityAState.moveHasBeenBlocked && this.alteredPawns.indexOf(entityA._id) < 0) {
@@ -254,7 +267,7 @@ module TacticArena.Controller {
                             for (var k = 0; k < path.length; k++) {
                                 let targetPosition = entityBState.moveHasBeenBlocked ? positionBBeforeOrder : positionB;
                                 if (path[k].x == targetPosition.x && path[k].y == targetPosition.y) {
-                                    orderA.targets.push(entityB);
+                                    orderA.targets.push(entityB._id);
                                     entityBHpLost += 2;
                                 }
                             }

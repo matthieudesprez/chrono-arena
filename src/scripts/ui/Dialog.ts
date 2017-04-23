@@ -11,7 +11,6 @@ module TacticArena.UI {
         }
 
         show(title, message, confirmTitle, cancelTitle, confirmFunction, cancelFunction) {
-            console.log('show');
             $("#dialog-confirm").attr('title', title);
             $("#dialog-confirm p").html(message);
             $("#dialog-confirm").dialog({

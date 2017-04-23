@@ -372,7 +372,7 @@ var TacticArena;
                     testStep(steps, 1, 0, 1, 'move', 'E', { x: 8, y: 7 }, 2, 4, false, {});
                     testStep(steps, 1, 1, 2, 'move', 'W', { x: 10, y: 7 }, 2, 4, false, {});
                     testStep(steps, 2, 0, 1, 'cast', 'E', { x: 8, y: 7 }, 0, 4, false, {});
-                    expect(steps[2][0].order.targets).toEqual([currentState.pawns[1]]);
+                    expect(steps[2][0].order.targets).toEqual([currentState.pawns[1]._id]);
                     testStep(steps, 2, 1, 2, 'move', 'W', { x: 9, y: 7 }, 1, 2, false, {});
                     testStep(steps, 3, 0, 1, 'stand', 'E', { x: 8, y: 7 }, 0, 3, false, {});
                     testStep(steps, 3, 1, 2, 'attack', 'W', { x: 9, y: 7 }, 0, 2, true, { x: 8, y: 7 });
@@ -400,7 +400,7 @@ var TacticArena;
                     testStep(steps, 0, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 3, 4, false, {});
                     testStep(steps, 0, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 3, 4, false, {});
                     testStep(steps, 1, 0, 1, 'cast', 'E', { x: 8, y: 8 }, 1, 4, false, {});
-                    expect(steps[1][0].order.targets).toEqual([currentState.pawns[1]]);
+                    expect(steps[1][0].order.targets).toEqual([currentState.pawns[1]._id]);
                     testStep(steps, 1, 1, 2, 'move', 'W', { x: 9, y: 8 }, 2, 2, false, {});
                     testStep(steps, 2, 0, 1, 'attack', 'E', { x: 8, y: 8 }, 0, 3, false, {});
                     testStep(steps, 2, 1, 2, 'attack', 'W', { x: 9, y: 8 }, 1, 1, true, { x: 8, y: 8 });
@@ -595,7 +595,6 @@ var TacticArena;
                 return steps;
             };
             OrderManager.prototype.getSteps = function () {
-                console.log(this.orders);
                 this.alteredPawns = [];
                 this.formatOrders();
                 var steps = new Array(this.getMaxOrderListLength());
@@ -619,6 +618,19 @@ var TacticArena;
                     moveHasBeenBlocked: false,
                     positionBlocked: {}
                 };
+            };
+            OrderManager.prototype.getPawn = function (id) {
+                //return this.game.pawns.find( p => {
+                //    console.log(p._id, id);
+                //    return p._id == id;
+                //});
+                var result = null;
+                this.game.pawns.forEach(function (p) {
+                    if (p._id == id) {
+                        result = p;
+                    }
+                });
+                return result;
             };
             OrderManager.prototype.processOrders = function (steps) {
                 for (var l = 1; l < steps.length; l++) {
@@ -686,7 +698,7 @@ var TacticArena;
                                     }
                                 }
                                 orderA.action = 'attack';
-                                orderA.target = { entity: entityB, dodge: entityBIsDodging };
+                                orderA.target = { entityId: entityB._id, dodge: entityBIsDodging };
                             }
                             if (entityAState.moveHasBeenBlocked && this.alteredPawns.indexOf(entityA._id) < 0) {
                                 this.blockEntity(steps, l, i, OrderManager.getDefaultOrder(previousStep[i].order, previousStep[i].order.direction), entityA);
@@ -701,7 +713,7 @@ var TacticArena;
                                 for (var k = 0; k < path.length; k++) {
                                     var targetPosition = entityBState.moveHasBeenBlocked ? positionBBeforeOrder : positionB;
                                     if (path[k].x == targetPosition.x && path[k].y == targetPosition.y) {
-                                        orderA.targets.push(entityB);
+                                        orderA.targets.push(entityB._id);
                                         entityBHpLost += 2;
                                     }
                                 }
@@ -826,14 +838,14 @@ var TacticArena;
                         {
                             entity: currentState.pawns[0],
                             order: {
-                                action: "attack", direction: "E", x: 9, y: 8, target: { entity: currentState.pawns[1], dodge: false }
+                                action: "attack", direction: "E", x: 9, y: 8, target: { entityId: currentState.pawns[1]._id, dodge: false }
                             },
                             entityState: getEntityState(1, 4)
                         },
                         {
                             entity: currentState.pawns[1],
                             order: {
-                                action: "attack", direction: "W", x: 10, y: 8, target: { entity: currentState.pawns[0], dodge: true }
+                                action: "attack", direction: "W", x: 10, y: 8, target: { entityId: currentState.pawns[0]._id, dodge: true }
                             },
                             entityState: getEntityState(1, 3)
                         }
@@ -875,7 +887,7 @@ var TacticArena;
                     [
                         {
                             entity: currentState.pawns[0],
-                            order: { action: "cast", direction: "E", x: 8, y: 7, targets: [currentState.pawns[1]] },
+                            order: { action: "cast", direction: "E", x: 8, y: 7, targets: [currentState.pawns[1]._id] },
                             entityState: getEntityState(0, 4)
                         },
                         {
@@ -887,12 +899,12 @@ var TacticArena;
                     [
                         {
                             entity: currentState.pawns[0],
-                            order: { action: "stand", direction: "E", x: 8, y: 7, targets: [currentState.pawns[1]] },
+                            order: { action: "stand", direction: "E", x: 8, y: 7, targets: [currentState.pawns[1]._id] },
                             entityState: getEntityState(0, 3)
                         },
                         {
                             entity: currentState.pawns[1],
-                            order: { action: "move", direction: "W", x: 9, y: 7, target: { entity: currentState.pawns[0], dodge: false } },
+                            order: { action: "move", direction: "W", x: 9, y: 7, target: { entity: currentState.pawns[0]._id, dodge: false } },
                             entityState: getEntityState(0, 2)
                         }
                     ]
@@ -1021,6 +1033,7 @@ var TacticArena;
                 var _this = this;
                 if (animate === void 0) { animate = true; }
                 if (backward === void 0) { backward = false; }
+                var self = this;
                 return new Promise(function (resolve, reject) {
                     if (index >= _this.steps.length) {
                         resolve(true);
@@ -1030,13 +1043,13 @@ var TacticArena;
                     _this.game.signalManager.stepResolutionIndexChange.dispatch(index);
                     var step = _this.steps[index];
                     var previousStep = index > 0 ? _this.steps[index - 1] : null;
-                    console.info('processStep', index, step);
+                    console.log('processStep', index, step);
                     var promisesOrders = [];
-                    for (var i = 0; i < step.length; i++) {
-                        var o = step[i].order;
-                        var e = step[i].entity;
-                        var s = step[i].entityState;
-                        var p = null;
+                    var _loop_1 = function () {
+                        o = step[i].order;
+                        e = step[i].entity;
+                        s = step[i].entityState;
+                        p = null;
                         var position = e.getPosition();
                         e.setAp(s.ap);
                         if (s.hp <= 0) {
@@ -1057,15 +1070,25 @@ var TacticArena;
                             }
                         }
                         else if (o.action == 'attack') {
+                            o.target.entity = _this.game.orderManager.getPawn(o.target.entityId);
                             p = _this.handleBackwardPromise(_this.createPromiseAttack(e, o.target), e, o, position, animate);
                         }
                         else if (o.action == 'cast') {
-                            p = _this.handleBackwardPromise(e.cast(o.targets, o.direction), e, o, position, animate);
+                            var targets_1 = [];
+                            o.targets.forEach(function (t) {
+                                targets_1.push(self.game.orderManager.getPawn(t));
+                            });
+                            console.log('ids', targets_1);
+                            p = _this.handleBackwardPromise(e.cast(targets_1, o.direction), e, o, position, animate);
                         }
                         else if (o.action == 'stand') {
                             p = _this.handleBackwardPromise(_this.createPromiseStand(e, o.direction), e, o, position, animate);
                         }
                         promisesOrders.push(p);
+                    };
+                    var o, e, s, p;
+                    for (var i = 0; i < step.length; i++) {
+                        _loop_1();
                     }
                     _this.manageProjectionDislay(step);
                     Promise.all(promisesOrders).then(function (res) {
@@ -1124,8 +1147,8 @@ var TacticArena;
         var ServerManager = (function () {
             function ServerManager(game, login, onChatMessageReceptionCallback, onPlayersListUpdateCallback, onDuelAskReceptionCallback, onDuelAcceptedCallback, onDuelStartCallback) {
                 this.game = game;
-                //this.url = 'wss://polar-fortress-51758.herokuapp.com';
-                this.url = 'ws://localhost:3000';
+                this.url = 'wss://polar-fortress-51758.herokuapp.com';
+                //this.url = 'ws://localhost:3000';
                 this.login = login;
                 this.token = '';
                 this.socketId = null;
@@ -1172,9 +1195,7 @@ var TacticArena;
                             if (data.content[i].orders) {
                                 for (var j = 0; j < data.content[i].orders.length; j++) {
                                     if (data.content[i].orders[j].entityId) {
-                                        data.content[i].orders[j].entity = self.game.pawns.find(function (o) {
-                                            return o._id == data.content[i].orders[j].entityId;
-                                        });
+                                        data.content[i].orders[j].entity = self.game.orderManager.getPawn(data.content[i].orders[j].entityId);
                                     }
                                     orders = orders.concat(data.content[i].orders[j]);
                                 }
@@ -1360,7 +1381,6 @@ var TacticArena;
                     }
                 });
                 this.onChatMessageReception.add(function (data) {
-                    console.log(data);
                     self.game.uiManager.chatUI.write(data.name + ': ' + data.message);
                 });
                 this.onProcessedOrders.add(function (steps) {
@@ -1524,6 +1544,7 @@ var TacticArena;
                         }
                         _this.currentTurnIndex++;
                         _this.playedPawns = [];
+                        _this.game.orderManager.orders = [];
                     }
                     _this.setActivePawn(pawn);
                     resolve(true);
@@ -2087,6 +2108,7 @@ var TacticArena;
                     $('#game-menu .ui h2').html('En attente de votre adversaire');
                     self.serverManager.request('FACTION_CHOSEN', self.selected_faction);
                 });
+                $('#game-menu .ui .faction.human').trigger('click');
             };
             return Lobby;
         }(TacticArena.State.BaseState));
@@ -2163,15 +2185,30 @@ var TacticArena;
             };
             Main.prototype.isOver = function () {
                 var _this = this;
-                var everyoneElseIsDead = true;
+                //let everyoneElseIsDead = true;
+                var ennemyPawnAlive = false;
+                var allyPawnAlive = false;
                 this.pawns.forEach(function (pawn) {
-                    _this.teams[pawn.team] = _this.teams[pawn.team] || pawn.isAlive();
+                    _this.teams[pawn.team] = true; //this.teams[pawn.team] || pawn.isAlive();
+                    //if(pawn.team != this.playerTeam) {
+                    //    everyoneElseIsDead = everyoneElseIsDead && !this.teams[pawn.team];
+                    //}
                     if (pawn.team != _this.playerTeam) {
-                        everyoneElseIsDead = everyoneElseIsDead && !_this.teams[pawn.team];
+                        if (pawn.isAlive()) {
+                            ennemyPawnAlive = true;
+                        }
+                    }
+                    else {
+                        if (pawn.isAlive()) {
+                            allyPawnAlive = true;
+                        }
                     }
                 });
-                console.log(this.teams, !this.teams[this.playerTeam], everyoneElseIsDead);
-                return (!this.teams[this.playerTeam] || everyoneElseIsDead);
+                console.log(ennemyPawnAlive, allyPawnAlive);
+                if (!allyPawnAlive) {
+                    this.teams[this.playerTeam] = false;
+                }
+                return (!allyPawnAlive || !ennemyPawnAlive);
             };
             Main.prototype.getUniqueId = function () {
                 var id = 0; //Math.floor(Math.random() * 1000);
@@ -2283,15 +2320,30 @@ var TacticArena;
             };
             MainMultiplayerOnline.prototype.isOver = function () {
                 var _this = this;
-                var everyoneElseIsDead = true;
+                //let everyoneElseIsDead = true;
+                var ennemyPawnAlive = false;
+                var allyPawnAlive = false;
                 this.pawns.forEach(function (pawn) {
-                    _this.teams[pawn.team] = _this.teams[pawn.team] || pawn.isAlive();
+                    _this.teams[pawn.team] = true; //this.teams[pawn.team] || pawn.isAlive();
+                    //if(pawn.team != this.playerTeam) {
+                    //    everyoneElseIsDead = everyoneElseIsDead && !this.teams[pawn.team];
+                    //}
                     if (pawn.team != _this.playerTeam) {
-                        everyoneElseIsDead = everyoneElseIsDead && !_this.teams[pawn.team];
+                        if (pawn.isAlive()) {
+                            ennemyPawnAlive = true;
+                        }
+                    }
+                    else {
+                        if (pawn.isAlive()) {
+                            allyPawnAlive = true;
+                        }
                     }
                 });
-                console.log(this.teams, !this.teams[this.playerTeam], everyoneElseIsDead);
-                return (!this.teams[this.playerTeam] || everyoneElseIsDead);
+                console.log(ennemyPawnAlive, allyPawnAlive);
+                if (!allyPawnAlive) {
+                    this.teams[this.playerTeam] = false;
+                }
+                return (!allyPawnAlive || !ennemyPawnAlive);
             };
             MainMultiplayerOnline.prototype.getUniqueId = function () {
                 var id = 0; //Math.floor(Math.random() * 1000);
@@ -3372,9 +3424,7 @@ var TS;
         Serializer.prototype.unserialize = function (data) {
             var _this = this;
             // Unserialize objects list
-            console.log(data);
-            var fobjects = [JSON.parse(data)];
-            console.log(fobjects);
+            var fobjects = JSON.parse(data);
             // Reconstruct objects
             var objects = fobjects.map(function (objdata) { return TS.merge(_this.constructObject(objdata['$c']), objdata['$f']); });
             // Reconnect links
@@ -4392,7 +4442,6 @@ var TacticArena;
             Chat.prototype.updatePlayersList = function (data) {
                 var self = this;
                 var playersList = '<li class="channel-general">General</li>';
-                console.log(self.serverManager.token);
                 data.content.forEach(function (p) {
                     if (p.token != self.serverManager.token) {
                         playersList += '<li class="channel-player" id="' + p.token + '">' + p.name + '</li>';
@@ -4466,7 +4515,6 @@ var TacticArena;
                 this.element = $('#dialog-confirm');
             }
             Dialog.prototype.show = function (title, message, confirmTitle, cancelTitle, confirmFunction, cancelFunction) {
-                console.log('show');
                 $("#dialog-confirm").attr('title', title);
                 $("#dialog-confirm p").html(message);
                 $("#dialog-confirm").dialog({
@@ -4597,6 +4645,20 @@ var TacticArena;
                     self.menu.game.state.start('menu');
                 });
             };
+            IngameMenu.prototype.show = function (msg) {
+                var self = this;
+                this.showOverlay();
+                this.menu.element.append('<div class="ui-popin">' +
+                    '<a class="button">' + msg + '</a>' +
+                    '</div>');
+                this.menu.element.find('.button.quit').on('click', function () {
+                    self.menu.game.state.start('menu');
+                });
+            };
+            IngameMenu.prototype.close = function () {
+                this.menu.element.find('.ui-overlay').remove();
+                this.menu.element.find('.ui-popin').remove();
+            };
             return IngameMenu;
         }());
         UI.IngameMenu = IngameMenu;
@@ -4690,7 +4752,6 @@ var TacticArena;
             KeyManager.prototype.pKeyPress = function (self, uiManager) {
                 if (self.altKey) {
                     uiManager.game.hideProjections = !uiManager.game.hideProjections;
-                    console.log('hidden projections', uiManager.game.hideProjections);
                 }
             };
             KeyManager.prototype.oneKeyPress = function (self, uiManager) {
@@ -5383,9 +5444,6 @@ var TacticArena;
                     var activePawn_2 = this.game.turnManager.getActivePawn();
                     this.game.turnManager.endTurn().then(function (nextPawn) {
                         _this.game.signalManager.onTurnEnded.dispatch(activePawn_2);
-                        console.log(_this.game.playMode);
-                        console.log(_this.game.playerTeam);
-                        console.info(_this.game.turnManager.getRemainingPawns(_this.game.playerTeam));
                         if (_this.game.playMode == 'online' && _this.game.turnManager.getRemainingPawns(_this.game.playerTeam).length == 0) {
                             // s'il reste plus de pawn à jouer du playerteam
                             // alors on signale au serveur qu'on a fini la phase de commandement
@@ -5394,7 +5452,7 @@ var TacticArena;
                                 turn: _this.game.turnManager.currentTurnIndex,
                                 orders: _this.game.orderManager.getPlayerOrders(_this.game.playerTeam)
                             });
-                            console.log('waiting for other player');
+                            _this.ingamemenuUI.show('Waiting for opponent move');
                         }
                         else {
                             if (_this.game.turnManager.getRemainingPawns().length == 0) {
@@ -5410,6 +5468,7 @@ var TacticArena;
             };
             UIManager.prototype.initResolvePhase = function (steps) {
                 var _this = this;
+                this.ingamemenuUI.close();
                 this.actionUI.clean();
                 this.directionUI.clean();
                 this.game.resolveManager.init(steps);
@@ -5429,7 +5488,6 @@ var TacticArena;
                     this.game.pawns[i].destroyProjection();
                 }
                 this.game.resolveManager.active = false;
-                this.pawnsinfosUI.cleanOrders();
                 setTimeout(function () {
                     self.notificationsUI.clean();
                 }, 500);

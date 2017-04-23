@@ -117,14 +117,14 @@ module TacticArena.Specs {
                         {
                             entity: currentState.pawns[0],
                             order: {
-                                action: "attack", direction: "E", x: 9, y: 8, target: { entity: currentState.pawns[1], dodge: false }
+                                action: "attack", direction: "E", x: 9, y: 8, target: { entityId: currentState.pawns[1]._id, dodge: false }
                             },
                             entityState: getEntityState(1, 4)
                         },
                         {
                             entity: currentState.pawns[1],
                             order: {
-                                action: "attack", direction: "W", x: 10, y: 8, target: { entity: currentState.pawns[0], dodge: true }
+                                action: "attack", direction: "W", x: 10, y: 8, target: { entityId: currentState.pawns[0]._id, dodge: true }
                             },
                             entityState: getEntityState(1, 3)
                         }
@@ -172,7 +172,7 @@ module TacticArena.Specs {
                     [
                         {
                             entity: currentState.pawns[0],
-                            order: {action: "cast", direction: "E", x: 8, y: 7, targets: [currentState.pawns[1]] },
+                            order: {action: "cast", direction: "E", x: 8, y: 7, targets: [currentState.pawns[1]._id] },
                             entityState: getEntityState(0, 4)
                         },
                         {
@@ -184,12 +184,12 @@ module TacticArena.Specs {
                     [
                         {
                             entity: currentState.pawns[0],
-                            order: {action: "stand", direction: "E", x: 8, y: 7, targets: [currentState.pawns[1]] },
+                            order: {action: "stand", direction: "E", x: 8, y: 7, targets: [currentState.pawns[1]._id] },
                             entityState: getEntityState(0, 3)
                         },
                         {
                             entity: currentState.pawns[1],
-                            order: { action: "move", direction: "W", x: 9, y: 7, target: { entity: currentState.pawns[0], dodge: false } },
+                            order: { action: "move", direction: "W", x: 9, y: 7, target: { entity: currentState.pawns[0]._id, dodge: false } },
                             entityState: getEntityState(0, 2)
                         }
                     ]

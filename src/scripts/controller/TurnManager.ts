@@ -20,6 +20,7 @@ module TacticArena.Controller {
 					}
 					this.currentTurnIndex++;
 					this.playedPawns = [];
+					this.game.orderManager.orders = [];
 				}
                 this.setActivePawn(pawn);
 	        	resolve(true);

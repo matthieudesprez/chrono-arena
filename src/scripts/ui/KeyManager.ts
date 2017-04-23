@@ -103,7 +103,6 @@ module TacticArena.UI {
         pKeyPress(self, uiManager) {
             if(self.altKey) {
                 uiManager.game.hideProjections = !uiManager.game.hideProjections;
-                console.log('hidden projections', uiManager.game.hideProjections);
             }
         }
         oneKeyPress(self, uiManager) {

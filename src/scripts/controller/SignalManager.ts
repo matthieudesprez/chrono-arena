@@ -109,7 +109,6 @@ module TacticArena.Controller {
             });
 
             this.onChatMessageReception.add(function(data) {
-                console.log(data);
                 self.game.uiManager.chatUI.write(data.name + ': ' + data.message)
             });
 

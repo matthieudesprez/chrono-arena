@@ -121,15 +121,23 @@ module TacticArena.State {
         }
 
         isOver() {
-            let everyoneElseIsDead = true;
+            //let everyoneElseIsDead = true;
+            let ennemyPawnAlive = false;
+            let allyPawnAlive = false;
             this.pawns.forEach( pawn => {
-                this.teams[pawn.team] = this.teams[pawn.team] || pawn.isAlive();
+                this.teams[pawn.team] = true; //this.teams[pawn.team] || pawn.isAlive();
+                //if(pawn.team != this.playerTeam) {
+                //    everyoneElseIsDead = everyoneElseIsDead && !this.teams[pawn.team];
+                //}
                 if(pawn.team != this.playerTeam) {
-                    everyoneElseIsDead = everyoneElseIsDead && !this.teams[pawn.team];
+                    if(pawn.isAlive()) { ennemyPawnAlive = true; }
+                } else {
+                    if(pawn.isAlive()) { allyPawnAlive = true; }
                 }
             });
-            console.log(this.teams, !this.teams[this.playerTeam], everyoneElseIsDead);
-            return (!this.teams[this.playerTeam] || everyoneElseIsDead);
+            console.log(ennemyPawnAlive, allyPawnAlive);
+            if(!allyPawnAlive) { this.teams[this.playerTeam] = false; }
+            return (!allyPawnAlive || !ennemyPawnAlive);
         }
 
         getUniqueId() {

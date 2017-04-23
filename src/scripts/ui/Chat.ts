@@ -45,7 +45,6 @@ module TacticArena.UI {
         updatePlayersList(data) {
             let self = this;
             let playersList = '<li class="channel-general">General</li>';
-            console.log(self.serverManager.token);
             data.content.forEach(p => {
                 if (p.token != self.serverManager.token) {
                     playersList += '<li class="channel-player" id="' + p.token + '">' + p.name + '</li>';

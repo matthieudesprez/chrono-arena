@@ -81,6 +81,8 @@ module TacticArena.State {
                 $('#game-menu .ui h2').html('En attente de votre adversaire');
                 self.serverManager.request('FACTION_CHOSEN', self.selected_faction);
             });
+
+            $('#game-menu .ui .faction.human').trigger('click');
         }
     }
 }

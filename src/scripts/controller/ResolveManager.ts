@@ -98,6 +98,7 @@ module TacticArena.Controller {
         }
 
         processStep(index:number, animate:boolean = true, backward:boolean = false) {
+            let self = this;
             return new Promise((resolve, reject) => {
                 if (index >= this.steps.length) {
                     resolve(true);
@@ -107,7 +108,7 @@ module TacticArena.Controller {
                 this.game.signalManager.stepResolutionIndexChange.dispatch(index);
                 let step = this.steps[index];
                 let previousStep = index > 0 ? this.steps[index - 1] : null;
-                console.info('processStep', index, step);
+                console.log('processStep', index, step);
 
                 var promisesOrders = [];
                 for (var i = 0; i < step.length; i++) {
@@ -132,9 +133,16 @@ module TacticArena.Controller {
                             }
                         }
                     } else if (o.action == 'attack') {
+                        o.target.entity = this.game.orderManager.getPawn(o.target.entityId);
                         p = this.handleBackwardPromise(this.createPromiseAttack(e, o.target), e, o, position, animate);
                     } else if (o.action == 'cast') {
-                        p = this.handleBackwardPromise(e.cast(o.targets, o.direction), e, o, position, animate);
+                        let targets = [];
+                        o.targets.forEach( t => {
+                            targets.push(self.game.orderManager.getPawn(t));
+                        });
+
+                        console.log('ids', targets);
+                        p = this.handleBackwardPromise(e.cast(targets, o.direction), e, o, position, animate);
                     } else if (o.action == 'stand') {
                         p = this.handleBackwardPromise(this.createPromiseStand(e, o.direction), e, o, position, animate);
                     }

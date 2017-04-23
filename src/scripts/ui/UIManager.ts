@@ -66,9 +66,6 @@ module TacticArena.UI {
                 let activePawn = this.game.turnManager.getActivePawn();
                 this.game.turnManager.endTurn().then((nextPawn) => {
                     this.game.signalManager.onTurnEnded.dispatch(activePawn);
-                    console.log(this.game.playMode);
-                    console.log(this.game.playerTeam);
-                    console.info(this.game.turnManager.getRemainingPawns(this.game.playerTeam));
                     if(this.game.playMode == 'online' && this.game.turnManager.getRemainingPawns(this.game.playerTeam).length == 0) {
                         // s'il reste plus de pawn à jouer du playerteam
                         // alors on signale au serveur qu'on a fini la phase de commandement
@@ -77,7 +74,7 @@ module TacticArena.UI {
                             turn: this.game.turnManager.currentTurnIndex,
                             orders: this.game.orderManager.getPlayerOrders(this.game.playerTeam)
                         });
-                        console.log('waiting for other player')
+                        this.ingamemenuUI.show('Waiting for opponent move');
                     } else {
                         if (this.game.turnManager.getRemainingPawns().length == 0) {
                             let steps = this.game.orderManager.getSteps();
@@ -91,6 +88,7 @@ module TacticArena.UI {
         }
 
         initResolvePhase(steps) {
+            this.ingamemenuUI.close();
             this.actionUI.clean();
             this.directionUI.clean();
             this.game.resolveManager.init(steps);
@@ -111,7 +109,6 @@ module TacticArena.UI {
                 this.game.pawns[i].destroyProjection();
             }
             this.game.resolveManager.active = false;
-            this.pawnsinfosUI.cleanOrders();
             setTimeout(function() {
                 self.notificationsUI.clean();
             }, 500);

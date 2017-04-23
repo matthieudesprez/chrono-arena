@@ -45,5 +45,23 @@ module TacticArena.UI {
                 self.menu.game.state.start('menu');
             });
         }
+
+        show(msg) {
+            let self = this;
+            this.showOverlay();
+            this.menu.element.append(
+                '<div class="ui-popin">' +
+                '<a class="button">' + msg + '</a>' +
+                '</div>'
+            );
+            this.menu.element.find('.button.quit').on('click', function() {
+                self.menu.game.state.start('menu');
+            });
+        }
+
+        close() {
+            this.menu.element.find('.ui-overlay').remove();
+            this.menu.element.find('.ui-popin').remove();
+        }
     }
 }
