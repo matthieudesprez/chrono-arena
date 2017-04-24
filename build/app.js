@@ -1128,9 +1128,11 @@ var TacticArena;
                         }
                         if (condition) {
                             entityA.projection.hide();
+                            entityA.show();
                         }
                         else {
                             entityA.projection.show(0.7);
+                            entityA.hide();
                         }
                     }
                 }
@@ -1147,8 +1149,8 @@ var TacticArena;
         var ServerManager = (function () {
             function ServerManager(game, login, onChatMessageReceptionCallback, onPlayersListUpdateCallback, onDuelAskReceptionCallback, onDuelAcceptedCallback, onDuelStartCallback) {
                 this.game = game;
-                this.url = 'wss://polar-fortress-51758.herokuapp.com';
-                //this.url = 'ws://localhost:3000';
+                //this.url = 'wss://polar-fortress-51758.herokuapp.com';
+                this.url = 'ws://localhost:3000';
                 this.login = login;
                 this.token = '';
                 this.socketId = null;
@@ -1246,6 +1248,9 @@ var TacticArena;
                 };
                 this.socket.onopen = function (e) {
                     console.log('open', e);
+                    setInterval(function () {
+                        self.request('KEEP_ALIVE', 'keep me alive');
+                    }, 30000);
                 };
                 $(window).on('beforeunload', function () {
                     console.log('disconnect');
@@ -1688,6 +1693,7 @@ var TacticArena;
                 return new Promise(function (resolve, reject) {
                     if (_this.projection) {
                         _this.projection.hide();
+                        _this.show();
                     }
                     _this.faceDirection(direction);
                     _this.sprite.cast(targets, function () {

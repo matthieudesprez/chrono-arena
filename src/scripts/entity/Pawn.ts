@@ -99,6 +99,7 @@ module TacticArena.Entity {
             return new Promise((resolve, reject) => {
                 if(this.projection) {
                     this.projection.hide();
+                    this.show();
                 }
                 this.faceDirection(direction);
                 this.sprite.cast(targets, function() {

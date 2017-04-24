@@ -180,7 +180,7 @@ module TacticArena.Controller {
                 let position = entityA.getProjectionOrReal().getPosition();
 
                 if (entityA.projection) {
-                    let condition = false
+                    let condition = false;
                     if(compareActualEntity) {
                         condition = (JSON.stringify(entityA.getPosition()) == JSON.stringify(entityA.getProjectionOrReal().getPosition()));
                     } else {
@@ -189,8 +189,10 @@ module TacticArena.Controller {
 
                     if (condition) {
                         entityA.projection.hide();
+                        entityA.show();
                     } else {
                         entityA.projection.show(0.7);
+                        entityA.hide();
                     }
                 }
             }
