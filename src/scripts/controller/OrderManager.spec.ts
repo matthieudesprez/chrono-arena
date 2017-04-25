@@ -2,8 +2,6 @@
 // / <reference path="../state/Main.ts"/>
 
 module TacticArena.Specs {
-    import Main = TacticArena.State.Main;
-
     describe("OrderManager", () => {
         var testGame, currentState;
 

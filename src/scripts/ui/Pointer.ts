@@ -1,6 +1,6 @@
 module TacticArena.UI {
     export class Pointer {
-        game:State.Main;
+        game;
         marker:Phaser.Graphics;
 
         constructor(game) {

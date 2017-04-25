@@ -192,7 +192,7 @@ module TacticArena.Controller {
                         entityA.show();
                     } else {
                         entityA.projection.show(0.7);
-                        entityA.hide();
+                        //entityA.hide();
                     }
                 }
             }

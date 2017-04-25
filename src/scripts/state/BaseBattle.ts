@@ -1,6 +1,6 @@
-declare var EasyStar;
+/// <reference path="BaseState.ts"/>
 module TacticArena.State {
-    export class Main extends TacticArena.State.BaseState {
+    export class BaseBattle extends TacticArena.State.BaseState {
         layer: Phaser.TilemapLayer;
         pawns: Entity.Pawn[];
         pathTilesGroup;
@@ -13,10 +13,8 @@ module TacticArena.State {
         orderManager: Controller.OrderManager;
         resolveManager: Controller.ResolveManager;
         stageManager: Controller.StageManager;
-        aiManager: Controller.AiManager;
         logManager: Controller.LogManager;
         signalManager: Controller.SignalManager;
-        serverManager: Controller.ServerManager;
         uiManager: UI.UIManager;
         process: Boolean;
         selecting: Boolean;
@@ -26,25 +24,29 @@ module TacticArena.State {
         teamColors;
         playerTeam;
         teams;
+        players;
+        chatUI;
+        generator;
+        playMode;
+        serializer;
 
-        create() {
+        constructor() {
+            super();
+        }
+
+        init(data?, chat?, server?) {
+            super.init();
             this.game.stage.backgroundColor = 0xffffff;
-            var self = this;
             this.process = true;
             this.selecting = false;
             this.tileSize = 32;
             this.isPaused = false;
             this.hideProjections = false;
             this.teamColors = ['0x8ad886', '0xd68686', '0x87bfdb', '0xcdd385'];
-            this.playerTeam = 1;
             this.teams = {};
-
+            //this.serializer = new TS.Serializer(TacticArena);
             this.signalManager = new Controller.SignalManager(this);
             this.signalManager.init();
-
-            //this.serverManager = new Controller.ServerManager(this, function(data) {
-            //    self.signalManager.onChatMessageReception.dispatch(data);
-            //});
 
             this.stageManager = new Controller.StageManager(this);
             this.stageManager.init();
@@ -56,12 +58,14 @@ module TacticArena.State {
             this.pathOrdersTilesGroup = this.add.group();
             this.uiSpritesGroup = this.add.group();
             this.pawnsSpritesGroup = this.add.group();
-            this.pawns.push(new Entity.Pawn(this, 8, 8, 'E', 'redhead', this.getUniqueId(), false, 1, 'Eikio'));
-            this.pawns.push(new Entity.Pawn(this, 7, 7, 'E', 'blondy', this.getUniqueId(), false, 1, 'Diana'));
-            this.pawns.push(new Entity.Pawn(this, 11, 8, 'W', 'skeleton', this.getUniqueId(), false, 2, 'Fétide'));
-            this.pawns.push(new Entity.Pawn(this, 12, 7, 'W', 'skeleton', this.getUniqueId(), false, 2, 'Oscar'));
 
+            this.generator = new Utils.Generator();
+        }
+
+        create() {
+            let self = this;
             this.stageManager.addDecorations();
+            console.log('decorations');
 
             this.pathfinder = new EasyStar.js();
             this.pathfinder.setAcceptableTiles([-1]);
@@ -72,20 +76,21 @@ module TacticArena.State {
             this.logManager = new Controller.LogManager(this);
             this.orderManager = new Controller.OrderManager(this);
             this.resolveManager = new Controller.ResolveManager(this);
-            this.aiManager = new Controller.AiManager(this);
             this.turnManager = new Controller.TurnManager(this);
             this.uiManager = new UI.UIManager(this);
+            if(this.chatUI) {
+                this.chatUI.menu = this.uiManager;
+            }
 
-            self.uiManager.initOrderPhase(this.pawns[0], true);
-
-            this.pawns[2].setHp(0);
+            let playerPawns = this.pawns.filter( pawn => { return pawn.team == self.playerTeam; });
+            this.uiManager.initOrderPhase(playerPawns[0], true);
         }
 
         update() {
             this.pathTilesGroup.sort('y', Phaser.Group.SORT_ASCENDING);
             this.pawnsSpritesGroup.sort('y', Phaser.Group.SORT_ASCENDING);
             this.world.bringToTop(this.pointer.marker);
-            this.world.bringToTop(this.pawnsSpritesGroup);
+            //this.world.bringToTop(this.pawnsSpritesGroup);
         }
 
         isGameReadyPromise() {
@@ -132,6 +137,16 @@ module TacticArena.State {
                 }
             }
             return id;
+        }
+
+        getFirstAlive() {
+            for(var i = 0; i < this.pawns.length; i++) {
+                let p = this.pawns[i];
+                if(p.team == this.playerTeam && p.isAlive()) {
+                    return p;
+                }
+            }
+            return null;
         }
     }
 }

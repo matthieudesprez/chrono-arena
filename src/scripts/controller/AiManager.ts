@@ -1,18 +1,22 @@
 module TacticArena.Controller {
     export class AiManager {
         game;
+        team;
 
-        constructor(game) {
+        constructor(game, team) {
             this.game = game;
+            this.team = team;
         }
 
-        getClosestPawn(position) {
+        getClosestPawn(position, enemy=true) {
             let result = null;
+            let min_distance = Infinity;
             for (var i = 0; i < this.game.pawns.length; i++) {
                 let p = this.game.pawns[i];
                 let distance = this.game.stageManager.getNbTilesBetween(position, p.getPosition());
-                if(distance > 0) {
+                if(distance > 0 && distance < min_distance && ((p.team != this.team && p.isAlive()) || !enemy)) {
                     result = p;
+                    min_distance = distance;
                 }
             }
             return result;
@@ -41,6 +45,10 @@ module TacticArena.Controller {
                 if(pawn.getDirection() != direction) {
                     this.game.orderManager.add('stand', pawn, p.x, p.y, direction);
                     pawn.setAp(pawn.getAp() - 1);
+                }
+                if(self.game.stageManager.isFacingAway(p, pawn.getDirection(), targetPosition)) {
+                    this.game.orderManager.add('cast', pawn, p.x, p.y, pawn.getDirection());
+                    pawn.setAp(pawn.getAp() - 2);
                 }
 
                 let lastDirection = pawn.getDirection();

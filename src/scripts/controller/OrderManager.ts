@@ -170,10 +170,6 @@ module TacticArena.Controller {
         }
 
         getPawn(id) {
-            //return this.game.pawns.find( p => {
-            //    console.log(p._id, id);
-            //    return p._id == id;
-            //});
             let result = null;
             this.game.pawns.forEach( p => {
                 if(p._id == id) {
@@ -213,7 +209,7 @@ module TacticArena.Controller {
                         let positionBBeforeOrder = {x: previousStep[j].order.x, y: previousStep[j].order.y};
                         let aWasFacingB = this.game.stageManager.isFacing(positionABeforeOrder, previousStep[i].order.direction, positionBBeforeOrder);
                         let aWasNextToB = this.game.stageManager.getNbTilesBetween(positionABeforeOrder, positionBBeforeOrder) == 1;
-                        let fleeRate = 100;
+                        let fleeRate = 50;
                         let entityAApCost = 1;
                         let entityBHpLost = 0;
                         let aIsActive = previousStep[i].entityState['ap'] > 0; // INACTIF = stand mais pas le droit d'attaquer
@@ -253,13 +249,6 @@ module TacticArena.Controller {
                             orderA.target = { entityId: entityB._id, dodge: entityBIsDodging };
                         }
 
-                        if (entityAState.moveHasBeenBlocked && this.alteredPawns.indexOf(entityA._id) < 0) {
-                            this.blockEntity(steps, l, i, OrderManager.getDefaultOrder(previousStep[i].order, previousStep[i].order.direction), entityA);
-                        }
-                        if (entityBState.moveHasBeenBlocked && this.alteredPawns.indexOf(entityB._id) < 0) {
-                            this.blockEntity(steps, l, j, OrderManager.getDefaultOrder(previousStep[j].order, previousStep[j].order.direction), entityB);
-                        }
-
                         if (orderA.action == 'cast') {
                             entityAApCost++;
                             let path = this.game.stageManager.getLinearPath(entityA, 4, orderA.direction, orderA);
@@ -276,6 +265,15 @@ module TacticArena.Controller {
                         entityBState.hp = typeof entityBState.hp !== 'undefined' ? entityBState.hp : previousStep[j].entityState['hp'];
                         entityBState.hp -= entityBHpLost;
                         entityAState.ap = aIsActive ? previousStep[i].entityState['ap'] - entityAApCost : 0;
+
+                        if(entityBState.hp <= 0) { entityBState.moveHasBeenBlocked = true; }
+
+                        if (entityAState.moveHasBeenBlocked && this.alteredPawns.indexOf(entityA._id) < 0) {
+                            this.blockEntity(steps, l, i, OrderManager.getDefaultOrder(previousStep[i].order, previousStep[i].order.direction), entityA);
+                        }
+                        if (entityBState.moveHasBeenBlocked && this.alteredPawns.indexOf(entityB._id) < 0) {
+                            this.blockEntity(steps, l, j, OrderManager.getDefaultOrder(previousStep[j].order, previousStep[j].order.direction), entityB);
+                        }
                     }
                 }
             }

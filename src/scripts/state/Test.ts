@@ -11,7 +11,6 @@ module TacticArena.State {
         orderManager: Controller.OrderManager;
         resolveManager: Controller.ResolveManager;
         stageManager: Controller.StageManager;
-        aiManager: Controller.AiManager;
         logManager: Controller.LogManager;
         signalManager: Controller.SignalManager;
         uiManager: UI.UIManager;
@@ -56,7 +55,6 @@ module TacticArena.State {
             this.logManager = new Controller.LogManager(this);
             this.orderManager = new Controller.OrderManager(this);
             this.resolveManager = new Controller.ResolveManager(this);
-            this.aiManager = new Controller.AiManager(this);
             this.turnManager = new Controller.TurnManager(this);
         }
     }

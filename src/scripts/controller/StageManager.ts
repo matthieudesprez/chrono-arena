@@ -130,6 +130,7 @@ module TacticArena.Controller {
         }
 
         isFacing(coordsA, directionA, coordsB) {
+            console.log(coordsA, directionA, coordsB);
             return (
                 coordsA.x == coordsB.x && (
                     (coordsA.y == coordsB.y + 1 && directionA == 'N') || (coordsA.y == coordsB.y - 1 && directionA == 'S')
@@ -137,6 +138,14 @@ module TacticArena.Controller {
                 coordsA.y == coordsB.y && (
                     (coordsA.x == coordsB.x + 1 && directionA == 'W') || (coordsA.x == coordsB.x - 1 && directionA == 'E')
                 )
+            );
+        }
+
+        isFacingAway(coordsA, directionA, coordsB) {
+            console.log(coordsA, directionA, coordsB);
+            return (
+                (coordsA.x == coordsB.x && (directionA == 'N' || directionA == 'S')) ||
+                (coordsA.y == coordsB.y && (directionA == 'W' || directionA == 'E'))
             );
         }
 

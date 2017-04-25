@@ -24,6 +24,8 @@ module TacticArena.UI {
                 }
             });
 
+            this.element.draggable({ containment: "body" }).resizable();
+
             this.element.ready(function () {
                 self.write('################');
                 self.write('<b># Chrono <span style="color:orangered;">A</span>' +
@@ -45,6 +47,7 @@ module TacticArena.UI {
         updatePlayersList(data) {
             let self = this;
             let playersList = '<li class="channel-general">General</li>';
+            playersList += '<li class="channel-player bot">BOT 01</li>';
             data.content.forEach(p => {
                 if (p.token != self.serverManager.token) {
                     playersList += '<li class="channel-player" id="' + p.token + '">' + p.name + '</li>';
@@ -59,9 +62,13 @@ module TacticArena.UI {
                 items: {
                     duel: {
                         name: "Provoquer en duel", callback: function (key, opt) {
-                            let token = opt.$trigger.attr("id");
-                            self.serverManager.request('ASK_DUEL', token);
-                            self.write('<span class="notification">La demande a été envoyée à ' + opt.$trigger.html() + '</span>');
+                            if(opt.$trigger.hasClass('bot')) {
+                                self.menu.factionSelectionUI.init('solo');
+                            } else {
+                                let token = opt.$trigger.attr("id");
+                                self.serverManager.request('ASK_DUEL', token);
+                                self.write('<span class="notification">La demande a été envoyée à ' + opt.$trigger.html() + '</span>');
+                            }
                         }
                     }
                 }

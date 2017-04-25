@@ -16,8 +16,8 @@ module TacticArena.Controller {
 
         constructor(game, login, onChatMessageReceptionCallback, onPlayersListUpdateCallback, onDuelAskReceptionCallback, onDuelAcceptedCallback, onDuelStartCallback) {
             this.game = game;
-            //this.url = 'wss://polar-fortress-51758.herokuapp.com';
-            this.url = 'ws://localhost:3000';
+            this.url = 'wss://polar-fortress-51758.herokuapp.com';
+            //this.url = 'ws://localhost:3000';
             this.login = login;
             this.token = '';
             this.socketId = null;
@@ -67,7 +67,6 @@ module TacticArena.Controller {
                     }
                     self.game.orderManager.orders = orders;
                     let steps = self.game.orderManager.getSteps();
-                    console.log(steps);
                     let serializedSteps = [];
                     for(var i = 0; i < steps.length; i++) {
                         serializedSteps.push([]);

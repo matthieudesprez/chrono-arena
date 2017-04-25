@@ -38,8 +38,15 @@ module TacticArena.State {
             //setTimeout(function () {
             //    that.game.state.start("menu");
             //}, 1000);
+            that.game.state.start("menu");
             //that.game.state.start("main");
-            that.game.state.start("lobby");
+            //that.game.state.start('mainsolooffline', true, false, {
+            //    players: [
+            //        {name: 'BOT 01', faction: 'evil', player: false},
+            //        {name: 'Matt', faction: 'human', player: true}
+            //    ]
+            //}, null);
+            //that.game.state.start("lobby");
         }
     }
 }

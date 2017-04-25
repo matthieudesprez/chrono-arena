@@ -118,7 +118,7 @@ module TacticArena.UI {
                 let msg = this.game.teams[this.game.playerTeam] ? 'You win' : 'You lose';
                 this.ingamemenuUI.gameOver(msg);
             } else {
-                this.initOrderPhase(this.game.pawns[0], true);
+                this.initOrderPhase(this.game.getFirstAlive(), true);
             }
 
         }

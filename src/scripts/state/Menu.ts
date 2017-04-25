@@ -11,7 +11,14 @@ module TacticArena.State {
                 '<div class="button options"><a>Options</a></div>'
             );
 
-            $('.singleplayer').click(function () { that.game.state.start('main'); });
+            $('.singleplayer').click(function () {
+                that.game.state.start('mainsolooffline', true, false, {
+                    players: [
+                        {name: 'Player', faction: 'human', player: true},
+                        {name: 'BOT 01', faction: 'evil', player: false}
+                    ]
+                }, null);
+            });
             $('.multiplayerlocal').click(function () { that.game.state.start('main'); });
             $('.multiplayeronline').click(function () { that.game.state.start('lobby'); });
             $('.options').click(function () { that.game.state.start('options'); });
