@@ -435,7 +435,7 @@ var TacticArena;
                     testStep(steps, 0, 3, 4, 'stand', 'W', { x: 12, y: 7 }, 3, 4, false, {});
                     testStep(steps, 1, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 2, 4, false, {});
                     testStep(steps, 1, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 2, 4, false, {});
-                    testStep(steps, 1, 2, 3, 'stand', 'E', { x: 7, y: 7 }, 0, 0, false, {});
+                    testStep(steps, 1, 2, 3, 'dead', 'E', { x: 7, y: 7 }, 0, 0, false, {});
                     testStep(steps, 1, 3, 4, 'stand', 'W', { x: 12, y: 7 }, 2, 4, false, {});
                 });
                 it("with 1 dead - 4th pawn moves", function () {
@@ -459,11 +459,11 @@ var TacticArena;
                     testStep(steps, 1, 0, 4, 'move', 'W', { x: 11, y: 7 }, 2, 4, false, {});
                     testStep(steps, 1, 1, 1, 'stand', 'E', { x: 8, y: 8 }, 2, 4, false, {});
                     testStep(steps, 1, 2, 2, 'stand', 'W', { x: 10, y: 8 }, 2, 4, false, {});
-                    testStep(steps, 1, 3, 3, 'stand', 'E', { x: 7, y: 7 }, 0, 0, false, {});
+                    testStep(steps, 1, 3, 3, 'dead', 'E', { x: 7, y: 7 }, 0, 0, false, {});
                     testStep(steps, 2, 0, 4, 'move', 'W', { x: 11, y: 6 }, 1, 4, false, {});
                     testStep(steps, 2, 1, 1, 'stand', 'E', { x: 8, y: 8 }, 1, 4, false, {});
                     testStep(steps, 2, 2, 2, 'stand', 'W', { x: 10, y: 8 }, 1, 4, false, {});
-                    testStep(steps, 2, 3, 3, 'stand', 'E', { x: 7, y: 7 }, 0, 0, false, {});
+                    testStep(steps, 2, 3, 3, 'dead', 'E', { x: 7, y: 7 }, 0, 0, false, {});
                 });
             });
         });
@@ -670,10 +670,23 @@ var TacticArena;
                             var entityAApCost = 1;
                             var entityBHpLost = 0;
                             var aIsActive = previousStep[i].entityState['ap'] > 0; // INACTIF = stand mais pas le droit d'attaquer
+                            var aIsAlive = previousStep[i].entityState['hp'] > 0;
                             var keepDirection = (previousStep[i].order.direction == orderA.direction);
                             var keepPosition = (orderA.x == positionABeforeOrder.x && orderA.y == positionABeforeOrder.y);
                             var equalPositions = this.game.stageManager.equalPositions(orderA, orderB);
                             var differentTeams = entityA.team != entityB.team;
+                            entityAState.hp = typeof entityAState.hp !== 'undefined' ? entityAState.hp : previousStep[i].entityState['hp'];
+                            if (!aIsAlive) {
+                                orderA.action = 'dead';
+                                orderA.x = previousStep[i].order.x;
+                                orderA.y = previousStep[i].order.y;
+                                entityAState.ap = previousStep[i].entityState['ap'];
+                                entityAState.hp = 0;
+                                if (previousStep[i].order.action !== 'dead') {
+                                    previousStep[i].entityState.dies = true;
+                                }
+                                continue;
+                            }
                             if (equalPositions) {
                                 // Si A veut aller sur la même case que B (qu'il y soit déjà où qu'il veuille y aller)
                                 if (this.alteredPawns.indexOf(entityA._id) < 0)
@@ -719,9 +732,6 @@ var TacticArena;
                             entityBState.hp = typeof entityBState.hp !== 'undefined' ? entityBState.hp : previousStep[j].entityState['hp'];
                             entityBState.hp -= entityBHpLost;
                             entityAState.ap = aIsActive ? previousStep[i].entityState['ap'] - entityAApCost : 0;
-                            if (entityBState.hp <= 0) {
-                                entityBState.moveHasBeenBlocked = true;
-                            }
                             if (entityAState.moveHasBeenBlocked && this.alteredPawns.indexOf(entityA._id) < 0) {
                                 this.blockEntity(steps, l, i, OrderManager.getDefaultOrder(previousStep[i].order, previousStep[i].order.direction), entityA);
                             }
@@ -1059,10 +1069,7 @@ var TacticArena;
                         p = null;
                         var position = e.getPosition();
                         e.setAp(s.ap);
-                        if (s.hp <= 0) {
-                            //p = this.handleBackwardPromise(this.createPromiseDie(e), e, o, position, animate);
-                        }
-                        else if (o.action == 'move') {
+                        if (o.action == 'move') {
                             if (s.moveHasBeenBlocked) {
                                 p = _this.createPromiseBlock(e, { x: o.x, y: o.y }, s.positionBlocked, animate);
                             }
@@ -1085,7 +1092,6 @@ var TacticArena;
                             o.targets.forEach(function (t) {
                                 targets_1.push(self.game.orderManager.getPawn(t));
                             });
-                            console.log('ids', targets_1);
                             p = _this.handleBackwardPromise(e.cast(targets_1, o.direction), e, o, position, animate);
                         }
                         else if (o.action == 'stand') {
@@ -1103,7 +1109,8 @@ var TacticArena;
                             _this.manageProjectionDislay(step);
                         }
                         step.forEach(function (s) {
-                            s.entity.setHp(s.entityState.hp);
+                            var forceAnimation = typeof s.entityState.dies !== 'undefined' && s.entityState.dies;
+                            s.entity.setHp(s.entityState.hp, forceAnimation);
                         });
                         _this.game.signalManager.stepResolutionFinished.dispatch(index);
                         if (_this.steps.length > (index + 1) && !_this.game.isPaused) {
@@ -1826,8 +1833,8 @@ var TacticArena;
             Pawn.prototype.getHp = function () {
                 return this._hp;
             };
-            Pawn.prototype.setHp = function (hp) {
-                if (this.isAlive() && hp <= 0) {
+            Pawn.prototype.setHp = function (hp, forceAnimation) {
+                if ((this.isAlive() || forceAnimation) && hp <= 0) {
                     this.sprite.die();
                 }
                 this._hp = hp;

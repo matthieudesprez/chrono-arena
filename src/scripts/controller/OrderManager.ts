@@ -213,10 +213,25 @@ module TacticArena.Controller {
                         let entityAApCost = 1;
                         let entityBHpLost = 0;
                         let aIsActive = previousStep[i].entityState['ap'] > 0; // INACTIF = stand mais pas le droit d'attaquer
+                        let aIsAlive = previousStep[i].entityState['hp'] > 0;
                         let keepDirection = (previousStep[i].order.direction == orderA.direction);
                         let keepPosition = (orderA.x == positionABeforeOrder.x && orderA.y == positionABeforeOrder.y);
                         let equalPositions = this.game.stageManager.equalPositions(orderA, orderB);
                         let differentTeams = entityA.team != entityB.team;
+
+                        entityAState.hp = typeof entityAState.hp !== 'undefined' ? entityAState.hp : previousStep[i].entityState['hp'];
+
+                        if(!aIsAlive) {
+                            orderA.action = 'dead';
+                            orderA.x = previousStep[i].order.x;
+                            orderA.y = previousStep[i].order.y;
+                            entityAState.ap = previousStep[i].entityState['ap'];
+                            entityAState.hp = 0;
+                            if(previousStep[i].order.action !== 'dead') {
+                                previousStep[i].entityState.dies = true;
+                            }
+                            continue;
+                        }
 
                         if (equalPositions) {
                             // Si A veut aller sur la même case que B (qu'il y soit déjà où qu'il veuille y aller)
@@ -265,8 +280,6 @@ module TacticArena.Controller {
                         entityBState.hp = typeof entityBState.hp !== 'undefined' ? entityBState.hp : previousStep[j].entityState['hp'];
                         entityBState.hp -= entityBHpLost;
                         entityAState.ap = aIsActive ? previousStep[i].entityState['ap'] - entityAApCost : 0;
-
-                        if(entityBState.hp <= 0) { entityBState.moveHasBeenBlocked = true; }
 
                         if (entityAState.moveHasBeenBlocked && this.alteredPawns.indexOf(entityA._id) < 0) {
                             this.blockEntity(steps, l, i, OrderManager.getDefaultOrder(previousStep[i].order, previousStep[i].order.direction), entityA);

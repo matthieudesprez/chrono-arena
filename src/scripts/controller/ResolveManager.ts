@@ -119,9 +119,7 @@ module TacticArena.Controller {
                     let position = e.getPosition();
 
                     e.setAp(s.ap);
-                    if (s.hp <= 0) {
-                        //p = this.handleBackwardPromise(this.createPromiseDie(e), e, o, position, animate);
-                    } else if (o.action == 'move') {
+                    if (o.action == 'move') {
                         if (s.moveHasBeenBlocked) {
                             p = this.createPromiseBlock(e, {x: o.x, y: o.y}, s.positionBlocked, animate);
                         } else {
@@ -140,8 +138,6 @@ module TacticArena.Controller {
                         o.targets.forEach( t => {
                             targets.push(self.game.orderManager.getPawn(t));
                         });
-
-                        console.log('ids', targets);
                         p = this.handleBackwardPromise(e.cast(targets, o.direction), e, o, position, animate);
                     } else if (o.action == 'stand') {
                         p = this.handleBackwardPromise(this.createPromiseStand(e, o.direction), e, o, position, animate);
@@ -156,7 +152,8 @@ module TacticArena.Controller {
                         this.manageProjectionDislay(step);
                     }
                     step.forEach((s) => {
-                        s.entity.setHp(s.entityState.hp);
+                        let forceAnimation = typeof s.entityState.dies !== 'undefined' && s.entityState.dies;
+                        s.entity.setHp(s.entityState.hp, forceAnimation);
                     });
                     this.game.signalManager.stepResolutionFinished.dispatch(index);
                     if (this.steps.length > (index + 1) && !this.game.isPaused) {

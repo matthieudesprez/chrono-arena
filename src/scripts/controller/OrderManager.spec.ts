@@ -258,7 +258,7 @@ module TacticArena.Specs {
                 testStep(steps, 0, 3, 4, 'stand', 'W', {x: 12, y: 7}, 3, 4, false, {});
                 testStep(steps, 1, 0, 1, 'stand', 'E', {x: 8, y: 8}, 2, 4, false, {});
                 testStep(steps, 1, 1, 2, 'stand', 'W', {x: 10, y: 8}, 2, 4, false, {});
-                testStep(steps, 1, 2, 3, 'stand', 'E', {x: 7, y: 7}, 0, 0, false, {});
+                testStep(steps, 1, 2, 3, 'dead', 'E', {x: 7, y: 7}, 0, 0, false, {});
                 testStep(steps, 1, 3, 4, 'stand', 'W', {x: 12, y: 7}, 2, 4, false, {});
             });
 
@@ -284,12 +284,12 @@ module TacticArena.Specs {
                 testStep(steps, 1, 0, 4, 'move', 'W', {x: 11, y: 7}, 2, 4, false, {});
                 testStep(steps, 1, 1, 1, 'stand', 'E', {x: 8, y: 8}, 2, 4, false, {});
                 testStep(steps, 1, 2, 2, 'stand', 'W', {x: 10, y: 8}, 2, 4, false, {});
-                testStep(steps, 1, 3, 3, 'stand', 'E', {x: 7, y: 7}, 0, 0, false, {});
+                testStep(steps, 1, 3, 3, 'dead', 'E', {x: 7, y: 7}, 0, 0, false, {});
 
                 testStep(steps, 2, 0, 4, 'move', 'W', {x: 11, y: 6}, 1, 4, false, {});
                 testStep(steps, 2, 1, 1, 'stand', 'E', {x: 8, y: 8}, 1, 4, false, {});
                 testStep(steps, 2, 2, 2, 'stand', 'W', {x: 10, y: 8}, 1, 4, false, {});
-                testStep(steps, 2, 3, 3, 'stand', 'E', {x: 7, y: 7}, 0, 0, false, {});
+                testStep(steps, 2, 3, 3, 'dead', 'E', {x: 7, y: 7}, 0, 0, false, {});
             });
 
         });
