@@ -243,8 +243,8 @@ module TacticArena.Specs {
                     return true;
                 });
 
-                currentState.pawns.push(new Entity.Pawn(currentState, 7, 7, 'E', 'skeleton', 3, false, 2, 'Oscar'));
-                currentState.pawns.push(new Entity.Pawn(currentState, 12, 7, 'W', 'skeleton', 4, false, 1, 'Diana'));
+                currentState.pawns.push(new Entity.Pawn(currentState, 7, 7, 'E', 'skeleton', 3, false, 1, 'Diana'));
+                currentState.pawns.push(new Entity.Pawn(currentState, 12, 7, 'W', 'skeleton', 4, false, 2, 'Oscar'));
             });
 
             it("with 1 dead - nothing is played", function () {
@@ -292,6 +292,66 @@ module TacticArena.Specs {
                 testStep(steps, 2, 3, 3, 'dead', 'E', {x: 7, y: 7}, 0, 0, false, {});
             });
 
+            it("the 1st one cast, the 2nd one dies so it blocks the way and sees its actions cancelled - the 4th pawn moves but is blocked", function () {
+                currentState.pawns[1].setHp(2);
+                currentState.pawns[1]._apMax = 4;
+                currentState.pawns[3]._apMax = 4;
+                currentState.orderManager.orders = [
+                    {
+                        entity: currentState.pawns[0],
+                        list: [
+                            {action: "cast", direction: "E", x: 8, y: 8},
+                            {action: "move", direction: "E", x: 7, y: 8}
+                        ]
+                    },
+                    {
+                        entity: currentState.pawns[1],
+                        list: [
+                            {action: "move", direction: "W", x: 9, y: 8},
+                            {action: "cast", direction: "W", x: 9, y: 8},
+                            {action: "move", direction: "W", x: 9, y: 7},
+                        ]
+                    },
+                    {
+                        entity: currentState.pawns[3],
+                        list: [
+                            {action: "move", direction: "W", x: 11, y: 7},
+                            {action: "move", direction: "W", x: 10, y: 7},
+                            {action: "move", direction: "W", x: 9, y: 7},
+                            {action: "move", direction: "W", x: 9, y: 8},
+                        ]
+                    },
+                ];
+                let steps = currentState.orderManager.getSteps();
+                expect(steps.length).toEqual(5);
+                expect(steps[0].length).toEqual(4);
+                testStep(steps, 0, 0, 1, 'stand', 'E', {x: 8, y: 8}, 3, 4, false, {});
+                testStep(steps, 0, 1, 2, 'stand', 'W', {x: 10, y: 8}, 4, 2, false, {});
+                testStep(steps, 0, 2, 4, 'stand', 'W', {x: 12, y: 7}, 4, 4, false, {});
+                testStep(steps, 0, 3, 3, 'stand', 'E', {x: 7, y: 7}, 3, 4, false, {});
+
+                testStep(steps, 1, 0, 1, 'cast', 'E', {x: 8, y: 8}, 1, 4, false, {});
+                testStep(steps, 1, 1, 2, 'move', 'W', {x: 9, y: 8}, 3, 0, false, {});
+                expect(steps[1][1].entityState.dies).toBeTruthy();
+                testStep(steps, 1, 2, 4, 'move', 'W', {x: 11, y: 7}, 3, 4, false, {});
+                testStep(steps, 1, 3, 3, 'stand', 'E', {x: 7, y: 7}, 2, 4, false, {});
+
+                testStep(steps, 2, 0, 1, 'move', 'E', {x: 7, y: 8}, 0, 4, false, {});
+                testStep(steps, 2, 1, 2, 'dead', 'W', {x: 9, y: 8}, 3, 0, false, {});
+                expect(steps[2][1].entityState.dies).toBeFalsy();
+                testStep(steps, 2, 2, 4, 'move', 'W', {x: 10, y: 7}, 2, 4, false, {});
+                testStep(steps, 2, 3, 3, 'stand', 'E', {x: 7, y: 7}, 1, 4, false, {});
+
+                testStep(steps, 3, 0, 1, 'stand', 'E', {x: 7, y: 8}, 0, 4, false, {});
+                testStep(steps, 3, 1, 2, 'dead', 'W', {x: 9, y: 8}, 3, 0, false, {});
+                testStep(steps, 3, 2, 4, 'move', 'W', {x: 9, y: 7}, 1, 4, false, {});
+                testStep(steps, 3, 3, 3, 'stand', 'E', {x: 7, y: 7}, 0, 4, false, {});
+
+                testStep(steps, 4, 0, 1, 'stand', 'E', {x: 7, y: 8}, 0, 4, false, {});
+                testStep(steps, 4, 1, 2, 'dead', 'W', {x: 9, y: 8}, 3, 0, false, {});
+                testStep(steps, 4, 2, 4, 'move', 'W', {x: 9, y: 7}, 0, 4, true, {x: 9, y: 8});
+                testStep(steps, 4, 3, 3, 'stand', 'E', {x: 7, y: 7}, 0, 4, false, {});
+            });
         });
     });
 }
