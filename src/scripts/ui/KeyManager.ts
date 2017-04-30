@@ -11,6 +11,9 @@ module TacticArena.UI {
         pKey;
         oneKey;
         twoKey;
+        threeKey;
+        fourKey;
+        fiveKey;
 
         constructor(menu) {
             this.menu = menu;
@@ -47,6 +50,15 @@ module TacticArena.UI {
 
             this.twoKey = this.menu.game.input.keyboard.addKey(Phaser.KeyCode.TWO);
             this.twoKey.onDown.add(this.twoKeyPress, this, 0, this.menu);
+
+            this.threeKey = this.menu.game.input.keyboard.addKey(Phaser.KeyCode.THREE);
+            this.threeKey.onDown.add(this.threeKeyPress, this, 0, this.menu);
+
+            this.fourKey = this.menu.game.input.keyboard.addKey(Phaser.KeyCode.FOUR);
+            this.fourKey.onDown.add(this.fourKeyPress, this, 0, this.menu);
+
+            this.fiveKey = this.menu.game.input.keyboard.addKey(Phaser.KeyCode.FIVE);
+            this.fiveKey.onDown.add(this.fiveKeyPress, this, 0, this.menu);
         }
 
        leftKeyPressed(self, uiManager) {
@@ -107,16 +119,37 @@ module TacticArena.UI {
         }
         oneKeyPress(self, uiManager) {
             if(self.altKey) {
-                $('.pawn01').trigger('click');
+                $('.pawn:nth-child(1)').trigger('click');
             } else {
-                uiManager.actionUI.select('walk');
+                uiManager.actionUI.wait();
             }
         }
         twoKeyPress(self, uiManager) {
             if(self.altKey) {
-                $('.pawn02').trigger('click');
+                $('.pawn:nth-child(2)').trigger('click');
+            } else {
+                uiManager.actionUI.select('walk');
+            }
+        }
+        threeKeyPress(self, uiManager) {
+            if(self.altKey) {
+                $('.pawn:nth-child(3)').trigger('click');
+            } else {
+                uiManager.actionUI.select('slash');
+            }
+        }
+        fourKeyPress(self, uiManager) {
+            if(self.altKey) {
+                $('.pawn:nth-child(4)').trigger('click');
             } else {
                 uiManager.actionUI.select('fire');
+            }
+        }
+        fiveKeyPress(self, uiManager) {
+            if(self.altKey) {
+                $('.pawn:nth-child(5)').trigger('click');
+            } else {
+                uiManager.actionUI.select('wind');
             }
         }
     }

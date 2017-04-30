@@ -9,12 +9,21 @@ module TacticArena.UI {
             this.menu.element.append('' +
                 '<div class="ui-menu-container">' +
                     '<ul class="ui-menu">' +
-                        '<li class="cancel"></li>' +
-                        '<li class="walk" min-cost="1">1' +
-                            ' <span class="tooltip">Move<br/>Cost: 1 AP / case</span>' +
+                        '<li class="cancel">←</li>' +
+                        '<li class="wait" min-cost="1">1' +
+                            '<span class="tooltip">Wait<br/>Cost: 1 AP<br/>Hit: 50%</span>' +
                         '</li>' +
-                        '<li class="fire" min-cost="2">2' +
-                            '<span class="tooltip">Fireball<br/>Cost: 2 AP<br/>Range: 4</span>' +
+                        '<li class="walk" min-cost="1">2' +
+                            ' <span class="tooltip">Move<br/>Cost: 1 AP / case<br/>Hit: 50%</span>' +
+                        '</li>' +
+                        '<li class="slash" min-cost="1">3' +
+                            '<span class="tooltip">Slash<br/>Cost: 1 AP<br/>Range: 1<br/>Hit: 100%</span>' +
+                        '</li>' +
+                        '<li class="fire" min-cost="2">4' +
+                            '<span class="tooltip">Fireball<br/>Cost: 2 AP<br/>Range: 4<br/>Hit: 100%</span>' +
+                        '</li>' +
+                        '<li class="wind" min-cost="2">5' +
+                            '<span class="tooltip">Wind<br/>Cost: 2 AP<br/>Range: 4<br/>Hit: 100%</span>' +
                         '</li>' +
                         '<li class="submit">Confirm</li>' +
                     '</ul>' +
@@ -32,6 +41,15 @@ module TacticArena.UI {
             });
             this.element.find('.fire').on('click', function () {
                 self.select('fire');
+            });
+            this.element.find('.slash').on('click', function () {
+                self.select('slash');
+            });
+            this.element.find('.wait').on('click', function () {
+                self.wait();
+            });
+            this.element.find('.wind').on('click', function () {
+                self.select('wind');
             });
 
             this.element.find('.walk').trigger('click');
@@ -54,6 +72,19 @@ module TacticArena.UI {
 
         canOrderFire() {
             return this.element.find('.fire').hasClass('selected');
+        }
+
+        canOrderWind() {
+            return this.element.find('.wind').hasClass('selected');
+        }
+
+        canOrderSlash() {
+            return this.element.find('.slash').hasClass('selected');
+        }
+
+        wait() {
+            let activePawn = this.menu.game.turnManager.getActivePawn();
+            this.menu.directionUI.changeDirection(activePawn.getProjectionOrReal().getDirection());
         }
 
         clean() {

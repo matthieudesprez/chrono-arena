@@ -38,6 +38,8 @@
 .ui-menu li.walk { background-image: url('../assets/images/icons/icon-walk.png'); background-size: 90%; }
 .ui-menu li.fire { background-image: url('../assets/images/icons/icon-fire.png'); }
 .ui-menu li.wait { background-image: url('../assets/images/icons/icon-wait.png'); }
+.ui-menu li.slash { background-image: url('../assets/images/icons/icon-slash.png'); }
+.ui-menu li.wind { background-image: url('../assets/images/icons/icon-wind.png'); }
 .ui-menu li.submit {
     position: absolute;
     top: -8px;

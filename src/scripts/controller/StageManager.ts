@@ -75,6 +75,17 @@ module TacticArena.Controller {
             return path;
         }
 
+        getFrontTile(pawn, direction = null, position = null) {
+            let p = position ? position : pawn.getPosition();
+            let d = direction ? direction : pawn.getDirection();
+            let path = [];
+            if(d == 'W') { path.push({'x': p.x - 1, 'y': p.y}); }
+            else if(d == 'E') { path.push({'x': p.x + 1, 'y': p.y}); }
+            else if(d == 'S') { path.push({'x': p.x, 'y': p.y + 1}); }
+            else if(d == 'N') { path.push({'x': p.x, 'y': p.y - 1}); }
+            return path;
+        }
+
         showPossibleLinearTrajectories(path) {
             this.clearPossibleMove();
             for (var i = 0; i < path.length; i++) {

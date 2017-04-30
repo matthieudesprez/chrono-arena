@@ -139,6 +139,15 @@ module TacticArena.Controller {
                             targets.push(self.game.orderManager.getPawn(t));
                         });
                         p = this.handleBackwardPromise(e.cast(targets, o.direction), e, o, position, animate);
+                    }  else if (o.action == 'cast_wind') {
+                        let targets = [];
+                        o.targets.forEach( t => {
+                            targets.push({
+                                entity: self.game.orderManager.getPawn(t.entity),
+                                moved: t.moved
+                            });
+                        });
+                        p = this.handleBackwardPromise(e.castTornado(targets, o.direction), e, o, position, animate);
                     } else if (o.action == 'stand') {
                         p = this.handleBackwardPromise(this.createPromiseStand(e, o.direction), e, o, position, animate);
                     }
@@ -151,7 +160,7 @@ module TacticArena.Controller {
                     if(!backward) {
                         this.manageProjectionDislay(step);
                     }
-                    step.forEach((s) => {
+                    step.forEach( s => {
                         let forceAnimation = typeof s.entityState.dies !== 'undefined' && s.entityState.dies;
                         s.entity.setHp(s.entityState.hp, forceAnimation);
                     });

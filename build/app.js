@@ -415,14 +415,44 @@ var TacticArena;
                     testStep(steps, 3, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 0, 2, false, {});
                     testStep(steps, 3, 1, 2, 'attack', 'W', { x: 9, y: 8 }, 0, 1, false, {});
                 });
+                it("the first one cast_wind to the east while the other moves and get pushed to where it came from", function () {
+                    currentState.orderManager.orders = [
+                        {
+                            entity: currentState.pawns[0],
+                            list: [
+                                { action: "cast_wind", direction: "E", x: 8, y: 8 }
+                            ]
+                        },
+                        {
+                            entity: currentState.pawns[1],
+                            list: [
+                                { action: "move", direction: "W", x: 9, y: 8 },
+                                { action: "move", direction: "W", x: 8, y: 8 },
+                                { action: "move", direction: "W", x: 7, y: 8 }
+                            ]
+                        },
+                    ];
+                    var steps = currentState.orderManager.getSteps();
+                    expect(steps.length).toEqual(4);
+                    expect(steps[0].length).toEqual(2);
+                    testStep(steps, 0, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 3, 4, false, {});
+                    testStep(steps, 0, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 3, 4, false, {});
+                    testStep(steps, 1, 0, 1, 'cast_wind', 'E', { x: 8, y: 8 }, 1, 4, false, {});
+                    expect(steps[1][0].order.targets).toEqual([{ entity: currentState.pawns[1]._id, moved: { x: 10, y: 8, d: 1 } }]);
+                    testStep(steps, 1, 1, 2, 'move', 'W', { x: 9, y: 8 }, 2, 3, false, {});
+                    testStep(steps, 2, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 0, 4, false, {});
+                    testStep(steps, 2, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 1, 3, false, {});
+                    testStep(steps, 3, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 0, 4, false, {});
+                    testStep(steps, 3, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 0, 3, false, {});
+                });
             });
             describe("4 players / Fleerate 0%", function () {
                 beforeEach(function () {
                     spyOn(TacticArena.Controller.OrderManager, 'resolutionEsquive').and.callFake(function () {
                         return true;
                     });
-                    currentState.pawns.push(new TacticArena.Entity.Pawn(currentState, 7, 7, 'E', 'skeleton', 3, false, 2, 'Oscar'));
-                    currentState.pawns.push(new TacticArena.Entity.Pawn(currentState, 12, 7, 'W', 'skeleton', 4, false, 1, 'Diana'));
+                    currentState.pawns.push(new TacticArena.Entity.Pawn(currentState, 7, 7, 'E', 'skeleton', 3, false, 1, 'Diana'));
+                    currentState.pawns.push(new TacticArena.Entity.Pawn(currentState, 12, 7, 'W', 'skeleton', 4, false, 2, 'Oscar'));
                 });
                 it("with 1 dead - nothing is played", function () {
                     currentState.pawns[2].setHp(0);
@@ -464,6 +494,62 @@ var TacticArena;
                     testStep(steps, 2, 1, 1, 'stand', 'E', { x: 8, y: 8 }, 1, 4, false, {});
                     testStep(steps, 2, 2, 2, 'stand', 'W', { x: 10, y: 8 }, 1, 4, false, {});
                     testStep(steps, 2, 3, 3, 'dead', 'E', { x: 7, y: 7 }, 0, 0, false, {});
+                });
+                it("the 1st one cast, the 2nd one dies so it blocks the way and sees its actions cancelled - the 4th pawn moves but is blocked", function () {
+                    currentState.pawns[1].setHp(2);
+                    currentState.pawns[1]._apMax = 4;
+                    currentState.pawns[3]._apMax = 4;
+                    currentState.orderManager.orders = [
+                        {
+                            entity: currentState.pawns[0],
+                            list: [
+                                { action: "cast", direction: "E", x: 8, y: 8 },
+                                { action: "move", direction: "E", x: 7, y: 8 }
+                            ]
+                        },
+                        {
+                            entity: currentState.pawns[1],
+                            list: [
+                                { action: "move", direction: "W", x: 9, y: 8 },
+                                { action: "cast", direction: "W", x: 9, y: 8 },
+                                { action: "move", direction: "W", x: 9, y: 7 },
+                            ]
+                        },
+                        {
+                            entity: currentState.pawns[3],
+                            list: [
+                                { action: "move", direction: "W", x: 11, y: 7 },
+                                { action: "move", direction: "W", x: 10, y: 7 },
+                                { action: "move", direction: "W", x: 9, y: 7 },
+                                { action: "move", direction: "W", x: 9, y: 8 },
+                            ]
+                        },
+                    ];
+                    var steps = currentState.orderManager.getSteps();
+                    expect(steps.length).toEqual(5);
+                    expect(steps[0].length).toEqual(4);
+                    testStep(steps, 0, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 3, 4, false, {});
+                    testStep(steps, 0, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 4, 2, false, {});
+                    testStep(steps, 0, 2, 4, 'stand', 'W', { x: 12, y: 7 }, 4, 4, false, {});
+                    testStep(steps, 0, 3, 3, 'stand', 'E', { x: 7, y: 7 }, 3, 4, false, {});
+                    testStep(steps, 1, 0, 1, 'cast', 'E', { x: 8, y: 8 }, 1, 4, false, {});
+                    testStep(steps, 1, 1, 2, 'move', 'W', { x: 9, y: 8 }, 3, 0, false, {});
+                    expect(steps[1][1].entityState.dies).toBeTruthy();
+                    testStep(steps, 1, 2, 4, 'move', 'W', { x: 11, y: 7 }, 3, 4, false, {});
+                    testStep(steps, 1, 3, 3, 'stand', 'E', { x: 7, y: 7 }, 2, 4, false, {});
+                    testStep(steps, 2, 0, 1, 'move', 'E', { x: 7, y: 8 }, 0, 4, false, {});
+                    testStep(steps, 2, 1, 2, 'dead', 'W', { x: 9, y: 8 }, 3, 0, false, {});
+                    expect(steps[2][1].entityState.dies).toBeFalsy();
+                    testStep(steps, 2, 2, 4, 'move', 'W', { x: 10, y: 7 }, 2, 4, false, {});
+                    testStep(steps, 2, 3, 3, 'stand', 'E', { x: 7, y: 7 }, 1, 4, false, {});
+                    testStep(steps, 3, 0, 1, 'stand', 'E', { x: 7, y: 8 }, 0, 4, false, {});
+                    testStep(steps, 3, 1, 2, 'dead', 'W', { x: 9, y: 8 }, 3, 0, false, {});
+                    testStep(steps, 3, 2, 4, 'move', 'W', { x: 9, y: 7 }, 1, 4, false, {});
+                    testStep(steps, 3, 3, 3, 'stand', 'E', { x: 7, y: 7 }, 0, 4, false, {});
+                    testStep(steps, 4, 0, 1, 'stand', 'E', { x: 7, y: 8 }, 0, 4, false, {});
+                    testStep(steps, 4, 1, 2, 'dead', 'W', { x: 9, y: 8 }, 3, 0, false, {});
+                    testStep(steps, 4, 2, 4, 'move', 'W', { x: 9, y: 7 }, 0, 4, true, { x: 9, y: 8 });
+                    testStep(steps, 4, 3, 3, 'stand', 'E', { x: 7, y: 7 }, 0, 4, false, {});
                 });
             });
         });
@@ -602,6 +688,21 @@ var TacticArena;
                 entity.destroyProjection();
                 return steps;
             };
+            OrderManager.prototype.pacifyEntity = function (steps, startI, j, order, entity, state) {
+                console.log('pacify', steps, startI, j, order, entity, state);
+                for (var i = startI; i < steps.length; i++) {
+                    if (steps[i][j].order) {
+                        console.log(steps[i][j].order);
+                        steps[i][j].order.action = 'stand';
+                        steps[i][j].order.direction = order.direction;
+                        steps[i][j].order.x = state.moved.x;
+                        steps[i][j].order.y = state.moved.y;
+                    }
+                }
+                this.alteredPawns.push(entity._id);
+                entity.destroyProjection();
+                return steps;
+            };
             OrderManager.prototype.getSteps = function () {
                 this.alteredPawns = [];
                 this.formatOrders();
@@ -664,6 +765,9 @@ var TacticArena;
                             var positionB = { x: orderB.x, y: orderB.y };
                             var positionABeforeOrder = { x: previousStep[i].order.x, y: previousStep[i].order.y };
                             var positionBBeforeOrder = { x: previousStep[j].order.x, y: previousStep[j].order.y };
+                            if (previousStep[j].entityState.moved) {
+                                positionBBeforeOrder = previousStep[j].entityState.moved;
+                            }
                             var aWasFacingB = this.game.stageManager.isFacing(positionABeforeOrder, previousStep[i].order.direction, positionBBeforeOrder);
                             var aWasNextToB = this.game.stageManager.getNbTilesBetween(positionABeforeOrder, positionBBeforeOrder) == 1;
                             var fleeRate = 50;
@@ -687,6 +791,14 @@ var TacticArena;
                                 }
                                 continue;
                             }
+                            //if(previousStep[i].entityState.moved) {
+                            //    orderA.action = 'pacified';
+                            //    orderA.x = previousStep[i].entityState.moved.x;
+                            //    orderA.y = previousStep[i].entityState.moved.y;
+                            //    entityAState.ap = previousStep[i].entityState['ap'];
+                            //    entityAState.moved = previousStep[i].entityState.moved;
+                            //    continue;
+                            //}
                             if (equalPositions) {
                                 // Si A veut aller sur la même case que B (qu'il y soit déjà où qu'il veuille y aller)
                                 if (this.alteredPawns.indexOf(entityA._id) < 0)
@@ -704,18 +816,23 @@ var TacticArena;
                             // AND IF A & B are not in the same team
                             // AND IF A keeps its direction (aIsFacingB) (et ne va donc pas pas se détourner de B)
                             // AND IF A stays next to B OR IF A moves toward B (equalPositions) (en lui faisant face)
-                            if (['stand', 'move'].indexOf(orderA.action) >= 0 && aWasNextToB && aWasFacingB && aIsActive &&
+                            if (['stand', 'move', 'slash'].indexOf(orderA.action) >= 0 && aWasNextToB && aWasFacingB && aIsActive &&
                                 differentTeams && keepDirection && (keepPosition || equalPositions)) {
                                 var entityBIsDodging = true;
+                                if (orderA.action == 'slash') {
+                                    fleeRate = 0;
+                                }
+                                ;
                                 if (OrderManager.resolutionEsquive(fleeRate)) {
                                     entityBHpLost += 1;
+                                    //if(orderA.action == 'slash') { entityBHpLost += 1; }
                                     entityBIsDodging = false;
                                     if (this.alteredPawns.indexOf(entityB._id) < 0) {
                                         entityBState.moveHasBeenBlocked = (orderB.action == 'move');
                                     }
                                 }
                                 orderA.action = 'attack';
-                                orderA.target = { entityId: entityB._id, dodge: entityBIsDodging };
+                                orderA.target = { entityId: entityB._id, dodge: entityBIsDodging, damages: entityBHpLost };
                             }
                             if (orderA.action == 'cast') {
                                 entityAApCost++;
@@ -726,6 +843,37 @@ var TacticArena;
                                     if (path[k].x == targetPosition.x && path[k].y == targetPosition.y) {
                                         orderA.targets.push(entityB._id);
                                         entityBHpLost += 2;
+                                    }
+                                }
+                            }
+                            else if (orderA.action == 'cast_wind') {
+                                entityAApCost++;
+                                var path = this.game.stageManager.getLinearPath(entityA, 4, orderA.direction, orderA);
+                                orderA.targets = orderA.targets || [];
+                                for (var k = 0; k < path.length; k++) {
+                                    var targetPosition = entityBState.moveHasBeenBlocked ? positionBBeforeOrder : positionB;
+                                    if (path[k].x == targetPosition.x && path[k].y == targetPosition.y) {
+                                        var movedX = orderB.x;
+                                        var movedY = orderB.y;
+                                        if (orderA.direction == 'E') {
+                                            movedX++;
+                                        }
+                                        else if (orderA.direction == 'W') {
+                                            movedX--;
+                                        }
+                                        else if (orderA.direction == 'S') {
+                                            movedY++;
+                                        }
+                                        else if (orderA.direction == 'N') {
+                                            movedY--;
+                                        }
+                                        entityBState.moved = { x: movedX, y: movedY };
+                                        orderA.targets.push({
+                                            entity: entityB._id,
+                                            moved: { x: movedX, y: movedY, d: this.game.stageManager.getNbTilesBetween({ x: orderA.x, y: orderA.y }, { x: orderB.x, y: orderB.y }) }
+                                        });
+                                        entityBHpLost += 1;
+                                        this.pacifyEntity(steps, l + 1, j, orderB, entityB, entityBState);
                                     }
                                 }
                             }
@@ -1094,6 +1242,16 @@ var TacticArena;
                             });
                             p = _this.handleBackwardPromise(e.cast(targets_1, o.direction), e, o, position, animate);
                         }
+                        else if (o.action == 'cast_wind') {
+                            var targets_2 = [];
+                            o.targets.forEach(function (t) {
+                                targets_2.push({
+                                    entity: self.game.orderManager.getPawn(t.entity),
+                                    moved: t.moved
+                                });
+                            });
+                            p = _this.handleBackwardPromise(e.castTornado(targets_2, o.direction), e, o, position, animate);
+                        }
                         else if (o.action == 'stand') {
                             p = _this.handleBackwardPromise(_this.createPromiseStand(e, o.direction), e, o, position, animate);
                         }
@@ -1354,11 +1512,12 @@ var TacticArena;
                 });
                 this.turnInitialized.add(function (pawn) {
                     self.game.process = false;
+                    self.game.selecting = true;
                     if (pawn.isBot) {
                         self.game.aiManager.play(pawn);
                     }
                     else {
-                        self.game.selecting = true;
+                        //self.game.selecting = true;
                     }
                 });
                 this.stepResolutionFinished.add(function (stepIndex) {
@@ -1479,6 +1638,26 @@ var TacticArena;
                             path.push({ 'x': x, 'y': y });
                         }
                     }
+                }
+                return path;
+            };
+            StageManager.prototype.getFrontTile = function (pawn, direction, position) {
+                if (direction === void 0) { direction = null; }
+                if (position === void 0) { position = null; }
+                var p = position ? position : pawn.getPosition();
+                var d = direction ? direction : pawn.getDirection();
+                var path = [];
+                if (d == 'W') {
+                    path.push({ 'x': p.x - 1, 'y': p.y });
+                }
+                else if (d == 'E') {
+                    path.push({ 'x': p.x + 1, 'y': p.y });
+                }
+                else if (d == 'S') {
+                    path.push({ 'x': p.x, 'y': p.y + 1 });
+                }
+                else if (d == 'N') {
+                    path.push({ 'x': p.x, 'y': p.y - 1 });
                 }
                 return path;
             };
@@ -1670,8 +1849,8 @@ var TacticArena;
                 var that = this;
                 return new Promise(function (resolve, reject) {
                     _this.sprite.attack(target, function () {
-                        that.sprite.stand();
                         resolve(true);
+                        that.sprite.stand();
                     });
                 });
             };
@@ -1716,6 +1895,21 @@ var TacticArena;
                     }
                     _this.faceDirection(direction);
                     _this.sprite.cast(targets, function () {
+                        that.sprite.stand();
+                        resolve(true);
+                    });
+                });
+            };
+            Pawn.prototype.castTornado = function (targets, direction) {
+                var _this = this;
+                var that = this;
+                return new Promise(function (resolve, reject) {
+                    if (_this.projection) {
+                        _this.projection.hide();
+                        _this.show();
+                    }
+                    _this.faceDirection(direction);
+                    _this.sprite.castTornado(targets, function () {
                         that.sprite.stand();
                         resolve(true);
                     });
@@ -1778,6 +1972,7 @@ var TacticArena;
                 });
             };
             Pawn.prototype.createProjection = function () {
+                console.log(this.projection);
                 if (this.projection == null) {
                     this.projection = new Entity.Pawn(this.game, this.getPosition().x, this.getPosition().y, this.sprite._ext, this.type, null, false, this.team);
                     this.projection.parent = this;
@@ -1987,14 +2182,69 @@ var TacticArena;
                     t.onComplete.add(function () { fireball.kill(); }, self);
                 }, 500);
             };
+            Sprite.prototype.castTornado = function (targets, callback) {
+                var self = this;
+                this._animationCompleteCallback = callback;
+                this.playAnimation('cast' + this._ext);
+                setTimeout(function () {
+                    var initialX = 0;
+                    var initialY = 0;
+                    var targetX = 0;
+                    var targetY = 0;
+                    var scaleX = 1;
+                    if (self._ext == 'W' || self._ext == 'E') {
+                        initialY = self.position.y + 40;
+                        targetY = initialY;
+                        initialX = self.position.x;
+                        targetX = initialX - 100;
+                        if (self._ext == 'E') {
+                            initialX = self.position.x + 65;
+                            targetX = initialX + 100;
+                            scaleX = -1;
+                        }
+                    }
+                    else if (self._ext == 'N' || self._ext == 'S') {
+                        initialX = self.position.x + 30;
+                        targetX = initialX;
+                        initialY = self.position.y + 5;
+                        targetY = initialY - 110;
+                        if (self._ext == 'S') {
+                            initialY = self.position.y + 65;
+                            targetY = initialY + 110;
+                        }
+                    }
+                    var tornado = self._parent.game.add.sprite(initialX, initialY, 'wind');
+                    self._parent.game.pawnsSpritesGroup.add(tornado);
+                    tornado.anchor.setTo(.5, .5);
+                    tornado.scale.x *= scaleX;
+                    tornado.animations.add('wind', ["wind_01", "wind_02", "wind_03", "wind_04", "wind_05", "wind_06", "wind_07"], 7, false);
+                    tornado.animations.play('wind');
+                    if (targets) {
+                        var _loop_2 = function () {
+                            var target = targets[i];
+                            setTimeout(function () {
+                                target.entity.hurt(1);
+                                target.entity.moveTo(target.moved.x, target.moved.y);
+                            }, target.moved.d * 100);
+                        };
+                        for (var i = 0; i < targets.length; i++) {
+                            _loop_2();
+                        }
+                    }
+                    var t = self._parent.game.add.tween(tornado).to({ x: targetX, y: targetY }, 1000, Phaser.Easing.Linear.None, true);
+                    t.onComplete.add(function () { tornado.kill(); }, self);
+                }, 500);
+            };
             Sprite.prototype.attack = function (target, callback) {
                 this._animationCompleteCallback = callback;
                 this.playAnimation('attack' + this._ext);
-                if (target.dodge) {
-                    target.entity.dodge();
-                }
-                else {
-                    target.entity.hurt();
+                if (target) {
+                    if (target.dodge) {
+                        target.entity.dodge();
+                    }
+                    else {
+                        target.entity.hurt(target.damages);
+                    }
                 }
             };
             Sprite.prototype.hurt = function () {
@@ -2095,7 +2345,7 @@ var TacticArena;
                 this.pathTilesGroup.sort('y', Phaser.Group.SORT_ASCENDING);
                 this.pawnsSpritesGroup.sort('y', Phaser.Group.SORT_ASCENDING);
                 this.world.bringToTop(this.pointer.marker);
-                //this.world.bringToTop(this.pawnsSpritesGroup);
+                this.world.bringToTop(this.pawnsSpritesGroup);
             };
             BaseBattle.prototype.isGameReadyPromise = function () {
                 var self = this;
@@ -2346,7 +2596,12 @@ var TacticArena;
                 $('#game-menu .ui').html('<div class="button singleplayer"><a>Single Player</a></div>' +
                     //'<div class="button multiplayerlocal"><a>Multi Player Local</a></div>' +
                     '<div class="button multiplayeronline"><a>Multi Player Online</a></div>' +
-                    '<div class="button options"><a>Options</a></div>');
+                    '<div class="button options"><a>Options</a></div>' +
+                    '<div class="button"><br/><br/></div>' +
+                    '<div class="button">' +
+                    '<a class="fa fa-envelope" href="mailto:matthieu.desprez@gmail.com" title="Contact me"></a>' +
+                    '&nbsp;&nbsp;&nbsp;&nbsp;<a class="fa fa-github" href="https://github.com/Edistra" target="_blank"></a>' +
+                    '</div>');
                 $('.singleplayer').click(function () {
                     that.game.state.start('mainsolooffline', true, false, {
                         players: [
@@ -2413,6 +2668,7 @@ var TacticArena;
                 this.load.atlasJSONArray('blondy', 'assets/images/blondy.png', 'assets/images/blondy.json');
                 this.load.atlasJSONArray('evil', 'assets/images/evil.png', 'assets/images/evil.json');
                 this.load.atlasJSONArray('fireball', 'assets/images/fireball.png', 'assets/images/fireball.json');
+                this.load.atlasJSONArray('wind', 'assets/images/wind.png', 'assets/images/wind.json');
                 this.load.atlasJSONArray('circle', 'assets/images/circle.png', 'assets/images/circle.json');
                 this.load.start();
             };
@@ -4321,12 +4577,21 @@ var TacticArena;
                 this.menu.element.append('' +
                     '<div class="ui-menu-container">' +
                     '<ul class="ui-menu">' +
-                    '<li class="cancel"></li>' +
-                    '<li class="walk" min-cost="1">1' +
-                    ' <span class="tooltip">Move<br/>Cost: 1 AP / case</span>' +
+                    '<li class="cancel">←</li>' +
+                    '<li class="wait" min-cost="1">1' +
+                    '<span class="tooltip">Wait<br/>Cost: 1 AP<br/>Hit: 50%</span>' +
                     '</li>' +
-                    '<li class="fire" min-cost="2">2' +
-                    '<span class="tooltip">Fireball<br/>Cost: 2 AP<br/>Range: 4</span>' +
+                    '<li class="walk" min-cost="1">2' +
+                    ' <span class="tooltip">Move<br/>Cost: 1 AP / case<br/>Hit: 50%</span>' +
+                    '</li>' +
+                    '<li class="slash" min-cost="1">3' +
+                    '<span class="tooltip">Slash<br/>Cost: 1 AP<br/>Range: 1<br/>Hit: 100%</span>' +
+                    '</li>' +
+                    '<li class="fire" min-cost="2">4' +
+                    '<span class="tooltip">Fireball<br/>Cost: 2 AP<br/>Range: 4<br/>Hit: 100%</span>' +
+                    '</li>' +
+                    '<li class="wind" min-cost="2">5' +
+                    '<span class="tooltip">Wind<br/>Cost: 2 AP<br/>Range: 4<br/>Hit: 100%</span>' +
                     '</li>' +
                     '<li class="submit">Confirm</li>' +
                     '</ul>' +
@@ -4343,6 +4608,15 @@ var TacticArena;
                 });
                 this.element.find('.fire').on('click', function () {
                     self.select('fire');
+                });
+                this.element.find('.slash').on('click', function () {
+                    self.select('slash');
+                });
+                this.element.find('.wait').on('click', function () {
+                    self.wait();
+                });
+                this.element.find('.wind').on('click', function () {
+                    self.select('wind');
                 });
                 this.element.find('.walk').trigger('click');
             }
@@ -4361,6 +4635,16 @@ var TacticArena;
             };
             Action.prototype.canOrderFire = function () {
                 return this.element.find('.fire').hasClass('selected');
+            };
+            Action.prototype.canOrderWind = function () {
+                return this.element.find('.wind').hasClass('selected');
+            };
+            Action.prototype.canOrderSlash = function () {
+                return this.element.find('.slash').hasClass('selected');
+            };
+            Action.prototype.wait = function () {
+                var activePawn = this.menu.game.turnManager.getActivePawn();
+                this.menu.directionUI.changeDirection(activePawn.getProjectionOrReal().getDirection());
             };
             Action.prototype.clean = function () {
                 $('.ui-menu-container').fadeOut();
@@ -4726,6 +5010,12 @@ var TacticArena;
                 this.oneKey.onDown.add(this.oneKeyPress, this, 0, this.menu);
                 this.twoKey = this.menu.game.input.keyboard.addKey(Phaser.KeyCode.TWO);
                 this.twoKey.onDown.add(this.twoKeyPress, this, 0, this.menu);
+                this.threeKey = this.menu.game.input.keyboard.addKey(Phaser.KeyCode.THREE);
+                this.threeKey.onDown.add(this.threeKeyPress, this, 0, this.menu);
+                this.fourKey = this.menu.game.input.keyboard.addKey(Phaser.KeyCode.FOUR);
+                this.fourKey.onDown.add(this.fourKeyPress, this, 0, this.menu);
+                this.fiveKey = this.menu.game.input.keyboard.addKey(Phaser.KeyCode.FIVE);
+                this.fiveKey.onDown.add(this.fiveKeyPress, this, 0, this.menu);
             };
             KeyManager.prototype.leftKeyPressed = function (self, uiManager) {
                 if (uiManager.process)
@@ -4788,18 +5078,42 @@ var TacticArena;
             };
             KeyManager.prototype.oneKeyPress = function (self, uiManager) {
                 if (self.altKey) {
-                    $('.pawn01').trigger('click');
+                    $('.pawn:nth-child(1)').trigger('click');
+                }
+                else {
+                    uiManager.actionUI.wait();
+                }
+            };
+            KeyManager.prototype.twoKeyPress = function (self, uiManager) {
+                if (self.altKey) {
+                    $('.pawn:nth-child(2)').trigger('click');
                 }
                 else {
                     uiManager.actionUI.select('walk');
                 }
             };
-            KeyManager.prototype.twoKeyPress = function (self, uiManager) {
+            KeyManager.prototype.threeKeyPress = function (self, uiManager) {
                 if (self.altKey) {
-                    $('.pawn02').trigger('click');
+                    $('.pawn:nth-child(3)').trigger('click');
+                }
+                else {
+                    uiManager.actionUI.select('slash');
+                }
+            };
+            KeyManager.prototype.fourKeyPress = function (self, uiManager) {
+                if (self.altKey) {
+                    $('.pawn:nth-child(4)').trigger('click');
                 }
                 else {
                     uiManager.actionUI.select('fire');
+                }
+            };
+            KeyManager.prototype.fiveKeyPress = function (self, uiManager) {
+                if (self.altKey) {
+                    $('.pawn:nth-child(5)').trigger('click');
+                }
+                else {
+                    uiManager.actionUI.select('wind');
                 }
             };
             return KeyManager;
@@ -5102,6 +5416,46 @@ var TacticArena;
                             this.clearHelp();
                         }
                     }
+                    else if (self.game.uiManager.actionUI.canOrderWind() && activePawn_1.getAp() >= 2) {
+                        if (distance <= 4) {
+                            var path = this.game.stageManager.getLinearPath(activePawn_1.getProjectionOrReal(), 4);
+                            this.game.stageManager.showPossibleLinearTrajectories(path);
+                            var isInPath = false;
+                            for (var i = 0; i < path.length; i++) {
+                                if (path[i].x == pointerPosition.x && path[i].y == pointerPosition.y) {
+                                    isInPath = true;
+                                }
+                            }
+                            this.game.stageManager.clearPath(self.game.pathTilesGroup);
+                            if (isInPath) {
+                                this.game.stageManager.showPath(path, self.game.pathTilesGroup, 0xfc000f);
+                                this.game.uiManager.pawnsinfosUI.showApCost(activePawn_1, 2);
+                            }
+                        }
+                        else {
+                            this.clearHelp();
+                        }
+                    }
+                    else if (self.game.uiManager.actionUI.canOrderSlash() && activePawn_1.getAp() >= 1) {
+                        if (distance <= 2) {
+                            var path = this.game.stageManager.getFrontTile(activePawn_1.getProjectionOrReal());
+                            this.game.stageManager.showPossibleLinearTrajectories(path);
+                            var isInPath = false;
+                            for (var i = 0; i < path.length; i++) {
+                                if (path[i].x == pointerPosition.x && path[i].y == pointerPosition.y) {
+                                    isInPath = true;
+                                }
+                            }
+                            this.game.stageManager.clearPath(self.game.pathTilesGroup);
+                            if (isInPath) {
+                                this.game.stageManager.showPath(path, self.game.pathTilesGroup, 0xfc000f);
+                                this.game.uiManager.pawnsinfosUI.showApCost(activePawn_1, 1);
+                            }
+                        }
+                        else {
+                            this.clearHelp();
+                        }
+                    }
                 }
             };
             Pointer.prototype.onGridClick = function () {
@@ -5150,6 +5504,55 @@ var TacticArena;
                                 activePawn.setAp(activePawn.getAp() - 2);
                                 this.game.uiManager.pawnsinfosUI.showApCost(activePawn, 0);
                                 this.game.orderManager.add('cast', activePawn, position.x, position.y, activePawn.getProjectionOrReal().getDirection());
+                                this.clearHelp();
+                                self.game.signalManager.onActionPlayed.dispatch(activePawn);
+                            }
+                        }
+                    }
+                    else if (this.game.uiManager.actionUI.canOrderWind() && activePawn.getAp() >= 2) {
+                        if (distance <= 4) {
+                            var path = this.game.stageManager.getLinearPath(activePawn.getProjectionOrReal(), 4);
+                            this.game.stageManager.showPossibleLinearTrajectories(path);
+                            var isInPath = false;
+                            var maxX = null;
+                            var maxY = null;
+                            for (var i = 0; i < path.length; i++) {
+                                if (path[i].x == targetX && path[i].y == targetY) {
+                                    isInPath = true;
+                                }
+                                if (this.game.stageManager.getNbTilesBetween({ 'x': path[i].x, 'y': path[i].y }, { 'x': position.x, 'y': position.y }) == 4) {
+                                    maxX = path[i].x;
+                                    maxY = path[i].y;
+                                }
+                            }
+                            if (isInPath) {
+                                activePawn.createProjection();
+                                activePawn.getProjectionOrReal().halfcast();
+                                activePawn.setAp(activePawn.getAp() - 2);
+                                this.game.uiManager.pawnsinfosUI.showApCost(activePawn, 0);
+                                this.game.orderManager.add('cast_wind', activePawn, position.x, position.y, activePawn.getProjectionOrReal().getDirection());
+                                this.clearHelp();
+                                self.game.signalManager.onActionPlayed.dispatch(activePawn);
+                            }
+                        }
+                    }
+                    else if (self.game.uiManager.actionUI.canOrderSlash() && activePawn.getAp() >= 1) {
+                        if (distance <= 1) {
+                            var path = this.game.stageManager.getFrontTile(activePawn.getProjectionOrReal());
+                            this.game.stageManager.showPossibleLinearTrajectories(path);
+                            var isInPath = false;
+                            for (var i = 0; i < path.length; i++) {
+                                if (path[i].x == targetX && path[i].y == targetY) {
+                                    isInPath = true;
+                                }
+                            }
+                            if (isInPath) {
+                                activePawn.createProjection();
+                                activePawn.getProjectionOrReal().sprite.stand();
+                                activePawn.getProjectionOrReal().sprite.attack();
+                                activePawn.setAp(activePawn.getAp() - 1);
+                                this.game.uiManager.pawnsinfosUI.showApCost(activePawn, 0);
+                                this.game.orderManager.add('slash', activePawn, position.x, position.y, activePawn.getProjectionOrReal().getDirection());
                                 this.clearHelp();
                                 self.game.signalManager.onActionPlayed.dispatch(activePawn);
                             }

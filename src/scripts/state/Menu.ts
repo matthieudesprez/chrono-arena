@@ -8,7 +8,12 @@ module TacticArena.State {
                 '<div class="button singleplayer"><a>Single Player</a></div>' +
                 //'<div class="button multiplayerlocal"><a>Multi Player Local</a></div>' +
                 '<div class="button multiplayeronline"><a>Multi Player Online</a></div>' +
-                '<div class="button options"><a>Options</a></div>'
+                '<div class="button options"><a>Options</a></div>' +
+                '<div class="button"><br/><br/></div>' +
+                '<div class="button">' +
+                '<a class="fa fa-envelope" href="mailto:matthieu.desprez@gmail.com" title="Contact me"></a>' +
+                '&nbsp;&nbsp;&nbsp;&nbsp;<a class="fa fa-github" href="https://github.com/Edistra" target="_blank"></a>' +
+                '</div>'
             );
 
             $('.singleplayer').click(function () {

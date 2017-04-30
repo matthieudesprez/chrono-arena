@@ -159,13 +159,68 @@ module TacticArena.Entity {
             }, 500);
         }
 
+        castTornado(targets, callback?) {
+            let self = this;
+            this._animationCompleteCallback = callback;
+            this.playAnimation('cast' + this._ext);
+
+            setTimeout( function() {
+                let initialX = 0;
+                let initialY = 0;
+                let targetX = 0;
+                let targetY = 0;
+                let scaleX = 1;
+                if (self._ext == 'W' || self._ext == 'E') {
+                    initialY = self.position.y + 40;
+                    targetY = initialY;
+                    initialX = self.position.x;
+                    targetX = initialX - 100;
+                    if (self._ext == 'E') {
+                        initialX = self.position.x + 65;
+                        targetX = initialX + 100;
+                        scaleX = -1;
+                    }
+                } else if (self._ext == 'N' || self._ext == 'S') {
+                    initialX = self.position.x + 30;
+                    targetX = initialX;
+                    initialY = self.position.y + 5;
+                    targetY = initialY - 110;
+                    if (self._ext == 'S') {
+                        initialY = self.position.y + 65;
+                        targetY = initialY + 110;
+                    }
+                }
+                let tornado = self._parent.game.add.sprite(initialX, initialY, 'wind');
+                self._parent.game.pawnsSpritesGroup.add(tornado);
+                tornado.anchor.setTo(.5, .5);
+                tornado.scale.x *= scaleX;
+                tornado.animations.add('wind', ["wind_01", "wind_02", "wind_03", "wind_04", "wind_05", "wind_06", "wind_07"], 7, false);
+                tornado.animations.play('wind');
+
+                if (targets) {
+                    for (var i = 0; i < targets.length; i++) {
+                        let target = targets[i];
+                        setTimeout( function() {
+                            target.entity.hurt(1);
+                            target.entity.moveTo(target.moved.x, target.moved.y);
+                        }, target.moved.d * 100);
+                    }
+                }
+
+                var t = self._parent.game.add.tween(tornado).to({x: targetX, y: targetY}, 1000, Phaser.Easing.Linear.None, true);
+                t.onComplete.add(function () { tornado.kill(); }, self);
+            }, 500);
+        }
+
         attack(target?, callback?) {
             this._animationCompleteCallback = callback;
             this.playAnimation('attack' + this._ext);
-            if(target.dodge) {
-                target.entity.dodge();
-            } else {
-                target.entity.hurt();
+            if(target) {
+                if (target.dodge) {
+                    target.entity.dodge();
+                } else {
+                    target.entity.hurt(target.damages);
+                }
             }
         }
 

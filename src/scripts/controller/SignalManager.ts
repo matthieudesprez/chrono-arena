@@ -56,10 +56,11 @@ module TacticArena.Controller {
 
             this.turnInitialized.add(function(pawn) {
                 self.game.process = false;
+                self.game.selecting = true;
                 if(pawn.isBot) {
                     self.game.aiManager.play(pawn);
                 } else {
-                    self.game.selecting = true;
+                    //self.game.selecting = true;
                 }
             });
 

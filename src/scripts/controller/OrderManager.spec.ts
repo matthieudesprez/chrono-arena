@@ -234,6 +234,37 @@ module TacticArena.Specs {
                 testStep(steps, 3, 0, 1, 'stand', 'E', {x: 8, y: 8}, 0, 2, false, {});
                 testStep(steps, 3, 1, 2, 'attack', 'W', {x: 9, y: 8}, 0, 1, false, {});
             });
+
+            it("the first one cast_wind to the east while the other moves and get pushed to where it came from", function () {
+                currentState.orderManager.orders = [
+                    {
+                        entity: currentState.pawns[0],
+                        list: [
+                            {action: "cast_wind", direction: "E", x: 8, y: 8}
+                        ]
+                    },
+                    {
+                        entity: currentState.pawns[1],
+                        list: [
+                            {action: "move", direction: "W", x: 9, y: 8},
+                            {action: "move", direction: "W", x: 8, y: 8},
+                            {action: "move", direction: "W", x: 7, y: 8}
+                        ]
+                    },
+                ];
+                let steps = currentState.orderManager.getSteps();
+                expect(steps.length).toEqual(4);
+                expect(steps[0].length).toEqual(2);
+                testStep(steps, 0, 0, 1, 'stand', 'E', {x: 8, y: 8}, 3, 4, false, {});
+                testStep(steps, 0, 1, 2, 'stand', 'W', {x: 10, y: 8}, 3, 4, false, {});
+                testStep(steps, 1, 0, 1, 'cast_wind', 'E', {x: 8, y: 8}, 1, 4, false, {});
+                expect(steps[1][0].order.targets).toEqual([{entity: currentState.pawns[1]._id, moved: {x: 10, y: 8, d: 1}}]);
+                testStep(steps, 1, 1, 2, 'move', 'W', {x: 9, y: 8}, 2, 3, false, {});
+                testStep(steps, 2, 0, 1, 'stand', 'E', {x: 8, y: 8}, 0, 4, false, {});
+                testStep(steps, 2, 1, 2, 'stand', 'W', {x: 10, y: 8}, 1, 3, false, {});
+                testStep(steps, 3, 0, 1, 'stand', 'E', {x: 8, y: 8}, 0, 4, false, {});
+                testStep(steps, 3, 1, 2, 'stand', 'W', {x: 10, y: 8}, 0, 3, false, {});
+            });
         });
 
 

@@ -90,7 +90,7 @@ module TacticArena.State {
             this.pathTilesGroup.sort('y', Phaser.Group.SORT_ASCENDING);
             this.pawnsSpritesGroup.sort('y', Phaser.Group.SORT_ASCENDING);
             this.world.bringToTop(this.pointer.marker);
-            //this.world.bringToTop(this.pawnsSpritesGroup);
+            this.world.bringToTop(this.pawnsSpritesGroup);
         }
 
         isGameReadyPromise() {

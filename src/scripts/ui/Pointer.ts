@@ -33,7 +33,6 @@ module TacticArena.UI {
             this.marker.x = pointerPosition.x * this.game.tileSize;
             this.marker.y = pointerPosition.y * this.game.tileSize;
 
-
             if(!self.game.process) {
                 let activePawn = this.game.turnManager.getActivePawn();
                 let position = activePawn.getProjectionOrReal().getPosition();
@@ -63,6 +62,42 @@ module TacticArena.UI {
                         if(isInPath) {
                             this.game.stageManager.showPath(path, self.game.pathTilesGroup, 0xfc000f);
                             this.game.uiManager.pawnsinfosUI.showApCost(activePawn, 2);
+                        }
+                    } else {
+                        this.clearHelp();
+                    }
+                }  else if(self.game.uiManager.actionUI.canOrderWind() && activePawn.getAp() >= 2) {
+                    if (distance <= 4) {
+                        let path = this.game.stageManager.getLinearPath(activePawn.getProjectionOrReal(), 4);
+                        this.game.stageManager.showPossibleLinearTrajectories(path);
+                        let isInPath = false;
+                        for(var i = 0; i < path.length; i++) {
+                            if(path[i].x == pointerPosition.x && path[i].y == pointerPosition.y) {
+                                isInPath = true;
+                            }
+                        }
+                        this.game.stageManager.clearPath(self.game.pathTilesGroup);
+                        if(isInPath) {
+                            this.game.stageManager.showPath(path, self.game.pathTilesGroup, 0xfc000f);
+                            this.game.uiManager.pawnsinfosUI.showApCost(activePawn, 2);
+                        }
+                    } else {
+                        this.clearHelp();
+                    }
+                } else if(self.game.uiManager.actionUI.canOrderSlash() && activePawn.getAp() >= 1) {
+                    if (distance <= 2) {
+                        let path = this.game.stageManager.getFrontTile(activePawn.getProjectionOrReal());
+                        this.game.stageManager.showPossibleLinearTrajectories(path);
+                        let isInPath = false;
+                        for(var i = 0; i < path.length; i++) {
+                            if(path[i].x == pointerPosition.x && path[i].y == pointerPosition.y) {
+                                isInPath = true;
+                            }
+                        }
+                        this.game.stageManager.clearPath(self.game.pathTilesGroup);
+                        if(isInPath) {
+                            this.game.stageManager.showPath(path, self.game.pathTilesGroup, 0xfc000f);
+                            this.game.uiManager.pawnsinfosUI.showApCost(activePawn, 1);
                         }
                     } else {
                         this.clearHelp();
@@ -123,7 +158,53 @@ module TacticArena.UI {
                             self.game.signalManager.onActionPlayed.dispatch(activePawn);
                         }
                     }
-
+                }  else if (this.game.uiManager.actionUI.canOrderWind() && activePawn.getAp() >= 2) {
+                    if (distance <= 4) {
+                        let path = this.game.stageManager.getLinearPath(activePawn.getProjectionOrReal(), 4);
+                        this.game.stageManager.showPossibleLinearTrajectories(path);
+                        let isInPath = false;
+                        let maxX = null;
+                        let maxY = null;
+                        for(var i = 0; i < path.length; i++) {
+                            if(path[i].x == targetX && path[i].y == targetY) {
+                                isInPath = true;
+                            }
+                            if(this.game.stageManager.getNbTilesBetween({'x': path[i].x, 'y': path[i].y}, {'x': position.x, 'y': position.y}) == 4) {
+                                maxX = path[i].x;
+                                maxY = path[i].y;
+                            }
+                        }
+                        if(isInPath) {
+                            activePawn.createProjection();
+                            activePawn.getProjectionOrReal().halfcast();
+                            activePawn.setAp(activePawn.getAp() - 2);
+                            this.game.uiManager.pawnsinfosUI.showApCost(activePawn, 0);
+                            this.game.orderManager.add('cast_wind', activePawn, position.x, position.y, activePawn.getProjectionOrReal().getDirection());
+                            this.clearHelp();
+                            self.game.signalManager.onActionPlayed.dispatch(activePawn);
+                        }
+                    }
+                } else if(self.game.uiManager.actionUI.canOrderSlash() && activePawn.getAp() >= 1) {
+                    if (distance <= 1) {
+                        let path = this.game.stageManager.getFrontTile(activePawn.getProjectionOrReal());
+                        this.game.stageManager.showPossibleLinearTrajectories(path);
+                        let isInPath = false;
+                        for(var i = 0; i < path.length; i++) {
+                            if(path[i].x == targetX && path[i].y == targetY) {
+                                isInPath = true;
+                            }
+                        }
+                        if(isInPath) {
+                            activePawn.createProjection();
+                            activePawn.getProjectionOrReal().sprite.stand();
+                            activePawn.getProjectionOrReal().sprite.attack();
+                            activePawn.setAp(activePawn.getAp() - 1);
+                            this.game.uiManager.pawnsinfosUI.showApCost(activePawn, 0);
+                            this.game.orderManager.add('slash', activePawn, position.x, position.y, activePawn.getProjectionOrReal().getDirection());
+                            this.clearHelp();
+                            self.game.signalManager.onActionPlayed.dispatch(activePawn);
+                        }
+                    }
                 }
             }
         }

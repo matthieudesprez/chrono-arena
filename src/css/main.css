@@ -183,6 +183,9 @@ html, body {
     color: #AB9352;
     text-shadow: -2px 0 #FFFFFF, 0 2px #FFFFFF, 2px 0 #FFFFFF, 0 -2px #FFFFFF;
 }
+#game-menu .button a.fa {
+    font-family: FontAwesome;
+}
 
 .ui-ingame-menu {
     position: absolute;

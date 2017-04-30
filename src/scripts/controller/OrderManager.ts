@@ -142,6 +142,22 @@ module TacticArena.Controller {
             return steps;
         }
 
+        pacifyEntity(steps, startI, j, order, entity, state) {
+            console.log('pacify', steps, startI, j, order, entity, state);
+            for (var i = startI; i < steps.length; i++) {
+                if (steps[i][j].order) {
+                    console.log(steps[i][j].order);
+                    steps[i][j].order.action = 'stand';
+                    steps[i][j].order.direction = order.direction;
+                    steps[i][j].order.x = state.moved.x;
+                    steps[i][j].order.y = state.moved.y;
+                }
+            }
+            this.alteredPawns.push(entity._id);
+            entity.destroyProjection();
+            return steps;
+        }
+
         getSteps() {
             this.alteredPawns = [];
             this.formatOrders();
@@ -207,6 +223,7 @@ module TacticArena.Controller {
                         let positionB = {x: orderB.x, y: orderB.y};
                         let positionABeforeOrder = {x: previousStep[i].order.x, y: previousStep[i].order.y};
                         let positionBBeforeOrder = {x: previousStep[j].order.x, y: previousStep[j].order.y};
+                        if(previousStep[j].entityState.moved) { positionBBeforeOrder = previousStep[j].entityState.moved; }
                         let aWasFacingB = this.game.stageManager.isFacing(positionABeforeOrder, previousStep[i].order.direction, positionBBeforeOrder);
                         let aWasNextToB = this.game.stageManager.getNbTilesBetween(positionABeforeOrder, positionBBeforeOrder) == 1;
                         let fleeRate = 50;
@@ -233,6 +250,15 @@ module TacticArena.Controller {
                             continue;
                         }
 
+                        //if(previousStep[i].entityState.moved) {
+                        //    orderA.action = 'pacified';
+                        //    orderA.x = previousStep[i].entityState.moved.x;
+                        //    orderA.y = previousStep[i].entityState.moved.y;
+                        //    entityAState.ap = previousStep[i].entityState['ap'];
+                        //    entityAState.moved = previousStep[i].entityState.moved;
+                        //    continue;
+                        //}
+
                         if (equalPositions) {
                             // Si A veut aller sur la même case que B (qu'il y soit déjà où qu'il veuille y aller)
                             if (this.alteredPawns.indexOf(entityA._id) < 0) entityAState.moveHasBeenBlocked = (orderA.action == 'move');
@@ -250,18 +276,20 @@ module TacticArena.Controller {
                         // AND IF A keeps its direction (aIsFacingB) (et ne va donc pas pas se détourner de B)
                         // AND IF A stays next to B OR IF A moves toward B (equalPositions) (en lui faisant face)
                         if (
-                            ['stand', 'move'].indexOf(orderA.action) >= 0 && aWasNextToB && aWasFacingB && aIsActive &&
+                            ['stand', 'move', 'slash'].indexOf(orderA.action) >= 0 && aWasNextToB && aWasFacingB && aIsActive &&
                             differentTeams && keepDirection && (keepPosition || equalPositions)) {
                             let entityBIsDodging = true;
+                            if(orderA.action == 'slash') { fleeRate = 0; };
                             if (OrderManager.resolutionEsquive(fleeRate)) {
                                 entityBHpLost += 1;
+                                //if(orderA.action == 'slash') { entityBHpLost += 1; }
                                 entityBIsDodging = false;
                                 if (this.alteredPawns.indexOf(entityB._id) < 0) {
                                     entityBState.moveHasBeenBlocked = (orderB.action == 'move');
                                 }
                             }
                             orderA.action = 'attack';
-                            orderA.target = { entityId: entityB._id, dodge: entityBIsDodging };
+                            orderA.target = { entityId: entityB._id, dodge: entityBIsDodging, damages: entityBHpLost};
                         }
 
                         if (orderA.action == 'cast') {
@@ -273,6 +301,28 @@ module TacticArena.Controller {
                                 if (path[k].x == targetPosition.x && path[k].y == targetPosition.y) {
                                     orderA.targets.push(entityB._id);
                                     entityBHpLost += 2;
+                                }
+                            }
+                        } else if (orderA.action == 'cast_wind') {
+                            entityAApCost++;
+                            let path = this.game.stageManager.getLinearPath(entityA, 4, orderA.direction, orderA);
+                            orderA.targets = orderA.targets || [];
+                            for (var k = 0; k < path.length; k++) {
+                                let targetPosition = entityBState.moveHasBeenBlocked ? positionBBeforeOrder : positionB;
+                                if (path[k].x == targetPosition.x && path[k].y == targetPosition.y) {
+                                    let movedX = orderB.x;
+                                    let movedY = orderB.y;
+                                    if(orderA.direction == 'E') { movedX++; }
+                                    else if(orderA.direction == 'W') { movedX--; }
+                                    else if(orderA.direction == 'S') { movedY++; }
+                                    else if(orderA.direction == 'N') { movedY--; }
+                                    entityBState.moved = {x: movedX, y: movedY};
+                                    orderA.targets.push({
+                                        entity: entityB._id,
+                                        moved: {x: movedX, y: movedY, d: this.game.stageManager.getNbTilesBetween({x: orderA.x, y: orderA.y}, {x: orderB.x, y: orderB.y})}
+                                    });
+                                    entityBHpLost += 1;
+                                    this.pacifyEntity(steps, l + 1, j, orderB, entityB, entityBState);
                                 }
                             }
                         }

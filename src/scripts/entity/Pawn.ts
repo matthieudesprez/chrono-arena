@@ -56,8 +56,8 @@ module TacticArena.Entity {
             var that = this;
             return new Promise((resolve, reject) => {
                 this.sprite.attack(target, function() {
-                    that.sprite.stand();
                     resolve(true);
+                    that.sprite.stand();
                 });
             });
         }
@@ -103,6 +103,21 @@ module TacticArena.Entity {
                 }
                 this.faceDirection(direction);
                 this.sprite.cast(targets, function() {
+                    that.sprite.stand();
+                    resolve(true);
+                });
+            });
+        }
+
+        castTornado(targets, direction) {
+            var that = this;
+            return new Promise((resolve, reject) => {
+                if(this.projection) {
+                    this.projection.hide();
+                    this.show();
+                }
+                this.faceDirection(direction);
+                this.sprite.castTornado(targets, function() {
                     that.sprite.stand();
                     resolve(true);
                 });
@@ -165,6 +180,7 @@ module TacticArena.Entity {
         }
 
         createProjection() {
+            console.log(this.projection);
             if (this.projection == null) {
                 this.projection = new Entity.Pawn(
                     this.game,
