@@ -44,6 +44,9 @@ module TacticArena.UI {
         }
 
         initOrderPhase(pawn, first) {
+            if(first) {
+                this.game.orderManager.orders = [];
+            }
             this.game.turnManager.init(pawn, first).then((data) => {
                 if(first) {
                     this.turnIndicatorUI.write(this.game.turnManager.currentTurnIndex + 1);

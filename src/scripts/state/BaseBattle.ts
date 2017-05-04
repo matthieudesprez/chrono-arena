@@ -70,7 +70,8 @@ module TacticArena.State {
             this.pathfinder = new EasyStar.js();
             this.pathfinder.setAcceptableTiles([-1]);
             this.pathfinder.disableDiagonals();
-            this.pathfinder.disableSync();
+            //this.pathfinder.enableDiagonals();
+            //this.pathfinder.disableSync();
             this.pathfinder.setGrid(this.stageManager.grid);
 
             this.logManager = new Controller.LogManager(this);
@@ -89,8 +90,6 @@ module TacticArena.State {
         update() {
             this.pathTilesGroup.sort('y', Phaser.Group.SORT_ASCENDING);
             this.pawnsSpritesGroup.sort('y', Phaser.Group.SORT_ASCENDING);
-            this.world.bringToTop(this.pointer.marker);
-            this.world.bringToTop(this.pawnsSpritesGroup);
         }
 
         isGameReadyPromise() {
@@ -129,7 +128,7 @@ module TacticArena.State {
             while(!isUnique) {
                 isUnique = true;
                 id++;
-                for(var i=0; i < this.pawns.length; i++) {
+                for(var i= 0; i < this.pawns.length; i++) {
                     if(this.pawns[i]._id && this.pawns[i]._id == id) {
                         isUnique = false;
                         break;

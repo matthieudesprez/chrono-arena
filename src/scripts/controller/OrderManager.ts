@@ -113,10 +113,12 @@ module TacticArena.Controller {
                 let hp = pawn.getHp();
                 state['ap'] = hp > 0 ? pawn._apMax : 0;
                 state['hp'] = hp;
+                let defaultOrder = OrderManager.getDefaultOrder(pawn.getPosition(), pawn.getDirection());
+                if(hp <= 0) defaultOrder.action = 'dead';
                 step.push({
                     entity: pawn,
                     entityState: state,
-                    order: OrderManager.getDefaultOrder(pawn.getPosition(), pawn.getDirection())
+                    order: defaultOrder
                 });
             }
             return step;
@@ -145,13 +147,12 @@ module TacticArena.Controller {
         pacifyEntity(steps, startI, j, order, entity, state) {
             console.log('pacify', steps, startI, j, order, entity, state);
             for (var i = startI; i < steps.length; i++) {
-                if (steps[i][j].order) {
-                    console.log(steps[i][j].order);
-                    steps[i][j].order.action = 'stand';
-                    steps[i][j].order.direction = order.direction;
-                    steps[i][j].order.x = state.moved.x;
-                    steps[i][j].order.y = state.moved.y;
-                }
+                steps[i][j].order = {
+                    action: 'stand',
+                    direction: order.direction,
+                    x: state.moved.x,
+                    y: state.moved.y
+                };
             }
             this.alteredPawns.push(entity._id);
             entity.destroyProjection();
@@ -193,6 +194,18 @@ module TacticArena.Controller {
                 }
             });
             return result;
+        }
+
+        tileIsFree(step, x, y) {
+            for (var i = 0; i < step.length; i++) {
+                let entityState = step[i].entityState;
+                let order = step[i].order;
+                if((typeof entityState.moved === 'undefined' && order.x == x && order.y == y) || (entityState.moved && entityState.moved.x == x && entityState.moved.y == y)) {
+                    console.log(entityState, order, x, y);
+                    return false;
+                }
+            }
+            return true;
         }
 
         processOrders(steps) {
@@ -250,15 +263,6 @@ module TacticArena.Controller {
                             continue;
                         }
 
-                        //if(previousStep[i].entityState.moved) {
-                        //    orderA.action = 'pacified';
-                        //    orderA.x = previousStep[i].entityState.moved.x;
-                        //    orderA.y = previousStep[i].entityState.moved.y;
-                        //    entityAState.ap = previousStep[i].entityState['ap'];
-                        //    entityAState.moved = previousStep[i].entityState.moved;
-                        //    continue;
-                        //}
-
                         if (equalPositions) {
                             // Si A veut aller sur la même case que B (qu'il y soit déjà où qu'il veuille y aller)
                             if (this.alteredPawns.indexOf(entityA._id) < 0) entityAState.moveHasBeenBlocked = (orderA.action == 'move');
@@ -312,10 +316,18 @@ module TacticArena.Controller {
                                 if (path[k].x == targetPosition.x && path[k].y == targetPosition.y) {
                                     let movedX = orderB.x;
                                     let movedY = orderB.y;
+                                    if(entityBState.moved) {
+                                        movedX = entityBState.moved.x;
+                                        movedY = entityBState.moved.y;
+                                    }
                                     if(orderA.direction == 'E') { movedX++; }
                                     else if(orderA.direction == 'W') { movedX--; }
                                     else if(orderA.direction == 'S') { movedY++; }
                                     else if(orderA.direction == 'N') { movedY--; }
+                                    if(!this.tileIsFree(step, movedX, movedY) || this.game.stageManager.isObstacle(movedX, movedY)) {
+                                        movedX = false;
+                                        movedY = false;
+                                    }
                                     entityBState.moved = {x: movedX, y: movedY};
                                     orderA.targets.push({
                                         entity: entityB._id,

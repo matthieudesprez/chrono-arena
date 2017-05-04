@@ -263,6 +263,7 @@ module TacticArena.Entity {
         }
 
         setHp(hp, forceAnimation) {
+            console.log(this._id, this.isAlive(), hp, forceAnimation);
             if((this.isAlive() || forceAnimation) && hp <= 0) { this.sprite.die(); }
             this._hp = hp;
             this.game.signalManager.onHpChange.dispatch(this);

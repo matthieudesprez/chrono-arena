@@ -202,7 +202,9 @@ module TacticArena.Entity {
                         let target = targets[i];
                         setTimeout( function() {
                             target.entity.hurt(1);
-                            target.entity.moveTo(target.moved.x, target.moved.y);
+                            if(target.moved.x && target.moved.y) {
+                                target.entity.moveTo(target.moved.x, target.moved.y);
+                            }
                         }, target.moved.d * 100);
                     }
                 }

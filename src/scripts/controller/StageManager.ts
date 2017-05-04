@@ -31,6 +31,10 @@ module TacticArena.Controller {
             this.map.createLayer('Decorations3');
         }
 
+        isObstacle(x, y) {
+            return this.grid[y][x] != -1;
+        }
+
         handleTile(pawn) {
             let p = pawn.getPosition();
             this.grid[p.y][p.x] = pawn.isAlive() ? -1 : 3;
