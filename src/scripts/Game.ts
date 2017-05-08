@@ -20,6 +20,7 @@ module TacticArena {
             this.state.add('menu', State.Menu);
             this.state.add('lobby', State.Lobby);
             this.state.add('options', State.Options);
+            this.state.add('mainadventure', State.MainAdventure);
             this.state.add('mainsolooffline', State.MainSoloOffline);
             this.state.add('mainmultiplayeronline', State.MainMultiplayerOnline);
 

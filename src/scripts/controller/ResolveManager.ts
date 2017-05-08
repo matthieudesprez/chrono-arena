@@ -127,7 +127,7 @@ module TacticArena.Controller {
                                 let direction = previousStep ? previousStep[i].order.direction : e.getDirection();
                                 p = this.createPromiseStand(e, direction);
                             } else {
-                                p = this.createPromiseMove(e, o.x, o.y, animate);
+                                p = this.createPromiseMove(e, o.x, o.y, animate, o.direction);
                             }
                         }
                     } else if (o.action == 'attack') {

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" renderorder="left-up" width="30" height="40" tilewidth="32" tileheight="32" nextobjectid="6">
+ <tileset firstgid="1" name="tiles-collection" tilewidth="32" tileheight="32" tilecount="2016" columns="32">
+  <image source="../../../../../../../../Applications/MAMP/htdocs/phaser_socket/client/assets/gameAssets/tile1.png" width="1024" height="2016"/>
+  <tile id="93" probability="0"/>
+ </tileset>
+ <tileset firstgid="2017" name="tileAssemblyA1Tiled" tilewidth="32" tileheight="32" tilecount="400" columns="16">
+  <image source="../../../../../../Pictures/mapwork/tilesets/tileAssemblyA1Tiled.png" width="512" height="800"/>
+ </tileset>
+ <tileset firstgid="2417" name="tileAssemblyA2" tilewidth="32" tileheight="32" tilecount="400" columns="16">
+  <image source="../../../../../../Pictures/mapwork/tilesets/tileAssemblyA2.png" width="512" height="800"/>
+ </tileset>
+ <tileset firstgid="2817" name="Futuristic_TileD" tilewidth="32" tileheight="32" tilecount="256" columns="16">
+  <image source="../../../../../../Pictures/mapwork/tilesets/Futuristic_TileD.png" width="512" height="512"/>
+ </tileset>
+ <tileset firstgid="3073" name="tileAssemblyA4" tilewidth="32" tileheight="32" tilecount="576" columns="16">
+  <image source="../../../../../../Pictures/mapwork/tilesets/tileAssemblyA4.png" width="512" height="1152"/>
+ </tileset>
+ <tileset firstgid="3649" name="tileAssemblyA3" tilewidth="32" tileheight="32" tilecount="336" columns="16">
+  <image source="../../../../../../Pictures/mapwork/tilesets/tileAssemblyA3.png" width="512" height="672"/>
+ </tileset>
+ <tileset firstgid="3985" name="Futuristic_TileC" tilewidth="32" tileheight="32" tilecount="256" columns="16">
+  <image source="../../../../../../Pictures/mapwork/tilesets/Futuristic_TileC.png" width="512" height="512"/>
+ </tileset>
+ <tileset firstgid="4241" name="Futuristic_TileE" tilewidth="32" tileheight="32" tilecount="256" columns="16">
+  <image source="../../../../../../Pictures/mapwork/tilesets/Futuristic_TileE.png" width="512" height="512"/>
+ </tileset>
+ <tileset firstgid="4497" name="Futuristic_TileB" tilewidth="32" tileheight="32" tilecount="256" columns="16">
+  <image source="../../../../../../Pictures/mapwork/tilesets/Futuristic_TileB.png" width="512" height="512"/>
+ </tileset>
+ <tileset firstgid="4753" name="tileAssemblyA5" tilewidth="32" tileheight="32" tilecount="256" columns="16">
+  <image source="../../../../../../Pictures/mapwork/tilesets/tileAssemblyA5.png" width="512" height="512"/>
+ </tileset>
+ <layer name="Background" width="30" height="40">
+  <data encoding="base64" compression="zlib">
+   eJztlD0OgCAMRrtK4gF0UE+gngDZvZ0nlkEiNtgQxd98w0sYWl7aUqacaAIAPEKliBp1r6+2ZBa1nO/wt9bRMXp44YVXxO2r29M9L49LWV8veHncX7w64DUJvP6cauYxAaeDx/l3xMw71MezxNQP70ppGXYoLvRK+Ufz3ub1e2mEfC30PcY70pZU/w2813h15LsAAHyPGah3dDM=
+  </data>
+ </layer>
+ <layer name="Pathfinder" width="30" height="40" visible="0">
+  <data encoding="base64" compression="zlib">
+   eJztwwEJAAAMA6C1W/9GzzGuYJNUVVXVdwFWHM2Z+Z0=
+  </data>
+ </layer>
+ <layer name="Foreground" width="30" height="40">
+  <data encoding="base64" compression="zlib">
+   eJztlstOAjEUhqvuTMbOMK/h2wC+gPIq6tqFulbwFldcHsCNG1dGdxrvhAUk3iAkJib+zQyhlDbTDtNGzfzJnxnK6floTy8Qkus3auARMr806b5nn7kAzjqeG7E34TnL7E8vYlbhHc6M/W6Zuw234MPYTXjXAfcAPuIYo8+2uSq54l5RQq6pe+4HjeyKe0an279otlzxjGB79xKMvsBe9KM9nNVZwsZXKhBSjr1SUMeKcbOMn3GLIXKG46dKYtys3FXkWAvHT5XEOBOurJ6nASFduAdv+eq+t6j5MWJO4BtqVm+TeorqcWutS83qrapnHWNoBNF7W7KPOpI2k3ozbg059jgzznkQmeUfSBhDOvl7Olz/fbiasL8Zt4WYOmeeM5QwmWr+dNyofwNuanBtKefqc7+DdN/pcotYJ6XYZeGseETMk+BnjXnSHe+dYu3K+uvUJ4l7oeDZ5ooS5/VFEtPWmHdTbpr7jOW559bZQ+CO+8px3xxyK9xdVkm4j8Q6qeqZpKzymGpZ8r9E1pZz/6b+89jS6gf4x7Sa
+  </data>
+ </layer>
+ <layer name="Decorations" width="30" height="40">
+  <data encoding="base64" compression="zlib">
+   eJxjYBgFo2Dkgqf8DAzP+XHzaQW+Au34zo+bT2twGGjXETraBwOP+CF4JIAnI8Sf9AQ8AqTr4SZDDzqYIwihXwzyOLUQHGgXkAawxacSmX6YBo0basT3KBgFo2AUoAMWFgh2AWJ3FvrZ6wa1zxVqPz3t9YDa60FHezug/qS3vaNgFIyCoQMA59kTcw==
+  </data>
+ </layer>
+ <layer name="Decorations2" width="30" height="40">
+  <data encoding="base64" compression="zlib">
+   eJxjYBgFo2AUjIJRMApGATXAD4GBdsEooAWYOoTjlXmA3J46ai/d7K0QZGD4CKTTBelr70gDN/kheKTY+5IfgkfBKBgFo2AwAQDENwuc
+  </data>
+ </layer>
+ <layer name="Decorations3" width="30" height="40">
+  <data encoding="base64" compression="zlib">
+   eJztzjEBAAAIA6A1sH8Wy1nBz0NIQAIAALDTdT0A4KMBM/wAyw==
+  </data>
+ </layer>
+</map>

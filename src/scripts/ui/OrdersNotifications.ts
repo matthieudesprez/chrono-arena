@@ -62,11 +62,11 @@ module TacticArena.UI {
             }
             let msg = '<b>' + activePawn._name + '</b>';
             if (order.action == 'move') {
-                msg += ' se déplacera en ' + order.x + ', ' + order.y;
+                msg += ' se déplacera en ' + order.x + ', ' + order.y + ', orienté vers le ' + this.directionMapping[order.direction];
             } else if (order.action == 'cast') {
                 msg += ' lancera une boule de feu vers ' + this.directionMapping[order.direction];
             } else if (order.action == 'stand') {
-                msg += ' restera en position ' + order.x + ', ' + order.y + ' et surveillera vers ' + this.directionMapping[order.direction];
+                msg += ' restera en position ' + order.x + ', ' + order.y + ' et fera preuve de vigilence vers ' + this.directionMapping[order.direction];
             }
             return '<span style="color:#ffffff;">' + msg + '</span>';
         }

@@ -124,6 +124,7 @@ module TacticArena.UI {
                         activePawn.projection.moveTo(0, 0, path).then( (res) => {
                             activePawn.setAp(activePawn.getAp() - distance);
                             for (var i = 0; i < (resultPath as any).length; i++) {
+                                console.log(activePawn.getProjectionOrReal().getDirection());
                                 self.game.orderManager.add('move', activePawn, resultPath[i].x, resultPath[i].y, activePawn.getProjectionOrReal().getDirection());
                             }
                             self.game.process = false;
@@ -196,8 +197,8 @@ module TacticArena.UI {
                         }
                         if(isInPath) {
                             activePawn.createProjection();
-                            activePawn.getProjectionOrReal().sprite.stand();
-                            activePawn.getProjectionOrReal().sprite.attack();
+                            activePawn.getProjectionOrReal().getSprite().stand();
+                            activePawn.getProjectionOrReal().getSprite().attack();
                             activePawn.setAp(activePawn.getAp() - 1);
                             this.game.uiManager.pawnsinfosUI.showApCost(activePawn, 0);
                             this.game.orderManager.add('slash', activePawn, position.x, position.y, activePawn.getProjectionOrReal().getDirection());

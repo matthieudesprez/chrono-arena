@@ -12,11 +12,14 @@ module TacticArena.Controller {
             this.grid = [];
         }
 
-        init() {
-            this.map = this.game.add.tilemap('map');
+        init(name='map') {
+            this.map = this.game.add.tilemap(name);
             this.map.addTilesetImage('tiles-collection');
             this.map.createLayer('Background');
-            this.layer = this.map.createLayer('Foreground');
+            this.map.createLayer('Foreground');
+            this.layer = this.map.createLayer('Collision');
+            this.layer.debug = true;
+            this.layer.resizeWorld();
             this.map.createLayer('Decorations');
             this.map.createLayer('Decorations2');
             for (var i = 0; i < this.map.layers[2].data.length; i++) {
@@ -25,6 +28,13 @@ module TacticArena.Controller {
                     this.grid[i][j] = this.map.layers[2].data[i][j].index;
                 }
             }
+
+            for (var x = 0; x < this.map.width; x++) {
+                for (var y = 0; y < this.map.height; y++) {
+                    this.map.removeTile(x, y, 'Collision');
+                }
+            }
+            console.log('jajoute mes tiles');
         }
 
         addDecorations() {
@@ -40,9 +50,9 @@ module TacticArena.Controller {
             this.grid[p.y][p.x] = pawn.isAlive() ? -1 : 3;
         }
 
-        canMove(entity, x, y, ap) {
+        canMove(entity, x, y, ap=Infinity) {
             return new Promise((resolve, reject) => {
-                this.equalPositions(entity.getPosition(), {x: x, y: y});
+                //this.equalPositions(entity.getPosition(), {x: x, y: y});
                 this.game.pathfinder.findPath(entity.getPosition().x, entity.getPosition().y, x, y, function (path) {
                     if (path && path.length > 0) {
                         path.shift();

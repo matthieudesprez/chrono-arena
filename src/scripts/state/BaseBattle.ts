@@ -1,34 +1,19 @@
-/// <reference path="BaseState.ts"/>
+/// <reference path="BasePlayable.ts"/>
 module TacticArena.State {
-    export class BaseBattle extends TacticArena.State.BaseState {
-        layer: Phaser.TilemapLayer;
-        pawns: Entity.Pawn[];
-        pathTilesGroup;
-        pathOrdersTilesGroup;
-        pawnsSpritesGroup;
-        uiSpritesGroup;
-        pathfinder;
-        tileSize: number;
+    export class BaseBattle extends TacticArena.State.BasePlayable {
         turnManager: Controller.TurnManager;
         orderManager: Controller.OrderManager;
         resolveManager: Controller.ResolveManager;
-        stageManager: Controller.StageManager;
         logManager: Controller.LogManager;
         signalManager: Controller.SignalManager;
         uiManager: UI.UIManager;
-        process: Boolean;
         selecting: Boolean;
-        pointer;
-        isPaused: Boolean;
         hideProjections: Boolean;
         teamColors;
         playerTeam;
         teams;
-        players;
         chatUI;
-        generator;
         playMode;
-        serializer;
 
         constructor() {
             super();
@@ -36,11 +21,7 @@ module TacticArena.State {
 
         init(data?, chat?, server?) {
             super.init();
-            this.game.stage.backgroundColor = 0xffffff;
-            this.process = true;
             this.selecting = false;
-            this.tileSize = 32;
-            this.isPaused = false;
             this.hideProjections = false;
             this.teamColors = ['0x8ad886', '0xd68686', '0x87bfdb', '0xcdd385'];
             this.teams = {};
@@ -48,29 +29,17 @@ module TacticArena.State {
             this.signalManager = new Controller.SignalManager(this);
             this.signalManager.init();
 
-            this.stageManager = new Controller.StageManager(this);
-            this.stageManager.init();
-
             this.pointer = new UI.Pointer(this);
-
-            this.pawns = [];
-            this.pathTilesGroup = this.add.group();
-            this.pathOrdersTilesGroup = this.add.group();
-            this.uiSpritesGroup = this.add.group();
-            this.pawnsSpritesGroup = this.add.group();
-
-            this.generator = new Utils.Generator();
         }
 
         create() {
             let self = this;
             this.stageManager.addDecorations();
-            console.log('decorations');
 
             this.pathfinder = new EasyStar.js();
             this.pathfinder.setAcceptableTiles([-1]);
-            this.pathfinder.disableDiagonals();
-            //this.pathfinder.enableDiagonals();
+            //this.pathfinder.disableDiagonals();
+            this.pathfinder.enableDiagonals();
             //this.pathfinder.disableSync();
             this.pathfinder.setGrid(this.stageManager.grid);
 
@@ -85,11 +54,6 @@ module TacticArena.State {
 
             let playerPawns = this.pawns.filter( pawn => { return pawn.team == self.playerTeam; });
             this.uiManager.initOrderPhase(playerPawns[0], true);
-        }
-
-        update() {
-            this.pathTilesGroup.sort('y', Phaser.Group.SORT_ASCENDING);
-            this.pawnsSpritesGroup.sort('y', Phaser.Group.SORT_ASCENDING);
         }
 
         isGameReadyPromise() {

@@ -29,11 +29,12 @@ module TacticArena.Specs {
             };
         }
 
-        function testStepResolution(index, position, ap, hp) {
+        function testStepResolution(index, position, ap, hp, direction) {
             let pawn = currentState.pawns[index];
             expect(pawn.getPosition()).toEqual(position);
             expect(pawn.getAp()).toEqual(ap);
             expect(pawn.getHp()).toEqual(hp);
+            expect(pawn.getDirection()).toEqual(direction);
         }
 
         beforeEach(function (done) {
@@ -83,13 +84,13 @@ module TacticArena.Specs {
             }).then((res) => {
 
             }, (res) => {
-                testStepResolution(0, {x: 8, y: 8}, 3, 4);
-                testStepResolution(1, {x: 10, y: 8}, 3, 4);
+                testStepResolution(0, {x: 8, y: 8}, 3, 4, 'E');
+                testStepResolution(1, {x: 10, y: 8}, 3, 4, 'W');
                 currentState.resolveManager.processStep(1).then((res) => {
 
                 }, (res) => {
-                    testStepResolution(0, {x: 9, y: 8}, 2, 4);
-                    testStepResolution(1, {x: 10, y: 8}, 2, 4);
+                    testStepResolution(0, {x: 9, y: 8}, 2, 4, 'E');
+                    testStepResolution(1, {x: 10, y: 8}, 2, 4, 'W');
                     done();
                 });
             });
@@ -133,18 +134,18 @@ module TacticArena.Specs {
             }).then((res) => {
 
             }, (res) => {
-                testStepResolution(0, {x: 8, y: 8}, 3, 4);
-                testStepResolution(1, {x: 10, y: 8}, 3, 4);
+                testStepResolution(0, {x: 8, y: 8}, 3, 4, 'E');
+                testStepResolution(1, {x: 10, y: 8}, 3, 4, 'W');
                 currentState.resolveManager.processStep(1).then((res) => {
 
                 }, (res) => {
-                    testStepResolution(0, {x: 9, y: 8}, 2, 4);
-                    testStepResolution(1, {x: 10, y: 8}, 2, 4);
+                    testStepResolution(0, {x: 9, y: 8}, 2, 4, 'E');
+                    testStepResolution(1, {x: 10, y: 8}, 2, 4, 'W');
                     currentState.resolveManager.processStep(2).then((res) => {
 
                     }, (res) => {
-                        testStepResolution(0, {x: 9, y: 8}, 1, 4);
-                        testStepResolution(1, {x: 10, y: 8}, 1, 3);
+                        testStepResolution(0, {x: 9, y: 8}, 1, 4, 'E');
+                        testStepResolution(1, {x: 10, y: 8}, 1, 3, 'W');
                         done();
                     });
                 });
@@ -197,23 +198,23 @@ module TacticArena.Specs {
             }).then((res) => {
 
             }, (res) => {
-                testStepResolution(0, {x: 8, y: 8}, 3, 4);
-                testStepResolution(1, {x: 10, y: 8}, 3, 4);
+                testStepResolution(0, {x: 8, y: 8}, 3, 4, 'E');
+                testStepResolution(1, {x: 10, y: 8}, 3, 4, 'W');
                 currentState.resolveManager.processStep(1).then((res) => {
 
                 }, (res) => {
-                    testStepResolution(0, {x: 8, y: 7}, 2, 4);
-                    testStepResolution(1, {x: 10, y: 7}, 2, 4);
+                    testStepResolution(0, {x: 8, y: 7}, 2, 4, 'E');
+                    testStepResolution(1, {x: 10, y: 7}, 2, 4, 'W');
                     currentState.resolveManager.processStep(2).then((res) => {
 
                     }, (res) => {
-                        testStepResolution(0, {x: 8, y: 7}, 0, 4);
-                        testStepResolution(1, {x: 9, y: 7}, 1, 2);
+                        testStepResolution(0, {x: 8, y: 7}, 0, 4, 'E');
+                        testStepResolution(1, {x: 9, y: 7}, 1, 2, 'W');
                         currentState.resolveManager.processStep(3).then((res) => {
 
                         }, (res) => {
-                            testStepResolution(0, {x: 8, y: 7}, 0, 3);
-                            testStepResolution(1, {x: 9, y: 7}, 0, 2);
+                            testStepResolution(0, {x: 8, y: 7}, 0, 3, 'E');
+                            testStepResolution(1, {x: 9, y: 7}, 0, 2, 'W');
                             done();
                         });
                     });

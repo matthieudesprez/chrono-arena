@@ -84,7 +84,10 @@ module TacticArena.UI {
 
         wait() {
             let activePawn = this.menu.game.turnManager.getActivePawn();
-            this.menu.directionUI.changeDirection(activePawn.getProjectionOrReal().getDirection());
+            let position = activePawn.getProjectionOrReal().getPosition();
+            this.menu.game.orderManager.add('stand', activePawn, position.x, position.y, activePawn.getProjectionOrReal().getDirection());
+            activePawn.setAp(activePawn.getAp() - 1);
+            this.menu.game.signalManager.onActionPlayed.dispatch(activePawn);
         }
 
         clean() {

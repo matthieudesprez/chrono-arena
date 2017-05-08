@@ -13,6 +13,7 @@ module TacticArena.State {
             this.load.setPreloadSprite(this.preloadBar);
 
             this.load.tilemap('map', 'assets/json/map.json', null, Phaser.Tilemap.TILED_JSON);
+            this.load.tilemap('area02', 'assets/json/area02.json', null, Phaser.Tilemap.TILED_JSON);
             this.load.image('tiles-collection', 'assets/images/maptiles.png');
             this.load.image('path-tile', 'assets/images/path_tile.png');
             this.load.atlasJSONArray('player', 'assets/images/character.png', 'assets/images/character.json');
@@ -39,8 +40,8 @@ module TacticArena.State {
             //setTimeout(function () {
             //    that.game.state.start("menu");
             //}, 1000);
-            that.game.state.start("menu");
-            //that.game.state.start("main");
+            //that.game.state.start("menu");
+            that.game.state.start("mainadventure");
             //that.game.state.start('mainsolooffline', true, false, {
             //    players: [
             //        {name: 'BOT 01', faction: 'evil', player: false},

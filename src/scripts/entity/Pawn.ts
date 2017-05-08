@@ -144,7 +144,7 @@ module TacticArena.Entity {
             return this._hp > 0;
         }
 
-        moveTo(x, y, path, animate = true) {
+        moveTo(x, y, path, animate = true, faceDirection = false) {
             return new Promise((resolve, reject) => {
                 var tile_y, tile_x;
                 if (path != undefined && path.length > 0) {
@@ -159,11 +159,12 @@ module TacticArena.Entity {
                 var newX = tile.x * this.game.tileSize - this.sprite._size / 4;
                 var newY = tile.y * this.game.tileSize - this.sprite._size / 2;
                 if(animate) {
+                    if(faceDirection) { this.sprite.faceTo(newX, newY); }
                     this.sprite.walk();
                     var t = this.game.add.tween(this.sprite).to({x: newX, y: newY}, this.sprite._speed, Phaser.Easing.Linear.None, true);
                     t.onComplete.add(function () {
                         if (path != undefined && path.length > 0) {
-                            this.moveTo(0, 0, path).then((res) => {
+                            this.moveTo(0, 0, path, animate, faceDirection).then((res) => {
                                 resolve(res);
                             }); // recursive
                         } else {
@@ -180,7 +181,6 @@ module TacticArena.Entity {
         }
 
         createProjection() {
-            console.log(this.projection);
             if (this.projection == null) {
                 this.projection = new Entity.Pawn(
                     this.game,
@@ -263,10 +263,13 @@ module TacticArena.Entity {
         }
 
         setHp(hp, forceAnimation) {
-            console.log(this._id, this.isAlive(), hp, forceAnimation);
             if((this.isAlive() || forceAnimation) && hp <= 0) { this.sprite.die(); }
             this._hp = hp;
             this.game.signalManager.onHpChange.dispatch(this);
+        }
+
+        getSprite() {
+            return this.sprite;
         }
     }
 }

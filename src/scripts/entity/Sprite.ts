@@ -80,14 +80,12 @@ module TacticArena.Entity {
         faceTo(x:number, y:number) {
             if (this.position.x < x) {
                 this._ext = 'E';
-            }
-            else if (this.position.x > x) {
+            } else if (this.position.x > x) {
                 this._ext = 'W';
             }
             if (this.position.y < y) {
                 this._ext = 'S';
-            }
-            else if (this.position.y > y) {
+            } else if (this.position.y > y) {
                 this._ext = 'N';
             }
         }
