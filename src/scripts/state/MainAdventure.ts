@@ -7,7 +7,7 @@ module TacticArena.State {
             super.init();
             this.game.stage.backgroundColor = 0x67AEE4;
             this.pointer = new UI.PointerExploration(this);
-            this.pawns.push(new Entity.Pawn(this, 24, 20, 'E', 'blondy', 1, false, 1, 'Amandine'));
+            this.pawns.push(new Entity.Pawn(this, 24, 20, 'E', 'amanda', 1, false, 1, 'Amandine')); //
         }
 
         create() {

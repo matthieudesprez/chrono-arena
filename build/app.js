@@ -1837,9 +1837,273 @@ var TacticArena;
 (function (TacticArena) {
     var Entity;
     (function (Entity) {
+        var Sprite = (function (_super) {
+            __extends(Sprite, _super);
+            function Sprite(game, x, y, ext, type, parent, size, tint) {
+                if (tint === void 0) { tint = null; }
+                var _this = _super.call(this, game.game, game.tileSize * x - (size / 4), game.tileSize * y - (size / 2), type) || this;
+                _this._parent = parent;
+                _this._ext = ext;
+                _this._speed = 200;
+                _this._size = size;
+                _this.setAnimations();
+                _this._animationCompleteCallback = null;
+                if (tint) {
+                    _this.tint = tint;
+                }
+                return _this;
+            }
+            Sprite.prototype.setAnimations = function () {
+                this.animations.add('standS', ["walkS1"], 6, false);
+                this.animations.add('standN', ["walkN1"], 6, false);
+                this.animations.add('standW', ["walkW1"], 6, false);
+                this.animations.add('standE', ["walkE1"], 6, false);
+                this.animations.add('walkS', ["walkS2", "walkS3", "walkS4", "walkS5", "walkS6", "walkS7", "walkS8", "walkS9"], 12, false);
+                this.animations.add('walkN', ["walkN2", "walkN3", "walkN4", "walkN5", "walkN6", "walkN7", "walkN8", "walkN9"], 12, false);
+                this.animations.add('walkW', ["walkW1", "walkW2", "walkW3", "walkW4", "walkW5", "walkW6", "walkW7", "walkW8", "walkW9"], 12, false);
+                this.animations.add('walkE', ["walkE1", "walkE2", "walkE3", "walkE4", "walkE5", "walkE6", "walkE7", "walkE8", "walkE9"], 12, false);
+                this.animations.add('attackS', ["attackS1", "attackS2", "attackS3", "attackS4", "attackS5", "attackS6"], 12, false);
+                this.animations.add('attackN', ["attackN1", "attackN2", "attackN3", "attackN4", "attackN5", "attackN6"], 12, false);
+                this.animations.add('attackW', ["attackW1", "attackW2", "attackW3", "attackW4", "attackW5", "attackW6"], 12, false);
+                this.animations.add('attackE', ["attackE1", "attackE2", "attackE3", "attackE4", "attackE5", "attackE6"], 12, false);
+                this.animations.add('castS', ["castS1", "castS2", "castS3", "castS3", "castS3", "castS4", "castS5", "castS6", "castS7"], 10, false);
+                this.animations.add('castN', ["castN1", "castN2", "castN3", "castN3", "castN3", "castN4", "castN5", "castN6", "castN7"], 10, false);
+                this.animations.add('castW', ["castW1", "castW2", "castW3", "castW3", "castW3", "castW4", "castW5", "castW6", "castW7"], 10, false);
+                this.animations.add('castE', ["castE1", "castE2", "castE3", "castE3", "castE3", "castE4", "castE5", "castE6", "castE7"], 10, false);
+                this.animations.add('halfcastS', ["castS1", "castS2", "castS3"], 10, false);
+                this.animations.add('halfcastN', ["castN1", "castN2", "castN3"], 10, false);
+                this.animations.add('halfcastW', ["castW1", "castW2", "castW3"], 10, false);
+                this.animations.add('halfcastE', ["castE1", "castE2", "castE3"], 10, false);
+                this.animations.add('dying', ["dying1", "dying2", "dying3", "dying4", "dying5", "dying6"], 10, false);
+                this.events.onAnimationComplete.add(this.animationComplete, this);
+            };
+            Sprite.prototype.animationComplete = function () {
+                if (this._animationCompleteCallback) {
+                    this._animationCompleteCallback();
+                    this._animationCompleteCallback = null;
+                }
+                var animationName = this.animations.currentAnim.name;
+                if (animationName.indexOf('attack') >= 0) {
+                    this.stand();
+                }
+            };
+            Sprite.prototype.playAnimation = function (animation) {
+                this.animations.play(animation);
+            };
+            Sprite.prototype.update = function () {
+                if (this._parent.game.selecting && this._parent.projection != null) {
+                    var p1 = this._parent.getPosition();
+                    var p2_1 = this._parent.projection.getPosition();
+                    if (p1.x == p2_1.x && p1.y == p2_1.y) {
+                        this._parent.hide();
+                    }
+                    else {
+                        this._parent.show();
+                    }
+                }
+            };
+            Sprite.prototype.faceTo = function (x, y) {
+                if (this.position.x < x) {
+                    this._ext = 'E';
+                }
+                else if (this.position.x > x) {
+                    this._ext = 'W';
+                }
+                if (this.position.y < y) {
+                    this._ext = 'S';
+                }
+                else if (this.position.y > y) {
+                    this._ext = 'N';
+                }
+            };
+            Sprite.prototype.walk = function () {
+                this.playAnimation('walk' + this._ext);
+            };
+            Sprite.prototype.stand = function () {
+                this.playAnimation('stand' + this._ext);
+            };
+            Sprite.prototype.halfcast = function () {
+                this.playAnimation('halfcast' + this._ext);
+            };
+            Sprite.prototype.cast = function (targets, callback) {
+                var self = this;
+                this._animationCompleteCallback = callback;
+                this.playAnimation('cast' + this._ext);
+                setTimeout(function () {
+                    var initialX = 0;
+                    var initialY = 0;
+                    var targetX = 0;
+                    var targetY = 0;
+                    var scaleX = 1;
+                    var angle = 0;
+                    if (self._ext == 'W' || self._ext == 'E') {
+                        initialY = self.position.y + 40;
+                        targetY = initialY;
+                        initialX = self.position.x - 40;
+                        targetX = initialX - 45;
+                        if (self._ext == 'E') {
+                            initialX = self.position.x + 110;
+                            targetX = initialX + 45;
+                            scaleX = -1;
+                        }
+                    }
+                    else if (self._ext == 'N' || self._ext == 'S') {
+                        initialX = self.position.x + 33;
+                        targetX = initialX;
+                        initialY = self.position.y - 40;
+                        targetY = initialY - 45;
+                        angle = 90;
+                        if (self._ext == 'S') {
+                            initialY = self.position.y + 110;
+                            targetY = initialY + 50;
+                            angle = 270;
+                        }
+                    }
+                    var fireball = self._parent.game.add.sprite(initialX, initialY, 'fireball');
+                    self._parent.game.pawnsSpritesGroup.add(fireball);
+                    fireball.anchor.setTo(.5, .5);
+                    fireball.scale.x *= scaleX;
+                    fireball.angle += angle;
+                    fireball.animations.add('fire', ["fireball_04", "fireball_03", "fireball_02", "fireball_01", "fireball_02", "fireball_03", "fireball_04"], 10, false);
+                    fireball.animations.play('fire');
+                    if (targets) {
+                        for (var i = 0; i < targets.length; i++) {
+                            targets[i].hurt(2);
+                        }
+                    }
+                    var t = self._parent.game.add.tween(fireball).to({ x: targetX, y: targetY }, 700, Phaser.Easing.Linear.None, true);
+                    t.onComplete.add(function () { fireball.kill(); }, self);
+                }, 500);
+            };
+            Sprite.prototype.castTornado = function (targets, callback) {
+                var self = this;
+                this._animationCompleteCallback = callback;
+                this.playAnimation('cast' + this._ext);
+                setTimeout(function () {
+                    var initialX = 0;
+                    var initialY = 0;
+                    var targetX = 0;
+                    var targetY = 0;
+                    var scaleX = 1;
+                    if (self._ext == 'W' || self._ext == 'E') {
+                        initialY = self.position.y + 40;
+                        targetY = initialY;
+                        initialX = self.position.x;
+                        targetX = initialX - 100;
+                        if (self._ext == 'E') {
+                            initialX = self.position.x + 65;
+                            targetX = initialX + 100;
+                            scaleX = -1;
+                        }
+                    }
+                    else if (self._ext == 'N' || self._ext == 'S') {
+                        initialX = self.position.x + 30;
+                        targetX = initialX;
+                        initialY = self.position.y + 5;
+                        targetY = initialY - 110;
+                        if (self._ext == 'S') {
+                            initialY = self.position.y + 65;
+                            targetY = initialY + 110;
+                        }
+                    }
+                    var tornado = self._parent.game.add.sprite(initialX, initialY, 'wind');
+                    self._parent.game.pawnsSpritesGroup.add(tornado);
+                    tornado.anchor.setTo(.5, .5);
+                    tornado.scale.x *= scaleX;
+                    tornado.animations.add('wind', ["wind_01", "wind_02", "wind_03", "wind_04", "wind_05", "wind_06", "wind_07"], 7, false);
+                    tornado.animations.play('wind');
+                    if (targets) {
+                        var _loop_2 = function () {
+                            var target = targets[i];
+                            setTimeout(function () {
+                                target.entity.hurt(1);
+                                if (target.moved.x && target.moved.y) {
+                                    target.entity.moveTo(target.moved.x, target.moved.y);
+                                }
+                            }, target.moved.d * 100);
+                        };
+                        for (var i = 0; i < targets.length; i++) {
+                            _loop_2();
+                        }
+                    }
+                    var t = self._parent.game.add.tween(tornado).to({ x: targetX, y: targetY }, 1000, Phaser.Easing.Linear.None, true);
+                    t.onComplete.add(function () { tornado.kill(); }, self);
+                }, 500);
+            };
+            Sprite.prototype.attack = function (target, callback) {
+                this._animationCompleteCallback = callback;
+                this.playAnimation('attack' + this._ext);
+                if (target) {
+                    if (target.dodge) {
+                        target.entity.dodge();
+                    }
+                    else {
+                        target.entity.hurt(target.damages);
+                    }
+                }
+            };
+            Sprite.prototype.hurt = function () {
+                this.game.add.tween(this).to({
+                    tint: 0.65 * 0xffffff,
+                    alpha: 0.5
+                }, 100, Phaser.Easing.Exponential.Out, true, 0, 0, true);
+            };
+            Sprite.prototype.die = function () {
+                this.playAnimation('dying');
+            };
+            return Sprite;
+        }(Phaser.Sprite));
+        Entity.Sprite = Sprite;
+    })(Entity = TacticArena.Entity || (TacticArena.Entity = {}));
+})(TacticArena || (TacticArena = {}));
+/// <reference path="Sprite.ts"/>
+var TacticArena;
+(function (TacticArena) {
+    var Entity;
+    (function (Entity) {
+        var MobSprite = (function (_super) {
+            __extends(MobSprite, _super);
+            function MobSprite(game, x, y, ext, type, parent, size, tint) {
+                if (tint === void 0) { tint = null; }
+                return _super.call(this, game, x, y, ext, type, parent, size, tint = null) || this;
+            }
+            MobSprite.prototype.setAnimations = function () {
+                this.animations.add('standS', ['stand_01', 'stand_02', 'stand_03', 'stand_04', 'stand_05', 'stand_06', 'stand_07', 'stand_08', 'stand_09', 'stand_10'], 6, false);
+                this.animations.add('standN', ['stand_01', 'stand_02', 'stand_03', 'stand_04', 'stand_05', 'stand_06', 'stand_07', 'stand_08', 'stand_09', 'stand_10'], 6, false);
+                this.animations.add('standW', ['stand_01', 'stand_02', 'stand_03', 'stand_04', 'stand_05', 'stand_06', 'stand_07', 'stand_08', 'stand_09', 'stand_10'], 6, false);
+                this.animations.add('standE', ['stand_01', 'stand_02', 'stand_03', 'stand_04', 'stand_05', 'stand_06', 'stand_07', 'stand_08', 'stand_09', 'stand_10'], 6, false);
+                this.animations.add('walkS', ['walk_01', 'walk_02', 'walk_03', 'walk_04', 'walk_05', 'walk_06', 'walk_07', 'walk_08', 'walk_09', 'walk_10'], 12, false);
+                this.animations.add('walkN', ['walk_01', 'walk_02', 'walk_03', 'walk_04', 'walk_05', 'walk_06', 'walk_07', 'walk_08', 'walk_09', 'walk_10'], 12, false);
+                this.animations.add('walkW', ['walk_01', 'walk_02', 'walk_03', 'walk_04', 'walk_05', 'walk_06', 'walk_07', 'walk_08', 'walk_09', 'walk_10'], 12, false);
+                this.animations.add('walkE', ['walk_01', 'walk_02', 'walk_03', 'walk_04', 'walk_05', 'walk_06', 'walk_07', 'walk_08', 'walk_09', 'walk_10'], 12, false);
+                this.animations.add('attackS', ['attack_01', 'attack_02', 'attack_03', 'attack_04', 'attack_05', 'attack_06', 'attack_07', 'attack_08', 'attack_09', 'attack_10'], 12, false);
+                this.animations.add('attackN', ['attack_01', 'attack_02', 'attack_03', 'attack_04', 'attack_05', 'attack_06', 'attack_07', 'attack_08', 'attack_09', 'attack_10'], 12, false);
+                this.animations.add('attackW', ['attack_01', 'attack_02', 'attack_03', 'attack_04', 'attack_05', 'attack_06', 'attack_07', 'attack_08', 'attack_09', 'attack_10'], 12, false);
+                this.animations.add('attackE', ['attack_01', 'attack_02', 'attack_03', 'attack_04', 'attack_05', 'attack_06', 'attack_07', 'attack_08', 'attack_09', 'attack_10'], 12, false);
+                this.animations.add('castS', ['gesture_01', 'gesture_02', 'gesture_03', 'gesture_04', 'gesture_05', 'gesture_06', 'gesture_07', 'gesture_08', 'gesture_09', 'gesture_10'], 10, false);
+                this.animations.add('castN', ['gesture_01', 'gesture_02', 'gesture_03', 'gesture_04', 'gesture_05', 'gesture_06', 'gesture_07', 'gesture_08', 'gesture_09', 'gesture_10'], 10, false);
+                this.animations.add('castW', ['gesture_01', 'gesture_02', 'gesture_03', 'gesture_04', 'gesture_05', 'gesture_06', 'gesture_07', 'gesture_08', 'gesture_09', 'gesture_10'], 10, false);
+                this.animations.add('castE', ['gesture_01', 'gesture_02', 'gesture_03', 'gesture_04', 'gesture_05', 'gesture_06', 'gesture_07', 'gesture_08', 'gesture_09', 'gesture_10'], 10, false);
+                this.animations.add('halfcastS', ['gesture_01', 'gesture_02', 'gesture_03'], 10, false);
+                this.animations.add('halfcastN', ['gesture_01', 'gesture_02', 'gesture_03'], 10, false);
+                this.animations.add('halfcastW', ['gesture_01', 'gesture_02', 'gesture_03'], 10, false);
+                this.animations.add('halfcastE', ['gesture_01', 'gesture_02', 'gesture_03'], 10, false);
+                this.animations.add('dying', ['dying_01', 'dying_02', 'dying_03', 'dying_04', 'dying_05', 'dying_06', 'dying_07', 'dying_08', 'dying_09', 'dying_10'], 10, false);
+                this.events.onAnimationComplete.add(this.animationComplete, this);
+            };
+            return MobSprite;
+        }(TacticArena.Entity.Sprite));
+        Entity.MobSprite = MobSprite;
+    })(Entity = TacticArena.Entity || (TacticArena.Entity = {}));
+})(TacticArena || (TacticArena = {}));
+var TacticArena;
+(function (TacticArena) {
+    var Entity;
+    (function (Entity) {
         var Pawn = (function () {
-            function Pawn(game, x, y, ext, type, id, bot, team, name) {
+            function Pawn(game, x, y, ext, type, id, bot, team, name, isMob) {
                 if (name === void 0) { name = ""; }
+                if (isMob === void 0) { isMob = false; }
                 this.game = game;
                 this._id = id;
                 this._name = name;
@@ -1848,7 +2112,12 @@ var TacticArena;
                 this._parent = null;
                 var tint = null; //team != this.game.playerTeam ? this.game.teamColors[team-1] : null;
                 if (type) {
-                    this.sprite = new Entity.Sprite(game, x, y, ext, type, this, 64, tint);
+                    if (isMob) {
+                        this.sprite = new Entity.MobSprite(game, x, y, ext, type, this, 32, tint);
+                    }
+                    else {
+                        this.sprite = new Entity.Sprite(game, x, y, ext, type, this, 64, tint);
+                    }
                     this.game.pawnsSpritesGroup.add(this.sprite);
                     this.sprite.stand();
                 }
@@ -2013,8 +2282,8 @@ var TacticArena;
             Pawn.prototype.destroyProjectionIfSamePosition = function () {
                 if (this.projection) {
                     var p1 = this.getPosition();
-                    var p2_1 = this.projection.getPosition();
-                    if (p1.x == p2_1.x && p1.y == p2_1.y) {
+                    var p2_2 = this.projection.getPosition();
+                    if (p1.x == p2_2.x && p1.y == p2_2.y) {
                         this.destroyProjection();
                     }
                 }
@@ -2072,229 +2341,6 @@ var TacticArena;
             return Pawn;
         }());
         Entity.Pawn = Pawn;
-    })(Entity = TacticArena.Entity || (TacticArena.Entity = {}));
-})(TacticArena || (TacticArena = {}));
-var TacticArena;
-(function (TacticArena) {
-    var Entity;
-    (function (Entity) {
-        var Sprite = (function (_super) {
-            __extends(Sprite, _super);
-            function Sprite(game, x, y, ext, type, parent, size, tint) {
-                if (tint === void 0) { tint = null; }
-                var _this = _super.call(this, game.game, game.tileSize * x - (size / 4), game.tileSize * y - (size / 2), type) || this;
-                _this._parent = parent;
-                _this._ext = ext;
-                _this._speed = 200;
-                _this._size = size;
-                _this.setAnimations();
-                _this._animationCompleteCallback = null;
-                if (tint) {
-                    _this.tint = tint;
-                }
-                return _this;
-            }
-            Sprite.prototype.setAnimations = function () {
-                this.animations.add('standS', ["walkS1"], 6, false);
-                this.animations.add('standN', ["walkN1"], 6, false);
-                this.animations.add('standW', ["walkW1"], 6, false);
-                this.animations.add('standE', ["walkE1"], 6, false);
-                this.animations.add('walkS', ["walkS2", "walkS3", "walkS4", "walkS5", "walkS6", "walkS7", "walkS8", "walkS9"], 12, false);
-                this.animations.add('walkN', ["walkN2", "walkN3", "walkN4", "walkN5", "walkN6", "walkN7", "walkN8", "walkN9"], 12, false);
-                this.animations.add('walkW', ["walkW1", "walkW2", "walkW3", "walkW4", "walkW5", "walkW6", "walkW7", "walkW8", "walkW9"], 12, false);
-                this.animations.add('walkE', ["walkE1", "walkE2", "walkE3", "walkE4", "walkE5", "walkE6", "walkE7", "walkE8", "walkE9"], 12, false);
-                this.animations.add('attackS', ["attackS1", "attackS2", "attackS3", "attackS4", "attackS5", "attackS6"], 12, false);
-                this.animations.add('attackN', ["attackN1", "attackN2", "attackN3", "attackN4", "attackN5", "attackN6"], 12, false);
-                this.animations.add('attackW', ["attackW1", "attackW2", "attackW3", "attackW4", "attackW5", "attackW6"], 12, false);
-                this.animations.add('attackE', ["attackE1", "attackE2", "attackE3", "attackE4", "attackE5", "attackE6"], 12, false);
-                this.animations.add('castS', ["castS1", "castS2", "castS3", "castS3", "castS3", "castS4", "castS5", "castS6", "castS7"], 10, false);
-                this.animations.add('castN', ["castN1", "castN2", "castN3", "castN3", "castN3", "castN4", "castN5", "castN6", "castN7"], 10, false);
-                this.animations.add('castW', ["castW1", "castW2", "castW3", "castW3", "castW3", "castW4", "castW5", "castW6", "castW7"], 10, false);
-                this.animations.add('castE', ["castE1", "castE2", "castE3", "castE3", "castE3", "castE4", "castE5", "castE6", "castE7"], 10, false);
-                this.animations.add('halfcastS', ["castS1", "castS2", "castS3"], 10, false);
-                this.animations.add('halfcastN', ["castN1", "castN2", "castN3"], 10, false);
-                this.animations.add('halfcastW', ["castW1", "castW2", "castW3"], 10, false);
-                this.animations.add('halfcastE', ["castE1", "castE2", "castE3"], 10, false);
-                this.animations.add('dying', ["dying1", "dying2", "dying3", "dying4", "dying5", "dying6"], 10, false);
-                this.events.onAnimationComplete.add(this.animationComplete, this);
-            };
-            Sprite.prototype.animationComplete = function () {
-                if (this._animationCompleteCallback) {
-                    this._animationCompleteCallback();
-                    this._animationCompleteCallback = null;
-                }
-                var animationName = this.animations.currentAnim.name;
-                if (animationName.indexOf('attack') >= 0) {
-                    this.stand();
-                }
-            };
-            Sprite.prototype.playAnimation = function (animation) {
-                this.animations.play(animation);
-            };
-            Sprite.prototype.update = function () {
-                if (this._parent.game.selecting && this._parent.projection != null) {
-                    var p1 = this._parent.getPosition();
-                    var p2_2 = this._parent.projection.getPosition();
-                    if (p1.x == p2_2.x && p1.y == p2_2.y) {
-                        this._parent.hide();
-                    }
-                    else {
-                        this._parent.show();
-                    }
-                }
-            };
-            Sprite.prototype.faceTo = function (x, y) {
-                if (this.position.x < x) {
-                    this._ext = 'E';
-                }
-                else if (this.position.x > x) {
-                    this._ext = 'W';
-                }
-                if (this.position.y < y) {
-                    this._ext = 'S';
-                }
-                else if (this.position.y > y) {
-                    this._ext = 'N';
-                }
-            };
-            Sprite.prototype.walk = function () {
-                this.playAnimation('walk' + this._ext);
-            };
-            Sprite.prototype.stand = function () {
-                this.playAnimation('stand' + this._ext);
-            };
-            Sprite.prototype.halfcast = function () {
-                this.playAnimation('halfcast' + this._ext);
-            };
-            Sprite.prototype.cast = function (targets, callback) {
-                var self = this;
-                this._animationCompleteCallback = callback;
-                this.playAnimation('cast' + this._ext);
-                setTimeout(function () {
-                    var initialX = 0;
-                    var initialY = 0;
-                    var targetX = 0;
-                    var targetY = 0;
-                    var scaleX = 1;
-                    var angle = 0;
-                    if (self._ext == 'W' || self._ext == 'E') {
-                        initialY = self.position.y + 40;
-                        targetY = initialY;
-                        initialX = self.position.x - 40;
-                        targetX = initialX - 45;
-                        if (self._ext == 'E') {
-                            initialX = self.position.x + 110;
-                            targetX = initialX + 45;
-                            scaleX = -1;
-                        }
-                    }
-                    else if (self._ext == 'N' || self._ext == 'S') {
-                        initialX = self.position.x + 33;
-                        targetX = initialX;
-                        initialY = self.position.y - 40;
-                        targetY = initialY - 45;
-                        angle = 90;
-                        if (self._ext == 'S') {
-                            initialY = self.position.y + 110;
-                            targetY = initialY + 50;
-                            angle = 270;
-                        }
-                    }
-                    var fireball = self._parent.game.add.sprite(initialX, initialY, 'fireball');
-                    self._parent.game.pawnsSpritesGroup.add(fireball);
-                    fireball.anchor.setTo(.5, .5);
-                    fireball.scale.x *= scaleX;
-                    fireball.angle += angle;
-                    fireball.animations.add('fire', ["fireball_04", "fireball_03", "fireball_02", "fireball_01", "fireball_02", "fireball_03", "fireball_04"], 10, false);
-                    fireball.animations.play('fire');
-                    if (targets) {
-                        for (var i = 0; i < targets.length; i++) {
-                            targets[i].hurt(2);
-                        }
-                    }
-                    var t = self._parent.game.add.tween(fireball).to({ x: targetX, y: targetY }, 700, Phaser.Easing.Linear.None, true);
-                    t.onComplete.add(function () { fireball.kill(); }, self);
-                }, 500);
-            };
-            Sprite.prototype.castTornado = function (targets, callback) {
-                var self = this;
-                this._animationCompleteCallback = callback;
-                this.playAnimation('cast' + this._ext);
-                setTimeout(function () {
-                    var initialX = 0;
-                    var initialY = 0;
-                    var targetX = 0;
-                    var targetY = 0;
-                    var scaleX = 1;
-                    if (self._ext == 'W' || self._ext == 'E') {
-                        initialY = self.position.y + 40;
-                        targetY = initialY;
-                        initialX = self.position.x;
-                        targetX = initialX - 100;
-                        if (self._ext == 'E') {
-                            initialX = self.position.x + 65;
-                            targetX = initialX + 100;
-                            scaleX = -1;
-                        }
-                    }
-                    else if (self._ext == 'N' || self._ext == 'S') {
-                        initialX = self.position.x + 30;
-                        targetX = initialX;
-                        initialY = self.position.y + 5;
-                        targetY = initialY - 110;
-                        if (self._ext == 'S') {
-                            initialY = self.position.y + 65;
-                            targetY = initialY + 110;
-                        }
-                    }
-                    var tornado = self._parent.game.add.sprite(initialX, initialY, 'wind');
-                    self._parent.game.pawnsSpritesGroup.add(tornado);
-                    tornado.anchor.setTo(.5, .5);
-                    tornado.scale.x *= scaleX;
-                    tornado.animations.add('wind', ["wind_01", "wind_02", "wind_03", "wind_04", "wind_05", "wind_06", "wind_07"], 7, false);
-                    tornado.animations.play('wind');
-                    if (targets) {
-                        var _loop_2 = function () {
-                            var target = targets[i];
-                            setTimeout(function () {
-                                target.entity.hurt(1);
-                                if (target.moved.x && target.moved.y) {
-                                    target.entity.moveTo(target.moved.x, target.moved.y);
-                                }
-                            }, target.moved.d * 100);
-                        };
-                        for (var i = 0; i < targets.length; i++) {
-                            _loop_2();
-                        }
-                    }
-                    var t = self._parent.game.add.tween(tornado).to({ x: targetX, y: targetY }, 1000, Phaser.Easing.Linear.None, true);
-                    t.onComplete.add(function () { tornado.kill(); }, self);
-                }, 500);
-            };
-            Sprite.prototype.attack = function (target, callback) {
-                this._animationCompleteCallback = callback;
-                this.playAnimation('attack' + this._ext);
-                if (target) {
-                    if (target.dodge) {
-                        target.entity.dodge();
-                    }
-                    else {
-                        target.entity.hurt(target.damages);
-                    }
-                }
-            };
-            Sprite.prototype.hurt = function () {
-                this.game.add.tween(this).to({
-                    tint: 0.65 * 0xffffff,
-                    alpha: 0.5
-                }, 100, Phaser.Easing.Exponential.Out, true, 0, 0, true);
-            };
-            Sprite.prototype.die = function () {
-                this.playAnimation('dying');
-            };
-            return Sprite;
-        }(Phaser.Sprite));
-        Entity.Sprite = Sprite;
     })(Entity = TacticArena.Entity || (TacticArena.Entity = {}));
 })(TacticArena || (TacticArena = {}));
 var TacticArena;
@@ -2562,7 +2608,7 @@ var TacticArena;
                 _super.prototype.init.call(this);
                 this.game.stage.backgroundColor = 0x67AEE4;
                 this.pointer = new TacticArena.UI.PointerExploration(this);
-                this.pawns.push(new TacticArena.Entity.Pawn(this, 24, 20, 'E', 'blondy', 1, false, 1, 'Amandine'));
+                this.pawns.push(new TacticArena.Entity.Pawn(this, 24, 20, 'E', 'amanda', 1, false, 1, 'Amandine')); //
             };
             MainAdventure.prototype.create = function () {
                 this.stageManager.addDecorations();
@@ -2651,10 +2697,10 @@ var TacticArena;
                     }
                     if (p.faction == 'human') {
                         _this.pawns.push(new TacticArena.Entity.Pawn(_this, startPositions[k][0].x, startPositions[k][0].y, startPositions[k][0].d, 'redhead', _this.getUniqueId(), isBot, k, _this.generator.generate()));
-                        _this.pawns.push(new TacticArena.Entity.Pawn(_this, startPositions[k][1].x, startPositions[k][1].y, startPositions[k][1].d, 'blondy', _this.getUniqueId(), isBot, k, _this.generator.generate()));
+                        _this.pawns.push(new TacticArena.Entity.Pawn(_this, startPositions[k][1].x, startPositions[k][1].y, startPositions[k][1].d, 'amanda', _this.getUniqueId(), isBot, k, _this.generator.generate()));
                     }
                     else {
-                        _this.pawns.push(new TacticArena.Entity.Pawn(_this, startPositions[k][0].x, startPositions[k][0].y, startPositions[k][0].d, 'evil', _this.getUniqueId(), isBot, k, _this.generator.generate()));
+                        _this.pawns.push(new TacticArena.Entity.Pawn(_this, startPositions[k][0].x, startPositions[k][0].y, startPositions[k][0].d, 'snake', _this.getUniqueId(), isBot, k, _this.generator.generate(), true));
                         _this.pawns.push(new TacticArena.Entity.Pawn(_this, startPositions[k][1].x, startPositions[k][1].y, startPositions[k][1].d, 'skeleton', _this.getUniqueId(), isBot, k, _this.generator.generate()));
                     }
                     console.log('jajoute mes pawns');
@@ -2755,7 +2801,9 @@ var TacticArena;
                 this.load.atlasJSONArray('redhead', 'assets/images/redhead.png', 'assets/images/redhead.json');
                 this.load.atlasJSONArray('skeleton', 'assets/images/skeleton.png', 'assets/images/skeleton.json');
                 this.load.atlasJSONArray('blondy', 'assets/images/blondy.png', 'assets/images/blondy.json');
+                this.load.atlasJSONArray('amanda', 'assets/images/amanda.png', 'assets/images/amanda.json');
                 this.load.atlasJSONArray('evil', 'assets/images/evil.png', 'assets/images/evil.json');
+                this.load.atlasJSONArray('snake', 'assets/images/snake.png', 'assets/images/snake.json');
                 this.load.atlasJSONArray('fireball', 'assets/images/fireball.png', 'assets/images/fireball.json');
                 this.load.atlasJSONArray('wind', 'assets/images/wind.png', 'assets/images/wind.json');
                 this.load.atlasJSONArray('circle', 'assets/images/circle.png', 'assets/images/circle.json');
@@ -2772,13 +2820,13 @@ var TacticArena;
                 //    that.game.state.start("menu");
                 //}, 1000);
                 //that.game.state.start("menu");
-                that.game.state.start("mainadventure");
-                //that.game.state.start('mainsolooffline', true, false, {
-                //    players: [
-                //        {name: 'BOT 01', faction: 'evil', player: false},
-                //        {name: 'Matt', faction: 'human', player: true}
-                //    ]
-                //}, null);
+                //that.game.state.start("mainadventure");
+                that.game.state.start('mainsolooffline', true, false, {
+                    players: [
+                        { name: 'BOT 01', faction: 'evil', player: false },
+                        { name: 'Matt', faction: 'human', player: true }
+                    ]
+                }, null);
                 //that.game.state.start("lobby");
             };
             return Preload;

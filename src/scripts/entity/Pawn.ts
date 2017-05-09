@@ -16,7 +16,7 @@ module TacticArena.Entity {
         team;
         hurting;
 
-        constructor(game, x, y, ext, type, id, bot, team, name = "") {
+        constructor(game, x, y, ext, type, id, bot, team, name = "", isMob=false) {
             this.game = game;
             this._id = id;
             this._name = name;
@@ -25,7 +25,11 @@ module TacticArena.Entity {
             this._parent = null;
             let tint = null; //team != this.game.playerTeam ? this.game.teamColors[team-1] : null;
             if(type) {
-                this.sprite = new Entity.Sprite(game, x, y, ext, type, this, 64, tint);
+                if(isMob) {
+                    this.sprite = new Entity.MobSprite(game, x, y, ext, type, this, 32, tint);
+                } else {
+                    this.sprite = new Entity.Sprite(game, x, y, ext, type, this, 64, tint);
+                }
                 this.game.pawnsSpritesGroup.add(this.sprite);
                 this.sprite.stand();
             }
