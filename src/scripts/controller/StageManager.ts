@@ -2,26 +2,81 @@ module TacticArena.Controller {
     export class StageManager {
         game;
         map:Phaser.Tilemap;
+        backgroundLayer;
+        foregroundLayer;
+        decorationLayer1;
+        decorationLayer2;
+        decorationLayer3;
         layer;
         grid;
+        initialGrid;
 
         constructor(game) {
             this.game = game;
             this.map = null;
+            this.backgroundLayer = null;
+            this.foregroundLayer = null;
+            this.decorationLayer1 = null;
+            this.decorationLayer2 = null;
+            this.decorationLayer3 = null;
             this.layer = null;
             this.grid = [];
+            this.initialGrid = [];
         }
 
         init(name='map') {
             this.map = this.game.add.tilemap(name);
             this.map.addTilesetImage('tiles-collection');
-            this.map.createLayer('Background');
-            this.map.createLayer('Foreground');
+            this.backgroundLayer = this.map.createLayer('Background');
+            this.foregroundLayer = this.map.createLayer('Foreground');
             this.layer = this.map.createLayer('Collision');
             this.layer.debug = true;
             this.layer.resizeWorld();
-            this.map.createLayer('Decorations');
-            this.map.createLayer('Decorations2');
+            this.decorationLayer1 = this.map.createLayer('Decorations');
+            this.decorationLayer2 = this.map.createLayer('Decorations2');
+            this.initGrid();
+            this.layer.resizeWorld();
+            console.log('jajoute mes tiles', this.backgroundLayer);
+        }
+
+        initFromArray(data) {
+            this.map = this.game.add.tilemap();
+            var objecttileset = this.map.addTilesetImage('tiles-collection', 'tiles-collection', 32, 32, 0, 0, 0);
+            console.log(objecttileset);
+            //this.backgroundLayer = this.map.createLayer(0);
+            //this.backgroundLayer = this.map.createBlankLayer('Background', 30, 30, 32, 32);
+            //this.foregroundLayer = this.map.createBlankLayer('Foreground', 30, 30, 32, 32);
+            //this.layer = this.map.createBlankLayer('Collision', 30, 30, 32, 32);
+
+            this.backgroundLayer = this.map.create('Background', 30, 30, 32, 32);
+            this.foregroundLayer = this.map.createBlankLayer('Foreground', 30, 30, 32, 32);
+            this.layer = this.map.createBlankLayer('Collision', 30, 30, 32, 32);
+            this.layer.resizeWorld();
+            this.decorationLayer1 = this.map.createBlankLayer('Decorations', 30, 30, 32, 32);
+            this.decorationLayer2 = this.map.createBlankLayer('Decorations2', 30, 30, 32, 32);
+
+            this.layer.debug = true;
+            this.backgroundLayer.debug = true;
+            for(var y = 0; y < 30; y++) {
+                for(var x = 0; x < 30; x++) {
+                    this.map.putTile(-1, x, y, this.layer);
+                }
+            }
+            for(var y = 0; y < 30; y++) {
+                for(var x = 0; x < 30; x++) {
+                   this.map.putTile(338, x, y, this.backgroundLayer);
+                }
+            }
+            this.map.putTile(338, 0, 0, this.layer);
+            this.initGrid();
+
+            this.backgroundLayer.resizeWorld();
+
+            //this.backgroundLayer.dirty = true;
+            console.log('oki', this.backgroundLayer, this.grid);
+        }
+
+        initGrid() {
             for (var i = 0; i < this.map.layers[2].data.length; i++) {
                 this.grid[i] = [];
                 for (var j = 0; j < this.map.layers[2].data[i].length; j++) {
@@ -29,16 +84,19 @@ module TacticArena.Controller {
                 }
             }
 
+            for (var i = 0; i < this.grid.length; i++) {
+                this.initialGrid[i] = this.grid[i].slice();
+            }
+
             for (var x = 0; x < this.map.width; x++) {
                 for (var y = 0; y < this.map.height; y++) {
                     this.map.removeTile(x, y, 'Collision');
                 }
             }
-            console.log('jajoute mes tiles');
         }
 
         addDecorations() {
-            this.map.createLayer('Decorations3');
+            this.decorationLayer3 = this.map.createLayer('Decorations3');
         }
 
         isObstacle(x, y) {
@@ -176,6 +234,16 @@ module TacticArena.Controller {
 
         equalPositions(p1, p2) {
             return p1.x == p2.x && p1.y == p2.y;
+        }
+
+        markPawns() {
+            for (var i = 0; i < this.initialGrid.length; i++) {
+                this.grid[i] = this.initialGrid[i].slice();
+            }
+            for(var i = 0; i < this.game.pawns.length; i++) {
+                let p = this.game.pawns[i].getPosition();
+                this.grid[p.y][p.x] = 0;
+            }
         }
     }
 }

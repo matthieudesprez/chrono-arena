@@ -27,8 +27,7 @@ module TacticArena.State {
             this.tileSize = 32;
             this.isPaused = false;
 
-            this.stageManager = new Controller.StageManager(this);
-            this.stageManager.init(this.mapName);
+            this.initMap();
 
             this.pawns = [];
             this.pathTilesGroup = this.add.group();
@@ -41,7 +40,13 @@ module TacticArena.State {
 
         update() {
             this.pathTilesGroup.sort('y', Phaser.Group.SORT_ASCENDING);
+            this.uiSpritesGroup.sort('y', Phaser.Group.SORT_ASCENDING);
             this.pawnsSpritesGroup.sort('y', Phaser.Group.SORT_ASCENDING);
+        }
+
+        initMap() {
+            this.stageManager = new Controller.StageManager(this);
+            this.stageManager.init(this.mapName);
         }
     }
 }

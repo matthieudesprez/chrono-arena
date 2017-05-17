@@ -36,8 +36,8 @@ var TacticArena;
         function Game(headless) {
             if (headless === void 0) { headless = false; }
             var _this = _super.call(this, {
-                width: 640,
-                height: 640,
+                width: window.innerWidth * window.devicePixelRatio * 0.8,
+                height: window.innerHeight * window.devicePixelRatio * 0.8,
                 renderer: headless ? Phaser.HEADLESS : Phaser.AUTO,
                 parent: 'game-container'
             }) || this;
@@ -47,6 +47,7 @@ var TacticArena;
             _this.state.add('lobby', TacticArena.State.Lobby);
             _this.state.add('options', TacticArena.State.Options);
             _this.state.add('mainadventure', TacticArena.State.MainAdventure);
+            _this.state.add('mainadventurebattle', TacticArena.State.MainAdventureBattle);
             _this.state.add('mainsolooffline', TacticArena.State.MainSoloOffline);
             _this.state.add('mainmultiplayeronline', TacticArena.State.MainMultiplayerOnline);
             _this.state.start('boot');
@@ -1592,35 +1593,80 @@ var TacticArena;
             function StageManager(game) {
                 this.game = game;
                 this.map = null;
+                this.backgroundLayer = null;
+                this.foregroundLayer = null;
+                this.decorationLayer1 = null;
+                this.decorationLayer2 = null;
+                this.decorationLayer3 = null;
                 this.layer = null;
                 this.grid = [];
+                this.initialGrid = [];
             }
             StageManager.prototype.init = function (name) {
                 if (name === void 0) { name = 'map'; }
                 this.map = this.game.add.tilemap(name);
                 this.map.addTilesetImage('tiles-collection');
-                this.map.createLayer('Background');
-                this.map.createLayer('Foreground');
+                this.backgroundLayer = this.map.createLayer('Background');
+                this.foregroundLayer = this.map.createLayer('Foreground');
                 this.layer = this.map.createLayer('Collision');
                 this.layer.debug = true;
                 this.layer.resizeWorld();
-                this.map.createLayer('Decorations');
-                this.map.createLayer('Decorations2');
+                this.decorationLayer1 = this.map.createLayer('Decorations');
+                this.decorationLayer2 = this.map.createLayer('Decorations2');
+                this.initGrid();
+                this.layer.resizeWorld();
+                console.log('jajoute mes tiles', this.backgroundLayer);
+            };
+            StageManager.prototype.initFromArray = function (data) {
+                this.map = this.game.add.tilemap();
+                var objecttileset = this.map.addTilesetImage('tiles-collection', 'tiles-collection', 32, 32, 0, 0, 0);
+                console.log(objecttileset);
+                //this.backgroundLayer = this.map.createLayer(0);
+                //this.backgroundLayer = this.map.createBlankLayer('Background', 30, 30, 32, 32);
+                //this.foregroundLayer = this.map.createBlankLayer('Foreground', 30, 30, 32, 32);
+                //this.layer = this.map.createBlankLayer('Collision', 30, 30, 32, 32);
+                this.backgroundLayer = this.map.create('Background', 30, 30, 32, 32);
+                this.foregroundLayer = this.map.createBlankLayer('Foreground', 30, 30, 32, 32);
+                this.layer = this.map.createBlankLayer('Collision', 30, 30, 32, 32);
+                this.layer.resizeWorld();
+                this.decorationLayer1 = this.map.createBlankLayer('Decorations', 30, 30, 32, 32);
+                this.decorationLayer2 = this.map.createBlankLayer('Decorations2', 30, 30, 32, 32);
+                this.layer.debug = true;
+                this.backgroundLayer.debug = true;
+                for (var y = 0; y < 30; y++) {
+                    for (var x = 0; x < 30; x++) {
+                        this.map.putTile(-1, x, y, this.layer);
+                    }
+                }
+                for (var y = 0; y < 30; y++) {
+                    for (var x = 0; x < 30; x++) {
+                        this.map.putTile(338, x, y, this.backgroundLayer);
+                    }
+                }
+                this.map.putTile(338, 0, 0, this.layer);
+                this.initGrid();
+                this.backgroundLayer.resizeWorld();
+                //this.backgroundLayer.dirty = true;
+                console.log('oki', this.backgroundLayer, this.grid);
+            };
+            StageManager.prototype.initGrid = function () {
                 for (var i = 0; i < this.map.layers[2].data.length; i++) {
                     this.grid[i] = [];
                     for (var j = 0; j < this.map.layers[2].data[i].length; j++) {
                         this.grid[i][j] = this.map.layers[2].data[i][j].index;
                     }
                 }
+                for (var i = 0; i < this.grid.length; i++) {
+                    this.initialGrid[i] = this.grid[i].slice();
+                }
                 for (var x = 0; x < this.map.width; x++) {
                     for (var y = 0; y < this.map.height; y++) {
                         this.map.removeTile(x, y, 'Collision');
                     }
                 }
-                console.log('jajoute mes tiles');
             };
             StageManager.prototype.addDecorations = function () {
-                this.map.createLayer('Decorations3');
+                this.decorationLayer3 = this.map.createLayer('Decorations3');
             };
             StageManager.prototype.isObstacle = function (x, y) {
                 return this.grid[y][x] != -1;
@@ -1750,6 +1796,15 @@ var TacticArena;
             StageManager.prototype.equalPositions = function (p1, p2) {
                 return p1.x == p2.x && p1.y == p2.y;
             };
+            StageManager.prototype.markPawns = function () {
+                for (var i = 0; i < this.initialGrid.length; i++) {
+                    this.grid[i] = this.initialGrid[i].slice();
+                }
+                for (var i = 0; i < this.game.pawns.length; i++) {
+                    var p = this.game.pawns[i].getPosition();
+                    this.grid[p.y][p.x] = 0;
+                }
+            };
             return StageManager;
         }());
         Controller.StageManager = StageManager;
@@ -1858,10 +1913,10 @@ var TacticArena;
                 this.animations.add('standN', ["walkN1"], 6, false);
                 this.animations.add('standW', ["walkW1"], 6, false);
                 this.animations.add('standE', ["walkE1"], 6, false);
-                this.animations.add('walkS', ["walkS2", "walkS3", "walkS4", "walkS5", "walkS6", "walkS7", "walkS8", "walkS9"], 12, false);
-                this.animations.add('walkN', ["walkN2", "walkN3", "walkN4", "walkN5", "walkN6", "walkN7", "walkN8", "walkN9"], 12, false);
-                this.animations.add('walkW', ["walkW1", "walkW2", "walkW3", "walkW4", "walkW5", "walkW6", "walkW7", "walkW8", "walkW9"], 12, false);
-                this.animations.add('walkE', ["walkE1", "walkE2", "walkE3", "walkE4", "walkE5", "walkE6", "walkE7", "walkE8", "walkE9"], 12, false);
+                this.animations.add('walkS', ["walkS2", "walkS3", "walkS4", "walkS5", "walkS6", "walkS7", "walkS8", "walkS9"], 12, true);
+                this.animations.add('walkN', ["walkN2", "walkN3", "walkN4", "walkN5", "walkN6", "walkN7", "walkN8", "walkN9"], 12, true);
+                this.animations.add('walkW', ["walkW1", "walkW2", "walkW3", "walkW4", "walkW5", "walkW6", "walkW7", "walkW8", "walkW9"], 12, true);
+                this.animations.add('walkE', ["walkE1", "walkE2", "walkE3", "walkE4", "walkE5", "walkE6", "walkE7", "walkE8", "walkE9"], 12, true);
                 this.animations.add('attackS', ["attackS1", "attackS2", "attackS3", "attackS4", "attackS5", "attackS6"], 12, false);
                 this.animations.add('attackN', ["attackN1", "attackN2", "attackN3", "attackN4", "attackN5", "attackN6"], 12, false);
                 this.animations.add('attackW', ["attackW1", "attackW2", "attackW3", "attackW4", "attackW5", "attackW6"], 12, false);
@@ -2068,25 +2123,25 @@ var TacticArena;
                 return _super.call(this, game, x, y, ext, type, parent, size, tint = null) || this;
             }
             MobSprite.prototype.setAnimations = function () {
-                this.animations.add('standS', ['stand_01', 'stand_02', 'stand_03', 'stand_04', 'stand_05', 'stand_06', 'stand_07', 'stand_08', 'stand_09', 'stand_10'], 6, false);
-                this.animations.add('standN', ['stand_01', 'stand_02', 'stand_03', 'stand_04', 'stand_05', 'stand_06', 'stand_07', 'stand_08', 'stand_09', 'stand_10'], 6, false);
-                this.animations.add('standW', ['stand_01', 'stand_02', 'stand_03', 'stand_04', 'stand_05', 'stand_06', 'stand_07', 'stand_08', 'stand_09', 'stand_10'], 6, false);
-                this.animations.add('standE', ['stand_01', 'stand_02', 'stand_03', 'stand_04', 'stand_05', 'stand_06', 'stand_07', 'stand_08', 'stand_09', 'stand_10'], 6, false);
+                this.animations.add('standS', ['stand_01', 'stand_02', 'stand_03', 'stand_04', 'stand_05', 'stand_06', 'stand_07', 'stand_08', 'stand_09', 'stand_10'], 6, true);
+                this.animations.add('standN', ['stand_01', 'stand_02', 'stand_03', 'stand_04', 'stand_05', 'stand_06', 'stand_07', 'stand_08', 'stand_09', 'stand_10'], 6, true);
+                this.animations.add('standW', ['stand_01_mirror', 'stand_02_mirror', 'stand_03_mirror', 'stand_04_mirror', 'stand_05_mirror', 'stand_06_mirror', 'stand_07_mirror', 'stand_08_mirror', 'stand_09_mirror', 'stand_10_mirror'], 6, true);
+                this.animations.add('standE', ['stand_01', 'stand_02', 'stand_03', 'stand_04', 'stand_05', 'stand_06', 'stand_07', 'stand_08', 'stand_09', 'stand_10'], 6, true);
                 this.animations.add('walkS', ['walk_01', 'walk_02', 'walk_03', 'walk_04', 'walk_05', 'walk_06', 'walk_07', 'walk_08', 'walk_09', 'walk_10'], 12, false);
                 this.animations.add('walkN', ['walk_01', 'walk_02', 'walk_03', 'walk_04', 'walk_05', 'walk_06', 'walk_07', 'walk_08', 'walk_09', 'walk_10'], 12, false);
-                this.animations.add('walkW', ['walk_01', 'walk_02', 'walk_03', 'walk_04', 'walk_05', 'walk_06', 'walk_07', 'walk_08', 'walk_09', 'walk_10'], 12, false);
+                this.animations.add('walkW', ['walk_01_mirror', 'walk_02_mirror', 'walk_03_mirror', 'walk_04_mirror', 'walk_05_mirror', 'walk_06_mirror', 'walk_07_mirror', 'walk_08_mirror', 'walk_09_mirror', 'walk_10_mirror'], 12, false);
                 this.animations.add('walkE', ['walk_01', 'walk_02', 'walk_03', 'walk_04', 'walk_05', 'walk_06', 'walk_07', 'walk_08', 'walk_09', 'walk_10'], 12, false);
                 this.animations.add('attackS', ['attack_01', 'attack_02', 'attack_03', 'attack_04', 'attack_05', 'attack_06', 'attack_07', 'attack_08', 'attack_09', 'attack_10'], 12, false);
                 this.animations.add('attackN', ['attack_01', 'attack_02', 'attack_03', 'attack_04', 'attack_05', 'attack_06', 'attack_07', 'attack_08', 'attack_09', 'attack_10'], 12, false);
-                this.animations.add('attackW', ['attack_01', 'attack_02', 'attack_03', 'attack_04', 'attack_05', 'attack_06', 'attack_07', 'attack_08', 'attack_09', 'attack_10'], 12, false);
+                this.animations.add('attackW', ['attack_01_mirror', 'attack_02_mirror', 'attack_03_mirror', 'attack_04_mirror', 'attack_05_mirror', 'attack_06_mirror', 'attack_07_mirror', 'attack_08_mirror', 'attack_09_mirror', 'attack_10_mirror'], 12, false);
                 this.animations.add('attackE', ['attack_01', 'attack_02', 'attack_03', 'attack_04', 'attack_05', 'attack_06', 'attack_07', 'attack_08', 'attack_09', 'attack_10'], 12, false);
                 this.animations.add('castS', ['gesture_01', 'gesture_02', 'gesture_03', 'gesture_04', 'gesture_05', 'gesture_06', 'gesture_07', 'gesture_08', 'gesture_09', 'gesture_10'], 10, false);
                 this.animations.add('castN', ['gesture_01', 'gesture_02', 'gesture_03', 'gesture_04', 'gesture_05', 'gesture_06', 'gesture_07', 'gesture_08', 'gesture_09', 'gesture_10'], 10, false);
-                this.animations.add('castW', ['gesture_01', 'gesture_02', 'gesture_03', 'gesture_04', 'gesture_05', 'gesture_06', 'gesture_07', 'gesture_08', 'gesture_09', 'gesture_10'], 10, false);
+                this.animations.add('castW', ['gesture_01_mirror', 'gesture_02_mirror', 'gesture_03_mirror', 'gesture_04_mirror', 'gesture_05_mirror', 'gesture_06_mirror', 'gesture_07_mirror', 'gesture_08_mirror', 'gesture_09_mirror', 'gesture_10_mirror'], 10, false);
                 this.animations.add('castE', ['gesture_01', 'gesture_02', 'gesture_03', 'gesture_04', 'gesture_05', 'gesture_06', 'gesture_07', 'gesture_08', 'gesture_09', 'gesture_10'], 10, false);
                 this.animations.add('halfcastS', ['gesture_01', 'gesture_02', 'gesture_03'], 10, false);
                 this.animations.add('halfcastN', ['gesture_01', 'gesture_02', 'gesture_03'], 10, false);
-                this.animations.add('halfcastW', ['gesture_01', 'gesture_02', 'gesture_03'], 10, false);
+                this.animations.add('halfcastW', ['gesture_01_mirror', 'gesture_02_mirror', 'gesture_03_mirror'], 10, false);
                 this.animations.add('halfcastE', ['gesture_01', 'gesture_02', 'gesture_03'], 10, false);
                 this.animations.add('dying', ['dying_01', 'dying_02', 'dying_03', 'dying_04', 'dying_05', 'dying_06', 'dying_07', 'dying_08', 'dying_09', 'dying_10'], 10, false);
                 this.events.onAnimationComplete.add(this.animationComplete, this);
@@ -2096,14 +2151,142 @@ var TacticArena;
         Entity.MobSprite = MobSprite;
     })(Entity = TacticArena.Entity || (TacticArena.Entity = {}));
 })(TacticArena || (TacticArena = {}));
+/// <reference path="Sprite.ts"/>
+var TacticArena;
+(function (TacticArena) {
+    var Entity;
+    (function (Entity) {
+        var MobSpriteSimple = (function (_super) {
+            __extends(MobSpriteSimple, _super);
+            function MobSpriteSimple(game, x, y, ext, type, parent, size, tint) {
+                if (tint === void 0) { tint = null; }
+                var _this = _super.call(this, game, x, y, ext, type, parent, size, tint = null) || this;
+                _this.anchor.set(-0.5);
+                return _this;
+            }
+            MobSpriteSimple.prototype.setAnimations = function () {
+                this.animations.add('standS', ['move_s_01', 'move_s_02', 'move_s_03'], 6, true);
+                this.animations.add('standN', ['move_n_01', 'move_n_02', 'move_n_03'], 6, true);
+                this.animations.add('standW', ['move_w_01', 'move_w_02', 'move_w_03'], 6, true);
+                this.animations.add('standE', ['move_e_01', 'move_e_02', 'move_e_03'], 6, true);
+                this.animations.add('walkS', ['move_s_01', 'move_s_02', 'move_s_03'], 12, false);
+                this.animations.add('walkN', ['move_n_01', 'move_n_02', 'move_n_03'], 12, false);
+                this.animations.add('walkW', ['move_w_01', 'move_w_02', 'move_w_03'], 12, false);
+                this.animations.add('walkE', ['move_e_01', 'move_e_02', 'move_e_03'], 12, false);
+                this.animations.add('attackS', ['move_s_01', 'move_s_02', 'move_s_03'], 12, false);
+                this.animations.add('attackN', ['move_n_01', 'move_n_02', 'move_n_03'], 12, false);
+                this.animations.add('attackW', ['move_w_01', 'move_w_02', 'move_w_03'], 12, false);
+                this.animations.add('attackE', ['move_e_01', 'move_e_02', 'move_e_03'], 12, false);
+                this.animations.add('castS', ['move_s_01', 'move_s_02', 'move_s_03'], 10, false);
+                this.animations.add('castN', ['move_n_01', 'move_n_02', 'move_n_03'], 10, false);
+                this.animations.add('castW', ['move_w_01', 'move_w_02', 'move_w_03'], 10, false);
+                this.animations.add('castE', ['move_e_01', 'move_e_02', 'move_e_03'], 10, false);
+                this.animations.add('halfcastS', ['move_s_01', 'move_s_02', 'move_s_03'], 10, false);
+                this.animations.add('halfcastN', ['move_n_01', 'move_n_02', 'move_n_03'], 10, false);
+                this.animations.add('halfcastW', ['move_w_01', 'move_w_02', 'move_w_03'], 10, false);
+                this.animations.add('halfcastE', ['move_e_01', 'move_e_02', 'move_e_03'], 10, false);
+                this.animations.add('dying', ['move_s_01', 'move_s_02', 'move_s_03'], 10, false);
+                this.events.onAnimationComplete.add(this.animationComplete, this);
+            };
+            MobSpriteSimple.prototype.attack = function (target, callback) {
+                var self = this;
+                _super.prototype.attack.call(this, target, callback);
+                var newX = self.position.x;
+                var newY = self.position.y;
+                if (this._ext == 'E') {
+                    newX += 10;
+                }
+                else if (this._ext == 'W') {
+                    newX -= 10;
+                }
+                else if (this._ext == 'N') {
+                    newY -= 10;
+                }
+                else if (this._ext == 'S') {
+                    newY += 10;
+                }
+                this.game.add.tween(this).to({
+                    x: newX,
+                    y: newY
+                }, 100, Phaser.Easing.Exponential.Out, true, 0, 0, true);
+            };
+            return MobSpriteSimple;
+        }(TacticArena.Entity.Sprite));
+        Entity.MobSpriteSimple = MobSpriteSimple;
+    })(Entity = TacticArena.Entity || (TacticArena.Entity = {}));
+})(TacticArena || (TacticArena = {}));
+/// <reference path="Sprite.ts"/>
+var TacticArena;
+(function (TacticArena) {
+    var Entity;
+    (function (Entity) {
+        var MobSpriteSimpleBis = (function (_super) {
+            __extends(MobSpriteSimpleBis, _super);
+            function MobSpriteSimpleBis(game, x, y, ext, type, parent, size, tint) {
+                if (tint === void 0) { tint = null; }
+                var _this = _super.call(this, game, x, y, ext, type, parent, size, tint = null) || this;
+                _this.anchor.set(-0.6);
+                return _this;
+            }
+            MobSpriteSimpleBis.prototype.setAnimations = function () {
+                this.animations.add('standS', ['move_s_02'], 6, true);
+                this.animations.add('standN', ['move_n_02'], 6, true);
+                this.animations.add('standW', ['move_w_02'], 6, true);
+                this.animations.add('standE', ['move_e_02'], 6, true);
+                this.animations.add('walkS', ['move_s_01', 'move_s_02', 'move_s_03'], 12, false);
+                this.animations.add('walkN', ['move_n_01', 'move_n_02', 'move_n_03'], 12, false);
+                this.animations.add('walkW', ['move_w_01', 'move_w_02', 'move_w_03'], 12, false);
+                this.animations.add('walkE', ['move_e_01', 'move_e_02', 'move_e_03'], 12, false);
+                this.animations.add('attackS', ['move_s_01', 'move_s_02', 'move_s_03'], 12, false);
+                this.animations.add('attackN', ['move_n_01', 'move_n_02', 'move_n_03'], 12, false);
+                this.animations.add('attackW', ['move_w_01', 'move_w_02', 'move_w_03'], 12, false);
+                this.animations.add('attackE', ['move_e_01', 'move_e_02', 'move_e_03'], 12, false);
+                this.animations.add('castS', ['move_s_01', 'move_s_02', 'move_s_03'], 10, false);
+                this.animations.add('castN', ['move_n_01', 'move_n_02', 'move_n_03'], 10, false);
+                this.animations.add('castW', ['move_w_01', 'move_w_02', 'move_w_03'], 10, false);
+                this.animations.add('castE', ['move_e_01', 'move_e_02', 'move_e_03'], 10, false);
+                this.animations.add('halfcastS', ['move_s_01', 'move_s_02', 'move_s_03'], 10, false);
+                this.animations.add('halfcastN', ['move_n_01', 'move_n_02', 'move_n_03'], 10, false);
+                this.animations.add('halfcastW', ['move_w_01', 'move_w_02', 'move_w_03'], 10, false);
+                this.animations.add('halfcastE', ['move_e_01', 'move_e_02', 'move_e_03'], 10, false);
+                this.animations.add('dying', ['move_s_01', 'move_s_02', 'move_s_03'], 10, false);
+                this.events.onAnimationComplete.add(this.animationComplete, this);
+            };
+            MobSpriteSimpleBis.prototype.attack = function (target, callback) {
+                var self = this;
+                _super.prototype.attack.call(this, target, callback);
+                var newX = self.position.x;
+                var newY = self.position.y;
+                if (this._ext == 'E') {
+                    newX += 10;
+                }
+                else if (this._ext == 'W') {
+                    newX -= 10;
+                }
+                else if (this._ext == 'N') {
+                    newY -= 10;
+                }
+                else if (this._ext == 'S') {
+                    newY += 10;
+                }
+                this.game.add.tween(this).to({
+                    x: newX,
+                    y: newY
+                }, 100, Phaser.Easing.Exponential.Out, true, 0, 0, true);
+            };
+            return MobSpriteSimpleBis;
+        }(TacticArena.Entity.Sprite));
+        Entity.MobSpriteSimpleBis = MobSpriteSimpleBis;
+    })(Entity = TacticArena.Entity || (TacticArena.Entity = {}));
+})(TacticArena || (TacticArena = {}));
 var TacticArena;
 (function (TacticArena) {
     var Entity;
     (function (Entity) {
         var Pawn = (function () {
-            function Pawn(game, x, y, ext, type, id, bot, team, name, isMob) {
+            function Pawn(game, x, y, ext, type, id, bot, team, name, spriteClass) {
                 if (name === void 0) { name = ""; }
-                if (isMob === void 0) { isMob = false; }
+                if (spriteClass === void 0) { spriteClass = Entity.Sprite; }
                 this.game = game;
                 this._id = id;
                 this._name = name;
@@ -2111,13 +2294,9 @@ var TacticArena;
                 this.projection = null;
                 this._parent = null;
                 var tint = null; //team != this.game.playerTeam ? this.game.teamColors[team-1] : null;
+                this.spriteClass = spriteClass;
                 if (type) {
-                    if (isMob) {
-                        this.sprite = new Entity.MobSprite(game, x, y, ext, type, this, 32, tint);
-                    }
-                    else {
-                        this.sprite = new Entity.Sprite(game, x, y, ext, type, this, 64, tint);
-                    }
+                    this.sprite = new spriteClass(game, x, y, ext, type, this, 64, tint);
                     this.game.pawnsSpritesGroup.add(this.sprite);
                     this.sprite.stand();
                 }
@@ -2251,7 +2430,10 @@ var TacticArena;
                         if (faceDirection) {
                             _this.sprite.faceTo(newX, newY);
                         }
-                        _this.sprite.walk();
+                        console.log(_this.sprite.animations.currentAnim.name);
+                        if (_this.sprite.animations.currentAnim.name != 'walk' + _this.sprite._ext) {
+                            _this.sprite.walk();
+                        }
                         var t = _this.game.add.tween(_this.sprite).to({ x: newX, y: newY }, _this.sprite._speed, Phaser.Easing.Linear.None, true);
                         t.onComplete.add(function () {
                             if (path != undefined && path.length > 0) {
@@ -2352,7 +2534,15 @@ var TacticArena;
             function BaseState() {
                 return _super.call(this) || this;
             }
-            BaseState.prototype.init = function (data, server, chat) {
+            BaseState.prototype.init = function () {
+                //this.game.scale.scaleMode = Phaser.ScaleManager.EXACT_FIT;
+                //this.game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+                //this.game.scale.setScreenSize( true );
+                //this.scale.scaleMode = Phaser.ScaleManager.;
+                //this.scale.pageAlignVertically = true;
+                //this.scale.pageAlignHorizontally = true;
+                //this.scale.setShowAll();
+                //this.scale.refresh();
                 this.game.stage.backgroundColor = 0x333333;
                 $('[class*="ui-"]').remove();
                 $('#game-menu').remove();
@@ -2386,8 +2576,7 @@ var TacticArena;
                 this.process = true;
                 this.tileSize = 32;
                 this.isPaused = false;
-                this.stageManager = new TacticArena.Controller.StageManager(this);
-                this.stageManager.init(this.mapName);
+                this.initMap();
                 this.pawns = [];
                 this.pathTilesGroup = this.add.group();
                 this.pathOrdersTilesGroup = this.add.group();
@@ -2397,7 +2586,12 @@ var TacticArena;
             };
             BasePlayable.prototype.update = function () {
                 this.pathTilesGroup.sort('y', Phaser.Group.SORT_ASCENDING);
+                this.uiSpritesGroup.sort('y', Phaser.Group.SORT_ASCENDING);
                 this.pawnsSpritesGroup.sort('y', Phaser.Group.SORT_ASCENDING);
+            };
+            BasePlayable.prototype.initMap = function () {
+                this.stageManager = new TacticArena.Controller.StageManager(this);
+                this.stageManager.init(this.mapName);
             };
             return BasePlayable;
         }(TacticArena.State.BaseState));
@@ -2427,7 +2621,7 @@ var TacticArena;
             };
             BaseBattle.prototype.create = function () {
                 var self = this;
-                this.stageManager.addDecorations();
+                //this.stageManager.addDecorations();
                 this.pathfinder = new EasyStar.js();
                 this.pathfinder.setAcceptableTiles([-1]);
                 //this.pathfinder.disableDiagonals();
@@ -2524,6 +2718,8 @@ var TacticArena;
                 this.load.image('loading', 'assets/images/loading.png');
             };
             Boot.prototype.create = function () {
+                //this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+                //this.scale.scaleMode = Phaser.ScaleManager.RESIZE;
                 this.input.maxPointers = 1;
                 this.stage.disableVisibilityChange = true;
                 this.game.state.start('preload');
@@ -2608,10 +2804,14 @@ var TacticArena;
                 _super.prototype.init.call(this);
                 this.game.stage.backgroundColor = 0x67AEE4;
                 this.pointer = new TacticArena.UI.PointerExploration(this);
-                this.pawns.push(new TacticArena.Entity.Pawn(this, 24, 20, 'E', 'amanda', 1, false, 1, 'Amandine')); //
+                this.pawns.push(new TacticArena.Entity.Pawn(this, 25, 10, 'N', 'redhead', 1, false, 1, 'Amandine', TacticArena.Entity.Sprite)); //
+                //this.pawns.push(new Entity.Pawn(this, 25, 6, 'E', 'rabbit', 1, false, 1, 'Amandine', Entity.MobSpriteSimpleBis)); //
+                this.pawns.push(new TacticArena.Entity.Pawn(this, 25, 6, 'E', 'bee', 1, false, 1, 'Amandine', TacticArena.Entity.MobSpriteSimple)); //
+                this.stageManager.markPawns();
             };
             MainAdventure.prototype.create = function () {
-                this.stageManager.addDecorations();
+                var self = this;
+                //this.stageManager.addDecorations();
                 console.log(this.stageManager.grid);
                 this.pathfinder = new EasyStar.js();
                 this.pathfinder.setAcceptableTiles([-1]);
@@ -2619,13 +2819,72 @@ var TacticArena;
                 //this.pathfinder.enableDiagonals();
                 //this.pathfinder.disableSync();
                 this.pathfinder.setGrid(this.stageManager.grid);
-                this.world.setBounds(0, 0, 2000, 2000);
+                //this.world.setBounds(0, 0, 2000, 2000);
                 this.game.camera.follow(this.pawns[0].getSprite(), Phaser.Camera.FOLLOW_LOCKON, 0.1, 0.1);
                 this.process = false;
+                $(window).on('keyup', function (e) {
+                    console.log(e.keyCode);
+                    if (e.keyCode == 37) {
+                        self.pawns[0].getSprite().attack();
+                    }
+                    else if (e.keyCode == 38) {
+                        self.pawns[0].getSprite().cast();
+                    }
+                    else if (e.keyCode == 39) {
+                        self.pawns[0].getSprite().die();
+                    }
+                });
+            };
+            MainAdventure.prototype.initMap = function () {
+                this.stageManager = new TacticArena.Controller.StageManager(this);
+                this.stageManager.initFromArray([]);
             };
             return MainAdventure;
         }(TacticArena.State.BasePlayable));
         State.MainAdventure = MainAdventure;
+    })(State = TacticArena.State || (TacticArena.State = {}));
+})(TacticArena || (TacticArena = {}));
+var TacticArena;
+(function (TacticArena) {
+    var State;
+    (function (State) {
+        var StageManager = TacticArena.Controller.StageManager;
+        var MainAdventureBattle = (function (_super) {
+            __extends(MainAdventureBattle, _super);
+            function MainAdventureBattle() {
+                return _super !== null && _super.apply(this, arguments) || this;
+            }
+            MainAdventureBattle.prototype.init = function (data) {
+                var _this = this;
+                this.importedStage = data.stage;
+                _super.prototype.init.call(this);
+                console.log(data);
+                this.playMode = 'offline';
+                this.players = data.players;
+                var startPositions = [[{ x: 8, y: 8, d: 'E' }, { x: 7, y: 7, d: 'E' }], [{ x: 11, y: 8, d: 'W' }, { x: 12, y: 7, d: 'W' }]];
+                this.players.forEach(function (p, k) {
+                    var isBot = true;
+                    if (p.player) {
+                        _this.playerTeam = k;
+                        isBot = false;
+                    }
+                    else {
+                        _this.aiManager = new TacticArena.Controller.AiManager(_this, k);
+                    }
+                    _this.pawns.push(new TacticArena.Entity.Pawn(_this, p.position.x, p.position.y, p.direction, p.type, _this.getUniqueId(), isBot, k, p.name, p.spriteClass));
+                    console.log('jajoute mes pawns');
+                });
+            };
+            MainAdventureBattle.prototype.create = function () {
+                _super.prototype.create.call(this);
+            };
+            MainAdventureBattle.prototype.initMap = function () {
+                this.stageManager = new StageManager(this);
+                this.stageManager.initFromArray([]);
+            };
+            return MainAdventureBattle;
+        }(TacticArena.State.BaseBattle));
+        State.MainAdventureBattle = MainAdventureBattle;
     })(State = TacticArena.State || (TacticArena.State = {}));
 })(TacticArena || (TacticArena = {}));
 var TacticArena;
@@ -2700,7 +2959,7 @@ var TacticArena;
                         _this.pawns.push(new TacticArena.Entity.Pawn(_this, startPositions[k][1].x, startPositions[k][1].y, startPositions[k][1].d, 'amanda', _this.getUniqueId(), isBot, k, _this.generator.generate()));
                     }
                     else {
-                        _this.pawns.push(new TacticArena.Entity.Pawn(_this, startPositions[k][0].x, startPositions[k][0].y, startPositions[k][0].d, 'snake', _this.getUniqueId(), isBot, k, _this.generator.generate(), true));
+                        _this.pawns.push(new TacticArena.Entity.Pawn(_this, startPositions[k][0].x, startPositions[k][0].y, startPositions[k][0].d, 'snake', _this.getUniqueId(), isBot, k, _this.generator.generate()));
                         _this.pawns.push(new TacticArena.Entity.Pawn(_this, startPositions[k][1].x, startPositions[k][1].y, startPositions[k][1].d, 'skeleton', _this.getUniqueId(), isBot, k, _this.generator.generate()));
                     }
                     console.log('jajoute mes pawns');
@@ -2804,9 +3063,15 @@ var TacticArena;
                 this.load.atlasJSONArray('amanda', 'assets/images/amanda.png', 'assets/images/amanda.json');
                 this.load.atlasJSONArray('evil', 'assets/images/evil.png', 'assets/images/evil.json');
                 this.load.atlasJSONArray('snake', 'assets/images/snake.png', 'assets/images/snake.json');
+                this.load.atlasJSONArray('poring', 'assets/images/poring.png', 'assets/images/poring.json');
+                this.load.atlasJSONArray('roguefemale', 'assets/images/roguefemale.png', 'assets/images/roguefemale.json');
+                this.load.atlasJSONArray('bee', 'assets/images/bee.png', 'assets/images/bee.json');
+                this.load.atlasJSONArray('rabbit', 'assets/images/rabbit.png', 'assets/images/rabbit.json');
                 this.load.atlasJSONArray('fireball', 'assets/images/fireball.png', 'assets/images/fireball.json');
                 this.load.atlasJSONArray('wind', 'assets/images/wind.png', 'assets/images/wind.json');
                 this.load.atlasJSONArray('circle', 'assets/images/circle.png', 'assets/images/circle.json');
+                this.load.image('cursor_attack', 'assets/images/cursor_attack.png');
+                this.load.image('cursor_pointer', 'assets/images/cursor_pointer.png');
                 this.load.start();
             };
             Preload.prototype.create = function () {
@@ -2820,13 +3085,13 @@ var TacticArena;
                 //    that.game.state.start("menu");
                 //}, 1000);
                 //that.game.state.start("menu");
-                //that.game.state.start("mainadventure");
-                that.game.state.start('mainsolooffline', true, false, {
-                    players: [
-                        { name: 'BOT 01', faction: 'evil', player: false },
-                        { name: 'Matt', faction: 'human', player: true }
-                    ]
-                }, null);
+                that.game.state.start("mainadventure");
+                //that.game.state.start('mainsolooffline', true, false, {
+                //    players: [
+                //        {name: 'BOT 01', faction: 'evil', player: false},
+                //        {name: 'Matt', faction: 'human', player: true}
+                //    ]
+                //}, null);
                 //that.game.state.start("lobby");
             };
             return Preload;
@@ -5497,11 +5762,19 @@ var TacticArena;
         var Pointer = (function () {
             function Pointer(game) {
                 this.game = game;
-                this.marker = this.game.add.graphics(-this.game.tileSize, -this.game.tileSize);
+                this.marker = this.game.make.graphics(-1 * this.game.tileSize, -1 * this.game.tileSize);
                 this.marker.lineStyle(2, 0xffffff, 1);
                 this.marker.drawRect(0, 0, this.game.tileSize, this.game.tileSize);
+                this.game.uiSpritesGroup.add(this.marker);
+                //this.cursor_pointer = this.game.add.sprite(0, 0, 'cursor_pointer');
+                //this.cursor_pointer.visible = true;
                 this.game.input.addMoveCallback(this.update, this);
-                this.game.input.onDown.add(this.onGridClick, this);
+                this.game.input.mousePointer.leftButton.onDown.add(this.onGridLeftClick, this);
+                this.game.input.mousePointer.rightButton.onDown.add(this.onGridRightClick, this);
+                this.game.input.mouse.capture = true;
+                $('canvas').bind('contextmenu', function (e) {
+                    return false;
+                });
             }
             Pointer.prototype.getPosition = function () {
                 return {
@@ -5520,6 +5793,9 @@ var TacticArena;
                 var pointerPosition = this.getPosition();
                 this.marker.x = pointerPosition.x * this.game.tileSize;
                 this.marker.y = pointerPosition.y * this.game.tileSize;
+                //this.cursor_pointer.position.x = this.game.input.activePointer.worldX;
+                //this.cursor_pointer.position.y = this.game.input.activePointer.worldY;
+                //this.cursor_pointer.bringToTop();
                 if (!self.game.process) {
                     var activePawn_1 = this.game.turnManager.getActivePawn();
                     var position = activePawn_1.getProjectionOrReal().getPosition();
@@ -5596,7 +5872,7 @@ var TacticArena;
                     }
                 }
             };
-            Pointer.prototype.onGridClick = function () {
+            Pointer.prototype.onGridLeftClick = function () {
                 var self = this;
                 if (!this.game.process) {
                     var activePawn = this.game.turnManager.getActivePawn();
@@ -5699,6 +5975,8 @@ var TacticArena;
                     }
                 }
             };
+            Pointer.prototype.onGridRightClick = function () {
+            };
             Pointer.prototype.hide = function () {
                 this.marker.visible = false;
             };
@@ -5728,30 +6006,68 @@ var TacticArena;
         var PointerExploration = (function (_super) {
             __extends(PointerExploration, _super);
             function PointerExploration(game) {
-                return _super.call(this, game) || this;
+                var _this = _super.call(this, game) || this;
+                _this.cursor_attack = _this.game.add.sprite(_this.marker.x + 5, _this.marker.y - 5, 'cursor_attack');
+                _this.cursor_attack.visible = false;
+                return _this;
             }
             PointerExploration.prototype.update = function () {
-                var pointerPosition = this.getPosition();
-                this.marker.x = pointerPosition.x * this.game.tileSize;
-                this.marker.y = pointerPosition.y * this.game.tileSize;
+                var activePawn = this.game.pawns[0];
+                var p = this.getPosition();
+                this.marker.x = p.x * this.game.tileSize;
+                this.marker.y = p.y * this.game.tileSize;
+                if (this.game.stageManager.grid[p.y][p.x] == 0 && !this.game.stageManager.equalPositions(p, activePawn.getPosition())) {
+                    //console.log('attack');
+                    //this.marker.visible = false;
+                    //this.cursor_attack.visible = true;
+                    //this.cursor_attack.position.x = this.marker.x + 5;
+                    //this.cursor_attack.position.y = this.marker.y - 5;
+                    this.marker.lineStyle(2, 0xcd2f36, 1);
+                }
+                else {
+                    this.marker.lineStyle(2, 0xffffff, 1);
+                    //this.marker.visible = true;
+                    //this.cursor_attack.visible = false;
+                }
+                this.marker.drawRect(0, 0, this.game.tileSize, this.game.tileSize);
             };
-            PointerExploration.prototype.onGridClick = function () {
+            PointerExploration.prototype.onGridLeftClick = function () {
                 var self = this;
                 if (!self.game.process) {
                     var activePawn = this.game.pawns[0];
+                    var p = this.getPosition();
                     var targetX = this.marker.x / this.game.tileSize;
                     var targetY = this.marker.y / this.game.tileSize;
+                    this.game.stageManager.map.putTile(338, p.x, p.y, this.game.stageManager.backgroundLayer);
                     self.game.process = true;
-                    this.game.stageManager.canMove(activePawn, targetX, targetY).then(function (path) {
-                        console.log(path);
-                        activePawn.moveTo(0, 0, path, true, true).then(function (res) {
-                            self.game.process = false;
+                    console.log(p);
+                    if (this.game.stageManager.grid[p.y][p.x] != 0) {
+                        this.game.stageManager.canMove(activePawn, targetX, targetY).then(function (path) {
+                            console.log(path);
+                            activePawn.moveTo(0, 0, path, true, true).then(function (res) {
+                                self.game.stageManager.markPawns();
+                                self.game.process = false;
+                            }, function (res) {
+                            });
                         }, function (res) {
+                            console.log(res);
+                            self.game.process = false;
                         });
-                    }, function (res) {
-                        console.log(res);
+                    }
+                    else if (!this.game.stageManager.equalPositions(p, activePawn.getPosition())) {
+                        console.log('attack');
+                        var enemy = self.game.pawns[1];
                         self.game.process = false;
-                    });
+                        self.game.state.clearCurrentState();
+                        self.game.state.start('mainadventurebattle', true, false, {
+                            players: [
+                                { name: 'Beez', faction: 'animals', player: false, type: enemy.type, spriteClass: enemy.spriteClass, position: enemy.getPosition(), direction: enemy.getDirection() },
+                                { name: activePawn._name, faction: 'human', player: true, type: activePawn.type, spriteClass: activePawn.spriteClass, position: activePawn.getPosition(), direction: activePawn.getDirection() }
+                            ],
+                            stage: {},
+                            center: p
+                        });
+                    }
                 }
             };
             return PointerExploration;

@@ -23,10 +23,20 @@ module TacticArena.State {
             this.load.atlasJSONArray('blondy', 'assets/images/blondy.png', 'assets/images/blondy.json');
             this.load.atlasJSONArray('amanda', 'assets/images/amanda.png', 'assets/images/amanda.json');
             this.load.atlasJSONArray('evil', 'assets/images/evil.png', 'assets/images/evil.json');
+
             this.load.atlasJSONArray('snake', 'assets/images/snake.png', 'assets/images/snake.json');
+            this.load.atlasJSONArray('poring', 'assets/images/poring.png', 'assets/images/poring.json');
+            this.load.atlasJSONArray('roguefemale', 'assets/images/roguefemale.png', 'assets/images/roguefemale.json');
+
+            this.load.atlasJSONArray('bee', 'assets/images/bee.png', 'assets/images/bee.json');
+            this.load.atlasJSONArray('rabbit', 'assets/images/rabbit.png', 'assets/images/rabbit.json');
+
             this.load.atlasJSONArray('fireball', 'assets/images/fireball.png', 'assets/images/fireball.json');
             this.load.atlasJSONArray('wind', 'assets/images/wind.png', 'assets/images/wind.json');
+
             this.load.atlasJSONArray('circle', 'assets/images/circle.png', 'assets/images/circle.json');
+            this.load.image('cursor_attack', 'assets/images/cursor_attack.png');
+            this.load.image('cursor_pointer', 'assets/images/cursor_pointer.png');
 
             this.load.start();
         }

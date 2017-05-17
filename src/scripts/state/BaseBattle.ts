@@ -34,7 +34,7 @@ module TacticArena.State {
 
         create() {
             let self = this;
-            this.stageManager.addDecorations();
+            //this.stageManager.addDecorations();
 
             this.pathfinder = new EasyStar.js();
             this.pathfinder.setAcceptableTiles([-1]);

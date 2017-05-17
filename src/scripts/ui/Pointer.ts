@@ -2,16 +2,26 @@ module TacticArena.UI {
     export class Pointer {
         game;
         marker:Phaser.Graphics;
+        cursor_pointer:Phaser.Sprite;
 
         constructor(game) {
             this.game = game;
 
-            this.marker = this.game.add.graphics(-this.game.tileSize, -this.game.tileSize);
+            this.marker =  this.game.make.graphics(-1 * this.game.tileSize, -1 * this.game.tileSize);
             this.marker.lineStyle(2, 0xffffff, 1);
             this.marker.drawRect(0, 0, this.game.tileSize, this.game.tileSize);
+            this.game.uiSpritesGroup.add(this.marker);
+
+            //this.cursor_pointer = this.game.add.sprite(0, 0, 'cursor_pointer');
+            //this.cursor_pointer.visible = true;
 
             this.game.input.addMoveCallback(this.update, this);
-            this.game.input.onDown.add(this.onGridClick, this);
+            this.game.input.mousePointer.leftButton.onDown.add(this.onGridLeftClick, this);
+            this.game.input.mousePointer.rightButton.onDown.add(this.onGridRightClick, this);
+            this.game.input.mouse.capture = true;
+            $('canvas').bind('contextmenu', function(e){
+                return false;
+            });
         }
 
         getPosition() {
@@ -32,6 +42,9 @@ module TacticArena.UI {
             let pointerPosition = this.getPosition();
             this.marker.x = pointerPosition.x * this.game.tileSize;
             this.marker.y = pointerPosition.y * this.game.tileSize;
+            //this.cursor_pointer.position.x = this.game.input.activePointer.worldX;
+            //this.cursor_pointer.position.y = this.game.input.activePointer.worldY;
+            //this.cursor_pointer.bringToTop();
 
             if(!self.game.process) {
                 let activePawn = this.game.turnManager.getActivePawn();
@@ -106,7 +119,7 @@ module TacticArena.UI {
             }
         }
 
-        onGridClick() {
+        onGridLeftClick() {
             let self = this;
             if (!this.game.process) {
                 var activePawn = this.game.turnManager.getActivePawn();
@@ -208,6 +221,10 @@ module TacticArena.UI {
                     }
                 }
             }
+        }
+
+        onGridRightClick() {
+
         }
 
         hide() {
