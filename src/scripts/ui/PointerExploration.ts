@@ -35,7 +35,7 @@ module TacticArena.UI {
                 let p = this.getPosition();
                 var targetX = this.marker.x / this.game.tileSize;
                 var targetY = this.marker.y / this.game.tileSize;
-                this.game.stageManager.map.putTile(338, p.x, p.y, this.game.stageManager.backgroundLayer);
+                this.game.stageManager.map.putTile(497, p.x, p.y, this.game.stageManager.backgroundLayer);
                 self.game.process = true;
                 console.log(p);
                 if(this.game.stageManager.grid[p.y][p.x] != 0) {
@@ -61,7 +61,7 @@ module TacticArena.UI {
                             {name: 'Beez', faction: 'animals', player: false, type: enemy.type, spriteClass: enemy.spriteClass, position: enemy.getPosition(), direction: enemy.getDirection()},
                             {name: activePawn._name, faction: 'human', player: true, type: activePawn.type, spriteClass: activePawn.spriteClass, position: activePawn.getPosition(), direction: activePawn.getDirection()}
                         ],
-                        stage: {}, //self.game.stageManager,
+                        stage: self.game.stageManager.getLayers(),
                         center: p
                     });
                 }

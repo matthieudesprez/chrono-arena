@@ -24,7 +24,7 @@ module TacticArena.Controller {
             this.initialGrid = [];
         }
 
-        init(name='map') {
+        init(name = 'map') {
             this.map = this.game.add.tilemap(name);
             this.map.addTilesetImage('tiles-collection');
             this.backgroundLayer = this.map.createLayer('Background');
@@ -41,7 +41,7 @@ module TacticArena.Controller {
 
         initFromArray(data) {
             this.map = this.game.add.tilemap();
-            var objecttileset = this.map.addTilesetImage('tiles-collection', 'tiles-collection', 32, 32, 0, 0, 0);
+            var objecttileset = this.map.addTilesetImage('tiles-collection');
             console.log(objecttileset);
             //this.backgroundLayer = this.map.createLayer(0);
             //this.backgroundLayer = this.map.createBlankLayer('Background', 30, 30, 32, 32);
@@ -56,18 +56,18 @@ module TacticArena.Controller {
             this.decorationLayer2 = this.map.createBlankLayer('Decorations2', 30, 30, 32, 32);
 
             this.layer.debug = true;
-            this.backgroundLayer.debug = true;
-            for(var y = 0; y < 30; y++) {
-                for(var x = 0; x < 30; x++) {
+            //this.backgroundLayer.debug = true;
+            for (var y = 0; y < 30; y++) {
+                for (var x = 0; x < 30; x++) {
                     this.map.putTile(-1, x, y, this.layer);
                 }
             }
-            for(var y = 0; y < 30; y++) {
-                for(var x = 0; x < 30; x++) {
-                   this.map.putTile(338, x, y, this.backgroundLayer);
+            for (var y = 0; y < 30; y++) {
+                for (var x = 0; x < 30; x++) {
+                    console.log(data.background.layer.data[y][x].index);
+                    this.map.putTile(data.background.layer.data[y][x].index, x, y, this.backgroundLayer);
                 }
             }
-            this.map.putTile(338, 0, 0, this.layer);
             this.initGrid();
 
             this.backgroundLayer.resizeWorld();
@@ -99,6 +99,17 @@ module TacticArena.Controller {
             this.decorationLayer3 = this.map.createLayer('Decorations3');
         }
 
+        getLayers() {
+            return {
+                background: this.backgroundLayer,
+                foreground: this.foregroundLayer,
+                collision: this.layer,
+                decoration1: this.decorationLayer1,
+                decoration2: this.decorationLayer2,
+                decoration3: this.decorationLayer3
+            };
+        }
+
         isObstacle(x, y) {
             return this.grid[y][x] != -1;
         }
@@ -108,7 +119,7 @@ module TacticArena.Controller {
             this.grid[p.y][p.x] = pawn.isAlive() ? -1 : 3;
         }
 
-        canMove(entity, x, y, ap=Infinity) {
+        canMove(entity, x, y, ap = Infinity) {
             return new Promise((resolve, reject) => {
                 //this.equalPositions(entity.getPosition(), {x: x, y: y});
                 this.game.pathfinder.findPath(entity.getPosition().x, entity.getPosition().y, x, y, function (path) {
@@ -151,10 +162,18 @@ module TacticArena.Controller {
             let p = position ? position : pawn.getPosition();
             let d = direction ? direction : pawn.getDirection();
             let path = [];
-            if(d == 'W') { path.push({'x': p.x - 1, 'y': p.y}); }
-            else if(d == 'E') { path.push({'x': p.x + 1, 'y': p.y}); }
-            else if(d == 'S') { path.push({'x': p.x, 'y': p.y + 1}); }
-            else if(d == 'N') { path.push({'x': p.x, 'y': p.y - 1}); }
+            if (d == 'W') {
+                path.push({'x': p.x - 1, 'y': p.y});
+            }
+            else if (d == 'E') {
+                path.push({'x': p.x + 1, 'y': p.y});
+            }
+            else if (d == 'S') {
+                path.push({'x': p.x, 'y': p.y + 1});
+            }
+            else if (d == 'N') {
+                path.push({'x': p.x, 'y': p.y - 1});
+            }
             return path;
         }
 
@@ -240,7 +259,7 @@ module TacticArena.Controller {
             for (var i = 0; i < this.initialGrid.length; i++) {
                 this.grid[i] = this.initialGrid[i].slice();
             }
-            for(var i = 0; i < this.game.pawns.length; i++) {
+            for (var i = 0; i < this.game.pawns.length; i++) {
                 let p = this.game.pawns[i].getPosition();
                 this.grid[p.y][p.x] = 0;
             }
