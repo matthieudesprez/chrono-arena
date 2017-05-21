@@ -14,6 +14,8 @@ module TacticArena.State {
         teams;
         chatUI;
         playMode;
+        gridWidth;
+        gridHeight;
 
         constructor() {
             super();

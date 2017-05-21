@@ -44,7 +44,7 @@ module TacticArena.UI {
                             self.game.stageManager.markPawns();
                             self.game.process = false;
                         }, (res) => {
-
+                            self.game.process = false;
                         });
                     }, (res) => {
                         console.log(res);
@@ -55,13 +55,19 @@ module TacticArena.UI {
                     let enemy = self.game.pawns[1];
                     self.game.process = false;
                     self.game.state.clearCurrentState();
+                    let gridWidth = 10;
+                    let gridHeight = 10;
+                    let startPosition = {x: Math.abs(p.x - Math.floor(gridWidth / 2)), y: Math.abs(p.y - Math.floor(gridHeight / 2))};
                     self.game.state.start('mainadventurebattle', true, false, {
                         players: [
-                            {name: 'Beez', faction: 'animals', player: false, type: enemy.type, spriteClass: enemy.spriteClass, position: enemy.getPosition(), direction: enemy.getDirection()},
-                            {name: activePawn._name, faction: 'human', player: true, type: activePawn.type, spriteClass: activePawn.spriteClass, position: activePawn.getPosition(), direction: activePawn.getDirection()}
+                            {name: 'Beez', faction: 'animals', player: false, type: enemy.type, spriteClass: enemy.spriteClass, position: self.game.stageManager.differenceBetweenPositions(startPosition, enemy.getPosition()), direction: enemy.getDirection()},
+                            {name: activePawn._name, faction: 'human', player: true, type: activePawn.type, spriteClass: activePawn.spriteClass, position: self.game.stageManager.differenceBetweenPositions(startPosition, activePawn.getPosition()), direction: activePawn.getDirection()}
                         ],
                         stage: self.game.stageManager.getLayers(),
-                        center: p
+                        center: p,
+                        gridWidth: gridWidth,
+                        gridHeight: gridHeight,
+                        startPosition : startPosition
                     });
                 }
             }
