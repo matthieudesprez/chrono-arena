@@ -38,6 +38,17 @@ module TacticArena.State {
             this.generator = new Utils.Generator();
         }
 
+        create() {
+            this.addDecorations();
+
+            this.pathfinder = new EasyStar.js();
+            this.pathfinder.setAcceptableTiles([-1]);
+            this.pathfinder.disableDiagonals();
+            //this.pathfinder.enableDiagonals();
+            //this.pathfinder.disableSync();
+            this.pathfinder.setGrid(this.stageManager.grid);
+        }
+
         update() {
             this.pathTilesGroup.sort('y', Phaser.Group.SORT_ASCENDING);
             this.uiSpritesGroup.sort('y', Phaser.Group.SORT_ASCENDING);
@@ -47,6 +58,10 @@ module TacticArena.State {
         initMap() {
             this.stageManager = new Controller.StageManager(this);
             this.stageManager.init(this.mapName);
+        }
+
+        addDecorations() {
+            this.stageManager.addDecorations();
         }
     }
 }

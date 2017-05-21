@@ -33,15 +33,8 @@ module TacticArena.State {
         }
 
         create() {
+            super.create();
             let self = this;
-            //this.stageManager.addDecorations();
-
-            this.pathfinder = new EasyStar.js();
-            this.pathfinder.setAcceptableTiles([-1]);
-            //this.pathfinder.disableDiagonals();
-            this.pathfinder.enableDiagonals();
-            //this.pathfinder.disableSync();
-            this.pathfinder.setGrid(this.stageManager.grid);
 
             this.logManager = new Controller.LogManager(this);
             this.orderManager = new Controller.OrderManager(this);

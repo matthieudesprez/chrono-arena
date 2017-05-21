@@ -9,6 +9,7 @@ module TacticArena.State {
         init(data) {
             this.importedStage = data.stage;
             super.init();
+            this.game.stage.backgroundColor = 0x67AEE4;
             console.log(data);
             this.playMode = 'offline';
             this.players = data.players;
@@ -48,6 +49,10 @@ module TacticArena.State {
         initMap() {
             this.stageManager = new StageManager(this);
             this.stageManager.initFromArray(this.importedStage);
+        }
+
+        addDecorations() {
+            this.stageManager.addDecorationsFromData(this.importedStage);
         }
     }
 }

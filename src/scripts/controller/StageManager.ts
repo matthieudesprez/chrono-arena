@@ -2,12 +2,13 @@ module TacticArena.Controller {
     export class StageManager {
         game;
         map:Phaser.Tilemap;
+        parallaxLayer;
         backgroundLayer;
         foregroundLayer;
+        collisionLayer;
         decorationLayer1;
         decorationLayer2;
         decorationLayer3;
-        layer;
         grid;
         initialGrid;
 
@@ -19,68 +20,75 @@ module TacticArena.Controller {
             this.decorationLayer1 = null;
             this.decorationLayer2 = null;
             this.decorationLayer3 = null;
-            this.layer = null;
+            this.collisionLayer = null;
             this.grid = [];
             this.initialGrid = [];
         }
 
         init(name = 'map') {
             this.map = this.game.add.tilemap(name);
-            this.map.addTilesetImage('tiles-collection');
+            this.map.addTilesetImage('tiles-collection', 'tiles-collection', 32, 32, 0, 0);
+            this.map.addTilesetImage('CloudPurple', 'CloudPurple', 32, 32, 0, 0);
+            this.parallaxLayer = this.map.createLayer('Parallax');
+            this.parallaxLayer.scrollFactorX = 0.5;
+            this.parallaxLayer.scrollFactorY = 0.5;
             this.backgroundLayer = this.map.createLayer('Background');
             this.foregroundLayer = this.map.createLayer('Foreground');
-            this.layer = this.map.createLayer('Collision');
-            this.layer.debug = true;
-            this.layer.resizeWorld();
+            this.collisionLayer = this.map.createLayer('Collision');
+            //this.collisionLayer.debug = true;
             this.decorationLayer1 = this.map.createLayer('Decorations');
             this.decorationLayer2 = this.map.createLayer('Decorations2');
             this.initGrid();
-            this.layer.resizeWorld();
-            console.log('jajoute mes tiles', this.backgroundLayer);
+            this.backgroundLayer.resizeWorld();
+            console.log('jajoute mes tiles', this.grid.length, this.backgroundLayer.layer.data.length);
         }
 
         initFromArray(data) {
             this.map = this.game.add.tilemap();
-            var objecttileset = this.map.addTilesetImage('tiles-collection');
-            console.log(objecttileset);
-            //this.backgroundLayer = this.map.createLayer(0);
-            //this.backgroundLayer = this.map.createBlankLayer('Background', 30, 30, 32, 32);
-            //this.foregroundLayer = this.map.createBlankLayer('Foreground', 30, 30, 32, 32);
-            //this.layer = this.map.createBlankLayer('Collision', 30, 30, 32, 32);
+            //this.map.addTilesetImage('CloudPurple');//, 'CloudPurple', 32, 32, 0, 0, 1);
 
-            this.backgroundLayer = this.map.create('Background', 30, 30, 32, 32);
-            this.foregroundLayer = this.map.createBlankLayer('Foreground', 30, 30, 32, 32);
-            this.layer = this.map.createBlankLayer('Collision', 30, 30, 32, 32);
-            this.layer.resizeWorld();
-            this.decorationLayer1 = this.map.createBlankLayer('Decorations', 30, 30, 32, 32);
-            this.decorationLayer2 = this.map.createBlankLayer('Decorations2', 30, 30, 32, 32);
+            this.map.addTilesetImage('tiles-collection', 'tiles-collection', 32, 32, 0, 0, 1);
+            this.parallaxLayer = this.map.create('Parallax', 160, 160, 32, 32);
+            this.parallaxLayer.scrollFactorX = 0.5;
+            this.parallaxLayer.scrollFactorY = 0.5;
+            this.backgroundLayer = this.map.create('Background', 160, 160, 32, 32);
+            this.foregroundLayer = this.map.createBlankLayer('Foreground', 160, 160, 32, 32);
+            this.collisionLayer = this.map.createBlankLayer('Collision', 160, 160, 32, 32);
+            this.decorationLayer1 = this.map.createBlankLayer('Decorations', 160, 160, 32, 32);
+            this.decorationLayer2 = this.map.createBlankLayer('Decorations2', 160, 160, 32, 32);
 
-            this.layer.debug = true;
-            //this.backgroundLayer.debug = true;
-            for (var y = 0; y < 30; y++) {
-                for (var x = 0; x < 30; x++) {
-                    this.map.putTile(-1, x, y, this.layer);
-                }
-            }
-            for (var y = 0; y < 30; y++) {
-                for (var x = 0; x < 30; x++) {
-                    console.log(data.background.layer.data[y][x].index);
-                    this.map.putTile(data.background.layer.data[y][x].index, x, y, this.backgroundLayer);
-                }
-            }
+            this.map.paste(0, 0, data.background.map.copy(0, 0, 160, 160, data.parallax), this.parallaxLayer);
+            this.map.paste(0, 0, data.background.map.copy(0, 0, 160, 160, data.background), this.backgroundLayer);
+            this.map.paste(0, 0, data.background.map.copy(0, 0, 160, 160, data.foreground), this.foregroundLayer);
+            this.map.paste(0, 0, data.background.map.copy(0, 0, 160, 160, data.collision), this.collisionLayer);
+            this.map.paste(0, 0, data.background.map.copy(0, 0, 160, 160, data.decoration1), this.decorationLayer1);
+            this.map.paste(0, 0, data.background.map.copy(0, 0, 160, 160, data.decoration2), this.decorationLayer2);
+
+            //for (var i = 0; i < data.background.layer.data.length; i++) {
+            //    for (var j = 0; j < data.background.layer.data[i].length; j++) {
+            //        console.log(data.background.layer.data[i][j]);
+            //        this.map.putTile(data.background.layer.data[i][j].index, j, i, this.backgroundLayer);
+            //    }
+            //}
+
+            //for (var y = 0; y < 160; y++) {
+            //    for (var x = 0; x < 160; x++) {
+            //        //console.log(data.background.layer.data[y][x].index);
+            //        //this.map.putTile(data.background.layer.data[y][x].index, x, y, this.backgroundLayer);
+            //        this.map.putTile(3, x, y, this.backgroundLayer);
+            //    }
+            //}
+
             this.initGrid();
 
             this.backgroundLayer.resizeWorld();
-
-            //this.backgroundLayer.dirty = true;
-            console.log('oki', this.backgroundLayer, this.grid);
         }
 
         initGrid() {
-            for (var i = 0; i < this.map.layers[2].data.length; i++) {
+            for (var i = 0; i < this.collisionLayer.layer.data.length; i++) {
                 this.grid[i] = [];
-                for (var j = 0; j < this.map.layers[2].data[i].length; j++) {
-                    this.grid[i][j] = this.map.layers[2].data[i][j].index;
+                for (var j = 0; j < this.collisionLayer.layer.data[i].length; j++) {
+                    this.grid[i][j] = this.collisionLayer.layer.data[i][j].index;
                 }
             }
 
@@ -99,11 +107,17 @@ module TacticArena.Controller {
             this.decorationLayer3 = this.map.createLayer('Decorations3');
         }
 
+        addDecorationsFromData(data) {
+            this.decorationLayer3 = this.map.createBlankLayer('Decorations3', 160, 160, 32, 32);
+            this.map.paste(0, 0, data.background.map.copy(0, 0, 160, 160, data.decoration3), this.decorationLayer3);
+        }
+
         getLayers() {
             return {
+                parallax: this.parallaxLayer,
                 background: this.backgroundLayer,
                 foreground: this.foregroundLayer,
-                collision: this.layer,
+                collision: this.collisionLayer,
                 decoration1: this.decorationLayer1,
                 decoration2: this.decorationLayer2,
                 decoration3: this.decorationLayer3
@@ -180,35 +194,35 @@ module TacticArena.Controller {
         showPossibleLinearTrajectories(path) {
             this.clearPossibleMove();
             for (var i = 0; i < path.length; i++) {
-                let tile = this.map.getTile(path[i].x, path[i].y, this.map.layer[0], true);
+                let tile = this.map.getTile(path[i].x, path[i].y, this.backgroundLayer, true);
                 tile.alpha = 0.7;
             }
-            this.map.layers[0].dirty = true;
+            this.backgroundLayer.layer.dirty = true;
         }
 
         showPossibleMove(position, ap) {
             for (var x = 0; x < this.map.width; x++) {
                 for (var y = 0; y < this.map.height; y++) {
-                    let tile = this.map.getTile(x, y, this.map.layer[0], true);
+                    let tile = this.map.getTile(x, y, this.backgroundLayer, true);
                     tile.alpha = ap > 0 && this.getNbTilesBetween(position, {'x': x, 'y': y}) <= ap ? 0.7 : 1;
                 }
             }
-            this.map.layers[0].dirty = true;
+            this.backgroundLayer.layer.dirty = true;
         }
 
         clearPossibleMove() {
             for (var x = 0; x < this.map.width; x++) {
                 for (var y = 0; y < this.map.height; y++) {
-                    let tile = this.map.getTile(x, y, this.map.layer[0], true);
+                    let tile = this.map.getTile(x, y, this.backgroundLayer, true);
                     tile.alpha = 1;
                 }
             }
-            this.map.layers[0].dirty = true;
+            this.backgroundLayer.layer.dirty = true;
         }
 
         showPath(path, group, tint = null) {
             for (var i = 0; i < (path as any).length; i++) {
-                let tile = this.map.getTile(path[i].x, path[i].y, this.map.layer[0], true);
+                let tile = this.map.getTile(path[i].x, path[i].y, this.backgroundLayer, true);
                 let tileSprite = new Phaser.Sprite(this.game, tile.x * this.game.tileSize, tile.y * this.game.tileSize, 'path-tile', '');
                 if (tint) {
                     tileSprite.tint = tint;

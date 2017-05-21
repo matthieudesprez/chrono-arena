@@ -14,31 +14,22 @@ module TacticArena.State {
         }
 
         create() {
+            super.create();
             let self = this;
-            //this.stageManager.addDecorations();
-            console.log(this.stageManager.grid);
-            this.pathfinder = new EasyStar.js();
-            this.pathfinder.setAcceptableTiles([-1]);
-            //this.pathfinder.disableDiagonals();
-            //this.pathfinder.enableDiagonals();
-            //this.pathfinder.disableSync();
-            this.pathfinder.setGrid(this.stageManager.grid);
 
             //this.world.setBounds(0, 0, 2000, 2000);
             this.game.camera.follow(this.pawns[0].getSprite(), Phaser.Camera.FOLLOW_LOCKON, 0.1, 0.1);
             this.process = false;
 
-            $(window).on('keyup', function (e) {
-                console.log(e.keyCode);
-                if(e.keyCode == 37) {
-                    self.pawns[0].getSprite().attack();
-                } else if(e.keyCode == 38) {
-                    self.pawns[0].getSprite().cast();
-                } else if(e.keyCode == 39) {
-                    self.pawns[0].getSprite().die();
-                }
-
-            });
+            //$(window).on('keyup', function (e) {
+            //    if(e.keyCode == 37) {
+            //        self.pawns[0].getSprite().attack();
+            //    } else if(e.keyCode == 38) {
+            //        self.pawns[0].getSprite().cast();
+            //    } else if(e.keyCode == 39) {
+            //        self.pawns[0].getSprite().die();
+            //    }
+            //});
         }
 
         //initMap() {
