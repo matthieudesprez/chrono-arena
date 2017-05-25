@@ -7,6 +7,7 @@ module TacticArena.State {
         data;
 
         init(data) {
+            console.log(data);
             this.data = data;
             super.init();
             this.game.stage.backgroundColor = 0x67AEE4;
@@ -43,7 +44,7 @@ module TacticArena.State {
         battleOver () {
             super.battleOver();
             this.game.state.start("mainadventure", true, false, {
-                position: this.pawns[0].getPosition()
+                mainPawn: this.pawns[0].export(),
             });
         }
     }

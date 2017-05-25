@@ -162,7 +162,6 @@ module TacticArena.Entity {
                 var newY = tile.y * this.game.tileSize - this.sprite._size / 2;
                 if(animate) {
                     if(faceDirection) { this.sprite.faceTo(newX, newY); }
-                    console.log(this.sprite.animations.currentAnim.name);
                     if(this.sprite.animations.currentAnim.name != 'walk' + this.sprite._ext) {
                         this.sprite.walk();
                     }
@@ -275,6 +274,18 @@ module TacticArena.Entity {
 
         getSprite() {
             return this.sprite;
+        }
+
+        export() {
+            return {
+                _id: this._id,
+                direction: this.getDirection(),
+                position: this.getPosition(),
+                hp: this.getHp(),
+                name: this._name,
+                type: this.type,
+                spriteClass: this.spriteClass
+            }
         }
     }
 }

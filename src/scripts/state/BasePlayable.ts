@@ -41,6 +41,7 @@ module TacticArena.State {
         create() {
             this.addDecorations();
 
+            this.pathfinder = null;
             this.pathfinder = new EasyStar.js();
             this.pathfinder.setAcceptableTiles([-1]);
             this.pathfinder.disableDiagonals();
@@ -62,6 +63,27 @@ module TacticArena.State {
 
         addDecorations() {
             this.stageManager.addDecorations();
+        }
+
+        shutdown () {
+            console.log('switch');
+            if(this.pointer) {
+                this.pointer.destroy();
+            }
+            this.pointer = null;
+            //delete this.pathfinder;
+            //delete this.pawns;
+            //delete this.pathTilesGroup;
+            //delete this.pathOrdersTilesGroup;
+            //delete this.pawnsSpritesGroup;
+            //delete this.uiSpritesGroup;
+            //delete this.tileSize;
+            //delete this.stageManager;
+            //delete this.process;
+            //delete this.isPaused;
+            //delete this.players;
+            //delete this.generator;
+            //delete this.mapName;
         }
     }
 }

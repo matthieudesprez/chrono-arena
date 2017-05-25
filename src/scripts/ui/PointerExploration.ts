@@ -58,12 +58,13 @@ module TacticArena.UI {
                     let gridWidth = 10;
                     let gridHeight = 16;
                     let startPosition = {x: p.x - Math.floor(gridWidth / 2), y: p.y - Math.floor(gridHeight / 2)};
+                    let layers = self.game.stageManager.getLayers();
                     self.game.state.start('mainadventurebattle', true, false, {
                         players: [
                             {name: 'Beez', faction: 'animals', player: false, type: enemy.type, spriteClass: enemy.spriteClass, position: enemy.getPosition(), direction: enemy.getDirection()},
                             {name: activePawn._name, faction: 'human', player: true, type: activePawn.type, spriteClass: activePawn.spriteClass, position: activePawn.getPosition(), direction: activePawn.getDirection()}
                         ],
-                        stage: self.game.stageManager.getLayers(),
+                        stage: layers,
                         center: p, // {x: startPosition.x - Math.floor(gridWidth / 2), y: startPosition.y - Math.floor(gridHeight / 2)},
                         gridWidth: gridWidth,
                         gridHeight: gridHeight,

@@ -25,6 +25,7 @@ module TacticArena.Controller {
             this.blackLayer = null;
             this.grid = [];
             this.initialGrid = [];
+            console.log('stagemanager init', this.grid);
         }
 
         init(name = 'map') {

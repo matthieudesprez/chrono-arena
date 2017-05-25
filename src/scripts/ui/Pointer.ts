@@ -249,5 +249,17 @@ module TacticArena.UI {
                 self.show();
             });
         }
+
+        destroy () {
+            console.log('pointer destroy');
+            this.marker.destroy();
+
+            this.game.input.deleteMoveCallback(this.update, this);
+            this.game.input.mousePointer.leftButton.onDown.removeAll();
+            this.game.input.mousePointer.rightButton.onDown.removeAll();
+            this.game.input.mouse.capture = false;
+
+            $('canvas').off('contextmenu');
+        }
     }
 }
