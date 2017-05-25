@@ -22,6 +22,7 @@ module TacticArena.Entity {
             if(tint) {
                 this.tint = tint;
             }
+            this.anchor.set(0);
         }
 
         setAnimations() {

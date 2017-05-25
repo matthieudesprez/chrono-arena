@@ -106,5 +106,9 @@ module TacticArena.State {
             }
             return null;
         }
+
+        battleOver () {
+            console.log('battle is over');
+        }
     }
 }

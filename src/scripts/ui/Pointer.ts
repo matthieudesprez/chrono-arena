@@ -42,7 +42,6 @@ module TacticArena.UI {
             let pointerPosition = this.getPosition();
             this.marker.x = pointerPosition.x * this.game.tileSize;
             this.marker.y = pointerPosition.y * this.game.tileSize;
-            console.log(pointerPosition);
             //this.cursor_pointer.position.x = this.game.input.activePointer.worldX;
             //this.cursor_pointer.position.y = this.game.input.activePointer.worldY;
             //this.cursor_pointer.bringToTop();
@@ -127,6 +126,8 @@ module TacticArena.UI {
                 var targetX = this.marker.x / this.game.tileSize;
                 var targetY = this.marker.y / this.game.tileSize;
                 let position = activePawn.getProjectionOrReal().getPosition();
+
+                console.log(targetX, targetY);
 
                 var distance = this.game.stageManager.getNbTilesBetween(
                     {'x': targetX, 'y': targetY}, {'x': position.x, 'y': position.y}

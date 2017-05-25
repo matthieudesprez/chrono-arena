@@ -5,7 +5,7 @@ module TacticArena.State {
         }
 
         create() {
-            //this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+            this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
             //this.scale.scaleMode = Phaser.ScaleManager.RESIZE;
 
             this.input.maxPointers = 1;

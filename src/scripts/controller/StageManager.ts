@@ -9,6 +9,7 @@ module TacticArena.Controller {
         decorationLayer1;
         decorationLayer2;
         decorationLayer3;
+        blackLayer;
         grid;
         initialGrid;
 
@@ -21,6 +22,7 @@ module TacticArena.Controller {
             this.decorationLayer2 = null;
             this.decorationLayer3 = null;
             this.collisionLayer = null;
+            this.blackLayer = null;
             this.grid = [];
             this.initialGrid = [];
         }
@@ -28,7 +30,6 @@ module TacticArena.Controller {
         init(name = 'map') {
             this.map = this.game.add.tilemap(name);
             this.map.addTilesetImage('tiles-collection', 'tiles-collection', this.game.tileSize, this.game.tileSize, 0, 0);
-            this.map.addTilesetImage('CloudPurple', 'CloudPurple', this.game.tileSize, this.game.tileSize, 0, 0);
             this.parallaxLayer = this.map.createLayer('Parallax');
             this.parallaxLayer.scrollFactorX = 0.5;
             this.parallaxLayer.scrollFactorY = 0.5;
@@ -45,21 +46,20 @@ module TacticArena.Controller {
 
         initFromArray(data, width=160, height=160, start={x:0, y:0}) {
             this.map = this.game.add.tilemap();
-            //this.map.addTilesetImage('CloudPurple', 'CloudPurple', this.game.tileSize, this.game.tileSize, 0, 0, 1);
-            //
-            //this.parallaxLayer = this.map.create('Parallax', 160, 160, this.game.tileSize, this.game.tileSize);
-            //this.parallaxLayer.scrollFactorX = 0.5;
-            //this.parallaxLayer.scrollFactorY = 0.5;
-            //this.map.paste(0, 0, data.background.map.copy(0, 0, 160, 160, data.parallax), this.parallaxLayer);
+            width = data.background.layer.width;
+            height = data.background.layer.height;
 
             this.map.addTilesetImage('tiles-collection', 'tiles-collection', this.game.tileSize, this.game.tileSize, 0, 0, 1);
-            this.backgroundLayer = this.map.create('Background', width, height, this.game.tileSize, this.game.tileSize);
+            this.parallaxLayer = this.map.create('Parallax', width, height, this.game.tileSize, this.game.tileSize);
+            this.parallaxLayer.scrollFactorX = 0.5;
+            this.parallaxLayer.scrollFactorY = 0.5;
+            this.backgroundLayer = this.map.createBlankLayer('Background', width, height, this.game.tileSize, this.game.tileSize);
             this.foregroundLayer = this.map.createBlankLayer('Foreground', width, height, this.game.tileSize, this.game.tileSize);
             this.collisionLayer = this.map.createBlankLayer('Collision', width, height, this.game.tileSize, this.game.tileSize);
             this.decorationLayer1 = this.map.createBlankLayer('Decorations', width, height, this.game.tileSize, this.game.tileSize);
             this.decorationLayer2 = this.map.createBlankLayer('Decorations2', width, height, this.game.tileSize, this.game.tileSize);
 
-            console.log(start);
+            this.map.paste(0, 0, data.background.map.copy(start.x, start.y, width, height, data.parallax), this.parallaxLayer);
             this.map.paste(0, 0, data.background.map.copy(start.x, start.y, width, height, data.background), this.backgroundLayer);
             this.map.paste(0, 0, data.background.map.copy(start.x, start.y, width, height, data.foreground), this.foregroundLayer);
             this.map.paste(0, 0, data.background.map.copy(start.x, start.y, width, height, data.collision), this.collisionLayer);
@@ -99,9 +99,31 @@ module TacticArena.Controller {
             this.decorationLayer3 = this.map.createLayer('Decorations3');
         }
 
-        addDecorationsFromData(data, width=160, height=160, start={x:0, y:0}) {
+        addDecorationsFromData(data) {
+            let width = data.stage.background.layer.width;
+            let height = data.stage.background.layer.height;
             this.decorationLayer3 = this.map.createBlankLayer('Decorations3', width, height, this.game.tileSize, this.game.tileSize);
-            this.map.paste(0, 0, data.background.map.copy(start.x, start.y, width, height, data.decoration3), this.decorationLayer3);
+            this.map.paste(0, 0, data.stage.background.map.copy(0, 0, width, height, data.stage.decoration3), this.decorationLayer3);
+        }
+
+        addBlackLayer(data) {
+            let width = data.stage.background.layer.width;
+            let height = data.stage.background.layer.height;
+            this.blackLayer = this.map.createBlankLayer('Black', width, height, this.game.tileSize, this.game.tileSize);
+            let endX = data.startPosition.x + data.gridWidth;
+            let endY = data.startPosition.y + data.gridHeight;
+            for (var x = 0; x < width; x++) {
+                for (var y = 0; y < height; y++) {
+                    if(x < data.startPosition.x || x > endX || y < data.startPosition.y || y > endY) {
+                        let tile = this.map.putTile(9, x, y, this.blackLayer);
+                        if (tile) {
+                            tile.alpha = 0.8;
+                            this.grid[y][x] = 1;
+                        }
+                    }
+                }
+            }
+            console.log(this.parallaxLayer);
         }
 
         getLayers() {

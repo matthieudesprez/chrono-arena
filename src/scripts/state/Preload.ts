@@ -14,7 +14,6 @@ module TacticArena.State {
 
             this.load.tilemap('map', 'assets/json/map.json', null, Phaser.Tilemap.TILED_JSON);
             this.load.tilemap('area02', 'assets/json/area02.json', null, Phaser.Tilemap.TILED_JSON);
-            this.load.image('CloudPurple', 'assets/images/cloud-tiles.png');
             this.load.image('tiles-collection', 'assets/images/maptiles.png');
             this.load.image('path-tile', 'assets/images/path_tile.png');
             this.load.atlasJSONArray('player', 'assets/images/character.png', 'assets/images/character.json');

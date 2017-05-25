@@ -25,16 +25,26 @@ module TacticArena.State {
 
         create() {
             super.create();
+            //this.game.camera.focusOnXY(this.pawns[0].getSprite().x + 16, this.pawns[0].getSprite().y + 16);
+            this.game.camera.focusOnXY(this.data.center.x * this.tileSize + 16, this.data.center.y * this.tileSize + 16);
         }
 
         initMap() {
             console.log(this.data);
             this.stageManager = new StageManager(this);
-            this.stageManager.initFromArray(this.data.stage, this.data.gridWidth, this.data.gridHeight, this.data.startPosition);
+            this.stageManager.initFromArray(this.data.stage, this.data.gridWidth, this.data.gridHeight);
         }
 
         addDecorations() {
-            this.stageManager.addDecorationsFromData(this.data.stage, this.data.gridWidth, this.data.gridHeight, this.data.startPosition);
+            this.stageManager.addDecorationsFromData(this.data);
+            this.stageManager.addBlackLayer(this.data);
+        }
+
+        battleOver () {
+            super.battleOver();
+            this.game.state.start("mainadventure", true, false, {
+                position: this.pawns[0].getPosition()
+            });
         }
     }
 }

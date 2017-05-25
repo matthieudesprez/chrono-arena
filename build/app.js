@@ -36,8 +36,8 @@ var TacticArena;
         function Game(headless) {
             if (headless === void 0) { headless = false; }
             var _this = _super.call(this, {
-                width: window.innerWidth * window.devicePixelRatio * 0.8,
-                height: window.innerHeight * window.devicePixelRatio * 0.8,
+                width: 640,
+                height: 608,
                 renderer: headless ? Phaser.HEADLESS : Phaser.AUTO,
                 parent: 'game-container'
             }) || this;
@@ -1599,14 +1599,14 @@ var TacticArena;
                 this.decorationLayer2 = null;
                 this.decorationLayer3 = null;
                 this.collisionLayer = null;
+                this.blackLayer = null;
                 this.grid = [];
                 this.initialGrid = [];
             }
             StageManager.prototype.init = function (name) {
                 if (name === void 0) { name = 'map'; }
                 this.map = this.game.add.tilemap(name);
-                this.map.addTilesetImage('tiles-collection', 'tiles-collection', 32, 32, 0, 0);
-                this.map.addTilesetImage('CloudPurple', 'CloudPurple', 32, 32, 0, 0);
+                this.map.addTilesetImage('tiles-collection', 'tiles-collection', this.game.tileSize, this.game.tileSize, 0, 0);
                 this.parallaxLayer = this.map.createLayer('Parallax');
                 this.parallaxLayer.scrollFactorX = 0.5;
                 this.parallaxLayer.scrollFactorY = 0.5;
@@ -1620,35 +1620,32 @@ var TacticArena;
                 this.backgroundLayer.resizeWorld();
                 console.log('jajoute mes tiles', this.grid.length, this.backgroundLayer.layer.data.length);
             };
-            StageManager.prototype.initFromArray = function (data) {
+            StageManager.prototype.initFromArray = function (data, width, height, start) {
+                if (width === void 0) { width = 160; }
+                if (height === void 0) { height = 160; }
+                if (start === void 0) { start = { x: 0, y: 0 }; }
                 this.map = this.game.add.tilemap();
-                //this.map.addTilesetImage('CloudPurple');//, 'CloudPurple', 32, 32, 0, 0, 1);
-                this.map.addTilesetImage('tiles-collection', 'tiles-collection', 32, 32, 0, 0, 1);
-                this.parallaxLayer = this.map.create('Parallax', 160, 160, 32, 32);
+                width = data.background.layer.width;
+                height = data.background.layer.height;
+                this.map.addTilesetImage('tiles-collection', 'tiles-collection', this.game.tileSize, this.game.tileSize, 0, 0, 1);
+                this.parallaxLayer = this.map.create('Parallax', width, height, this.game.tileSize, this.game.tileSize);
                 this.parallaxLayer.scrollFactorX = 0.5;
                 this.parallaxLayer.scrollFactorY = 0.5;
-                this.backgroundLayer = this.map.create('Background', 160, 160, 32, 32);
-                this.foregroundLayer = this.map.createBlankLayer('Foreground', 160, 160, 32, 32);
-                this.collisionLayer = this.map.createBlankLayer('Collision', 160, 160, 32, 32);
-                this.decorationLayer1 = this.map.createBlankLayer('Decorations', 160, 160, 32, 32);
-                this.decorationLayer2 = this.map.createBlankLayer('Decorations2', 160, 160, 32, 32);
-                this.map.paste(0, 0, data.background.map.copy(0, 0, 160, 160, data.parallax), this.parallaxLayer);
-                this.map.paste(0, 0, data.background.map.copy(0, 0, 160, 160, data.background), this.backgroundLayer);
-                this.map.paste(0, 0, data.background.map.copy(0, 0, 160, 160, data.foreground), this.foregroundLayer);
-                this.map.paste(0, 0, data.background.map.copy(0, 0, 160, 160, data.collision), this.collisionLayer);
-                this.map.paste(0, 0, data.background.map.copy(0, 0, 160, 160, data.decoration1), this.decorationLayer1);
-                this.map.paste(0, 0, data.background.map.copy(0, 0, 160, 160, data.decoration2), this.decorationLayer2);
+                this.backgroundLayer = this.map.createBlankLayer('Background', width, height, this.game.tileSize, this.game.tileSize);
+                this.foregroundLayer = this.map.createBlankLayer('Foreground', width, height, this.game.tileSize, this.game.tileSize);
+                this.collisionLayer = this.map.createBlankLayer('Collision', width, height, this.game.tileSize, this.game.tileSize);
+                this.decorationLayer1 = this.map.createBlankLayer('Decorations', width, height, this.game.tileSize, this.game.tileSize);
+                this.decorationLayer2 = this.map.createBlankLayer('Decorations2', width, height, this.game.tileSize, this.game.tileSize);
+                this.map.paste(0, 0, data.background.map.copy(start.x, start.y, width, height, data.parallax), this.parallaxLayer);
+                this.map.paste(0, 0, data.background.map.copy(start.x, start.y, width, height, data.background), this.backgroundLayer);
+                this.map.paste(0, 0, data.background.map.copy(start.x, start.y, width, height, data.foreground), this.foregroundLayer);
+                this.map.paste(0, 0, data.background.map.copy(start.x, start.y, width, height, data.collision), this.collisionLayer);
+                this.map.paste(0, 0, data.background.map.copy(start.x, start.y, width, height, data.decoration1), this.decorationLayer1);
+                this.map.paste(0, 0, data.background.map.copy(start.x, start.y, width, height, data.decoration2), this.decorationLayer2);
                 //for (var i = 0; i < data.background.layer.data.length; i++) {
                 //    for (var j = 0; j < data.background.layer.data[i].length; j++) {
                 //        console.log(data.background.layer.data[i][j]);
                 //        this.map.putTile(data.background.layer.data[i][j].index, j, i, this.backgroundLayer);
-                //    }
-                //}
-                //for (var y = 0; y < 160; y++) {
-                //    for (var x = 0; x < 160; x++) {
-                //        //console.log(data.background.layer.data[y][x].index);
-                //        //this.map.putTile(data.background.layer.data[y][x].index, x, y, this.backgroundLayer);
-                //        this.map.putTile(3, x, y, this.backgroundLayer);
                 //    }
                 //}
                 this.initGrid();
@@ -1674,8 +1671,29 @@ var TacticArena;
                 this.decorationLayer3 = this.map.createLayer('Decorations3');
             };
             StageManager.prototype.addDecorationsFromData = function (data) {
-                this.decorationLayer3 = this.map.createBlankLayer('Decorations3', 160, 160, 32, 32);
-                this.map.paste(0, 0, data.background.map.copy(0, 0, 160, 160, data.decoration3), this.decorationLayer3);
+                var width = data.stage.background.layer.width;
+                var height = data.stage.background.layer.height;
+                this.decorationLayer3 = this.map.createBlankLayer('Decorations3', width, height, this.game.tileSize, this.game.tileSize);
+                this.map.paste(0, 0, data.stage.background.map.copy(0, 0, width, height, data.stage.decoration3), this.decorationLayer3);
+            };
+            StageManager.prototype.addBlackLayer = function (data) {
+                var width = data.stage.background.layer.width;
+                var height = data.stage.background.layer.height;
+                this.blackLayer = this.map.createBlankLayer('Black', width, height, this.game.tileSize, this.game.tileSize);
+                var endX = data.startPosition.x + data.gridWidth;
+                var endY = data.startPosition.y + data.gridHeight;
+                for (var x = 0; x < width; x++) {
+                    for (var y = 0; y < height; y++) {
+                        if (x < data.startPosition.x || x > endX || y < data.startPosition.y || y > endY) {
+                            var tile = this.map.putTile(9, x, y, this.blackLayer);
+                            if (tile) {
+                                tile.alpha = 0.8;
+                                this.grid[y][x] = 1;
+                            }
+                        }
+                    }
+                }
+                console.log(this.parallaxLayer);
             };
             StageManager.prototype.getLayers = function () {
                 return {
@@ -1816,6 +1834,9 @@ var TacticArena;
             StageManager.prototype.equalPositions = function (p1, p2) {
                 return p1.x == p2.x && p1.y == p2.y;
             };
+            StageManager.prototype.differenceBetweenPositions = function (p1, p2) {
+                return { x: Math.abs(p1.x - p2.x), y: Math.abs(p1.y - p2.y) };
+            };
             StageManager.prototype.markPawns = function () {
                 for (var i = 0; i < this.initialGrid.length; i++) {
                     this.grid[i] = this.initialGrid[i].slice();
@@ -1926,6 +1947,7 @@ var TacticArena;
                 if (tint) {
                     _this.tint = tint;
                 }
+                _this.anchor.set(0);
                 return _this;
             }
             Sprite.prototype.setAnimations = function () {
@@ -2726,6 +2748,9 @@ var TacticArena;
                 }
                 return null;
             };
+            BaseBattle.prototype.battleOver = function () {
+                console.log('battle is over');
+            };
             return BaseBattle;
         }(TacticArena.State.BasePlayable));
         State.BaseBattle = BaseBattle;
@@ -2744,7 +2769,7 @@ var TacticArena;
                 this.load.image('loading', 'assets/images/loading.png');
             };
             Boot.prototype.create = function () {
-                //this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+                this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
                 //this.scale.scaleMode = Phaser.ScaleManager.RESIZE;
                 this.input.maxPointers = 1;
                 this.stage.disableVisibilityChange = true;
@@ -2825,31 +2850,39 @@ var TacticArena;
             function MainAdventure() {
                 return _super !== null && _super.apply(this, arguments) || this;
             }
-            MainAdventure.prototype.init = function () {
+            MainAdventure.prototype.init = function (data) {
+                console.log(data);
                 this.mapName = 'area02';
                 _super.prototype.init.call(this);
                 this.game.stage.backgroundColor = 0x67AEE4;
                 this.pointer = new TacticArena.UI.PointerExploration(this);
-                this.pawns.push(new TacticArena.Entity.Pawn(this, 25, 10, 'N', 'redhead', 1, false, 1, 'Amandine', TacticArena.Entity.Sprite)); //
+                var position = (data && data.position) ? data.position : { x: 25, y: 15 };
+                this.pawns.push(new TacticArena.Entity.Pawn(this, position.x, position.y, 'N', 'redhead', 1, false, 1, 'Amandine', TacticArena.Entity.Sprite)); //
                 //this.pawns.push(new Entity.Pawn(this, 25, 6, 'E', 'rabbit', 1, false, 1, 'Amandine', Entity.MobSpriteSimpleBis)); //
-                this.pawns.push(new TacticArena.Entity.Pawn(this, 25, 6, 'E', 'bee', 1, false, 1, 'Amandine', TacticArena.Entity.MobSpriteSimple)); //
+                this.pawns.push(new TacticArena.Entity.Pawn(this, 25, 11, 'E', 'bee', 1, false, 1, 'Amandine', TacticArena.Entity.MobSpriteSimple)); //
                 this.stageManager.markPawns();
             };
             MainAdventure.prototype.create = function () {
                 _super.prototype.create.call(this);
                 var self = this;
                 //this.world.setBounds(0, 0, 2000, 2000);
-                this.game.camera.follow(this.pawns[0].getSprite(), Phaser.Camera.FOLLOW_LOCKON, 0.1, 0.1);
+                //this.game.camera.follow(this.pawns[0].getSprite(), Phaser.Camera.STYLE_TOPDOWN_TIGHT, 0.1, 0.1);
                 this.process = false;
                 //$(window).on('keyup', function (e) {
                 //    if(e.keyCode == 37) {
-                //        self.pawns[0].getSprite().attack();
+                //        self.game.camera.x += 10;
+                //        //self.pawns[0].getSprite().attack();
                 //    } else if(e.keyCode == 38) {
-                //        self.pawns[0].getSprite().cast();
+                //        self.game.camera.x -= 10;
+                //        //self.pawns[0].getSprite().cast();
                 //    } else if(e.keyCode == 39) {
-                //        self.pawns[0].getSprite().die();
+                //        //self.pawns[0].getSprite().die();
                 //    }
                 //});
+            };
+            MainAdventure.prototype.update = function () {
+                _super.prototype.update.call(this);
+                this.game.camera.focusOnXY(this.pawns[0].getSprite().x + 16, this.pawns[0].getSprite().y + 16);
             };
             return MainAdventure;
         }(TacticArena.State.BasePlayable));
@@ -2868,14 +2901,11 @@ var TacticArena;
             }
             MainAdventureBattle.prototype.init = function (data) {
                 var _this = this;
-                this.importedStage = data.stage;
+                this.data = data;
                 _super.prototype.init.call(this);
                 this.game.stage.backgroundColor = 0x67AEE4;
-                console.log(data);
                 this.playMode = 'offline';
-                this.players = data.players;
-                var startPositions = [[{ x: 8, y: 8, d: 'E' }, { x: 7, y: 7, d: 'E' }], [{ x: 11, y: 8, d: 'W' }, { x: 12, y: 7, d: 'W' }]];
-                this.players.forEach(function (p, k) {
+                this.data.players.forEach(function (p, k) {
                     var isBot = true;
                     if (p.player) {
                         _this.playerTeam = k;
@@ -2885,18 +2915,27 @@ var TacticArena;
                         _this.aiManager = new TacticArena.Controller.AiManager(_this, k);
                     }
                     _this.pawns.push(new TacticArena.Entity.Pawn(_this, p.position.x, p.position.y, p.direction, p.type, _this.getUniqueId(), isBot, k, p.name, p.spriteClass));
-                    console.log('jajoute mes pawns');
                 });
             };
             MainAdventureBattle.prototype.create = function () {
                 _super.prototype.create.call(this);
+                //this.game.camera.focusOnXY(this.pawns[0].getSprite().x + 16, this.pawns[0].getSprite().y + 16);
+                this.game.camera.focusOnXY(this.data.center.x * this.tileSize + 16, this.data.center.y * this.tileSize + 16);
             };
             MainAdventureBattle.prototype.initMap = function () {
+                console.log(this.data);
                 this.stageManager = new StageManager(this);
-                this.stageManager.initFromArray(this.importedStage);
+                this.stageManager.initFromArray(this.data.stage, this.data.gridWidth, this.data.gridHeight);
             };
             MainAdventureBattle.prototype.addDecorations = function () {
-                this.stageManager.addDecorationsFromData(this.importedStage);
+                this.stageManager.addDecorationsFromData(this.data);
+                this.stageManager.addBlackLayer(this.data);
+            };
+            MainAdventureBattle.prototype.battleOver = function () {
+                _super.prototype.battleOver.call(this);
+                this.game.state.start("mainadventure", true, false, {
+                    position: this.pawns[0].getPosition()
+                });
             };
             return MainAdventureBattle;
         }(TacticArena.State.BaseBattle));
@@ -3069,7 +3108,6 @@ var TacticArena;
                 this.load.setPreloadSprite(this.preloadBar);
                 this.load.tilemap('map', 'assets/json/map.json', null, Phaser.Tilemap.TILED_JSON);
                 this.load.tilemap('area02', 'assets/json/area02.json', null, Phaser.Tilemap.TILED_JSON);
-                this.load.image('CloudPurple', 'assets/images/cloud-tiles.png');
                 this.load.image('tiles-collection', 'assets/images/maptiles.png');
                 this.load.image('path-tile', 'assets/images/path_tile.png');
                 this.load.atlasJSONArray('player', 'assets/images/character.png', 'assets/images/character.json');
@@ -5436,6 +5474,8 @@ var TacticArena;
                 this.fourKey.onDown.add(this.fourKeyPress, this, 0, this.menu);
                 this.fiveKey = this.menu.game.input.keyboard.addKey(Phaser.KeyCode.FIVE);
                 this.fiveKey.onDown.add(this.fiveKeyPress, this, 0, this.menu);
+                this.wKey = this.menu.game.input.keyboard.addKey(Phaser.KeyCode.W);
+                this.wKey.onDown.add(this.wKeyPress, this, 0, this.menu);
             };
             KeyManager.prototype.leftKeyPressed = function (self, uiManager) {
                 if (uiManager.process)
@@ -5534,6 +5574,11 @@ var TacticArena;
                 }
                 else {
                     uiManager.actionUI.select('wind');
+                }
+            };
+            KeyManager.prototype.wKeyPress = function (self, uiManager) {
+                if (self.altKey) {
+                    uiManager.game.battleOver();
                 }
             };
             return KeyManager;
@@ -5810,7 +5855,6 @@ var TacticArena;
                 var pointerPosition = this.getPosition();
                 this.marker.x = pointerPosition.x * this.game.tileSize;
                 this.marker.y = pointerPosition.y * this.game.tileSize;
-                console.log(pointerPosition);
                 //this.cursor_pointer.position.x = this.game.input.activePointer.worldX;
                 //this.cursor_pointer.position.y = this.game.input.activePointer.worldY;
                 //this.cursor_pointer.bringToTop();
@@ -5897,6 +5941,7 @@ var TacticArena;
                     var targetX = this.marker.x / this.game.tileSize;
                     var targetY = this.marker.y / this.game.tileSize;
                     var position = activePawn.getProjectionOrReal().getPosition();
+                    console.log(targetX, targetY);
                     var distance = this.game.stageManager.getNbTilesBetween({ 'x': targetX, 'y': targetY }, { 'x': position.x, 'y': position.y });
                     if (this.game.uiManager.actionUI.canOrderMove()) {
                         this.game.stageManager.canMove(activePawn.getProjectionOrReal(), targetX, targetY, activePawn.getAp()).then(function (path) {
@@ -6065,6 +6110,7 @@ var TacticArena;
                                 self.game.stageManager.markPawns();
                                 self.game.process = false;
                             }, function (res) {
+                                self.game.process = false;
                             });
                         }, function (res) {
                             console.log(res);
@@ -6076,14 +6122,23 @@ var TacticArena;
                         var enemy = self.game.pawns[1];
                         self.game.process = false;
                         self.game.state.clearCurrentState();
+                        var gridWidth = 10;
+                        var gridHeight = 16;
+                        var startPosition = { x: p.x - Math.floor(gridWidth / 2), y: p.y - Math.floor(gridHeight / 2) };
                         self.game.state.start('mainadventurebattle', true, false, {
                             players: [
                                 { name: 'Beez', faction: 'animals', player: false, type: enemy.type, spriteClass: enemy.spriteClass, position: enemy.getPosition(), direction: enemy.getDirection() },
                                 { name: activePawn._name, faction: 'human', player: true, type: activePawn.type, spriteClass: activePawn.spriteClass, position: activePawn.getPosition(), direction: activePawn.getDirection() }
                             ],
                             stage: self.game.stageManager.getLayers(),
-                            center: p
+                            center: p,
+                            gridWidth: gridWidth,
+                            gridHeight: gridHeight,
+                            startPosition: startPosition
                         });
+                    }
+                    else {
+                        self.game.process = false;
                     }
                 }
             };
@@ -6444,6 +6499,7 @@ var TacticArena;
                 if (this.game.isOver()) {
                     var msg = this.game.teams[this.game.playerTeam] ? 'You win' : 'You lose';
                     this.ingamemenuUI.gameOver(msg);
+                    this.game.battleOver();
                 }
                 else {
                     this.initOrderPhase(this.game.getFirstAlive(), true);

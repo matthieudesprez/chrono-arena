@@ -9,8 +9,8 @@ module TacticArena {
     export class Game extends Phaser.Game {
         constructor(headless:boolean = false) {
             super({
-                width: window.innerWidth * window.devicePixelRatio * 0.8,
-                height: window.innerHeight * window.devicePixelRatio * 0.8,
+                width: 640, //320, //window.innerWidth * window.devicePixelRatio * 0.8,
+                height: 608, //512, //window.innerHeight * window.devicePixelRatio * 0.8,
                 renderer: headless ? Phaser.HEADLESS : Phaser.AUTO,
                 parent: 'game-container'
             });

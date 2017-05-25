@@ -120,6 +120,7 @@ module TacticArena.UI {
             if(this.game.isOver()) {
                 let msg = this.game.teams[this.game.playerTeam] ? 'You win' : 'You lose';
                 this.ingamemenuUI.gameOver(msg);
+                this.game.battleOver();
             } else {
                 this.initOrderPhase(this.game.getFirstAlive(), true);
             }
