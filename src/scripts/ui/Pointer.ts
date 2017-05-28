@@ -10,7 +10,9 @@ module TacticArena.UI {
             this.marker =  this.game.make.graphics(-1 * this.game.tileSize, -1 * this.game.tileSize);
             this.marker.lineStyle(2, 0xffffff, 1);
             this.marker.drawRect(0, 0, this.game.tileSize, this.game.tileSize);
+            console.log('draw');
             this.game.uiSpritesGroup.add(this.marker);
+            //this.game.uiSpritesGroup.bringToTop();
 
             //this.cursor_pointer = this.game.add.sprite(0, 0, 'cursor_pointer');
             //this.cursor_pointer.visible = true;

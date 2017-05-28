@@ -59,6 +59,12 @@ module TacticArena.UI {
             });
         }
 
+        display (message) {
+            let message = this.menu.game.add.text(this.menu.game.camera.x + (this.menu.game.width/2), this.menu.game.camera.y + (this.menu.game.height/2), message, { font: '20px Arial', fill: "#ffffff" });
+            message.fixedToCamera = false;
+
+        }
+
         close() {
             this.menu.element.find('.ui-overlay').remove();
             this.menu.element.find('.ui-popin').remove();

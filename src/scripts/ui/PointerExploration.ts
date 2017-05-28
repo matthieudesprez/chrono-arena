@@ -1,10 +1,7 @@
 module TacticArena.UI {
     export class PointerExploration extends TacticArena.UI.Pointer {
-        cursor_attack;
         constructor(game) {
             super(game);
-            this.cursor_attack = this.game.add.sprite(this.marker.x + 5, this.marker.y - 5, 'cursor_attack');
-            this.cursor_attack.visible = false;
         }
 
         update() {
@@ -14,16 +11,9 @@ module TacticArena.UI {
             this.marker.y = p.y * this.game.tileSize;
 
             if(this.game.stageManager.grid[p.y][p.x] == 0 && !this.game.stageManager.equalPositions(p, activePawn.getPosition())) {
-                //console.log('attack');
-                //this.marker.visible = false;
-                //this.cursor_attack.visible = true;
-                //this.cursor_attack.position.x = this.marker.x + 5;
-                //this.cursor_attack.position.y = this.marker.y - 5;
                 this.marker.lineStyle(2, 0xcd2f36, 1);
             } else {
                 this.marker.lineStyle(2, 0xffffff, 1);
-                //this.marker.visible = true;
-                //this.cursor_attack.visible = false;
             }
             this.marker.drawRect(0, 0, this.game.tileSize, this.game.tileSize);
         }
@@ -54,11 +44,12 @@ module TacticArena.UI {
                     console.log('attack');
                     let enemy = self.game.pawns[1];
                     self.game.process = false;
-                    self.game.state.clearCurrentState();
                     let gridWidth = 10;
                     let gridHeight = 16;
                     let startPosition = {x: p.x - Math.floor(gridWidth / 2), y: p.y - Math.floor(gridHeight / 2)};
                     let layers = self.game.stageManager.getLayers();
+                    //self.game.stageManager.fillBlack().then(function() {
+                    self.game.state.clearCurrentState();
                     self.game.state.start('mainadventurebattle', true, false, {
                         players: [
                             {name: 'Beez', faction: 'animals', player: false, type: enemy.type, spriteClass: enemy.spriteClass, position: enemy.getPosition(), direction: enemy.getDirection()},
@@ -70,6 +61,7 @@ module TacticArena.UI {
                         gridHeight: gridHeight,
                         startPosition : startPosition
                     });
+                    //});
                 } else {
                     self.game.process = false;
                 }

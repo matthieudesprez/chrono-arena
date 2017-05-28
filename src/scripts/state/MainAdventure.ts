@@ -42,6 +42,9 @@ module TacticArena.State {
             //        //self.pawns[0].getSprite().die();
             //    }
             //});
+
+            let message = this.game.add.text(Math.abs(this.game.world.position.x) + this.game.camera.width/2, Math.abs(this.game.world.position.y) + this.game.camera.height/2, 'ok', { font: '20px Arial', fill: "#ffffff" });
+            message.fixedToCamera = true;
         }
 
         update () {

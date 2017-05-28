@@ -4,6 +4,7 @@ module TacticArena.Controller {
         map:Phaser.Tilemap;
         parallaxLayer;
         backgroundLayer;
+        uiLayer;
         foregroundLayer;
         collisionLayer;
         decorationLayer1;
@@ -17,6 +18,7 @@ module TacticArena.Controller {
             this.game = game;
             this.map = null;
             this.backgroundLayer = null;
+            this.uiLayer = null;
             this.foregroundLayer = null;
             this.decorationLayer1 = null;
             this.decorationLayer2 = null;
@@ -35,6 +37,7 @@ module TacticArena.Controller {
             this.parallaxLayer.scrollFactorX = 0.5;
             this.parallaxLayer.scrollFactorY = 0.5;
             this.backgroundLayer = this.map.createLayer('Background');
+            this.uiLayer = this.map.createBlankLayer('UI', this.backgroundLayer.layer.data[0].length, this.backgroundLayer.layer.data.length, this.game.tileSize, this.game.tileSize);
             this.foregroundLayer = this.map.createLayer('Foreground');
             this.collisionLayer = this.map.createLayer('Collision');
             //this.collisionLayer.debug = true;
@@ -55,8 +58,10 @@ module TacticArena.Controller {
             this.parallaxLayer.scrollFactorX = 0.5;
             this.parallaxLayer.scrollFactorY = 0.5;
             this.backgroundLayer = this.map.createBlankLayer('Background', width, height, this.game.tileSize, this.game.tileSize);
+            this.uiLayer = this.map.createBlankLayer('UI', width, height, this.game.tileSize, this.game.tileSize);
             this.foregroundLayer = this.map.createBlankLayer('Foreground', width, height, this.game.tileSize, this.game.tileSize);
             this.collisionLayer = this.map.createBlankLayer('Collision', width, height, this.game.tileSize, this.game.tileSize);
+            //this.collisionLayer.debug = true;
             this.decorationLayer1 = this.map.createBlankLayer('Decorations', width, height, this.game.tileSize, this.game.tileSize);
             this.decorationLayer2 = this.map.createBlankLayer('Decorations2', width, height, this.game.tileSize, this.game.tileSize);
 
@@ -91,9 +96,12 @@ module TacticArena.Controller {
 
             for (var x = 0; x < this.map.width; x++) {
                 for (var y = 0; y < this.map.height; y++) {
-                    this.map.removeTile(x, y, 'Collision');
+                    //this.map.removeTile(x, y, 'Collision');
+                    let tile = this.map.getTile(x, y, this.collisionLayer, true);
+                    tile.alpha = 0;
                 }
             }
+            this.collisionLayer.layer.dirty = true;
         }
 
         addDecorations() {
@@ -124,7 +132,34 @@ module TacticArena.Controller {
                     }
                 }
             }
-            console.log(this.parallaxLayer);
+        }
+
+        fillBlack() {
+            return new Promise((resolve, reject) => {
+                let width = this.backgroundLayer.layer.width;
+                let height = this.backgroundLayer.layer.height;
+                this.blackLayer = this.map.createBlankLayer('Black', width, height, this.game.tileSize, this.game.tileSize);
+                let startX = Math.floor(Math.abs(this.game.world.position.x) / this.game.tileSize);
+                let startY = Math.floor(Math.abs(this.game.world.position.y) / this.game.tileSize);
+                let endX = startX + 20;
+                let endY = startY + 19;
+                let self = this;
+                let x = startX;
+                let y = startY;
+                let interval = setInterval(function () {
+                    if (y >= endY) {
+                        clearInterval(interval);
+                        resolve(true);
+                    }
+                    if (x >= endX) {
+                        x = startX;
+                        y++;
+                    }
+                    self.map.putTile(9, x, y, self.blackLayer);
+                    self.blackLayer.layer.dirty = true;
+                    x++;
+                }, 5);
+            });
         }
 
         getLayers() {
@@ -209,8 +244,9 @@ module TacticArena.Controller {
         showPossibleLinearTrajectories(path) {
             this.clearPossibleMove();
             for (var i = 0; i < path.length; i++) {
-                let tile = this.map.getTile(path[i].x, path[i].y, this.backgroundLayer, true);
-                tile.alpha = 0.7;
+                //let tile = this.map.getTile(path[i].x, path[i].y, this.backgroundLayer, true);
+                let tile = this.map.putTile(2105, path[i].x, path[i].y, this.uiLayer);
+                tile.alpha = 0.5;
             }
             this.backgroundLayer.layer.dirty = true;
         }
@@ -218,8 +254,16 @@ module TacticArena.Controller {
         showPossibleMove(position, ap) {
             for (var x = 0; x < this.map.width; x++) {
                 for (var y = 0; y < this.map.height; y++) {
-                    let tile = this.map.getTile(x, y, this.backgroundLayer, true);
-                    tile.alpha = ap > 0 && this.getNbTilesBetween(position, {'x': x, 'y': y}) <= ap ? 0.7 : 1;
+                    //let tile = this.map.getTile(x, y, this.backgroundLayer, true);
+                    //tile.alpha = ap > 0 && this.getNbTilesBetween(position, {'x': x, 'y': y}) <= ap ? 0.7 : 1;
+                    if(
+                        this.getNbTilesBetween(position, {'x': x, 'y': y}) <= ap &&
+                        this.grid[y][x] == -1 &&
+                        this.backgroundLayer.layer.data[y][x].index > -1
+                    ) {
+                        let tile = this.map.putTile(2105, x, y, this.uiLayer);
+                        tile.alpha = 0.5;
+                    }
                 }
             }
             this.backgroundLayer.layer.dirty = true;
@@ -228,8 +272,9 @@ module TacticArena.Controller {
         clearPossibleMove() {
             for (var x = 0; x < this.map.width; x++) {
                 for (var y = 0; y < this.map.height; y++) {
-                    let tile = this.map.getTile(x, y, this.backgroundLayer, true);
-                    tile.alpha = 1;
+                    //let tile = this.map.getTile(x, y, this.backgroundLayer, true);
+                    //tile.alpha = 1;
+                    this.map.removeTile(x, y, this.uiLayer);
                 }
             }
             this.backgroundLayer.layer.dirty = true;

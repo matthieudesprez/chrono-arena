@@ -43,9 +43,10 @@ module TacticArena.State {
 
         battleOver () {
             super.battleOver();
-            this.game.state.start("mainadventure", true, false, {
-                mainPawn: this.pawns[0].export(),
-            });
+            this.uiManager.ingamemenuUI.display('You win !');
+            //this.game.state.start("mainadventure", true, false, {
+            //    mainPawn: this.pawns[0].export(),
+            //});
         }
     }
 }
