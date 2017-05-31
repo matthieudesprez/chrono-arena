@@ -1,6 +1,7 @@
 declare var EasyStar;
 module TacticArena.State {
     export class MainAdventure extends TacticArena.State.BasePlayable {
+        dialogUI;
 
         init(data) {
             console.log(data);
@@ -21,6 +22,8 @@ module TacticArena.State {
             let enemyPosition = {x:24,y:11};
             this.pawns.push(new Entity.Pawn(this, enemyPosition.x, enemyPosition.y, 'E', 'bee', 1, false, 1, 'Amandine', Entity.MobSpriteSimple)); //
             this.stageManager.markPawns();
+
+            this.dialogUI = new UI.Dialog(this.game);
         }
 
         create() {
@@ -43,8 +46,10 @@ module TacticArena.State {
             //    }
             //});
 
-            let message = this.game.add.text(Math.abs(this.game.world.position.x) + this.game.camera.width/2, Math.abs(this.game.world.position.y) + this.game.camera.height/2, 'ok', { font: '20px Arial', fill: "#ffffff" });
-            message.fixedToCamera = true;
+            //let message = this.game.add.text(Math.abs(this.game.world.position.x) + this.game.camera.width/2, Math.abs(this.game.world.position.y) + this.game.camera.height/2, 'ok', { font: '20px Arial', fill: "#ffffff" });
+            //message.fixedToCamera = true;
+            this.dialogUI.showModal("modal1");
+
         }
 
         update () {
