@@ -23,7 +23,7 @@ module TacticArena.State {
             this.pawns.push(new Entity.Pawn(this, enemyPosition.x, enemyPosition.y, 'E', 'bee', 1, false, 1, 'Amandine', Entity.MobSpriteSimple)); //
             this.stageManager.markPawns();
 
-            this.dialogUI = new UI.Dialog(this.game);
+            this.dialogUI = new UI.Dialog(this);
         }
 
         create() {

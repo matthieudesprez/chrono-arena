@@ -1,34 +1,57 @@
 module TacticArena.UI {
     export class Dialog {
-        element;
+        //element;
+        parentGame;
+        state;
         game;
 
-        constructor(game) {
+        constructor(state) {
             var self = this;
-            this.game = game;
-            $('body').append('<div id="dialog-confirm" class="ui-dialog" title=""><p></p></div>');
-            this.element = $('#dialog-confirm');
+            this.state = state;
+            this.game = state.game;
+            //$('body').append('<div id="dialog-confirm" class="ui-dialog" title=""><p></p></div>');
+            //this.element = $('#dialog-confirm');
             this.game.modals = {};
 
             this.createModal({
                 type: "modal1",
                 includeBackground: true,
-                modalCloseOnInput: true,
+                //modalCloseOnInput: true,
                 fixedToCamera: true,
-                itemsArr: [{
-                    type: "graphics",
-                    graphicColor: "0xffffff",
-                    graphicWidth: 300,
-                    graphicHeight: 300,
-                    graphicRadius: 40
-                }, {
-                    type: "text",
-                    content: "The white {behind} me\n{is} a {[Phaser.Graphic]}",
-                    fontFamily: "Luckiest Guy",
-                    fontSize: 22,
-                    color: "0x1e1e1e",
-                    offsetY: -50
-                }, ]
+                itemsArr: [
+                //    {
+                //    type: "graphics",
+                //    graphicColor: "0xffffff",
+                //    graphicWidth: 300,
+                //    graphicHeight: 300,
+                //    graphicRadius: 40
+                //},
+                    {
+                        type: "image",
+                        content: "modal-bg",
+                        offsetY: -20,
+                        contentScale: 1
+                    },
+                    {
+                        type: "image",
+                        content: "modal-close",
+                        offsetY: -150,
+                        offsetX: 210,
+                        contentScale: 1,
+                        callback: function(){
+                            self.hideModal("modal1");
+                        }
+                    },
+
+                    {
+                        type: "text",
+                        content: "The white {behind} me\n{is} a {[Phaser.Graphic]}",
+                        fontFamily: "Press Start 2P",
+                        fontSize: 12,
+                        color: "0xffffff",
+                        offsetY: -50
+                    },
+                ]
             });
         }
 
@@ -302,14 +325,15 @@ module TacticArena.UI {
         }
 
         showModal(type) {
-            console.log(type, this.game.modals);
             this.game.world.bringToTop(this.game.modals[type]);
             this.game.modals[type].visible = true;
+            this.state.process = true;
             // you can add animation here
         }
 
         hideModal(type) {
             this.game.modals[type].visible = false;
+            this.state.process = false;
             // you can add animation here
         }
 
@@ -317,10 +341,5 @@ module TacticArena.UI {
             this.game.modals[type].destroy();
             delete this.game.modals[type];
         }
-
-        hideModal(type) {
-            window.console.log(type);
-            this.game.modals[type].visible = false;
-        };
     }
 }

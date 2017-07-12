@@ -16,6 +16,8 @@ module TacticArena.State {
             this.load.tilemap('area02', 'assets/json/area02.json', null, Phaser.Tilemap.TILED_JSON);
             this.load.image('tiles-collection', 'assets/images/maptiles.png');
             this.load.image('path-tile', 'assets/images/path_tile.png');
+            this.load.image('modal-bg', 'assets/images/modal-bg.png');
+            this.load.image('modal-close', 'assets/images/modal-close.png');
             this.load.atlasJSONArray('player', 'assets/images/character.png', 'assets/images/character.json');
             this.load.atlasJSONArray('orc', 'assets/images/orc.png', 'assets/images/orc.json');
             this.load.atlasJSONArray('redhead', 'assets/images/redhead.png', 'assets/images/redhead.json');

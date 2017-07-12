@@ -10,6 +10,7 @@ module TacticArena.State {
         tileSize: number;
         stageManager: Controller.StageManager;
         process: Boolean;
+        modalVisible: Boolean;
         pointer;
         isPaused: Boolean;
         players;
@@ -24,6 +25,7 @@ module TacticArena.State {
             super.init();
             this.game.stage.backgroundColor = 0xffffff;
             this.process = true;
+            this.modalVisible = false;
             this.tileSize = 32;
             this.isPaused = false;
 
