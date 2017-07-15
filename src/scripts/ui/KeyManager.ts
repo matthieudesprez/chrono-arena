@@ -14,6 +14,7 @@ module TacticArena.UI {
         threeKey;
         fourKey;
         fiveKey;
+        wKey;
 
         constructor(menu) {
             this.menu = menu;
@@ -59,6 +60,9 @@ module TacticArena.UI {
 
             this.fiveKey = this.menu.game.input.keyboard.addKey(Phaser.KeyCode.FIVE);
             this.fiveKey.onDown.add(this.fiveKeyPress, this, 0, this.menu);
+
+            this.wKey = this.menu.game.input.keyboard.addKey(Phaser.KeyCode.W);
+            this.wKey.onDown.add(this.wKeyPress, this, 0, this.menu);
         }
 
        leftKeyPressed(self, uiManager) {
@@ -150,6 +154,11 @@ module TacticArena.UI {
                 $('.pawn:nth-child(5)').trigger('click');
             } else {
                 uiManager.actionUI.select('wind');
+            }
+        }
+        wKeyPress(self, uiManager) {
+            if(self.altKey) {
+                uiManager.game.battleOver();
             }
         }
     }

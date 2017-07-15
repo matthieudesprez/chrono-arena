@@ -19,14 +19,22 @@ html, body {
     text-align: center;
 }
 
+canvas {
+    /*cursor: none !important;*/
+}
+
 #content {
     margin: 70px auto 0 auto;
+    /*margin: 0;*/
     display: table;
     position: relative;
+    text-align: center;
 }
 
 #content #game-container {
-    width: 100%;
+    /*width: 80%;*/
+    margin: auto;
+    position: relative;
 }
 
 #content #game-container canvas {

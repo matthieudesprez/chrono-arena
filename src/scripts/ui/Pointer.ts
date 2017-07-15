@@ -2,22 +2,34 @@ module TacticArena.UI {
     export class Pointer {
         game;
         marker:Phaser.Graphics;
+        cursor_pointer:Phaser.Sprite;
 
         constructor(game) {
             this.game = game;
 
-            this.marker = this.game.add.graphics(-this.game.tileSize, -this.game.tileSize);
+            this.marker =  this.game.make.graphics(-1 * this.game.tileSize, -1 * this.game.tileSize);
             this.marker.lineStyle(2, 0xffffff, 1);
             this.marker.drawRect(0, 0, this.game.tileSize, this.game.tileSize);
+            console.log('draw');
+            this.game.uiSpritesGroup.add(this.marker);
+            //this.game.uiSpritesGroup.bringToTop();
+
+            //this.cursor_pointer = this.game.add.sprite(0, 0, 'cursor_pointer');
+            //this.cursor_pointer.visible = true;
 
             this.game.input.addMoveCallback(this.update, this);
-            this.game.input.onDown.add(this.onGridClick, this);
+            this.game.input.mousePointer.leftButton.onDown.add(this.onGridLeftClick, this);
+            this.game.input.mousePointer.rightButton.onDown.add(this.onGridRightClick, this);
+            this.game.input.mouse.capture = true;
+            $('canvas').bind('contextmenu', function(e){
+                return false;
+            });
         }
 
         getPosition() {
             return {
-                x: this.game.stageManager.layer.getTileX(this.game.input.activePointer.worldX),
-                y: this.game.stageManager.layer.getTileY(this.game.input.activePointer.worldY)
+                x: this.game.stageManager.collisionLayer.getTileX(this.game.input.activePointer.worldX),
+                y: this.game.stageManager.collisionLayer.getTileY(this.game.input.activePointer.worldY)
             }
         }
 
@@ -28,91 +40,99 @@ module TacticArena.UI {
         }
 
         update() {
-            let self = this;
-            let pointerPosition = this.getPosition();
-            this.marker.x = pointerPosition.x * this.game.tileSize;
-            this.marker.y = pointerPosition.y * this.game.tileSize;
+            if(!this.game.process) {
+                let self = this;
+                let pointerPosition = this.getPosition();
+                this.marker.x = pointerPosition.x * this.game.tileSize;
+                this.marker.y = pointerPosition.y * this.game.tileSize;
+                //this.cursor_pointer.position.x = this.game.input.activePointer.worldX;
+                //this.cursor_pointer.position.y = this.game.input.activePointer.worldY;
+                //this.cursor_pointer.bringToTop();
 
-            if(!self.game.process) {
-                let activePawn = this.game.turnManager.getActivePawn();
-                let position = activePawn.getProjectionOrReal().getPosition();
-                let distance = this.game.stageManager.getNbTilesBetween(
-                    {'x': pointerPosition.x, 'y': pointerPosition.y}, {'x': position.x, 'y': position.y}
-                );
-                if(self.game.uiManager.actionUI.canOrderMove()) {
-                    this.game.stageManager.canMove(activePawn.getProjectionOrReal(), pointerPosition.x, pointerPosition.y, activePawn.getAp()).then((path) => {
-                        this.clearHelp();
-                        this.game.stageManager.showPath(path, self.game.pathTilesGroup);
-                        this.game.stageManager.showPossibleMove(activePawn.getProjectionOrReal().getPosition(), activePawn.getReal().getAp());
-                        this.game.uiManager.pawnsinfosUI.showApCost(activePawn, (<any>path).length);
-                    }, (res) => {
-                        this.clearHelp();
-                    });
-                } else if(self.game.uiManager.actionUI.canOrderFire() && activePawn.getAp() >= 2) {
-                    if (distance <= 4) {
-                        let path = this.game.stageManager.getLinearPath(activePawn.getProjectionOrReal(), 4);
-                        this.game.stageManager.showPossibleLinearTrajectories(path);
-                        let isInPath = false;
-                        for(var i = 0; i < path.length; i++) {
-                            if(path[i].x == pointerPosition.x && path[i].y == pointerPosition.y) {
-                                isInPath = true;
+                if (!self.game.process) {
+                    let activePawn = this.game.turnManager.getActivePawn();
+                    let position = activePawn.getProjectionOrReal().getPosition();
+                    let distance = this.game.stageManager.getNbTilesBetween(
+                        {'x': pointerPosition.x, 'y': pointerPosition.y}, {'x': position.x, 'y': position.y}
+                    );
+                    if (self.game.uiManager.actionUI.canOrderMove()) {
+                        this.game.stageManager.canMove(activePawn.getProjectionOrReal(), pointerPosition.x, pointerPosition.y, activePawn.getAp()).then((path) => {
+                            this.clearHelp();
+                            this.game.stageManager.showPath(path, self.game.pathTilesGroup);
+                            this.game.stageManager.showPossibleMove(activePawn.getProjectionOrReal().getPosition(), activePawn.getReal().getAp());
+                            this.game.uiManager.pawnsinfosUI.showApCost(activePawn, (<any>path).length);
+                        }, (res) => {
+                            this.clearHelp();
+                        });
+                    } else if (self.game.uiManager.actionUI.canOrderFire() && activePawn.getAp() >= 2) {
+                        if (distance <= 4) {
+                            let path = this.game.stageManager.getLinearPath(activePawn.getProjectionOrReal(), 4);
+                            this.game.stageManager.showPossibleLinearTrajectories(path);
+                            let isInPath = false;
+                            for (var i = 0; i < path.length; i++) {
+                                if (path[i].x == pointerPosition.x && path[i].y == pointerPosition.y) {
+                                    isInPath = true;
+                                }
                             }
-                        }
-                        this.game.stageManager.clearPath(self.game.pathTilesGroup);
-                        if(isInPath) {
-                            this.game.stageManager.showPath(path, self.game.pathTilesGroup, 0xfc000f);
-                            this.game.uiManager.pawnsinfosUI.showApCost(activePawn, 2);
-                        }
-                    } else {
-                        this.clearHelp();
-                    }
-                }  else if(self.game.uiManager.actionUI.canOrderWind() && activePawn.getAp() >= 2) {
-                    if (distance <= 4) {
-                        let path = this.game.stageManager.getLinearPath(activePawn.getProjectionOrReal(), 4);
-                        this.game.stageManager.showPossibleLinearTrajectories(path);
-                        let isInPath = false;
-                        for(var i = 0; i < path.length; i++) {
-                            if(path[i].x == pointerPosition.x && path[i].y == pointerPosition.y) {
-                                isInPath = true;
+                            this.game.stageManager.clearPath(self.game.pathTilesGroup);
+                            if (isInPath) {
+                                this.game.stageManager.showPath(path, self.game.pathTilesGroup, 0xfc000f);
+                                this.game.uiManager.pawnsinfosUI.showApCost(activePawn, 2);
                             }
+                        } else {
+                            this.clearHelp();
                         }
-                        this.game.stageManager.clearPath(self.game.pathTilesGroup);
-                        if(isInPath) {
-                            this.game.stageManager.showPath(path, self.game.pathTilesGroup, 0xfc000f);
-                            this.game.uiManager.pawnsinfosUI.showApCost(activePawn, 2);
-                        }
-                    } else {
-                        this.clearHelp();
-                    }
-                } else if(self.game.uiManager.actionUI.canOrderSlash() && activePawn.getAp() >= 1) {
-                    if (distance <= 2) {
-                        let path = this.game.stageManager.getFrontTile(activePawn.getProjectionOrReal());
-                        this.game.stageManager.showPossibleLinearTrajectories(path);
-                        let isInPath = false;
-                        for(var i = 0; i < path.length; i++) {
-                            if(path[i].x == pointerPosition.x && path[i].y == pointerPosition.y) {
-                                isInPath = true;
+                    } else if (self.game.uiManager.actionUI.canOrderWind() && activePawn.getAp() >= 2) {
+                        if (distance <= 4) {
+                            let path = this.game.stageManager.getLinearPath(activePawn.getProjectionOrReal(), 4);
+                            this.game.stageManager.showPossibleLinearTrajectories(path);
+                            let isInPath = false;
+                            for (var i = 0; i < path.length; i++) {
+                                if (path[i].x == pointerPosition.x && path[i].y == pointerPosition.y) {
+                                    isInPath = true;
+                                }
                             }
+                            this.game.stageManager.clearPath(self.game.pathTilesGroup);
+                            if (isInPath) {
+                                this.game.stageManager.showPath(path, self.game.pathTilesGroup, 0xfc000f);
+                                this.game.uiManager.pawnsinfosUI.showApCost(activePawn, 2);
+                            }
+                        } else {
+                            this.clearHelp();
                         }
-                        this.game.stageManager.clearPath(self.game.pathTilesGroup);
-                        if(isInPath) {
-                            this.game.stageManager.showPath(path, self.game.pathTilesGroup, 0xfc000f);
-                            this.game.uiManager.pawnsinfosUI.showApCost(activePawn, 1);
+                    } else if (self.game.uiManager.actionUI.canOrderSlash() && activePawn.getAp() >= 1) {
+                        if (distance <= 2) {
+                            let path = this.game.stageManager.getFrontTile(activePawn.getProjectionOrReal());
+                            this.game.stageManager.showPossibleLinearTrajectories(path);
+                            let isInPath = false;
+                            for (var i = 0; i < path.length; i++) {
+                                if (path[i].x == pointerPosition.x && path[i].y == pointerPosition.y) {
+                                    isInPath = true;
+                                }
+                            }
+                            this.game.stageManager.clearPath(self.game.pathTilesGroup);
+                            if (isInPath) {
+                                this.game.stageManager.showPath(path, self.game.pathTilesGroup, 0xfc000f);
+                                this.game.uiManager.pawnsinfosUI.showApCost(activePawn, 1);
+                            }
+                        } else {
+                            this.clearHelp();
                         }
-                    } else {
-                        this.clearHelp();
                     }
                 }
             }
         }
 
-        onGridClick() {
-            let self = this;
+        onGridLeftClick() {
             if (!this.game.process) {
+                let self = this;
                 var activePawn = this.game.turnManager.getActivePawn();
                 var targetX = this.marker.x / this.game.tileSize;
                 var targetY = this.marker.y / this.game.tileSize;
                 let position = activePawn.getProjectionOrReal().getPosition();
+
+                console.log(targetX, targetY);
+
                 var distance = this.game.stageManager.getNbTilesBetween(
                     {'x': targetX, 'y': targetY}, {'x': position.x, 'y': position.y}
                 );
@@ -210,6 +230,10 @@ module TacticArena.UI {
             }
         }
 
+        onGridRightClick() {
+
+        }
+
         hide() {
             this.marker.visible = false;
         }
@@ -228,6 +252,18 @@ module TacticArena.UI {
             element.on('mouseout', function() {
                 self.show();
             });
+        }
+
+        destroy () {
+            console.log('pointer destroy');
+            this.marker.destroy();
+
+            this.game.input.deleteMoveCallback(this.update, this);
+            this.game.input.mousePointer.leftButton.onDown.removeAll();
+            this.game.input.mousePointer.rightButton.onDown.removeAll();
+            this.game.input.mouse.capture = false;
+
+            $('canvas').off('contextmenu');
         }
     }
 }

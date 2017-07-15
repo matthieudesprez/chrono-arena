@@ -20,11 +20,11 @@ module TacticArena.State {
                     this.aiManager = new Controller.AiManager(this, k);
                 }
                 if (p.faction == 'human') {
-                    this.pawns.push(new Entity.Pawn(this, startPositions[k][0].x, startPositions[k][0].y, startPositions[k][0].d, 'redhead', this.getUniqueId(), isBot, k, this.generator.generate()));
-                    this.pawns.push(new Entity.Pawn(this, startPositions[k][1].x, startPositions[k][1].y, startPositions[k][1].d, 'amanda', this.getUniqueId(), isBot, k, this.generator.generate()));
+                    this.pawns.push(new Entity.Pawn(this, startPositions[k][0].x, startPositions[k][0].y, startPositions[k][0].d, 'redhead', this.getUniqueId(), isBot, k, this.generator.generate(), Entity.Sprite));
+                    //this.pawns.push(new Entity.Pawn(this, startPositions[k][1].x, startPositions[k][1].y, startPositions[k][1].d, 'amanda', this.getUniqueId(), isBot, k, this.generator.generate(), Entity.Sprite));
                 } else {
-                    this.pawns.push(new Entity.Pawn(this, startPositions[k][0].x, startPositions[k][0].y, startPositions[k][0].d, 'snake', this.getUniqueId(), isBot, k, this.generator.generate(), true));
-                    this.pawns.push(new Entity.Pawn(this, startPositions[k][1].x, startPositions[k][1].y, startPositions[k][1].d, 'skeleton', this.getUniqueId(), isBot, k, this.generator.generate()));
+                    this.pawns.push(new Entity.Pawn(this, startPositions[k][0].x, startPositions[k][0].y, startPositions[k][0].d, 'skeleton', this.getUniqueId(), isBot, k, this.generator.generate(), Entity.Sprite));
+                    //this.pawns.push(new Entity.Pawn(this, startPositions[k][1].x, startPositions[k][1].y, startPositions[k][1].d, 'skeleton', this.getUniqueId(), isBot, k, this.generator.generate(), Entity.Sprite));
                 }
                 console.log('jajoute mes pawns');
             });

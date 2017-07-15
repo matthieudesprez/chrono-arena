@@ -15,8 +15,9 @@ module TacticArena.Entity {
         isBot;
         team;
         hurting;
+        spriteClass;
 
-        constructor(game, x, y, ext, type, id, bot, team, name = "", isMob=false) {
+        constructor(game, x, y, ext, type, id, bot, team, name = "", spriteClass: Entity.Sprite = Entity.Sprite) {
             this.game = game;
             this._id = id;
             this._name = name;
@@ -24,12 +25,9 @@ module TacticArena.Entity {
             this.projection = null;
             this._parent = null;
             let tint = null; //team != this.game.playerTeam ? this.game.teamColors[team-1] : null;
+            this.spriteClass = spriteClass;
             if(type) {
-                if(isMob) {
-                    this.sprite = new Entity.MobSprite(game, x, y, ext, type, this, 32, tint);
-                } else {
-                    this.sprite = new Entity.Sprite(game, x, y, ext, type, this, 64, tint);
-                }
+                this.sprite = new spriteClass(game, x, y, ext, type, this, 64, tint);
                 this.game.pawnsSpritesGroup.add(this.sprite);
                 this.sprite.stand();
             }
@@ -164,7 +162,9 @@ module TacticArena.Entity {
                 var newY = tile.y * this.game.tileSize - this.sprite._size / 2;
                 if(animate) {
                     if(faceDirection) { this.sprite.faceTo(newX, newY); }
-                    this.sprite.walk();
+                    if(this.sprite.animations.currentAnim.name != 'walk' + this.sprite._ext) {
+                        this.sprite.walk();
+                    }
                     var t = this.game.add.tween(this.sprite).to({x: newX, y: newY}, this.sprite._speed, Phaser.Easing.Linear.None, true);
                     t.onComplete.add(function () {
                         if (path != undefined && path.length > 0) {
@@ -274,6 +274,18 @@ module TacticArena.Entity {
 
         getSprite() {
             return this.sprite;
+        }
+
+        export() {
+            return {
+                _id: this._id,
+                direction: this.getDirection(),
+                position: this.getPosition(),
+                hp: this.getHp(),
+                name: this._name,
+                type: this.type,
+                spriteClass: this.spriteClass
+            }
         }
     }
 }
