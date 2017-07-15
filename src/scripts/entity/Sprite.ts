@@ -3,7 +3,7 @@ module TacticArena.Entity {
         _parent;
         _speed:number;
         _size;
-        private _ext:string;
+        _ext:string;
         _animationCompleteCallback;
 
         constructor(game, x, y, ext, type, parent, size, tint=null) {

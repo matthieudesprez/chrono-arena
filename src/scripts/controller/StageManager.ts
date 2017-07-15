@@ -34,8 +34,10 @@ module TacticArena.Controller {
             this.map = this.game.add.tilemap(name);
             this.map.addTilesetImage('tiles-collection', 'tiles-collection', this.game.tileSize, this.game.tileSize, 0, 0);
             this.parallaxLayer = this.map.createLayer('Parallax');
-            this.parallaxLayer.scrollFactorX = 0.5;
-            this.parallaxLayer.scrollFactorY = 0.5;
+            if(this.parallaxLayer) {
+                this.parallaxLayer.scrollFactorX = 0.5;
+                this.parallaxLayer.scrollFactorY = 0.5;
+            }
             this.backgroundLayer = this.map.createLayer('Background');
             this.uiLayer = this.map.createBlankLayer('UI', this.backgroundLayer.layer.data[0].length, this.backgroundLayer.layer.data.length, this.game.tileSize, this.game.tileSize);
             this.foregroundLayer = this.map.createLayer('Foreground');

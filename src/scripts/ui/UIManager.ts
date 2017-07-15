@@ -21,6 +21,14 @@ module TacticArena.UI {
             this.game = game;
 
             this.element = $('#content');
+
+            var topUIGroup = this.game.add.group();
+            var topUIBackground = this.game.make.graphics();
+            topUIBackground.beginFill(0x333333);
+            topUIBackground.drawRect(0, 0, this.game.world.width, 32);
+            topUIBackground.endFill();
+            topUIGroup.add(topUIBackground);
+
             //this.consolelogsUI = new UI.ConsoleLogs(this);
             this.directionUI = new UI.Direction(this);
             this.actionUI = new UI.Action(this);

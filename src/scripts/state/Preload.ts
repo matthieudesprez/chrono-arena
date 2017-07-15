@@ -18,6 +18,7 @@ module TacticArena.State {
             this.load.image('path-tile', 'assets/images/path_tile.png');
             this.load.image('modal-bg', 'assets/images/modal-bg.png');
             this.load.image('modal-close', 'assets/images/modal-close.png');
+            this.load.image('menu-icon', 'assets/images/menu_icon.png');
             this.load.atlasJSONArray('player', 'assets/images/character.png', 'assets/images/character.json');
             this.load.atlasJSONArray('orc', 'assets/images/orc.png', 'assets/images/orc.json');
             this.load.atlasJSONArray('redhead', 'assets/images/redhead.png', 'assets/images/redhead.json');
@@ -55,13 +56,13 @@ module TacticArena.State {
             //    that.game.state.start("menu");
             //}, 1000);
             //that.game.state.start("menu");
-            that.game.state.start("mainadventure");
-            //that.game.state.start('mainsolooffline', true, false, {
-            //    players: [
-            //        {name: 'BOT 01', faction: 'evil', player: false},
-            //        {name: 'Matt', faction: 'human', player: true}
-            //    ]
-            //}, null);
+            //that.game.state.start("mainadventure");
+            that.game.state.start('mainsolooffline', true, false, {
+                players: [
+                    {name: 'BOT 01', faction: 'evil', player: false},
+                    {name: 'Matt', faction: 'human', player: true}
+                ]
+            }, null);
             //that.game.state.start("lobby");
         }
     }

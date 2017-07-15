@@ -40,90 +40,92 @@ module TacticArena.UI {
         }
 
         update() {
-            let self = this;
-            let pointerPosition = this.getPosition();
-            this.marker.x = pointerPosition.x * this.game.tileSize;
-            this.marker.y = pointerPosition.y * this.game.tileSize;
-            //this.cursor_pointer.position.x = this.game.input.activePointer.worldX;
-            //this.cursor_pointer.position.y = this.game.input.activePointer.worldY;
-            //this.cursor_pointer.bringToTop();
+            if(!this.game.process) {
+                let self = this;
+                let pointerPosition = this.getPosition();
+                this.marker.x = pointerPosition.x * this.game.tileSize;
+                this.marker.y = pointerPosition.y * this.game.tileSize;
+                //this.cursor_pointer.position.x = this.game.input.activePointer.worldX;
+                //this.cursor_pointer.position.y = this.game.input.activePointer.worldY;
+                //this.cursor_pointer.bringToTop();
 
-            if(!self.game.process) {
-                let activePawn = this.game.turnManager.getActivePawn();
-                let position = activePawn.getProjectionOrReal().getPosition();
-                let distance = this.game.stageManager.getNbTilesBetween(
-                    {'x': pointerPosition.x, 'y': pointerPosition.y}, {'x': position.x, 'y': position.y}
-                );
-                if(self.game.uiManager.actionUI.canOrderMove()) {
-                    this.game.stageManager.canMove(activePawn.getProjectionOrReal(), pointerPosition.x, pointerPosition.y, activePawn.getAp()).then((path) => {
-                        this.clearHelp();
-                        this.game.stageManager.showPath(path, self.game.pathTilesGroup);
-                        this.game.stageManager.showPossibleMove(activePawn.getProjectionOrReal().getPosition(), activePawn.getReal().getAp());
-                        this.game.uiManager.pawnsinfosUI.showApCost(activePawn, (<any>path).length);
-                    }, (res) => {
-                        this.clearHelp();
-                    });
-                } else if(self.game.uiManager.actionUI.canOrderFire() && activePawn.getAp() >= 2) {
-                    if (distance <= 4) {
-                        let path = this.game.stageManager.getLinearPath(activePawn.getProjectionOrReal(), 4);
-                        this.game.stageManager.showPossibleLinearTrajectories(path);
-                        let isInPath = false;
-                        for(var i = 0; i < path.length; i++) {
-                            if(path[i].x == pointerPosition.x && path[i].y == pointerPosition.y) {
-                                isInPath = true;
+                if (!self.game.process) {
+                    let activePawn = this.game.turnManager.getActivePawn();
+                    let position = activePawn.getProjectionOrReal().getPosition();
+                    let distance = this.game.stageManager.getNbTilesBetween(
+                        {'x': pointerPosition.x, 'y': pointerPosition.y}, {'x': position.x, 'y': position.y}
+                    );
+                    if (self.game.uiManager.actionUI.canOrderMove()) {
+                        this.game.stageManager.canMove(activePawn.getProjectionOrReal(), pointerPosition.x, pointerPosition.y, activePawn.getAp()).then((path) => {
+                            this.clearHelp();
+                            this.game.stageManager.showPath(path, self.game.pathTilesGroup);
+                            this.game.stageManager.showPossibleMove(activePawn.getProjectionOrReal().getPosition(), activePawn.getReal().getAp());
+                            this.game.uiManager.pawnsinfosUI.showApCost(activePawn, (<any>path).length);
+                        }, (res) => {
+                            this.clearHelp();
+                        });
+                    } else if (self.game.uiManager.actionUI.canOrderFire() && activePawn.getAp() >= 2) {
+                        if (distance <= 4) {
+                            let path = this.game.stageManager.getLinearPath(activePawn.getProjectionOrReal(), 4);
+                            this.game.stageManager.showPossibleLinearTrajectories(path);
+                            let isInPath = false;
+                            for (var i = 0; i < path.length; i++) {
+                                if (path[i].x == pointerPosition.x && path[i].y == pointerPosition.y) {
+                                    isInPath = true;
+                                }
                             }
-                        }
-                        this.game.stageManager.clearPath(self.game.pathTilesGroup);
-                        if(isInPath) {
-                            this.game.stageManager.showPath(path, self.game.pathTilesGroup, 0xfc000f);
-                            this.game.uiManager.pawnsinfosUI.showApCost(activePawn, 2);
-                        }
-                    } else {
-                        this.clearHelp();
-                    }
-                }  else if(self.game.uiManager.actionUI.canOrderWind() && activePawn.getAp() >= 2) {
-                    if (distance <= 4) {
-                        let path = this.game.stageManager.getLinearPath(activePawn.getProjectionOrReal(), 4);
-                        this.game.stageManager.showPossibleLinearTrajectories(path);
-                        let isInPath = false;
-                        for(var i = 0; i < path.length; i++) {
-                            if(path[i].x == pointerPosition.x && path[i].y == pointerPosition.y) {
-                                isInPath = true;
+                            this.game.stageManager.clearPath(self.game.pathTilesGroup);
+                            if (isInPath) {
+                                this.game.stageManager.showPath(path, self.game.pathTilesGroup, 0xfc000f);
+                                this.game.uiManager.pawnsinfosUI.showApCost(activePawn, 2);
                             }
+                        } else {
+                            this.clearHelp();
                         }
-                        this.game.stageManager.clearPath(self.game.pathTilesGroup);
-                        if(isInPath) {
-                            this.game.stageManager.showPath(path, self.game.pathTilesGroup, 0xfc000f);
-                            this.game.uiManager.pawnsinfosUI.showApCost(activePawn, 2);
-                        }
-                    } else {
-                        this.clearHelp();
-                    }
-                } else if(self.game.uiManager.actionUI.canOrderSlash() && activePawn.getAp() >= 1) {
-                    if (distance <= 2) {
-                        let path = this.game.stageManager.getFrontTile(activePawn.getProjectionOrReal());
-                        this.game.stageManager.showPossibleLinearTrajectories(path);
-                        let isInPath = false;
-                        for(var i = 0; i < path.length; i++) {
-                            if(path[i].x == pointerPosition.x && path[i].y == pointerPosition.y) {
-                                isInPath = true;
+                    } else if (self.game.uiManager.actionUI.canOrderWind() && activePawn.getAp() >= 2) {
+                        if (distance <= 4) {
+                            let path = this.game.stageManager.getLinearPath(activePawn.getProjectionOrReal(), 4);
+                            this.game.stageManager.showPossibleLinearTrajectories(path);
+                            let isInPath = false;
+                            for (var i = 0; i < path.length; i++) {
+                                if (path[i].x == pointerPosition.x && path[i].y == pointerPosition.y) {
+                                    isInPath = true;
+                                }
                             }
+                            this.game.stageManager.clearPath(self.game.pathTilesGroup);
+                            if (isInPath) {
+                                this.game.stageManager.showPath(path, self.game.pathTilesGroup, 0xfc000f);
+                                this.game.uiManager.pawnsinfosUI.showApCost(activePawn, 2);
+                            }
+                        } else {
+                            this.clearHelp();
                         }
-                        this.game.stageManager.clearPath(self.game.pathTilesGroup);
-                        if(isInPath) {
-                            this.game.stageManager.showPath(path, self.game.pathTilesGroup, 0xfc000f);
-                            this.game.uiManager.pawnsinfosUI.showApCost(activePawn, 1);
+                    } else if (self.game.uiManager.actionUI.canOrderSlash() && activePawn.getAp() >= 1) {
+                        if (distance <= 2) {
+                            let path = this.game.stageManager.getFrontTile(activePawn.getProjectionOrReal());
+                            this.game.stageManager.showPossibleLinearTrajectories(path);
+                            let isInPath = false;
+                            for (var i = 0; i < path.length; i++) {
+                                if (path[i].x == pointerPosition.x && path[i].y == pointerPosition.y) {
+                                    isInPath = true;
+                                }
+                            }
+                            this.game.stageManager.clearPath(self.game.pathTilesGroup);
+                            if (isInPath) {
+                                this.game.stageManager.showPath(path, self.game.pathTilesGroup, 0xfc000f);
+                                this.game.uiManager.pawnsinfosUI.showApCost(activePawn, 1);
+                            }
+                        } else {
+                            this.clearHelp();
                         }
-                    } else {
-                        this.clearHelp();
                     }
                 }
             }
         }
 
         onGridLeftClick() {
-            let self = this;
             if (!this.game.process) {
+                let self = this;
                 var activePawn = this.game.turnManager.getActivePawn();
                 var targetX = this.marker.x / this.game.tileSize;
                 var targetY = this.marker.y / this.game.tileSize;

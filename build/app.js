@@ -1610,8 +1610,10 @@ var TacticArena;
                 this.map = this.game.add.tilemap(name);
                 this.map.addTilesetImage('tiles-collection', 'tiles-collection', this.game.tileSize, this.game.tileSize, 0, 0);
                 this.parallaxLayer = this.map.createLayer('Parallax');
-                this.parallaxLayer.scrollFactorX = 0.5;
-                this.parallaxLayer.scrollFactorY = 0.5;
+                if (this.parallaxLayer) {
+                    this.parallaxLayer.scrollFactorX = 0.5;
+                    this.parallaxLayer.scrollFactorY = 0.5;
+                }
                 this.backgroundLayer = this.map.createLayer('Background');
                 this.uiLayer = this.map.createBlankLayer('UI', this.backgroundLayer.layer.data[0].length, this.backgroundLayer.layer.data.length, this.game.tileSize, this.game.tileSize);
                 this.foregroundLayer = this.map.createLayer('Foreground');
@@ -3019,7 +3021,6 @@ var TacticArena;
             };
             MainAdventureBattle.prototype.battleOver = function () {
                 _super.prototype.battleOver.call(this);
-                this.uiManager.ingamemenuUI.display('You win !');
                 //this.game.state.start("mainadventure", true, false, {
                 //    mainPawn: this.pawns[0].export(),
                 //});
@@ -3098,11 +3099,11 @@ var TacticArena;
                     }
                     if (p.faction == 'human') {
                         _this.pawns.push(new TacticArena.Entity.Pawn(_this, startPositions[k][0].x, startPositions[k][0].y, startPositions[k][0].d, 'redhead', _this.getUniqueId(), isBot, k, _this.generator.generate(), TacticArena.Entity.Sprite));
-                        _this.pawns.push(new TacticArena.Entity.Pawn(_this, startPositions[k][1].x, startPositions[k][1].y, startPositions[k][1].d, 'amanda', _this.getUniqueId(), isBot, k, _this.generator.generate(), TacticArena.Entity.Sprite));
+                        //this.pawns.push(new Entity.Pawn(this, startPositions[k][1].x, startPositions[k][1].y, startPositions[k][1].d, 'amanda', this.getUniqueId(), isBot, k, this.generator.generate(), Entity.Sprite));
                     }
                     else {
                         _this.pawns.push(new TacticArena.Entity.Pawn(_this, startPositions[k][0].x, startPositions[k][0].y, startPositions[k][0].d, 'skeleton', _this.getUniqueId(), isBot, k, _this.generator.generate(), TacticArena.Entity.Sprite));
-                        _this.pawns.push(new TacticArena.Entity.Pawn(_this, startPositions[k][1].x, startPositions[k][1].y, startPositions[k][1].d, 'skeleton', _this.getUniqueId(), isBot, k, _this.generator.generate(), TacticArena.Entity.Sprite));
+                        //this.pawns.push(new Entity.Pawn(this, startPositions[k][1].x, startPositions[k][1].y, startPositions[k][1].d, 'skeleton', this.getUniqueId(), isBot, k, this.generator.generate(), Entity.Sprite));
                     }
                     console.log('jajoute mes pawns');
                 });
@@ -3199,6 +3200,7 @@ var TacticArena;
                 this.load.image('path-tile', 'assets/images/path_tile.png');
                 this.load.image('modal-bg', 'assets/images/modal-bg.png');
                 this.load.image('modal-close', 'assets/images/modal-close.png');
+                this.load.image('menu-icon', 'assets/images/menu_icon.png');
                 this.load.atlasJSONArray('player', 'assets/images/character.png', 'assets/images/character.json');
                 this.load.atlasJSONArray('orc', 'assets/images/orc.png', 'assets/images/orc.json');
                 this.load.atlasJSONArray('redhead', 'assets/images/redhead.png', 'assets/images/redhead.json');
@@ -3229,13 +3231,13 @@ var TacticArena;
                 //    that.game.state.start("menu");
                 //}, 1000);
                 //that.game.state.start("menu");
-                that.game.state.start("mainadventure");
-                //that.game.state.start('mainsolooffline', true, false, {
-                //    players: [
-                //        {name: 'BOT 01', faction: 'evil', player: false},
-                //        {name: 'Matt', faction: 'human', player: true}
-                //    ]
-                //}, null);
+                //that.game.state.start("mainadventure");
+                that.game.state.start('mainsolooffline', true, false, {
+                    players: [
+                        { name: 'BOT 01', faction: 'evil', player: false },
+                        { name: 'Matt', faction: 'human', player: true }
+                    ]
+                }, null);
                 //that.game.state.start("lobby");
             };
             return Preload;
@@ -5766,55 +5768,58 @@ var TacticArena;
             function IngameMenu(menu) {
                 var self = this;
                 this.menu = menu;
-                this.menu.element.append('<div class="ui-ingame-menu"><a class="menu-icon"></a></div>');
-                this.element = this.menu.element.find('.ui-ingame-menu');
-                this.element.find('.menu-icon').on('click', function () {
-                    self.showOverlay();
-                    self.menu.element.append('<div class="ui-popin">' +
-                        '<a class="close">x</a>' +
-                        '<a class="button quit">Quit</a>' +
-                        '</div>');
-                    self.menu.element.find('.close').on('click', function () {
-                        self.menu.element.find('.ui-overlay').remove();
-                        self.menu.element.find('.ui-popin').remove();
-                    });
-                    self.menu.element.find('.button.quit').on('click', function () {
-                        self.menu.game.state.start('menu');
-                    });
-                });
+                this.menu.game.add.image(this.menu.game.world.width - 28, 0, 'menu-icon');
+                //this.menu.element.append('<div class="ui-ingame-menu"><a class="menu-icon"></a></div>');
+                //this.element = this.menu.element.find('.ui-ingame-menu');
+                //this.element.find('.menu-icon').on('click', function () {
+                //    self.showOverlay();
+                //    self.menu.element.append(
+                //        '<div class="ui-popin">' +
+                //            '<a class="close">x</a>' +
+                //            '<a class="button quit">Quit</a>' +
+                //        '</div>'
+                //    );
+                //    self.menu.element.find('.close').on('click', function() {
+                //        self.menu.element.find('.ui-overlay').remove();
+                //        self.menu.element.find('.ui-popin').remove();
+                //    });
+                //    self.menu.element.find('.button.quit').on('click', function() {
+                //        self.menu.game.state.start('menu');
+                //    });
+                //});
             }
-            IngameMenu.prototype.showOverlay = function () {
-                this.menu.element.append('<div class="ui-overlay"></div>');
-            };
+            //showOverlay() {
+            //    this.menu.element.append('<div class="ui-overlay"></div>');
+            //}
             IngameMenu.prototype.gameOver = function (msg) {
-                var self = this;
-                this.showOverlay();
-                this.menu.element.append('<div class="ui-popin">' +
-                    '<a class="button">' + msg + '</a>' +
-                    '<a class="button">-</a>' +
-                    '<a class="button quit">Quit</a>' +
-                    '</div>');
-                this.menu.element.find('.button.quit').on('click', function () {
-                    self.menu.game.state.start('menu');
-                });
+                //let self = this;
+                //this.showOverlay();
+                //this.menu.element.append(
+                //    '<div class="ui-popin">' +
+                //    '<a class="button">' + msg + '</a>' +
+                //    '<a class="button">-</a>' +
+                //    '<a class="button quit">Quit</a>' +
+                //    '</div>'
+                //);
+                //this.menu.element.find('.button.quit').on('click', function() {
+                //    self.menu.game.state.start('menu');
+                //});
             };
             IngameMenu.prototype.show = function (msg) {
-                var self = this;
-                this.showOverlay();
-                this.menu.element.append('<div class="ui-popin">' +
-                    '<a class="button">' + msg + '</a>' +
-                    '</div>');
-                this.menu.element.find('.button.quit').on('click', function () {
-                    self.menu.game.state.start('menu');
-                });
-            };
-            IngameMenu.prototype.display = function (message) {
-                var message = this.menu.game.add.text(this.menu.game.camera.x + (this.menu.game.width / 2), this.menu.game.camera.y + (this.menu.game.height / 2), message, { font: '20px Arial', fill: "#ffffff" });
-                message.fixedToCamera = false;
+                //let self = this;
+                //this.showOverlay();
+                //this.menu.element.append(
+                //    '<div class="ui-popin">' +
+                //    '<a class="button">' + msg + '</a>' +
+                //    '</div>'
+                //);
+                //this.menu.element.find('.button.quit').on('click', function() {
+                //    self.menu.game.state.start('menu');
+                //});
             };
             IngameMenu.prototype.close = function () {
-                this.menu.element.find('.ui-overlay').remove();
-                this.menu.element.find('.ui-popin').remove();
+                //this.menu.element.find('.ui-overlay').remove();
+                //this.menu.element.find('.ui-popin').remove();
             };
             return IngameMenu;
         }());
@@ -6236,92 +6241,94 @@ var TacticArena;
             };
             Pointer.prototype.update = function () {
                 var _this = this;
-                var self = this;
-                var pointerPosition = this.getPosition();
-                this.marker.x = pointerPosition.x * this.game.tileSize;
-                this.marker.y = pointerPosition.y * this.game.tileSize;
-                //this.cursor_pointer.position.x = this.game.input.activePointer.worldX;
-                //this.cursor_pointer.position.y = this.game.input.activePointer.worldY;
-                //this.cursor_pointer.bringToTop();
-                if (!self.game.process) {
-                    var activePawn_1 = this.game.turnManager.getActivePawn();
-                    var position = activePawn_1.getProjectionOrReal().getPosition();
-                    var distance = this.game.stageManager.getNbTilesBetween({ 'x': pointerPosition.x, 'y': pointerPosition.y }, { 'x': position.x, 'y': position.y });
-                    if (self.game.uiManager.actionUI.canOrderMove()) {
-                        this.game.stageManager.canMove(activePawn_1.getProjectionOrReal(), pointerPosition.x, pointerPosition.y, activePawn_1.getAp()).then(function (path) {
-                            _this.clearHelp();
-                            _this.game.stageManager.showPath(path, self.game.pathTilesGroup);
-                            _this.game.stageManager.showPossibleMove(activePawn_1.getProjectionOrReal().getPosition(), activePawn_1.getReal().getAp());
-                            _this.game.uiManager.pawnsinfosUI.showApCost(activePawn_1, path.length);
-                        }, function (res) {
-                            _this.clearHelp();
-                        });
-                    }
-                    else if (self.game.uiManager.actionUI.canOrderFire() && activePawn_1.getAp() >= 2) {
-                        if (distance <= 4) {
-                            var path = this.game.stageManager.getLinearPath(activePawn_1.getProjectionOrReal(), 4);
-                            this.game.stageManager.showPossibleLinearTrajectories(path);
-                            var isInPath = false;
-                            for (var i = 0; i < path.length; i++) {
-                                if (path[i].x == pointerPosition.x && path[i].y == pointerPosition.y) {
-                                    isInPath = true;
+                if (!this.game.process) {
+                    var self_5 = this;
+                    var pointerPosition = this.getPosition();
+                    this.marker.x = pointerPosition.x * this.game.tileSize;
+                    this.marker.y = pointerPosition.y * this.game.tileSize;
+                    //this.cursor_pointer.position.x = this.game.input.activePointer.worldX;
+                    //this.cursor_pointer.position.y = this.game.input.activePointer.worldY;
+                    //this.cursor_pointer.bringToTop();
+                    if (!self_5.game.process) {
+                        var activePawn_1 = this.game.turnManager.getActivePawn();
+                        var position = activePawn_1.getProjectionOrReal().getPosition();
+                        var distance = this.game.stageManager.getNbTilesBetween({ 'x': pointerPosition.x, 'y': pointerPosition.y }, { 'x': position.x, 'y': position.y });
+                        if (self_5.game.uiManager.actionUI.canOrderMove()) {
+                            this.game.stageManager.canMove(activePawn_1.getProjectionOrReal(), pointerPosition.x, pointerPosition.y, activePawn_1.getAp()).then(function (path) {
+                                _this.clearHelp();
+                                _this.game.stageManager.showPath(path, self_5.game.pathTilesGroup);
+                                _this.game.stageManager.showPossibleMove(activePawn_1.getProjectionOrReal().getPosition(), activePawn_1.getReal().getAp());
+                                _this.game.uiManager.pawnsinfosUI.showApCost(activePawn_1, path.length);
+                            }, function (res) {
+                                _this.clearHelp();
+                            });
+                        }
+                        else if (self_5.game.uiManager.actionUI.canOrderFire() && activePawn_1.getAp() >= 2) {
+                            if (distance <= 4) {
+                                var path = this.game.stageManager.getLinearPath(activePawn_1.getProjectionOrReal(), 4);
+                                this.game.stageManager.showPossibleLinearTrajectories(path);
+                                var isInPath = false;
+                                for (var i = 0; i < path.length; i++) {
+                                    if (path[i].x == pointerPosition.x && path[i].y == pointerPosition.y) {
+                                        isInPath = true;
+                                    }
+                                }
+                                this.game.stageManager.clearPath(self_5.game.pathTilesGroup);
+                                if (isInPath) {
+                                    this.game.stageManager.showPath(path, self_5.game.pathTilesGroup, 0xfc000f);
+                                    this.game.uiManager.pawnsinfosUI.showApCost(activePawn_1, 2);
                                 }
                             }
-                            this.game.stageManager.clearPath(self.game.pathTilesGroup);
-                            if (isInPath) {
-                                this.game.stageManager.showPath(path, self.game.pathTilesGroup, 0xfc000f);
-                                this.game.uiManager.pawnsinfosUI.showApCost(activePawn_1, 2);
+                            else {
+                                this.clearHelp();
                             }
                         }
-                        else {
-                            this.clearHelp();
-                        }
-                    }
-                    else if (self.game.uiManager.actionUI.canOrderWind() && activePawn_1.getAp() >= 2) {
-                        if (distance <= 4) {
-                            var path = this.game.stageManager.getLinearPath(activePawn_1.getProjectionOrReal(), 4);
-                            this.game.stageManager.showPossibleLinearTrajectories(path);
-                            var isInPath = false;
-                            for (var i = 0; i < path.length; i++) {
-                                if (path[i].x == pointerPosition.x && path[i].y == pointerPosition.y) {
-                                    isInPath = true;
+                        else if (self_5.game.uiManager.actionUI.canOrderWind() && activePawn_1.getAp() >= 2) {
+                            if (distance <= 4) {
+                                var path = this.game.stageManager.getLinearPath(activePawn_1.getProjectionOrReal(), 4);
+                                this.game.stageManager.showPossibleLinearTrajectories(path);
+                                var isInPath = false;
+                                for (var i = 0; i < path.length; i++) {
+                                    if (path[i].x == pointerPosition.x && path[i].y == pointerPosition.y) {
+                                        isInPath = true;
+                                    }
+                                }
+                                this.game.stageManager.clearPath(self_5.game.pathTilesGroup);
+                                if (isInPath) {
+                                    this.game.stageManager.showPath(path, self_5.game.pathTilesGroup, 0xfc000f);
+                                    this.game.uiManager.pawnsinfosUI.showApCost(activePawn_1, 2);
                                 }
                             }
-                            this.game.stageManager.clearPath(self.game.pathTilesGroup);
-                            if (isInPath) {
-                                this.game.stageManager.showPath(path, self.game.pathTilesGroup, 0xfc000f);
-                                this.game.uiManager.pawnsinfosUI.showApCost(activePawn_1, 2);
+                            else {
+                                this.clearHelp();
                             }
                         }
-                        else {
-                            this.clearHelp();
-                        }
-                    }
-                    else if (self.game.uiManager.actionUI.canOrderSlash() && activePawn_1.getAp() >= 1) {
-                        if (distance <= 2) {
-                            var path = this.game.stageManager.getFrontTile(activePawn_1.getProjectionOrReal());
-                            this.game.stageManager.showPossibleLinearTrajectories(path);
-                            var isInPath = false;
-                            for (var i = 0; i < path.length; i++) {
-                                if (path[i].x == pointerPosition.x && path[i].y == pointerPosition.y) {
-                                    isInPath = true;
+                        else if (self_5.game.uiManager.actionUI.canOrderSlash() && activePawn_1.getAp() >= 1) {
+                            if (distance <= 2) {
+                                var path = this.game.stageManager.getFrontTile(activePawn_1.getProjectionOrReal());
+                                this.game.stageManager.showPossibleLinearTrajectories(path);
+                                var isInPath = false;
+                                for (var i = 0; i < path.length; i++) {
+                                    if (path[i].x == pointerPosition.x && path[i].y == pointerPosition.y) {
+                                        isInPath = true;
+                                    }
+                                }
+                                this.game.stageManager.clearPath(self_5.game.pathTilesGroup);
+                                if (isInPath) {
+                                    this.game.stageManager.showPath(path, self_5.game.pathTilesGroup, 0xfc000f);
+                                    this.game.uiManager.pawnsinfosUI.showApCost(activePawn_1, 1);
                                 }
                             }
-                            this.game.stageManager.clearPath(self.game.pathTilesGroup);
-                            if (isInPath) {
-                                this.game.stageManager.showPath(path, self.game.pathTilesGroup, 0xfc000f);
-                                this.game.uiManager.pawnsinfosUI.showApCost(activePawn_1, 1);
+                            else {
+                                this.clearHelp();
                             }
-                        }
-                        else {
-                            this.clearHelp();
                         }
                     }
                 }
             };
             Pointer.prototype.onGridLeftClick = function () {
-                var self = this;
                 if (!this.game.process) {
+                    var self_6 = this;
                     var activePawn = this.game.turnManager.getActivePawn();
                     var targetX = this.marker.x / this.game.tileSize;
                     var targetY = this.marker.y / this.game.tileSize;
@@ -6330,17 +6337,17 @@ var TacticArena;
                     var distance = this.game.stageManager.getNbTilesBetween({ 'x': targetX, 'y': targetY }, { 'x': position.x, 'y': position.y });
                     if (this.game.uiManager.actionUI.canOrderMove()) {
                         this.game.stageManager.canMove(activePawn.getProjectionOrReal(), targetX, targetY, activePawn.getAp()).then(function (path) {
-                            self.game.process = true;
+                            self_6.game.process = true;
                             activePawn.createProjection();
                             var resultPath = JSON.parse(JSON.stringify(path));
                             activePawn.projection.moveTo(0, 0, path).then(function (res) {
                                 activePawn.setAp(activePawn.getAp() - distance);
                                 for (var i = 0; i < resultPath.length; i++) {
                                     console.log(activePawn.getProjectionOrReal().getDirection());
-                                    self.game.orderManager.add('move', activePawn, resultPath[i].x, resultPath[i].y, activePawn.getProjectionOrReal().getDirection());
+                                    self_6.game.orderManager.add('move', activePawn, resultPath[i].x, resultPath[i].y, activePawn.getProjectionOrReal().getDirection());
                                 }
-                                self.game.process = false;
-                                self.game.signalManager.onActionPlayed.dispatch(activePawn);
+                                self_6.game.process = false;
+                                self_6.game.signalManager.onActionPlayed.dispatch(activePawn);
                             });
                         }, function (res) {
                         });
@@ -6368,7 +6375,7 @@ var TacticArena;
                                 this.game.uiManager.pawnsinfosUI.showApCost(activePawn, 0);
                                 this.game.orderManager.add('cast', activePawn, position.x, position.y, activePawn.getProjectionOrReal().getDirection());
                                 this.clearHelp();
-                                self.game.signalManager.onActionPlayed.dispatch(activePawn);
+                                self_6.game.signalManager.onActionPlayed.dispatch(activePawn);
                             }
                         }
                     }
@@ -6395,11 +6402,11 @@ var TacticArena;
                                 this.game.uiManager.pawnsinfosUI.showApCost(activePawn, 0);
                                 this.game.orderManager.add('cast_wind', activePawn, position.x, position.y, activePawn.getProjectionOrReal().getDirection());
                                 this.clearHelp();
-                                self.game.signalManager.onActionPlayed.dispatch(activePawn);
+                                self_6.game.signalManager.onActionPlayed.dispatch(activePawn);
                             }
                         }
                     }
-                    else if (self.game.uiManager.actionUI.canOrderSlash() && activePawn.getAp() >= 1) {
+                    else if (self_6.game.uiManager.actionUI.canOrderSlash() && activePawn.getAp() >= 1) {
                         if (distance <= 1) {
                             var path = this.game.stageManager.getFrontTile(activePawn.getProjectionOrReal());
                             this.game.stageManager.showPossibleLinearTrajectories(path);
@@ -6417,7 +6424,7 @@ var TacticArena;
                                 this.game.uiManager.pawnsinfosUI.showApCost(activePawn, 0);
                                 this.game.orderManager.add('slash', activePawn, position.x, position.y, activePawn.getProjectionOrReal().getDirection());
                                 this.clearHelp();
-                                self.game.signalManager.onActionPlayed.dispatch(activePawn);
+                                self_6.game.signalManager.onActionPlayed.dispatch(activePawn);
                             }
                         }
                     }
@@ -6466,52 +6473,54 @@ var TacticArena;
                 return _super.call(this, game) || this;
             }
             PointerExploration.prototype.update = function () {
-                var activePawn = this.game.pawns[0];
-                var p = this.getPosition();
-                this.marker.x = p.x * this.game.tileSize;
-                this.marker.y = p.y * this.game.tileSize;
-                if (this.game.stageManager.grid[p.y][p.x] == 0 && !this.game.stageManager.equalPositions(p, activePawn.getPosition())) {
-                    this.marker.lineStyle(2, 0xcd2f36, 1);
+                if (!this.game.process) {
+                    var activePawn = this.game.pawns[0];
+                    var p = this.getPosition();
+                    this.marker.x = p.x * this.game.tileSize;
+                    this.marker.y = p.y * this.game.tileSize;
+                    if (this.game.stageManager.grid[p.y][p.x] == 0 && !this.game.stageManager.equalPositions(p, activePawn.getPosition())) {
+                        this.marker.lineStyle(2, 0xcd2f36, 1);
+                    }
+                    else {
+                        this.marker.lineStyle(2, 0xffffff, 1);
+                    }
+                    this.marker.drawRect(0, 0, this.game.tileSize, this.game.tileSize);
                 }
-                else {
-                    this.marker.lineStyle(2, 0xffffff, 1);
-                }
-                this.marker.drawRect(0, 0, this.game.tileSize, this.game.tileSize);
             };
             PointerExploration.prototype.onGridLeftClick = function () {
-                var self = this;
-                if (!self.game.process) {
+                if (!this.game.process) {
+                    var self_7 = this;
                     var activePawn = this.game.pawns[0];
                     var p = this.getPosition();
                     var targetX = this.marker.x / this.game.tileSize;
                     var targetY = this.marker.y / this.game.tileSize;
-                    self.game.process = true;
+                    self_7.game.process = true;
                     console.log(p);
                     if (this.game.stageManager.grid[p.y][p.x] != 0) {
                         this.game.stageManager.canMove(activePawn, targetX, targetY).then(function (path) {
                             console.log(path);
                             activePawn.moveTo(0, 0, path, true, true).then(function (res) {
-                                self.game.stageManager.markPawns();
-                                self.game.process = false;
+                                self_7.game.stageManager.markPawns();
+                                self_7.game.process = false;
                             }, function (res) {
-                                self.game.process = false;
+                                self_7.game.process = false;
                             });
                         }, function (res) {
                             console.log(res);
-                            self.game.process = false;
+                            self_7.game.process = false;
                         });
                     }
                     else if (!this.game.stageManager.equalPositions(p, activePawn.getPosition())) {
                         console.log('attack');
-                        var enemy = self.game.pawns[1];
-                        self.game.process = false;
+                        var enemy = self_7.game.pawns[1];
+                        self_7.game.process = false;
                         var gridWidth = 10;
                         var gridHeight = 16;
                         var startPosition = { x: p.x - Math.floor(gridWidth / 2), y: p.y - Math.floor(gridHeight / 2) };
-                        var layers = self.game.stageManager.getLayers();
+                        var layers = self_7.game.stageManager.getLayers();
                         //self.game.stageManager.fillBlack().then(function() {
-                        self.game.state.clearCurrentState();
-                        self.game.state.start('mainadventurebattle', true, false, {
+                        self_7.game.state.clearCurrentState();
+                        self_7.game.state.start('mainadventurebattle', true, false, {
                             players: [
                                 { name: 'Beez', faction: 'animals', player: false, type: enemy.type, spriteClass: enemy.spriteClass, position: enemy.getPosition(), direction: enemy.getDirection() },
                                 { name: activePawn._name, faction: 'human', player: true, type: activePawn.type, spriteClass: activePawn.spriteClass, position: activePawn.getPosition(), direction: activePawn.getDirection() }
@@ -6525,7 +6534,7 @@ var TacticArena;
                         //});
                     }
                     else {
-                        self.game.process = false;
+                        self_7.game.process = false;
                     }
                 }
             };
@@ -6692,10 +6701,10 @@ var TacticArena;
                 var _this = this;
                 return new Promise(function (resolve, reject) {
                     if (elements.length > 0) {
-                        var self_5 = _this;
+                        var self_8 = _this;
                         $(elements[0]).find('.line').animate({ width: '91px' }, 200, function () {
                             $(elements[0]).find('.square').animate({ opacity: 1 }, 100, function () {
-                                self_5.display(elements.slice(1)).then(function () {
+                                self_8.display(elements.slice(1)).then(function () {
                                     resolve(true);
                                 });
                             });
@@ -6768,11 +6777,20 @@ var TacticArena;
             function TurnIndicator(menu) {
                 var self = this;
                 this.menu = menu;
-                this.menu.element.append('<div class="ui-turn-indicator"></div>');
-                this.element = this.menu.element.find('.ui-turn-indicator');
+                //this.menu.element.append('<div class="ui-turn-indicator"></div>');
+                //this.element = this.menu.element.find('.ui-turn-indicator');
+                this.text = this.menu.game.add.text(0, 0, '', {
+                    font: '35px Iceland',
+                    fill: '#AB9352',
+                    boundsAlignH: 'center',
+                    stroke: '#FFFFFF',
+                    strokeThickness: 3
+                });
+                this.text.setTextBounds(0, -5, this.menu.game.world.width, 32);
             }
             TurnIndicator.prototype.write = function (turn) {
-                this.element.html('Tour ' + ("0" + Number(turn)).slice(-2));
+                //this.element.html('Tour ' + ("0" + Number(turn)).slice(-2));
+                this.text.text = 'Tour ' + ('0' + Number(turn)).slice(-2);
             };
             return TurnIndicator;
         }());
@@ -6788,6 +6806,12 @@ var TacticArena;
                 var self = this;
                 this.game = game;
                 this.element = $('#content');
+                var topUIGroup = this.game.add.group();
+                var topUIBackground = this.game.make.graphics();
+                topUIBackground.beginFill(0x333333);
+                topUIBackground.drawRect(0, 0, this.game.world.width, 32);
+                topUIBackground.endFill();
+                topUIGroup.add(topUIBackground);
                 //this.consolelogsUI = new UI.ConsoleLogs(this);
                 this.directionUI = new UI.Direction(this);
                 this.actionUI = new UI.Action(this);

@@ -14,6 +14,7 @@ module TacticArena.UI {
         threeKey;
         fourKey;
         fiveKey;
+        wKey;
 
         constructor(menu) {
             this.menu = menu;
