@@ -24,8 +24,8 @@ module TacticArena.UI {
 
             var topUIGroup = this.game.add.group();
             var topUIBackground = this.game.make.graphics();
-            topUIBackground.beginFill(0x333333);
-            topUIBackground.drawRect(0, 0, this.game.world.width, 32);
+            topUIBackground.beginFill(0x333333, 0.6);
+            topUIBackground.drawRect(0, 0, this.game.world.width, 64);
             topUIBackground.endFill();
             topUIGroup.add(topUIBackground);
 

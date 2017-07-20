@@ -17,7 +17,7 @@ module TacticArena.UI {
                 stroke: '#FFFFFF',
                 strokeThickness: 3
             });
-            this.text.setTextBounds(0, -5, this.menu.game.world.width, 32);
+            this.text.setTextBounds(0, 0, this.menu.game.world.width, 32);
         }
 
         write(turn) {

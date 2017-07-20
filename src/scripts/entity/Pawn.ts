@@ -16,8 +16,9 @@ module TacticArena.Entity {
         team;
         hurting;
         spriteClass;
+        hpSprite;
 
-        constructor(game, x, y, ext, type, id, bot, team, name = "", spriteClass: Entity.Sprite = Entity.Sprite) {
+        constructor(game, x, y, ext, type, id, bot, team, name = "", spriteClass: typeof Entity.Sprite = Entity.Sprite) {
             this.game = game;
             this._id = id;
             this._name = name;

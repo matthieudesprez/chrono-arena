@@ -2667,7 +2667,7 @@ var TacticArena;
             function BasePlayable() {
                 return _super.call(this) || this;
             }
-            BasePlayable.prototype.init = function () {
+            BasePlayable.prototype.init = function (data) {
                 _super.prototype.init.call(this);
                 this.game.stage.backgroundColor = 0xffffff;
                 this.process = true;
@@ -3188,6 +3188,7 @@ var TacticArena;
             }
             Preload.prototype.preload = function () {
                 this.game.add.text(0, 0, "f", { font: '1px Press Start 2P', fill: "#333333" });
+                this.game.add.text(0, 0, "f", { font: '1px Iceland', fill: "#333333" });
                 _super.prototype.createMenu.call(this);
                 this.status = this.add.text(640 / 2, this.game.world.centerY / 2 + 200, 'Loading...', { fill: 'white' });
                 this.status.anchor.setTo(0.5);
@@ -3201,6 +3202,10 @@ var TacticArena;
                 this.load.image('modal-bg', 'assets/images/modal-bg.png');
                 this.load.image('modal-close', 'assets/images/modal-close.png');
                 this.load.image('menu-icon', 'assets/images/menu_icon.png');
+                this.load.image('avatar-blondy', 'assets/images/blondy_avatar.png');
+                this.load.image('avatar-redhead', 'assets/images/redhead_avatar.png');
+                this.load.image('avatar-evil', 'assets/images/evil_avatar.png');
+                this.load.image('avatar-skeleton', 'assets/images/skeleton_avatar.png');
                 this.load.atlasJSONArray('player', 'assets/images/character.png', 'assets/images/character.json');
                 this.load.atlasJSONArray('orc', 'assets/images/orc.png', 'assets/images/orc.json');
                 this.load.atlasJSONArray('redhead', 'assets/images/redhead.png', 'assets/images/redhead.json');
@@ -5220,6 +5225,162 @@ var TacticArena;
 (function (TacticArena) {
     var UI;
     (function (UI) {
+        var Bar = (function () {
+            function Bar(game, providedConfig) {
+                this.game = game;
+                this.setupConfiguration(providedConfig);
+                this.setPosition(this.config.x, this.config.y);
+                this.setValue(0);
+                this.drawBackground();
+                this.drawBar();
+                this.drawText();
+                console.log(this.config);
+                //this.setFixedToCamera(this.config.isFixedToCamera);
+            }
+            Bar.prototype.setValue = function (value) {
+                this.value = value;
+            };
+            Bar.prototype.updateValue = function (value) {
+                this.setValue(value);
+                this.updateText();
+            };
+            Bar.prototype.setupConfiguration = function (providedConfig) {
+                this.config = this.mergeWithDefaultConfiguration(providedConfig);
+                this.flipped = this.config.flipped;
+            };
+            Bar.prototype.mergeWithDefaultConfiguration = function (newConfig) {
+                var defaultConfig = {
+                    width: 250,
+                    height: 40,
+                    x: 0,
+                    y: 0,
+                    bg: {
+                        color: '#651828'
+                    },
+                    bar: {
+                        color: '#FEFF03'
+                    },
+                    animationDuration: 200,
+                    flipped: false,
+                    isFixedToCamera: false,
+                    max: 0,
+                    unit: ''
+                };
+                return this.mergeObjetcs(defaultConfig, newConfig);
+            };
+            Bar.prototype.mergeObjetcs = function (targetObj, newObj) {
+                for (var p in newObj) {
+                    try {
+                        targetObj[p] = newObj[p].constructor == Object ? this.mergeObjetcs(targetObj[p], newObj[p]) : newObj[p];
+                    }
+                    catch (e) {
+                        targetObj[p] = newObj[p];
+                    }
+                }
+                return targetObj;
+            };
+            Bar.prototype.drawBackground = function () {
+                var bmd = this.game.add.bitmapData(this.config.width, this.config.height);
+                bmd.ctx.fillStyle = this.config.bg.color;
+                bmd.ctx.beginPath();
+                bmd.ctx.rect(0, 0, this.config.width, this.config.height);
+                bmd.ctx.fill();
+                bmd.update();
+                this.bgSprite = this.game.add.sprite(this.x, this.y, bmd);
+                this.bgSprite.anchor.set(0); //0.5);
+                if (this.flipped) {
+                    this.bgSprite.scale.x = -1;
+                }
+            };
+            Bar.prototype.drawBar = function () {
+                var bmd = this.game.add.bitmapData(this.config.width, this.config.height);
+                bmd.ctx.fillStyle = this.config.bar.color;
+                bmd.ctx.beginPath();
+                bmd.ctx.rect(0, 0, this.config.width, this.config.height);
+                bmd.ctx.fill();
+                bmd.update();
+                this.barSprite = this.game.add.sprite(this.x, this.y, bmd);
+                //this.barSprite = this.game.add.sprite(this.x - this.bgSprite.width / 2, this.y, bmd);
+                this.barSprite.anchor.set(0);
+                //this.barSprite.anchor.y = 0;//0.5;
+                if (this.flipped) {
+                    this.barSprite.scale.x = -1;
+                }
+            };
+            Bar.prototype.drawText = function () {
+                this.text = this.game.add.text(this.x, this.y, '', {
+                    font: '12px Iceland',
+                    fill: '#ffffff',
+                    boundsAlignH: 'center',
+                    boundsAlignV: 'top',
+                });
+                this.text.setTextBounds(0, 0, this.bgSprite.width, this.bgSprite.height);
+                this.updateText();
+            };
+            Bar.prototype.updateText = function () {
+                this.text.text = this.value + ' / ' + this.config.max + ' ' + this.config.unit;
+            };
+            Bar.prototype.setPosition = function (x, y) {
+                this.x = x;
+                this.y = y;
+                if (this.bgSprite !== undefined && this.barSprite !== undefined) {
+                    this.bgSprite.position.x = x;
+                    this.bgSprite.position.y = y;
+                    this.barSprite.position.x = x - this.config.width / 2;
+                    this.barSprite.position.y = y;
+                }
+            };
+            Bar.prototype.setPercent = function (newValue) {
+                if (newValue < 0)
+                    newValue = 0;
+                if (newValue > 100)
+                    newValue = 100;
+                var newWidth = (newValue * this.config.width) / 100;
+                this.setWidth(newWidth);
+            };
+            Bar.prototype.setBarColor = function (newColor) {
+                var bmd = this.barSprite.key;
+                bmd.update();
+                var currentRGBColor = bmd.getPixelRGB(0, 0);
+                var newRGBColor = this.hexToRgb(newColor);
+                bmd.replaceRGB(currentRGBColor.r, currentRGBColor.g, currentRGBColor.b, 255, newRGBColor.r, newRGBColor.g, newRGBColor.b, 255);
+            };
+            Bar.prototype.setWidth = function (newWidth) {
+                if (this.flipped) {
+                    newWidth = -1 * newWidth;
+                }
+                this.game.add.tween(this.barSprite).to({ width: newWidth }, this.config.animationDuration, Phaser.Easing.Linear.None, true);
+            };
+            Bar.prototype.setFixedToCamera = function (fixedToCamera) {
+                this.bgSprite.fixedToCamera = fixedToCamera;
+                this.barSprite.fixedToCamera = fixedToCamera;
+            };
+            Bar.prototype.kill = function () {
+                this.bgSprite.kill();
+                this.barSprite.kill();
+            };
+            Bar.prototype.hexToRgb = function (hex) {
+                // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
+                var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+                hex = hex.replace(shorthandRegex, function (m, r, g, b) {
+                    return r + r + g + g + b + b;
+                });
+                var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+                return result ? {
+                    r: parseInt(result[1], 16),
+                    g: parseInt(result[2], 16),
+                    b: parseInt(result[3], 16)
+                } : null;
+            };
+            return Bar;
+        }());
+        UI.Bar = Bar;
+    })(UI = TacticArena.UI || (TacticArena.UI = {}));
+})(TacticArena || (TacticArena = {}));
+var TacticArena;
+(function (TacticArena) {
+    var UI;
+    (function (UI) {
         var Chat = (function () {
             function Chat(menu, serverManager) {
                 var self = this;
@@ -5768,7 +5929,7 @@ var TacticArena;
             function IngameMenu(menu) {
                 var self = this;
                 this.menu = menu;
-                this.menu.game.add.image(this.menu.game.world.width - 28, 0, 'menu-icon');
+                this.menu.game.add.image(this.menu.game.world.width - 33, 5, 'menu-icon');
                 //this.menu.element.append('<div class="ui-ingame-menu"><a class="menu-icon"></a></div>');
                 //this.element = this.menu.element.find('.ui-ingame-menu');
                 //this.element.find('.menu-icon').on('click', function () {
@@ -6137,11 +6298,52 @@ var TacticArena;
             function PawnsInfos(menu) {
                 this.menu = menu;
                 var self = this;
+                this.pawnsInfos = {};
                 var html = '<div class="ui-pawns-infos">';
                 // sort for displaying player pawns on top
-                var pawns = this.menu.game.pawns.sort(function (p) { return p.team != self.menu.game.playerTeam; });
+                var pawns = this.menu.game.pawns.sort(function (p) {
+                    return p.team != self.menu.game.playerTeam;
+                });
                 for (var i = 0; i < pawns.length; i++) {
                     var pawn = pawns[i];
+                    var img = self.menu.game.add.image(i * 64, 0, 'avatar-' + pawn.type);
+                    img.width = 64;
+                    img.height = 64;
+                    var hpBar = new UI.Bar(this.menu.game, {
+                        x: i * 64,
+                        y: 64,
+                        width: 64,
+                        height: 10,
+                        unit: 'HP',
+                        max: pawn._hpMax,
+                        textColor: '#ffffff',
+                        bg: {
+                            color: '#808080'
+                        },
+                        bar: {
+                            color: '#8b0000'
+                        }
+                    });
+                    var apBar = new UI.Bar(this.menu.game, {
+                        x: i * 64,
+                        y: 74,
+                        width: 64,
+                        height: 10,
+                        unit: 'AP',
+                        max: pawn._apMax,
+                        textColor: '#ffffff',
+                        bg: {
+                            color: '#267ac9'
+                        },
+                        bar: {
+                            color: '#1E90FF'
+                        }
+                    });
+                    //bar.setPercent(80);
+                    this.pawnsInfos[pawn._id] = {
+                        hpBar: hpBar,
+                        apBar: apBar
+                    };
                     var classColor = pawn.team == self.menu.game.playerTeam ? 0 : 1;
                     html += '<div pawn-index="' + i + '" class="pawn pawn0' + pawn._id + ' ' + pawn.type + ' team-' + classColor + '">' +
                         '<div class="avatar"><div class="picture shiny"></div></div>' +
@@ -6185,20 +6387,29 @@ var TacticArena;
             };
             PawnsInfos.prototype.updateInfos = function () {
                 for (var i = 0; i < this.menu.game.pawns.length; i++) {
-                    var entity = this.menu.game.pawns[i];
-                    this.element.find('.pawn0' + entity._id).toggleClass('dead', !entity.isAlive());
-                    this.element.find('.pawn0' + entity._id + ' .infos .hp .value').html(entity.getHp());
-                    this.element.find('.pawn0' + entity._id + ' .infos .hp .bar .current').css('width', ((entity.getHp() / entity._hpMax) * 100) + '%');
-                    this.element.find('.pawn0' + entity._id + ' .infos .ap .value').html(entity.getAp());
-                    this.element.find('.pawn0' + entity._id + ' .infos .ap .bar .current').css('width', ((entity.getAp() / entity._apMax) * 100) + '%');
-                    this.element.find('.pawn0' + entity._id + ' .infos .ap .bar .remaining').css('width', '0%');
+                    var pawn = this.menu.game.pawns[i];
+                    //TODO maintain
+                    //this.element.find('.pawn0' + entity._id).toggleClass('dead', !entity.isAlive());
+                    //this.element.find('.pawn0' + entity._id + ' .infos .hp .value').html(entity.getHp());
+                    //this.element.find('.pawn0' + entity._id + ' .infos .hp .bar .current').css('width', ((entity.getHp() / entity._hpMax) * 100) + '%');
+                    //this.element.find('.pawn0' + entity._id + ' .infos .ap .value').html(entity.getAp());
+                    //this.element.find('.pawn0' + entity._id + ' .infos .ap .bar .current').css('width', ((entity.getAp() / entity._apMax) * 100) + '%');
+                    //this.element.find('.pawn0' + entity._id + ' .infos .ap .bar .remaining').css('width', '0%');
+                    this.pawnsInfos[pawn._id].hpBar.setPercent(((pawn.getHp() / pawn._hpMax) * 100));
+                    this.pawnsInfos[pawn._id].hpBar.updateValue(pawn.getHp());
+                    this.pawnsInfos[pawn._id].apBar.setPercent(((pawn.getAp() / pawn._apMax) * 100));
+                    this.pawnsInfos[pawn._id].apBar.updateValue(pawn.getAp());
                 }
             };
             PawnsInfos.prototype.showApCost = function (pawn, apCost) {
-                var percentRemaining = apCost > 0 ? ((pawn.getAp() / pawn._apMax) * 100) : 0;
-                this.element.find('.pawn0' + pawn._id + ' .infos .ap .bar .current').css('width', (((pawn.getAp() - apCost) / pawn._apMax) * 100) + '%');
-                this.element.find('.pawn0' + pawn._id + ' .infos .ap .bar .remaining').css('width', percentRemaining + '%');
-                this.element.find('.pawn0' + pawn._id + ' .infos .ap .value').html(pawn.getAp() - apCost);
+                //let percentRemaining = apCost > 0 ? ((pawn.getAp() / pawn._apMax) * 100) : 0;
+                var currentPercent = (((pawn.getAp() - apCost) / pawn._apMax) * 100);
+                var remainingAp = pawn.getAp() - apCost;
+                //this.element.find('.pawn0' + pawn._id + ' .infos .ap .bar .current').css('width', currentPercent + '%');
+                //this.element.find('.pawn0' + pawn._id + ' .infos .ap .bar .remaining').css('width', percentRemaining + '%');
+                //this.element.find('.pawn0' + pawn._id + ' .infos .ap .value').html(remainingAp);
+                this.pawnsInfos[pawn._id].apBar.setPercent(currentPercent);
+                this.pawnsInfos[pawn._id].apBar.updateValue(remainingAp);
             };
             return PawnsInfos;
         }());
@@ -6786,7 +6997,7 @@ var TacticArena;
                     stroke: '#FFFFFF',
                     strokeThickness: 3
                 });
-                this.text.setTextBounds(0, -5, this.menu.game.world.width, 32);
+                this.text.setTextBounds(0, 0, this.menu.game.world.width, 32);
             }
             TurnIndicator.prototype.write = function (turn) {
                 //this.element.html('Tour ' + ("0" + Number(turn)).slice(-2));
@@ -6808,8 +7019,8 @@ var TacticArena;
                 this.element = $('#content');
                 var topUIGroup = this.game.add.group();
                 var topUIBackground = this.game.make.graphics();
-                topUIBackground.beginFill(0x333333);
-                topUIBackground.drawRect(0, 0, this.game.world.width, 32);
+                topUIBackground.beginFill(0x333333, 0.6);
+                topUIBackground.drawRect(0, 0, this.game.world.width, 64);
                 topUIBackground.endFill();
                 topUIGroup.add(topUIBackground);
                 //this.consolelogsUI = new UI.ConsoleLogs(this);

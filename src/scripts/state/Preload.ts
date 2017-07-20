@@ -5,6 +5,7 @@ module TacticArena.State {
 
         preload() {
             this.game.add.text(0, 0, "f", {font: '1px Press Start 2P', fill: "#333333"});
+            this.game.add.text(0, 0, "f", {font: '1px Iceland', fill: "#333333"});
             super.createMenu();
             this.status = this.add.text(640 / 2, this.game.world.centerY / 2 + 200, 'Loading...', {fill: 'white'});
             this.status.anchor.setTo(0.5);
@@ -19,6 +20,12 @@ module TacticArena.State {
             this.load.image('modal-bg', 'assets/images/modal-bg.png');
             this.load.image('modal-close', 'assets/images/modal-close.png');
             this.load.image('menu-icon', 'assets/images/menu_icon.png');
+
+            this.load.image('avatar-blondy', 'assets/images/blondy_avatar.png');
+            this.load.image('avatar-redhead', 'assets/images/redhead_avatar.png');
+            this.load.image('avatar-evil', 'assets/images/evil_avatar.png');
+            this.load.image('avatar-skeleton', 'assets/images/skeleton_avatar.png');
+
             this.load.atlasJSONArray('player', 'assets/images/character.png', 'assets/images/character.json');
             this.load.atlasJSONArray('orc', 'assets/images/orc.png', 'assets/images/orc.json');
             this.load.atlasJSONArray('redhead', 'assets/images/redhead.png', 'assets/images/redhead.json');

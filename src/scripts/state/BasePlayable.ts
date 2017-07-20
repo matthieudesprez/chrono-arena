@@ -21,7 +21,7 @@ module TacticArena.State {
             super();
         }
 
-        init() {
+        init(data?) {
             super.init();
             this.game.stage.backgroundColor = 0xffffff;
             this.process = true;
