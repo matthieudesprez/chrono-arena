@@ -30,7 +30,7 @@ module TacticArena.Controller {
             console.log('stagemanager init', this.grid);
         }
 
-        init(name = 'map') {
+        init(name = 'mapmobile') {
             this.map = this.game.add.tilemap(name);
             this.map.addTilesetImage('tiles-collection', 'tiles-collection', this.game.tileSize, this.game.tileSize, 0, 0);
             this.parallaxLayer = this.map.createLayer('Parallax');

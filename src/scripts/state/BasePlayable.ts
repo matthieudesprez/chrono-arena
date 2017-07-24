@@ -2,10 +2,12 @@
 module TacticArena.State {
     export class BasePlayable extends TacticArena.State.BaseState {
         pawns: Entity.Pawn[];
-        pathTilesGroup;
-        pathOrdersTilesGroup;
-        pawnsSpritesGroup;
-        uiSpritesGroup;
+        worldGroup: Phaser.Group;
+        mapGroup: Phaser.Group;
+        pathTilesGroup: Phaser.Group;
+        pathOrdersTilesGroup: Phaser.Group;
+        pawnsSpritesGroup: Phaser.Group;
+        uiSpritesGroup: Phaser.Group;
         pathfinder;
         tileSize: number;
         stageManager: Controller.StageManager;
@@ -23,7 +25,7 @@ module TacticArena.State {
 
         init(data?) {
             super.init();
-            this.game.stage.backgroundColor = 0xffffff;
+            this.game.stage.backgroundColor = 0x000000;
             this.process = true;
             this.modalVisible = false;
             this.tileSize = 32;
@@ -32,10 +34,20 @@ module TacticArena.State {
             this.initMap();
 
             this.pawns = [];
+            this.worldGroup = this.add.group();
+            // TODO put tiledmap in mapGroup for more controls (offset, scale)
+            this.mapGroup = this.add.group();
+            this.worldGroup.add(this.mapGroup);
             this.pathTilesGroup = this.add.group();
+            this.worldGroup.add(this.pathTilesGroup);
             this.pathOrdersTilesGroup = this.add.group();
+            this.worldGroup.add(this.pathOrdersTilesGroup);
             this.uiSpritesGroup = this.add.group();
+            this.worldGroup.add(this.uiSpritesGroup);
             this.pawnsSpritesGroup = this.add.group();
+            this.worldGroup.add(this.pawnsSpritesGroup);
+
+            this.worldGroup.scale.set(1);
 
             this.generator = new Utils.Generator();
         }

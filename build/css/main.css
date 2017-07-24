@@ -24,7 +24,7 @@ canvas {
 }
 
 #content {
-    margin: 70px auto 0 auto;
+    margin: 0 auto 0 auto;
     /*margin: 0;*/
     display: table;
     position: relative;

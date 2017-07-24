@@ -35,9 +35,12 @@ var TacticArena;
         __extends(Game, _super);
         function Game(headless) {
             if (headless === void 0) { headless = false; }
-            var _this = _super.call(this, {
-                width: 640,
-                height: 608,
+            var _this = this;
+            console.log(window.screen.availHeight * window.devicePixelRatio);
+            //Math.round((window.screen.availHeight * window.devicePixelRatio / 1.667) / 32) * 32
+            _this = _super.call(this, {
+                width: Math.round((window.screen.availHeight * window.devicePixelRatio / 1.667) / 32) * 32,
+                height: window.screen.availHeight * window.devicePixelRatio,
                 renderer: headless ? Phaser.HEADLESS : Phaser.AUTO,
                 parent: 'game-container'
             }) || this;
@@ -1606,7 +1609,7 @@ var TacticArena;
                 console.log('stagemanager init', this.grid);
             }
             StageManager.prototype.init = function (name) {
-                if (name === void 0) { name = 'map'; }
+                if (name === void 0) { name = 'mapmobile'; }
                 this.map = this.game.add.tilemap(name);
                 this.map.addTilesetImage('tiles-collection', 'tiles-collection', this.game.tileSize, this.game.tileSize, 0, 0);
                 this.parallaxLayer = this.map.createLayer('Parallax');
@@ -1994,6 +1997,21 @@ var TacticArena;
                 }
                 _this.anchor.set(0);
                 return _this;
+                //this._hpBar = this.addChild(new TacticArena.UI.Bar(this.game, {
+                //    x: 0,
+                //    y: 0,
+                //    width: 32,
+                //    height: 5,
+                //    unit: 'HP',
+                //    max: 4,
+                //    textColor: '#ffffff',
+                //    bg: {
+                //        color: '#808080'
+                //    },
+                //    bar: {
+                //        color: '#8b0000'
+                //    }
+                //}));
             }
             Sprite.prototype.setAnimations = function () {
                 this.animations.add('standS', ["walkS1"], 6, false);
@@ -2669,17 +2687,26 @@ var TacticArena;
             }
             BasePlayable.prototype.init = function (data) {
                 _super.prototype.init.call(this);
-                this.game.stage.backgroundColor = 0xffffff;
+                this.game.stage.backgroundColor = 0x000000;
                 this.process = true;
                 this.modalVisible = false;
                 this.tileSize = 32;
                 this.isPaused = false;
                 this.initMap();
                 this.pawns = [];
+                this.worldGroup = this.add.group();
+                // TODO put tiledmap in mapGroup for more controls (offset, scale)
+                this.mapGroup = this.add.group();
+                this.worldGroup.add(this.mapGroup);
                 this.pathTilesGroup = this.add.group();
+                this.worldGroup.add(this.pathTilesGroup);
                 this.pathOrdersTilesGroup = this.add.group();
+                this.worldGroup.add(this.pathOrdersTilesGroup);
                 this.uiSpritesGroup = this.add.group();
+                this.worldGroup.add(this.uiSpritesGroup);
                 this.pawnsSpritesGroup = this.add.group();
+                this.worldGroup.add(this.pawnsSpritesGroup);
+                this.worldGroup.scale.set(1);
                 this.generator = new TacticArena.Utils.Generator();
             };
             BasePlayable.prototype.create = function () {
@@ -2846,10 +2873,47 @@ var TacticArena;
                 this.load.image('loading', 'assets/images/loading.png');
             };
             Boot.prototype.create = function () {
-                this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+                //this.game.scale.fullScreenTarget = this.parentElement;
+                //this.scale.maxHeight = window.innerHeight;
+                //this.scale.maxWidth = Math.floor( this.scale.maxHeight / 1.333 );
+                //var aspectRatio = this.game.width / this.game.height;
+                //console.log(aspectRatio);
+                //var scaleRatio = this.game.width / 640;
+                //if(aspectRatio < 1) {
+                //    scaleRatio = this.game.height / 640;
+                //}
+                //console.log(this.game.height, this.game.width, this.game.height / 640, this.game.width / 608);
+                //this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
                 //this.scale.scaleMode = Phaser.ScaleManager.RESIZE;
+                this.scale.pageAlignHorizontally = true;
+                this.scale.pageAlignVertically = true;
+                //var scale = 1 / Math.min(window.innerWidth / this.game.width, window.innerHeight / this.game.height);
+                //console.log(scale);
+                //console.log(scaleRatio);
+                //scaleRatio = 1.01;
+                this.scale.scaleMode = Phaser.ScaleManager.USER_SCALE;
+                //scale = 1.3;
+                //this.scale.setUserScale(scale, scale);
+                //this.game.renderer.renderSession.roundPixels = true;
+                Phaser.Canvas.setImageRenderingCrisp(this.game.canvas);
+                this.game.scale.setResizeCallback(function (scale, parentBounds) {
+                    var _this = scale;
+                    // A value of 1 means no scaling 0.5 means half size, 2 double the size and so on.
+                    var scale = 1 * Math.min(window.innerWidth / _this.game.width, window.innerHeight / _this.game.height);
+                    // Resize parent div in order to vertically center the canvas correctly.
+                    // element.style.minHeight = window.innerHeight.toString() + "px";
+                    // Resize the canvas keeping the original aspect ratio.
+                    _this.game.scale.setUserScale(scale, scale, 0, 0);
+                    //if (logging == true) {
+                    //    var w = Math.floor(_this.game.width * scale),
+                    //        h = Math.floor(_this.game.height * scale);
+                    //}
+                    //console.info("The game has just been resized to: " + Math.floor(_this.game.width * scale) + " x " + Math.floor(_this.game.height * scale));
+                }, this);
+                this.scale.refresh();
                 this.input.maxPointers = 1;
                 this.stage.disableVisibilityChange = true;
+                this.stage.backgroundColor = '#000000';
                 this.game.state.start('preload');
             };
             return Boot;
@@ -3087,7 +3151,7 @@ var TacticArena;
                 this.playMode = 'offline';
                 this.chatUI = chatUI;
                 this.players = data.players;
-                var startPositions = [[{ x: 8, y: 8, d: 'E' }, { x: 7, y: 7, d: 'E' }], [{ x: 11, y: 8, d: 'W' }, { x: 12, y: 7, d: 'W' }]];
+                var startPositions = [[{ x: 6, y: 10, d: 'E' }, { x: 5, y: 9, d: 'E' }], [{ x: 9, y: 10, d: 'W' }, { x: 10, y: 9, d: 'W' }]];
                 this.players.forEach(function (p, k) {
                     var isBot = true;
                     if (p.player) {
@@ -3195,6 +3259,7 @@ var TacticArena;
                 this.preloadBar = this.add.image(640 / 2, this.game.world.centerY / 2 + 150, "loading");
                 this.preloadBar.anchor.setTo(0.5);
                 this.load.setPreloadSprite(this.preloadBar);
+                this.load.tilemap('mapmobile', 'assets/json/mapmobile.json', null, Phaser.Tilemap.TILED_JSON);
                 this.load.tilemap('map', 'assets/json/map.json', null, Phaser.Tilemap.TILED_JSON);
                 this.load.tilemap('area02', 'assets/json/area02.json', null, Phaser.Tilemap.TILED_JSON);
                 this.load.image('tiles-collection', 'assets/images/maptiles.png');
@@ -5225,16 +5290,19 @@ var TacticArena;
 (function (TacticArena) {
     var UI;
     (function (UI) {
-        var Bar = (function () {
+        var Bar = (function (_super) {
+            __extends(Bar, _super);
             function Bar(game, providedConfig) {
-                this.game = game;
-                this.setupConfiguration(providedConfig);
-                this.setPosition(this.config.x, this.config.y);
-                this.setValue(0);
-                this.drawBackground();
-                this.drawBar();
-                this.drawText();
-                console.log(this.config);
+                var _this = _super.call(this, game.game) || this;
+                _this.game = game;
+                _this.setupConfiguration(providedConfig);
+                _this.setPosition(_this.config.x, _this.config.y);
+                _this.setValue(0);
+                _this.drawBackground();
+                _this.drawBar();
+                _this.drawText();
+                console.log(_this.config);
+                return _this;
                 //this.setFixedToCamera(this.config.isFixedToCamera);
             }
             Bar.prototype.setValue = function (value) {
@@ -5246,7 +5314,6 @@ var TacticArena;
             };
             Bar.prototype.setupConfiguration = function (providedConfig) {
                 this.config = this.mergeWithDefaultConfiguration(providedConfig);
-                this.flipped = this.config.flipped;
             };
             Bar.prototype.mergeWithDefaultConfiguration = function (newConfig) {
                 var defaultConfig = {
@@ -5261,17 +5328,16 @@ var TacticArena;
                         color: '#FEFF03'
                     },
                     animationDuration: 200,
-                    flipped: false,
                     isFixedToCamera: false,
                     max: 0,
                     unit: ''
                 };
-                return this.mergeObjetcs(defaultConfig, newConfig);
+                return this.mergeObjects(defaultConfig, newConfig);
             };
-            Bar.prototype.mergeObjetcs = function (targetObj, newObj) {
+            Bar.prototype.mergeObjects = function (targetObj, newObj) {
                 for (var p in newObj) {
                     try {
-                        targetObj[p] = newObj[p].constructor == Object ? this.mergeObjetcs(targetObj[p], newObj[p]) : newObj[p];
+                        targetObj[p] = newObj[p].constructor == Object ? this.mergeObjects(targetObj[p], newObj[p]) : newObj[p];
                     }
                     catch (e) {
                         targetObj[p] = newObj[p];
@@ -5286,11 +5352,9 @@ var TacticArena;
                 bmd.ctx.rect(0, 0, this.config.width, this.config.height);
                 bmd.ctx.fill();
                 bmd.update();
-                this.bgSprite = this.game.add.sprite(this.x, this.y, bmd);
-                this.bgSprite.anchor.set(0); //0.5);
-                if (this.flipped) {
-                    this.bgSprite.scale.x = -1;
-                }
+                this.bgSprite = this.game.make.sprite(this.x, this.y, bmd);
+                this.bgSprite.anchor.set(0);
+                //this.add(bmd);
             };
             Bar.prototype.drawBar = function () {
                 var bmd = this.game.add.bitmapData(this.config.width, this.config.height);
@@ -5299,13 +5363,9 @@ var TacticArena;
                 bmd.ctx.rect(0, 0, this.config.width, this.config.height);
                 bmd.ctx.fill();
                 bmd.update();
-                this.barSprite = this.game.add.sprite(this.x, this.y, bmd);
-                //this.barSprite = this.game.add.sprite(this.x - this.bgSprite.width / 2, this.y, bmd);
+                this.barSprite = this.game.make.sprite(this.x, this.y, bmd);
                 this.barSprite.anchor.set(0);
-                //this.barSprite.anchor.y = 0;//0.5;
-                if (this.flipped) {
-                    this.barSprite.scale.x = -1;
-                }
+                //this.add(bmd);
             };
             Bar.prototype.drawText = function () {
                 this.text = this.game.add.text(this.x, this.y, '', {
@@ -5316,6 +5376,7 @@ var TacticArena;
                 });
                 this.text.setTextBounds(0, 0, this.bgSprite.width, this.bgSprite.height);
                 this.updateText();
+                //this.add(this.text);
             };
             Bar.prototype.updateText = function () {
                 this.text.text = this.value + ' / ' + this.config.max + ' ' + this.config.unit;
@@ -5346,9 +5407,6 @@ var TacticArena;
                 bmd.replaceRGB(currentRGBColor.r, currentRGBColor.g, currentRGBColor.b, 255, newRGBColor.r, newRGBColor.g, newRGBColor.b, 255);
             };
             Bar.prototype.setWidth = function (newWidth) {
-                if (this.flipped) {
-                    newWidth = -1 * newWidth;
-                }
                 this.game.add.tween(this.barSprite).to({ width: newWidth }, this.config.animationDuration, Phaser.Easing.Linear.None, true);
             };
             Bar.prototype.setFixedToCamera = function (fixedToCamera) {
@@ -5373,7 +5431,7 @@ var TacticArena;
                 } : null;
             };
             return Bar;
-        }());
+        }(Phaser.Group));
         UI.Bar = Bar;
     })(UI = TacticArena.UI || (TacticArena.UI = {}));
 })(TacticArena || (TacticArena = {}));
@@ -6314,6 +6372,7 @@ var TacticArena;
                         y: 64,
                         width: 64,
                         height: 10,
+                        name: 'hpbar',
                         unit: 'HP',
                         max: pawn._hpMax,
                         textColor: '#ffffff',
@@ -6329,6 +6388,7 @@ var TacticArena;
                         y: 74,
                         width: 64,
                         height: 10,
+                        name: 'apbar',
                         unit: 'AP',
                         max: pawn._apMax,
                         textColor: '#ffffff',
@@ -6345,25 +6405,25 @@ var TacticArena;
                         apBar: apBar
                     };
                     var classColor = pawn.team == self.menu.game.playerTeam ? 0 : 1;
-                    html += '<div pawn-index="' + i + '" class="pawn pawn0' + pawn._id + ' ' + pawn.type + ' team-' + classColor + '">' +
-                        '<div class="avatar"><div class="picture shiny"></div></div>' +
-                        '<div class="name">' + pawn._name + '</div>' +
-                        '<div class="infos">' +
-                        '<div class="hp">' +
-                        '<div class="bar">' +
-                        '<div class="content current"></div>' +
-                        '<div class="text"><span class="value"></span> / ' + pawn._hpMax + ' HP</div>' +
-                        '</div>' +
-                        '</div>' +
-                        '<div class="ap">' +
-                        '<div class="bar">' +
-                        '<div class="content remaining"></div>' +
-                        '<div class="content current"></div>' +
-                        '<div class="text"><span class="value"></span> / ' + pawn._apMax + ' AP</div>' +
-                        '</div>' +
-                        '</div>' +
-                        '</div>' +
-                        '</div>';
+                    //html += '<div pawn-index="' + i + '" class="pawn pawn0' + pawn._id + ' ' + pawn.type + ' team-' + classColor + '">' +
+                    //    '<div class="avatar"><div class="picture shiny"></div></div>' +
+                    //    '<div class="name">' + pawn._name + '</div>' +
+                    //    '<div class="infos">' +
+                    //    '<div class="hp">' +
+                    //    '<div class="bar">' +
+                    //    '<div class="content current"></div>' +
+                    //    '<div class="text"><span class="value"></span> / ' + pawn._hpMax + ' HP</div>' +
+                    //    '</div>' +
+                    //    '</div>' +
+                    //    '<div class="ap">' +
+                    //    '<div class="bar">' +
+                    //    '<div class="content remaining"></div>' +
+                    //    '<div class="content current"></div>' +
+                    //    '<div class="text"><span class="value"></span> / ' + pawn._apMax + ' AP</div>' +
+                    //    '</div>' +
+                    //    '</div>' +
+                    //    '</div>' +
+                    //    '</div>';
                 }
                 html += '</div>';
                 this.menu.element.append(html);

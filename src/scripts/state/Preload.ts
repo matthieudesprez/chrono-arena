@@ -13,6 +13,7 @@ module TacticArena.State {
             this.preloadBar.anchor.setTo(0.5);
             this.load.setPreloadSprite(this.preloadBar);
 
+            this.load.tilemap('mapmobile', 'assets/json/mapmobile.json', null, Phaser.Tilemap.TILED_JSON);
             this.load.tilemap('map', 'assets/json/map.json', null, Phaser.Tilemap.TILED_JSON);
             this.load.tilemap('area02', 'assets/json/area02.json', null, Phaser.Tilemap.TILED_JSON);
             this.load.image('tiles-collection', 'assets/images/maptiles.png');

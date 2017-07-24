@@ -1,11 +1,10 @@
 module TacticArena.UI {
-    export class Bar {
+    export class Bar extends Phaser.Group {
         menu;
         element;
         text;
         game;
         config;
-        flipped;
         bgSprite;
         barSprite;
         x;
@@ -13,6 +12,7 @@ module TacticArena.UI {
         value;
 
         constructor(game, providedConfig) {
+            super(game.game);
             this.game = game;
             this.setupConfiguration(providedConfig);
             this.setPosition(this.config.x, this.config.y);
@@ -35,7 +35,6 @@ module TacticArena.UI {
 
         setupConfiguration(providedConfig) {
             this.config = this.mergeWithDefaultConfiguration(providedConfig);
-            this.flipped = this.config.flipped;
         }
 
         mergeWithDefaultConfiguration(newConfig) {
@@ -51,19 +50,18 @@ module TacticArena.UI {
                     color: '#FEFF03'
                 },
                 animationDuration: 200,
-                flipped: false,
                 isFixedToCamera: false,
                 max: 0,
                 unit: ''
             };
 
-            return this.mergeObjetcs(defaultConfig, newConfig);
+            return this.mergeObjects(defaultConfig, newConfig);
         }
 
-        mergeObjetcs(targetObj, newObj) {
+        mergeObjects(targetObj, newObj) {
             for (var p in newObj) {
                 try {
-                    targetObj[p] = newObj[p].constructor == Object ? this.mergeObjetcs(targetObj[p], newObj[p]) : newObj[p];
+                    targetObj[p] = newObj[p].constructor == Object ? this.mergeObjects(targetObj[p], newObj[p]) : newObj[p];
                 } catch (e) {
                     targetObj[p] = newObj[p];
                 }
@@ -79,12 +77,9 @@ module TacticArena.UI {
             bmd.ctx.fill();
             bmd.update();
 
-            this.bgSprite = this.game.add.sprite(this.x, this.y, bmd);
-            this.bgSprite.anchor.set(0);//0.5);
-
-            if (this.flipped) {
-                this.bgSprite.scale.x = -1;
-            }
+            this.bgSprite = this.game.make.sprite(this.x, this.y, bmd);
+            this.bgSprite.anchor.set(0);
+            //this.add(bmd);
         }
 
         drawBar() {
@@ -95,14 +90,9 @@ module TacticArena.UI {
             bmd.ctx.fill();
             bmd.update();
 
-            this.barSprite = this.game.add.sprite(this.x, this.y, bmd);
-            //this.barSprite = this.game.add.sprite(this.x - this.bgSprite.width / 2, this.y, bmd);
+            this.barSprite = this.game.make.sprite(this.x, this.y, bmd);
             this.barSprite.anchor.set(0);
-            //this.barSprite.anchor.y = 0;//0.5;
-
-            if (this.flipped) {
-                this.barSprite.scale.x = -1;
-            }
+            //this.add(bmd);
         }
 
         drawText() {
@@ -114,6 +104,7 @@ module TacticArena.UI {
             });
             this.text.setTextBounds(0, 0, this.bgSprite.width, this.bgSprite.height);
             this.updateText();
+            //this.add(this.text);
         }
 
         updateText() {
@@ -160,9 +151,6 @@ module TacticArena.UI {
         }
 
         setWidth(newWidth) {
-            if (this.flipped) {
-                newWidth = -1 * newWidth;
-            }
             this.game.add.tween(this.barSprite).to({width: newWidth}, this.config.animationDuration, Phaser.Easing.Linear.None, true);
         }
 

@@ -25,6 +25,7 @@ module TacticArena.UI {
                     y: 64,
                     width: 64,
                     height: 10,
+                    name: 'hpbar',
                     unit: 'HP',
                     max: pawn._hpMax,
                     textColor: '#ffffff',
@@ -41,6 +42,7 @@ module TacticArena.UI {
                     y: 74,
                     width: 64,
                     height: 10,
+                    name: 'apbar',
                     unit: 'AP',
                     max: pawn._apMax,
                     textColor: '#ffffff',
@@ -58,25 +60,25 @@ module TacticArena.UI {
                 }
 
                 let classColor = pawn.team == self.menu.game.playerTeam ? 0 : 1;
-                html += '<div pawn-index="' + i + '" class="pawn pawn0' + pawn._id + ' ' + pawn.type + ' team-' + classColor + '">' +
-                    '<div class="avatar"><div class="picture shiny"></div></div>' +
-                    '<div class="name">' + pawn._name + '</div>' +
-                    '<div class="infos">' +
-                    '<div class="hp">' +
-                    '<div class="bar">' +
-                    '<div class="content current"></div>' +
-                    '<div class="text"><span class="value"></span> / ' + pawn._hpMax + ' HP</div>' +
-                    '</div>' +
-                    '</div>' +
-                    '<div class="ap">' +
-                    '<div class="bar">' +
-                    '<div class="content remaining"></div>' +
-                    '<div class="content current"></div>' +
-                    '<div class="text"><span class="value"></span> / ' + pawn._apMax + ' AP</div>' +
-                    '</div>' +
-                    '</div>' +
-                    '</div>' +
-                    '</div>';
+                //html += '<div pawn-index="' + i + '" class="pawn pawn0' + pawn._id + ' ' + pawn.type + ' team-' + classColor + '">' +
+                //    '<div class="avatar"><div class="picture shiny"></div></div>' +
+                //    '<div class="name">' + pawn._name + '</div>' +
+                //    '<div class="infos">' +
+                //    '<div class="hp">' +
+                //    '<div class="bar">' +
+                //    '<div class="content current"></div>' +
+                //    '<div class="text"><span class="value"></span> / ' + pawn._hpMax + ' HP</div>' +
+                //    '</div>' +
+                //    '</div>' +
+                //    '<div class="ap">' +
+                //    '<div class="bar">' +
+                //    '<div class="content remaining"></div>' +
+                //    '<div class="content current"></div>' +
+                //    '<div class="text"><span class="value"></span> / ' + pawn._apMax + ' AP</div>' +
+                //    '</div>' +
+                //    '</div>' +
+                //    '</div>' +
+                //    '</div>';
             }
             html += '</div>';
             this.menu.element.append(html);
