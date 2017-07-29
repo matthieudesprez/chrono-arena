@@ -7,6 +7,15 @@ module TacticArena.State {
         pawnsSpritesGroup;
         pathfinder;
         tileSize: number;
+
+        worldGroup: Phaser.Group;
+        mapGroup: Phaser.Group;
+        pathTilesGroup: Phaser.Group;
+        pathOrdersTilesGroup: Phaser.Group;
+        pawnsSpritesGroup: Phaser.Group;
+        uiSpritesGroup: Phaser.Group;
+        uiGroup: Phaser.Group;
+
         turnManager: Controller.TurnManager;
         orderManager: Controller.OrderManager;
         resolveManager: Controller.ResolveManager;
@@ -35,9 +44,28 @@ module TacticArena.State {
             this.selecting = false;
             this.tileSize = 32;
             this.isPaused = false;
+            this.worldGroup = this.add.group();
+
+            this.mapGroup = this.add.group();
+            this.worldGroup.add(this.mapGroup);
+
+            this.pathTilesGroup = this.add.group();
+            this.worldGroup.add(this.pathTilesGroup);
+
+            this.pathOrdersTilesGroup = this.add.group();
+            this.worldGroup.add(this.pathOrdersTilesGroup);
+
+            this.uiSpritesGroup = this.add.group();
+            this.worldGroup.add(this.uiSpritesGroup);
+
+            this.pawnsSpritesGroup = this.add.group();
+            this.worldGroup.add(this.pawnsSpritesGroup);
+
+            this.uiGroup = this.add.group();
+            this.worldGroup.add(this.uiGroup);
 
             this.stageManager = new Controller.StageManager(this);
-            this.stageManager.init();
+            this.stageManager.init('map');
 
             this.pawns = [];
             this.pathTilesGroup = this.add.group();

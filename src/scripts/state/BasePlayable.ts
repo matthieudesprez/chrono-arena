@@ -33,7 +33,7 @@ module TacticArena.State {
             this.isPaused = false;
 
             this.worldGroup = this.add.group();
-            // TODO put tiledmap in mapGroup for more controls (offset, scale)
+
             this.mapGroup = this.add.group();
             this.worldGroup.add(this.mapGroup);
 
