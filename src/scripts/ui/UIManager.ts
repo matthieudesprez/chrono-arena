@@ -29,6 +29,8 @@ module TacticArena.UI {
             topUIBackground.endFill();
             topUIGroup.add(topUIBackground);
 
+            this.game.uiGroup.add(topUIGroup);
+
             //this.consolelogsUI = new UI.ConsoleLogs(this);
             this.directionUI = new UI.Direction(this);
             this.actionUI = new UI.Action(this);

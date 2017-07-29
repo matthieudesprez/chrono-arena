@@ -11,7 +11,8 @@ module TacticArena.UI {
             this.marker.lineStyle(2, 0xffffff, 1);
             this.marker.drawRect(0, 0, this.game.tileSize, this.game.tileSize);
             console.log('draw');
-            this.game.uiSpritesGroup.add(this.marker);
+            this.game.worldGroup.add(this.marker);
+            console.log(this.game);
             //this.game.uiSpritesGroup.bringToTop();
 
             //this.cursor_pointer = this.game.add.sprite(0, 0, 'cursor_pointer');
@@ -33,6 +34,14 @@ module TacticArena.UI {
             }
         }
 
+        getTilePosition() {
+            let p = this.getPosition();
+            return {
+                x: Math.round(p.x * this.game.tileSize / this.game.worldGroup.scale.x / 32) * 32,
+                y: Math.round(p.y * this.game.tileSize / this.game.worldGroup.scale.y / 32) * 32
+            }
+        }
+
         clearHelp() {
             let activePawn = this.game.turnManager.getActivePawn();
             this.game.stageManager.clearHelp();
@@ -42,9 +51,9 @@ module TacticArena.UI {
         update() {
             if(!this.game.process) {
                 let self = this;
-                let pointerPosition = this.getPosition();
-                this.marker.x = pointerPosition.x * this.game.tileSize;
-                this.marker.y = pointerPosition.y * this.game.tileSize;
+                let pointerPosition = this.getTilePosition();
+                this.marker.x = pointerPosition.x;
+                this.marker.y = pointerPosition.y;
                 //this.cursor_pointer.position.x = this.game.input.activePointer.worldX;
                 //this.cursor_pointer.position.y = this.game.input.activePointer.worldY;
                 //this.cursor_pointer.bringToTop();
@@ -132,6 +141,12 @@ module TacticArena.UI {
                 let position = activePawn.getProjectionOrReal().getPosition();
 
                 console.log(targetX, targetY);
+                this.game.pawns.forEach( (p, k) => {
+                    if (self.game.stageManager.equalPositions(p.getPosition(), {x: targetX, y: targetY})) {
+                        console.log('yay', p);
+                        //let actionMenu = new UI.ActionMenu(self.game, p.type);
+                    }
+                });
 
                 var distance = this.game.stageManager.getNbTilesBetween(
                     {'x': targetX, 'y': targetY}, {'x': position.x, 'y': position.y}

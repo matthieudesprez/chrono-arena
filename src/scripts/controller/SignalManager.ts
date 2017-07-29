@@ -99,6 +99,7 @@ module TacticArena.Controller {
                 s.animations.add('turn', ["selected_circle_01", "selected_circle_02"], 4, true);
                 s.play('turn');
                 //this.consolelogsUI.write('au tour du joueur ' + activePawn._id);
+                let actionMenu = new UI.ActionMenu(self.game, activePawn);
             });
 
             this.onTeamChange.add(function() {

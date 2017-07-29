@@ -7,7 +7,8 @@ module TacticArena.UI {
             var self = this;
             this.menu = menu;
 
-            this.menu.game.add.image(this.menu.game.world.width - 33, 5, 'menu-icon');
+            let icon = this.menu.game.make.image(this.menu.game.world.width - 33, 5, 'menu-icon');
+            this.menu.game.uiGroup.add(icon);
             //this.menu.element.append('<div class="ui-ingame-menu"><a class="menu-icon"></a></div>');
             //this.element = this.menu.element.find('.ui-ingame-menu');
 

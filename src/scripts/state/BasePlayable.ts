@@ -8,6 +8,7 @@ module TacticArena.State {
         pathOrdersTilesGroup: Phaser.Group;
         pawnsSpritesGroup: Phaser.Group;
         uiSpritesGroup: Phaser.Group;
+        uiGroup: Phaser.Group;
         pathfinder;
         tileSize: number;
         stageManager: Controller.StageManager;
@@ -31,25 +32,34 @@ module TacticArena.State {
             this.tileSize = 32;
             this.isPaused = false;
 
-            this.initMap();
-
-            this.pawns = [];
             this.worldGroup = this.add.group();
             // TODO put tiledmap in mapGroup for more controls (offset, scale)
             this.mapGroup = this.add.group();
             this.worldGroup.add(this.mapGroup);
+
             this.pathTilesGroup = this.add.group();
             this.worldGroup.add(this.pathTilesGroup);
+
             this.pathOrdersTilesGroup = this.add.group();
             this.worldGroup.add(this.pathOrdersTilesGroup);
+
             this.uiSpritesGroup = this.add.group();
             this.worldGroup.add(this.uiSpritesGroup);
+
             this.pawnsSpritesGroup = this.add.group();
             this.worldGroup.add(this.pawnsSpritesGroup);
 
-            this.worldGroup.scale.set(1);
+            this.uiGroup = this.add.group();
+            this.worldGroup.add(this.uiGroup);
+
+            this.worldGroup.scale.set(this.getScaleRatio());
+            console.log(this.getScaleRatio());
+
+            this.pawns = [];
 
             this.generator = new Utils.Generator();
+
+            this.initMap();
         }
 
         create() {

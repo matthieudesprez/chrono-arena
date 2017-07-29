@@ -31,20 +31,23 @@ module TacticArena.Controller {
         }
 
         init(name = 'mapmobile') {
-            this.map = this.game.add.tilemap(name);
+            this.map = this.game.make.tilemap(name);
             this.map.addTilesetImage('tiles-collection', 'tiles-collection', this.game.tileSize, this.game.tileSize, 0, 0);
-            this.parallaxLayer = this.map.createLayer('Parallax');
+            //this.parallaxLayer = this.game.mapGroup.add(this.map.createLayer('Parallax'));
             if(this.parallaxLayer) {
                 this.parallaxLayer.scrollFactorX = 0.5;
                 this.parallaxLayer.scrollFactorY = 0.5;
             }
-            this.backgroundLayer = this.map.createLayer('Background');
-            this.uiLayer = this.map.createBlankLayer('UI', this.backgroundLayer.layer.data[0].length, this.backgroundLayer.layer.data.length, this.game.tileSize, this.game.tileSize);
-            this.foregroundLayer = this.map.createLayer('Foreground');
-            this.collisionLayer = this.map.createLayer('Collision');
+            this.backgroundLayer = this.game.mapGroup.add(this.map.createLayer('Background'));
+            this.uiLayer = this.game.mapGroup.add(this.map.createBlankLayer('UI', this.backgroundLayer.layer.data[0].length, this.backgroundLayer.layer.data.length, this.game.tileSize, this.game.tileSize));
+            this.foregroundLayer = this.game.mapGroup.add(this.map.createLayer('Foreground'));
+            this.collisionLayer = this.game.mapGroup.add(this.map.createLayer('Collision'));
             //this.collisionLayer.debug = true;
-            this.decorationLayer1 = this.map.createLayer('Decorations');
-            this.decorationLayer2 = this.map.createLayer('Decorations2');
+            this.decorationLayer1 = this.game.mapGroup.add(this.map.createLayer('Decorations'));
+            this.decorationLayer2 = this.game.mapGroup.add(this.map.createLayer('Decorations2'));
+
+            console.log(this.game);
+
             this.initGrid();
             this.backgroundLayer.resizeWorld();
             console.log('jajoute mes tiles', this.grid.length, this.backgroundLayer.layer.data.length);
@@ -107,7 +110,7 @@ module TacticArena.Controller {
         }
 
         addDecorations() {
-            this.decorationLayer3 = this.map.createLayer('Decorations3');
+            this.decorationLayer3 = this.game.mapGroup.add(this.map.createLayer('Decorations3'));
         }
 
         addDecorationsFromData(data) {

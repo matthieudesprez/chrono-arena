@@ -16,7 +16,7 @@ module TacticArena.UI {
                 boundsAlignH: 'center',
                 stroke: '#FFFFFF',
                 strokeThickness: 3
-            });
+            }, this.menu.game.uiGroup);
             this.text.setTextBounds(0, 0, this.menu.game.world.width, 32);
         }
 

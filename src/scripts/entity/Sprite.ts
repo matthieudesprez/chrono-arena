@@ -5,8 +5,6 @@ module TacticArena.Entity {
         _size;
         _ext:string;
         _animationCompleteCallback;
-        _hpBar;
-        _apBar;
 
         constructor(game, x, y, ext, type, parent, size, tint=null) {
             super(
@@ -25,21 +23,6 @@ module TacticArena.Entity {
                 this.tint = tint;
             }
             this.anchor.set(0);
-            //this._hpBar = this.addChild(new TacticArena.UI.Bar(this.game, {
-            //    x: 0,
-            //    y: 0,
-            //    width: 32,
-            //    height: 5,
-            //    unit: 'HP',
-            //    max: 4,
-            //    textColor: '#ffffff',
-            //    bg: {
-            //        color: '#808080'
-            //    },
-            //    bar: {
-            //        color: '#8b0000'
-            //    }
-            //}));
         }
 
         setAnimations() {

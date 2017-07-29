@@ -16,48 +16,50 @@ module TacticArena.UI {
             for (var i = 0; i < pawns.length; i++) {
                 let pawn = pawns[i];
 
-                let img = self.menu.game.add.image(i * 64, 0, 'avatar-' + pawn.type);
-                img.width = 64;
-                img.height = 64;
-
-                let hpBar = new Bar(this.menu.game, {
-                    x: i * 64,
-                    y: 64,
-                    width: 64,
-                    height: 10,
-                    name: 'hpbar',
-                    unit: 'HP',
-                    max: pawn._hpMax,
-                    textColor: '#ffffff',
-                    bg: {
-                        color: '#808080'
-                    },
-                    bar: {
-                        color: '#8b0000'
-                    }
-                });
-
-                let apBar = new Bar(this.menu.game, {
-                    x: i * 64,
-                    y: 74,
-                    width: 64,
-                    height: 10,
-                    name: 'apbar',
-                    unit: 'AP',
-                    max: pawn._apMax,
-                    textColor: '#ffffff',
-                    bg: {
-                        color: '#267ac9'
-                    },
-                    bar: {
-                        color: '#1E90FF'
-                    }
-                });
+                //let img = self.menu.game.add.image(i * 64, 0, 'avatar-' + pawn.type);
+                //img.width = 64;
+                //img.height = 64;
+                //
+                //let hpBar = new Bar(this.menu.game, {
+                //    x: i * 64,
+                //    y: 64,
+                //    width: 64,
+                //    height: 10,
+                //    text: true,
+                //    name: 'hpbar',
+                //    unit: 'HP',
+                //    max: pawn._hpMax,
+                //    textColor: '#ffffff',
+                //    bg: {
+                //        color: '#808080'
+                //    },
+                //    bar: {
+                //        color: '#8b0000'
+                //    }
+                //});
+                //
+                //let apBar = new Bar(this.menu.game, {
+                //    x: i * 64,
+                //    y: 74,
+                //    width: 64,
+                //    height: 10,
+                //    text: true,
+                //    name: 'apbar',
+                //    unit: 'AP',
+                //    max: pawn._apMax,
+                //    textColor: '#ffffff',
+                //    bg: {
+                //        color: '#267ac9'
+                //    },
+                //    bar: {
+                //        color: '#1E90FF'
+                //    }
+                //});
                 //bar.setPercent(80);
-                this.pawnsInfos[pawn._id] = {
-                    hpBar: hpBar,
-                    apBar: apBar
-                }
+                //this.pawnsInfos[pawn._id] = {
+                //    hpBar: hpBar,
+                //    apBar: apBar
+                //};
 
                 let classColor = pawn.team == self.menu.game.playerTeam ? 0 : 1;
                 //html += '<div pawn-index="' + i + '" class="pawn pawn0' + pawn._id + ' ' + pawn.type + ' team-' + classColor + '">' +
@@ -117,10 +119,10 @@ module TacticArena.UI {
                 //this.element.find('.pawn0' + entity._id + ' .infos .ap .bar .current').css('width', ((entity.getAp() / entity._apMax) * 100) + '%');
                 //this.element.find('.pawn0' + entity._id + ' .infos .ap .bar .remaining').css('width', '0%');
 
-                this.pawnsInfos[pawn._id].hpBar.setPercent(((pawn.getHp() / pawn._hpMax) * 100));
-                this.pawnsInfos[pawn._id].hpBar.updateValue(pawn.getHp());
-                this.pawnsInfos[pawn._id].apBar.setPercent(((pawn.getAp() / pawn._apMax) * 100));
-                this.pawnsInfos[pawn._id].apBar.updateValue(pawn.getAp());
+                //this.pawnsInfos[pawn._id].hpBar.setPercent(((pawn.getHp() / pawn._hpMax) * 100));
+                //this.pawnsInfos[pawn._id].hpBar.updateValue(pawn.getHp());
+                //this.pawnsInfos[pawn._id].apBar.setPercent(((pawn.getAp() / pawn._apMax) * 100));
+                //this.pawnsInfos[pawn._id].apBar.updateValue(pawn.getAp());
             }
         }
 
@@ -131,8 +133,9 @@ module TacticArena.UI {
             //this.element.find('.pawn0' + pawn._id + ' .infos .ap .bar .current').css('width', currentPercent + '%');
             //this.element.find('.pawn0' + pawn._id + ' .infos .ap .bar .remaining').css('width', percentRemaining + '%');
             //this.element.find('.pawn0' + pawn._id + ' .infos .ap .value').html(remainingAp);
-            this.pawnsInfos[pawn._id].apBar.setPercent(currentPercent);
-            this.pawnsInfos[pawn._id].apBar.updateValue(remainingAp);
+
+            //this.pawnsInfos[pawn._id].apBar.setPercent(currentPercent);
+            //this.pawnsInfos[pawn._id].apBar.updateValue(remainingAp);
         }
     }
 }

@@ -32,5 +32,9 @@ module TacticArena.State {
                 '</div>'
             );
         }
+
+        getScaleRatio() {
+            return Math.max(this.game.width / 512, 1);
+        }
     }
 }

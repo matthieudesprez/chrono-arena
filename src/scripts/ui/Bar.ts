@@ -5,21 +5,23 @@ module TacticArena.UI {
         text;
         game;
         config;
-        bgSprite;
         barSprite;
+        bgSprite;
         x;
         y;
         value;
 
         constructor(game, providedConfig) {
-            super(game.game);
+            super(game);
             this.game = game;
             this.setupConfiguration(providedConfig);
             this.setPosition(this.config.x, this.config.y);
             this.setValue(0);
             this.drawBackground();
             this.drawBar();
-            this.drawText();
+            if(this.config.text) {
+                this.drawText();
+            }
             console.log(this.config);
             //this.setFixedToCamera(this.config.isFixedToCamera);
         }
@@ -51,8 +53,10 @@ module TacticArena.UI {
                 },
                 animationDuration: 200,
                 isFixedToCamera: false,
+                text: false,
                 max: 0,
-                unit: ''
+                unit: '',
+                textStyle: '12px Iceland',
             };
 
             return this.mergeObjects(defaultConfig, newConfig);
@@ -77,9 +81,9 @@ module TacticArena.UI {
             bmd.ctx.fill();
             bmd.update();
 
-            this.bgSprite = this.game.make.sprite(this.x, this.y, bmd);
+            this.bgSprite = this.game.make.sprite(0, 0, bmd);
             this.bgSprite.anchor.set(0);
-            //this.add(bmd);
+            this.add(this.bgSprite);
         }
 
         drawBar() {
@@ -90,19 +94,19 @@ module TacticArena.UI {
             bmd.ctx.fill();
             bmd.update();
 
-            this.barSprite = this.game.make.sprite(this.x, this.y, bmd);
+            this.barSprite = this.game.make.sprite(0, 0, bmd);
             this.barSprite.anchor.set(0);
-            //this.add(bmd);
+            this.add(this.barSprite);
         }
 
         drawText() {
-            this.text = this.game.add.text(this.x, this.y, '', {
-                font: '12px Iceland',
+            this.text = this.game.add.text(0, 0, '', {
+                font: this.config.textStyle,
                 fill: '#ffffff',
                 boundsAlignH: 'center',
                 boundsAlignV: 'top',
-            });
-            this.text.setTextBounds(0, 0, this.bgSprite.width, this.bgSprite.height);
+            }, this);
+            this.text.setTextBounds(0, 0, this.width, this.height);
             this.updateText();
             //this.add(this.text);
         }
@@ -115,13 +119,13 @@ module TacticArena.UI {
             this.x = x;
             this.y = y;
 
-            if (this.bgSprite !== undefined && this.barSprite !== undefined) {
-                this.bgSprite.position.x = x;
-                this.bgSprite.position.y = y;
-
-                this.barSprite.position.x = x - this.config.width / 2;
-                this.barSprite.position.y = y;
-            }
+            //if (this.bgSprite !== undefined && this.barSprite !== undefined) {
+            //    this.bgSprite.position.x = x;
+            //    this.bgSprite.position.y = y;
+            //
+            //    this.barSprite.position.x = x - this.config.width / 2;
+            //    this.barSprite.position.y = y;
+            //}
         }
 
         setPercent(newValue) {
