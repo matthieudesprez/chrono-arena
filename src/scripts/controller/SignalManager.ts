@@ -51,7 +51,7 @@ module TacticArena.Controller {
 
             this.onActionPlayed.add(function(pawn) {
                 self.game.pointer.update();
-                self.game.uiManager.actionUI.update(pawn.getAp());
+                //self.game.uiManager.actionUI.update(pawn.getAp());
             });
 
             this.turnInitialized.add(function(pawn) {
@@ -85,12 +85,12 @@ module TacticArena.Controller {
             });
 
             this.onActivePawnChange.add(function(activePawn) {
-                self.game.uiManager.ordersnotificationsUI.clean();
-                self.game.uiManager.ordersnotificationsUI.update(self.game.orderManager.getOrders(activePawn._id));
-                self.game.uiManager.pawnsinfosUI.select(activePawn._id);
-                self.game.uiManager.directionUI.init(activePawn.getDirection());
-                self.game.uiManager.actionUI.update(activePawn.getAp());
-                self.game.uiManager.actionUI.select('walk');
+                //self.game.uiManager.ordersnotificationsUI.clean();
+                //self.game.uiManager.ordersnotificationsUI.update(self.game.orderManager.getOrders(activePawn._id));
+                //self.game.uiManager.pawnsinfosUI.select(activePawn._id);
+                //self.game.uiManager.directionUI.init(activePawn.getDirection());
+                //self.game.uiManager.actionUI.update(activePawn.getAp());
+                //self.game.uiManager.actionUI.select('walk');
 
                 let position = activePawn.getPosition();
 

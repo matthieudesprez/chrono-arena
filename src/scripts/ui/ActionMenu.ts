@@ -7,10 +7,10 @@ module TacticArena.UI {
             this.game = game;
             this.mainGroup = this.game.add.group();
 
-            var bmd = this.game.add.bitmapData(this.game.world.width / 2, 100);
+            var bmd = this.game.add.bitmapData(this.game.world.width / 2, 96);
             bmd.ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
             bmd.ctx.beginPath();
-            bmd.ctx.rect(0, 0, this.game.world.width / 2, 100);
+            bmd.ctx.rect(0, 0, this.game.world.width / 2, 96);
             bmd.ctx.fill();
             bmd.update();
 
@@ -25,7 +25,7 @@ module TacticArena.UI {
             this.mainGroup.add(bgSprite);
             this.mainGroup.add(avatar);
             this.mainGroup.x = 0;
-            this.mainGroup.y = this.game.world.centerY + 100;
+            this.mainGroup.y = 608;
 
             let text = this.game.add.text(110, 5, pawn._name, {
                 font: '20px Iceland',

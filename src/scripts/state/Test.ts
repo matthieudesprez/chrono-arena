@@ -3,8 +3,6 @@ module TacticArena.State {
     export class Test extends TacticArena.State.BaseState {
         layer: Phaser.TilemapLayer;
         pawns: Entity.Pawn[];
-        pathTilesGroup;
-        pawnsSpritesGroup;
         pathfinder;
         tileSize: number;
 

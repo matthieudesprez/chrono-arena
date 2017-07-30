@@ -4,6 +4,7 @@ module TacticArena.State {
         private status;
 
         preload() {
+            let self = this;
             this.game.add.text(0, 0, "f", {font: '1px Press Start 2P', fill: "#333333"});
             this.game.add.text(0, 0, "f", {font: '1px Iceland', fill: "#333333"});
             super.createMenu();
@@ -21,6 +22,12 @@ module TacticArena.State {
             this.load.image('modal-bg', 'assets/images/modal-bg.png');
             this.load.image('modal-close', 'assets/images/modal-close.png');
             this.load.image('menu-icon', 'assets/images/menu_icon.png');
+
+            let icons = ['arrow-east', 'arrow-north', 'arrow-south', 'arrow-west', 'cancel', 'compass', 'fire', 'next', 'pause', 'play', 'previous', 'slash', 'submit', 'wait', 'walk', 'wind'];
+            icons.forEach(function(icon) {
+                self.load.image('icon-' + icon, 'assets/images/icons/icon-' + icon + '.png');
+            });
+
 
             this.load.image('avatar-blondy', 'assets/images/blondy_avatar.png');
             this.load.image('avatar-redhead', 'assets/images/redhead_avatar.png');

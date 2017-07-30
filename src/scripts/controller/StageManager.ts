@@ -46,8 +46,6 @@ module TacticArena.Controller {
             this.decorationLayer1 = this.game.mapGroup.add(this.map.createLayer('Decorations'));
             this.decorationLayer2 = this.game.mapGroup.add(this.map.createLayer('Decorations2'));
 
-            console.log(this.game);
-
             this.initGrid();
             this.backgroundLayer.resizeWorld();
             console.log('jajoute mes tiles', this.grid.length, this.backgroundLayer.layer.data.length);

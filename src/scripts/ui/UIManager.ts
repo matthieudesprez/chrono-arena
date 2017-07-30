@@ -2,9 +2,7 @@ module TacticArena.UI {
     export class UIManager {
         game;
         element;
-        //consolelogsUI;
         directionUI;
-        actionUI;
         timeUI;
         timelineUI;
         pawnsinfosUI;
@@ -31,9 +29,7 @@ module TacticArena.UI {
 
             this.game.uiGroup.add(topUIGroup);
 
-            //this.consolelogsUI = new UI.ConsoleLogs(this);
             this.directionUI = new UI.Direction(this);
-            this.actionUI = new UI.Action(this);
             this.timeUI = new UI.Time(this);
             this.timelineUI = new UI.TimeLine(this);
             this.pawnsinfosUI = new UI.PawnsInfos(this);
@@ -44,8 +40,6 @@ module TacticArena.UI {
             this.turnIndicatorUI = new UI.TurnIndicator(this);
             this.ingamemenuUI = new UI.IngameMenu(this);
 
-            //this.game.pointer.dealWith(this.consolelogsUI.element);
-            this.game.pointer.dealWith(this.actionUI.element);
             this.game.pointer.dealWith(this.timeUI.element);
             this.game.pointer.dealWith(this.timelineUI.element);
             this.game.pointer.dealWith(this.directionUI.element);
@@ -61,7 +55,6 @@ module TacticArena.UI {
                 if(first) {
                     this.turnIndicatorUI.write(this.game.turnManager.currentTurnIndex + 1);
                     this.transitionUI.show('Phase de commandement').then( (res) => {
-                        this.actionUI.show();
                         this.directionUI.show();
                         return true;
                     });
@@ -102,7 +95,6 @@ module TacticArena.UI {
 
         initResolvePhase(steps) {
             this.ingamemenuUI.close();
-            this.actionUI.clean();
             this.directionUI.clean();
             this.game.resolveManager.init(steps);
             this.transitionUI.show('Phase de Résolution').then((res) => {

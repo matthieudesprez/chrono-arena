@@ -16,7 +16,7 @@ module TacticArena.Entity {
         team;
         hurting;
         spriteClass;
-        hpSprite;
+        skills;
 
         constructor(game, x, y, ext, type, id, bot, team, name = "", spriteClass: typeof Entity.Sprite = Entity.Sprite) {
             this.game = game;
@@ -39,6 +39,7 @@ module TacticArena.Entity {
             this.isBot = bot;
             this.team = team;
             this.hurting = 0;
+            this.skills = [];
         }
 
         getReal() {
@@ -287,6 +288,10 @@ module TacticArena.Entity {
                 type: this.type,
                 spriteClass: this.spriteClass
             }
+        }
+
+        getSelectedSkill() {
+            return this.skills.filter( skill => { return skill.selected; })[0];
         }
     }
 }
