@@ -5,7 +5,7 @@ module TacticArena.State {
         chatUI:UI.Chat;
         dialogUI:UI.Dialog;
         factionSelectionUI:UI.FactionSelection;
-        serverManager:Controller.ServerManager;
+        serverManager: ServerManager;
         onChatMessageReception:Phaser.Signal;
         selected_faction;
         generator;
@@ -38,7 +38,7 @@ module TacticArena.State {
         initChat(login) {
             this.menu.html('');
             var self = this;
-            this.serverManager = new Controller.ServerManager(this, login, function (data, server = false) {
+            this.serverManager = new ServerManager(this, login, function (data, server = false) {
                 console.log(data);
                 let msg = server ? '<span class="notification">' + data.content + '</span>' : data.name + ': ' + data.content;
                 self.chatUI.write(msg);

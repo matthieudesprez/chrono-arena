@@ -9,8 +9,8 @@ module TacticArena.Specs {
             expect(steps[i][j].entity._id).toEqual(entityId);
             expect(steps[i][j].order.action).toEqual(action);
             expect(steps[i][j].order.direction).toEqual(direction);
-            expect(steps[i][j].order.x).toEqual(orderPosition.x);
-            expect(steps[i][j].order.y).toEqual(orderPosition.y);
+            expect(steps[i][j].order.position.x).toEqual(orderPosition.x);
+            expect(steps[i][j].order.position.y).toEqual(orderPosition.y);
             expect(steps[i][j].entityState.ap).toEqual(ap);
             expect(steps[i][j].entityState.hp).toEqual(hp);
             expect(steps[i][j].entityState.moveHasBeenBlocked).toEqual(moveHasBeenBlocked);
@@ -18,7 +18,7 @@ module TacticArena.Specs {
         }
 
         beforeEach(function (done) {
-            spyOn(console, 'log').and.stub();
+            //spyOn(console, 'log').and.stub();
             spyOn(console, 'info').and.stub();
             spyOn(console, 'warn').and.stub();
             testGame = new TestGame(true);
@@ -43,7 +43,7 @@ module TacticArena.Specs {
 
         describe("2 players / Fleerate 0%", () => {
             beforeEach(function () {
-                spyOn(TacticArena.Controller.OrderManager, 'resolutionEsquive').and.callFake(() => {
+                spyOn(TacticArena.OrderManager, 'resolutionEsquive').and.callFake(() => {
                     return true;
                 });
             });
@@ -63,7 +63,7 @@ module TacticArena.Specs {
                     {
                         entity: currentState.pawns[0],
                         list: [
-                            {action: "stand", direction: "E", x: 8, y: 8}
+                            new Order.Stand(new Position(8, 8), 'E')
                         ]
                     }
                 ];
@@ -81,8 +81,8 @@ module TacticArena.Specs {
                     {
                         entity: currentState.pawns[0],
                         list: [
-                            {action: "move", direction: "E", x: 9, y: 8},
-                            {action: "move", direction: "E", x: 10, y: 8}
+                            new Order.Move(new Position(9, 8), 'E'),
+                            new Order.Move(new Position(10, 8), 'E')
                         ]
                     }
                 ];
@@ -102,14 +102,14 @@ module TacticArena.Specs {
                     {
                         entity: currentState.pawns[0],
                         list: [
-                            {action: "move", direction: "E", x: 9, y: 8},
-                            {action: "move", direction: "E", x: 9, y: 9},
+                            new Order.Move(new Position(9, 8), 'E'),
+                            new Order.Move(new Position(9, 9), 'E')
                         ]
                     },
                     {
                         entity: currentState.pawns[1],
                         list: [
-                            {action: "move", direction: "W", x: 9, y: 8}
+                            new Order.Move(new Position(9, 8), 'W')
                         ]
                     }
                 ];
@@ -129,9 +129,9 @@ module TacticArena.Specs {
                     {
                         entity: currentState.pawns[0],
                         list: [
-                            {action: "move", direction: "E", x: 9, y: 8},
-                            {action: "move", direction: "E", x: 9, y: 9},
-                            {action: "move", direction: "E", x: 10, y: 9}
+                            new Order.Move(new Position(9, 8), 'E'),
+                            new Order.Move(new Position(9, 9), 'E'),
+                            new Order.Move(new Position(10, 8), 'E')
                         ]
                     }
                 ];
@@ -153,9 +153,9 @@ module TacticArena.Specs {
                     {
                         entity: currentState.pawns[0],
                         list: [
-                            {action: "stand", direction: "S", x: 8, y: 8},
-                            {action: "move", direction: "S", x: 9, y: 8},
-                            {action: "move", direction: "S", x: 9, y: 9}
+                            new Order.Stand(new Position(8, 8), 'S'),
+                            new Order.Move(new Position(9, 8), 'S'),
+                            new Order.Move(new Position(9, 9), 'S')
                         ]
                     }
                 ];
@@ -177,16 +177,16 @@ module TacticArena.Specs {
                     {
                         entity: currentState.pawns[0],
                         list: [
-                            {action: "move", direction: "E", x: 8, y: 7},
-                            {action: "cast", direction: "E", x: 8, y: 7}
+                            new Order.Move(new Position(8, 7), 'E'),
+                            new Order.Fire(new Position(8, 7), 'E')
                         ]
                     },
                     {
                         entity: currentState.pawns[1],
                         list: [
-                            {action: "move", direction: "W", x: 10, y: 7},
-                            {action: "move", direction: "W", x: 9, y: 7},
-                            {action: "move", direction: "W", x: 8, y: 7}
+                            new Order.Move(new Position(10, 7), 'W'),
+                            new Order.Move(new Position(9, 7), 'W'),
+                            new Order.Move(new Position(8, 7), 'W')
                         ]
                     },
                 ];
@@ -209,15 +209,15 @@ module TacticArena.Specs {
                     {
                         entity: currentState.pawns[0],
                         list: [
-                            {action: "cast", direction: "E", x: 8, y: 8}
+                            new Order.Fire(new Position(8, 8), 'E')
                         ]
                     },
                     {
                         entity: currentState.pawns[1],
                         list: [
-                            {action: "move", direction: "W", x: 9, y: 8},
-                            {action: "move", direction: "W", x: 8, y: 8},
-                            {action: "move", direction: "W", x: 7, y: 8}
+                            new Order.Move(new Position(9, 8), 'W'),
+                            new Order.Move(new Position(8, 8), 'W'),
+                            new Order.Move(new Position(7, 8), 'W')
                         ]
                     },
                 ];
@@ -240,15 +240,15 @@ module TacticArena.Specs {
                     {
                         entity: currentState.pawns[0],
                         list: [
-                            {action: "cast_wind", direction: "E", x: 8, y: 8}
+                            new Order.Wind(new Position(8, 8), 'E')
                         ]
                     },
                     {
                         entity: currentState.pawns[1],
                         list: [
-                            {action: "move", direction: "W", x: 9, y: 8},
-                            {action: "move", direction: "W", x: 8, y: 8},
-                            {action: "move", direction: "W", x: 7, y: 8}
+                            new Order.Move(new Position(9, 8), 'W'),
+                            new Order.Move(new Position(8, 8), 'W'),
+                            new Order.Move(new Position(7, 8), 'W')
                         ]
                     },
                 ];
@@ -270,7 +270,7 @@ module TacticArena.Specs {
 
         describe("4 players / Fleerate 0%", () => {
             beforeEach(function () {
-                spyOn(TacticArena.Controller.OrderManager, 'resolutionEsquive').and.callFake(() => {
+                spyOn(TacticArena.OrderManager, 'resolutionEsquive').and.callFake(() => {
                     return true;
                 });
 
@@ -299,8 +299,8 @@ module TacticArena.Specs {
                     {
                         entity: currentState.pawns[3],
                         list: [
-                            {action: "move", direction: "W", x: 11, y: 7},
-                            {action: "move", direction: "W", x: 11, y: 6}
+                            new Order.Move(new Position(11, 7), 'W'),
+                            new Order.Move(new Position(11, 6), 'W')
                         ]
                     },
                 ];
@@ -331,25 +331,25 @@ module TacticArena.Specs {
                     {
                         entity: currentState.pawns[0],
                         list: [
-                            {action: "cast", direction: "E", x: 8, y: 8},
-                            {action: "move", direction: "E", x: 7, y: 8}
+                            new Order.Fire(new Position(8, 8), 'E'),
+                            new Order.Move(new Position(7, 8), 'E')
                         ]
                     },
                     {
                         entity: currentState.pawns[1],
                         list: [
-                            {action: "move", direction: "W", x: 9, y: 8},
-                            {action: "cast", direction: "W", x: 9, y: 8},
-                            {action: "move", direction: "W", x: 9, y: 7},
+                            new Order.Move(new Position(9, 8), 'W'),
+                            new Order.Fire(new Position(9, 8), 'W'),
+                            new Order.Move(new Position(9, 7), 'W')
                         ]
                     },
                     {
                         entity: currentState.pawns[3],
                         list: [
-                            {action: "move", direction: "W", x: 11, y: 7},
-                            {action: "move", direction: "W", x: 10, y: 7},
-                            {action: "move", direction: "W", x: 9, y: 7},
-                            {action: "move", direction: "W", x: 9, y: 8},
+                            new Order.Move(new Position(11, 7), 'W'),
+                            new Order.Move(new Position(10, 7), 'W'),
+                            new Order.Move(new Position(9, 7), 'W'),
+                            new Order.Move(new Position(9, 8), 'W')
                         ]
                     },
                 ];

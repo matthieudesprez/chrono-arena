@@ -1,4 +1,4 @@
-module TacticArena.Controller {
+module TacticArena {
     export class StageManager {
         game;
         map:Phaser.Tilemap;
@@ -27,7 +27,6 @@ module TacticArena.Controller {
             this.blackLayer = null;
             this.grid = [];
             this.initialGrid = [];
-            console.log('stagemanager init', this.grid);
         }
 
         init(name = 'mapmobile') {
@@ -48,7 +47,6 @@ module TacticArena.Controller {
 
             this.initGrid();
             this.backgroundLayer.resizeWorld();
-            console.log('jajoute mes tiles', this.grid.length, this.backgroundLayer.layer.data.length);
         }
 
         initFromArray(data, width=160, height=160, start={x:0, y:0}) {
@@ -177,8 +175,8 @@ module TacticArena.Controller {
             };
         }
 
-        isObstacle(x, y) {
-            return this.grid[y][x] != -1;
+        isObstacle(position) {
+            return this.grid[position.y][position.x] != -1;
         }
 
         handleTile(pawn) {
@@ -309,7 +307,6 @@ module TacticArena.Controller {
         }
 
         isFacing(coordsA, directionA, coordsB) {
-            console.log(coordsA, directionA, coordsB);
             return (
                 coordsA.x == coordsB.x && (
                     (coordsA.y == coordsB.y + 1 && directionA == 'N') || (coordsA.y == coordsB.y - 1 && directionA == 'S')
@@ -321,7 +318,6 @@ module TacticArena.Controller {
         }
 
         isFacingAway(coordsA, directionA, coordsB) {
-            console.log(coordsA, directionA, coordsB);
             return (
                 (coordsA.x == coordsB.x && (directionA == 'N' || directionA == 'S')) ||
                 (coordsA.y == coordsB.y && (directionA == 'W' || directionA == 'E'))

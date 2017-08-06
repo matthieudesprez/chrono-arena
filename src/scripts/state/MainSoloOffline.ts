@@ -1,8 +1,8 @@
 declare var EasyStar;
 module TacticArena.State {
-    import AiManager = TacticArena.Controller.AiManager;
+    import AiManager = TacticArena.AiManager;
     export class MainSoloOffline extends TacticArena.State.BaseBattle {
-        aiManager: Controller.AiManager;
+        aiManager: AiManager;
 
         init(data, chatUI) {
             super.init();
@@ -17,7 +17,7 @@ module TacticArena.State {
                     this.playerTeam = k;
                     isBot = false;
                 } else {
-                    this.aiManager = new Controller.AiManager(this, k);
+                    this.aiManager = new AiManager(this, k);
                 }
                 if (p.faction == 'human') {
                     let pawn = new Entity.Character.Ruairi(this, startPositions[k][0].x, startPositions[k][0].y, startPositions[k][0].d, this.getUniqueId(), isBot, k);

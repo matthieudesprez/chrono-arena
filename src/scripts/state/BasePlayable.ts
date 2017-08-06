@@ -11,7 +11,7 @@ module TacticArena.State {
         uiGroup: Phaser.Group;
         pathfinder;
         tileSize: number;
-        stageManager: Controller.StageManager;
+        stageManager: StageManager;
         process: Boolean;
         modalVisible: Boolean;
         pointer;
@@ -81,7 +81,7 @@ module TacticArena.State {
         }
 
         initMap() {
-            this.stageManager = new Controller.StageManager(this);
+            this.stageManager = new StageManager(this);
             this.stageManager.init(this.mapName);
         }
 

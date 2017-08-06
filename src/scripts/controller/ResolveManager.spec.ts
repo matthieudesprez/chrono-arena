@@ -31,7 +31,7 @@ module TacticArena.Specs {
 
         function testStepResolution(index, position, ap, hp, direction) {
             let pawn = currentState.pawns[index];
-            expect(pawn.getPosition()).toEqual(position);
+            expect(pawn.getPosition().equals(position)).toEqual(true);
             expect(pawn.getAp()).toEqual(ap);
             expect(pawn.getHp()).toEqual(hp);
             expect(pawn.getDirection()).toEqual(direction);

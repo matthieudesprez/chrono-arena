@@ -1,9 +1,9 @@
 declare var EasyStar;
 module TacticArena.State {
-    import AiManager = TacticArena.Controller.AiManager;
-    import StageManager = TacticArena.Controller.StageManager;
+    import AiManager = TacticArena.AiManager;
+    import StageManager = TacticArena.StageManager;
     export class MainAdventureBattle extends TacticArena.State.BaseBattle {
-        aiManager: Controller.AiManager;
+        aiManager: AiManager;
         data;
 
         init(data) {
@@ -18,7 +18,7 @@ module TacticArena.State {
                     this.playerTeam = k;
                     isBot = false;
                 } else {
-                    this.aiManager = new Controller.AiManager(this, k);
+                    this.aiManager = new AiManager(this, k);
                 }
                 this.pawns.push(new Entity.Pawn(this, p.position.x, p.position.y, p.direction, p.type, this.getUniqueId(), isBot, k, p.name, p.spriteClass));
             });

@@ -49,11 +49,11 @@ module TacticArena.Entity {
             return this.projection ? this.projection : this;
         }
 
-        getPosition() {
-            return {
-                x: (this.sprite.position.x + this.sprite._size / 4) / this.game.tileSize,
-                y: (this.sprite.position.y + this.sprite._size / 2) / this.game.tileSize
-            };
+        getPosition():Position {
+            return new Position(
+                (this.sprite.position.x + this.sprite._size / 4) / this.game.tileSize,
+                (this.sprite.position.y + this.sprite._size / 2) / this.game.tileSize
+            );
         }
 
         attack(target?) {

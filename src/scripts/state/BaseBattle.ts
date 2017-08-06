@@ -1,11 +1,11 @@
 /// <reference path="BasePlayable.ts"/>
 module TacticArena.State {
     export class BaseBattle extends TacticArena.State.BasePlayable {
-        turnManager: Controller.TurnManager;
-        orderManager: Controller.OrderManager;
-        resolveManager: Controller.ResolveManager;
-        logManager: Controller.LogManager;
-        signalManager: Controller.SignalManager;
+        turnManager: TurnManager;
+        orderManager: OrderManager;
+        resolveManager: ResolveManager;
+        logManager: LogManager;
+        signalManager: SignalManager;
         uiManager: UI.UIManager;
         selecting: Boolean;
         hideProjections: Boolean;
@@ -28,7 +28,7 @@ module TacticArena.State {
             this.teamColors = ['0x8ad886', '0xd68686', '0x87bfdb', '0xcdd385'];
             this.teams = {};
             //this.serializer = new TS.Serializer(TacticArena);
-            this.signalManager = new Controller.SignalManager(this);
+            this.signalManager = new SignalManager(this);
             this.signalManager.init();
 
             this.pointer = new UI.Pointer(this);
@@ -38,10 +38,10 @@ module TacticArena.State {
             super.create();
             let self = this;
 
-            this.logManager = new Controller.LogManager(this);
-            this.orderManager = new Controller.OrderManager(this);
-            this.resolveManager = new Controller.ResolveManager(this);
-            this.turnManager = new Controller.TurnManager(this);
+            this.logManager = new LogManager(this);
+            this.orderManager = new OrderManager(this);
+            this.resolveManager = new ResolveManager(this);
+            this.turnManager = new TurnManager(this);
             this.uiManager = new UI.UIManager(this);
             if(this.chatUI) {
                 this.chatUI.menu = this.uiManager;

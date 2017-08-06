@@ -1,7 +1,7 @@
 declare var EasyStar;
 module TacticArena.State {
     export class MainMultiplayerOnline extends TacticArena.State.BaseBattle {
-        serverManager: Controller.ServerManager;
+        serverManager: ServerManager;
 
         init(data, chatUI, serverManager) {
             super.init();

@@ -1,4 +1,4 @@
-module TacticArena.Controller {
+module TacticArena {
     export class TurnManager {
 		currentTurnIndex;
 		currentTeam;

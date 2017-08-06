@@ -94,107 +94,101 @@ var TacticArena;
 })(TacticArena || (TacticArena = {}));
 var TacticArena;
 (function (TacticArena) {
-    var Controller;
-    (function (Controller) {
-        var AiManager = (function () {
-            function AiManager(game, team) {
-                this.game = game;
-                this.team = team;
+    var AiManager = (function () {
+        function AiManager(game, team) {
+            this.game = game;
+            this.team = team;
+        }
+        AiManager.prototype.getClosestPawn = function (position, enemy) {
+            if (enemy === void 0) { enemy = true; }
+            var result = null;
+            var min_distance = Infinity;
+            for (var i = 0; i < this.game.pawns.length; i++) {
+                var p = this.game.pawns[i];
+                var distance = this.game.stageManager.getNbTilesBetween(position, p.getPosition());
+                if (distance > 0 && distance < min_distance && ((p.team != this.team && p.isAlive()) || !enemy)) {
+                    result = p;
+                    min_distance = distance;
+                }
             }
-            AiManager.prototype.getClosestPawn = function (position, enemy) {
-                if (enemy === void 0) { enemy = true; }
-                var result = null;
-                var min_distance = Infinity;
-                for (var i = 0; i < this.game.pawns.length; i++) {
-                    var p = this.game.pawns[i];
-                    var distance = this.game.stageManager.getNbTilesBetween(position, p.getPosition());
-                    if (distance > 0 && distance < min_distance && ((p.team != this.team && p.isAlive()) || !enemy)) {
-                        result = p;
-                        min_distance = distance;
-                    }
+            return result;
+        };
+        AiManager.prototype.getDirection = function (p1, p2) {
+            if (p1.x > p2.x) {
+                return 'W';
+            }
+            else if (p1.x < p2.x) {
+                return 'E';
+            }
+            else if (p1.y > p2.y) {
+                return 'N';
+            }
+            else if (p1.y < p2.y) {
+                return 'S';
+            }
+        };
+        AiManager.prototype.play = function (pawn) {
+            var self = this;
+            var p = pawn.getPosition();
+            var target = this.getClosestPawn(p);
+            if (target) {
+                var targetPosition_1 = target.getPosition();
+                var direction_1 = self.getDirection(p, targetPosition_1);
+                if (pawn.getDirection() != direction_1) {
+                    this.game.orderManager.add('stand', pawn, p.x, p.y, direction_1);
+                    pawn.setAp(pawn.getAp() - 1);
                 }
-                return result;
-            };
-            AiManager.prototype.getDirection = function (p1, p2) {
-                if (p1.x > p2.x) {
-                    return 'W';
+                if (self.game.stageManager.isFacingAway(p, pawn.getDirection(), targetPosition_1)) {
+                    this.game.orderManager.add('cast', pawn, p.x, p.y, pawn.getDirection());
+                    pawn.setAp(pawn.getAp() - 2);
                 }
-                else if (p1.x < p2.x) {
-                    return 'E';
-                }
-                else if (p1.y > p2.y) {
-                    return 'N';
-                }
-                else if (p1.y < p2.y) {
-                    return 'S';
-                }
-            };
-            AiManager.prototype.play = function (pawn) {
-                var self = this;
-                var p = pawn.getPosition();
-                var target = this.getClosestPawn(p);
-                if (target) {
-                    var targetPosition_1 = target.getPosition();
-                    var direction_1 = self.getDirection(p, targetPosition_1);
-                    if (pawn.getDirection() != direction_1) {
-                        this.game.orderManager.add('stand', pawn, p.x, p.y, direction_1);
-                        pawn.setAp(pawn.getAp() - 1);
-                    }
-                    if (self.game.stageManager.isFacingAway(p, pawn.getDirection(), targetPosition_1)) {
-                        this.game.orderManager.add('cast', pawn, p.x, p.y, pawn.getDirection());
-                        pawn.setAp(pawn.getAp() - 2);
-                    }
-                    var lastDirection_1 = pawn.getDirection();
-                    this.game.pathfinder.findPath(p.x, p.y, targetPosition_1.x, targetPosition_1.y, function (path) {
-                        if (path && path.length > 0) {
-                            path.shift();
-                            for (var i = 0; i < path.length; i++) {
-                                if (pawn.getAp() > 0) {
-                                    direction_1 = self.getDirection(p, targetPosition_1);
-                                    self.game.orderManager.add('move', pawn, path[i].x, path[i].y, direction_1);
+                var lastDirection_1 = pawn.getDirection();
+                this.game.pathfinder.findPath(p.x, p.y, targetPosition_1.x, targetPosition_1.y, function (path) {
+                    if (path && path.length > 0) {
+                        path.shift();
+                        for (var i = 0; i < path.length; i++) {
+                            if (pawn.getAp() > 0) {
+                                direction_1 = self.getDirection(p, targetPosition_1);
+                                self.game.orderManager.add('move', pawn, path[i].x, path[i].y, direction_1);
+                                pawn.setAp(pawn.getAp() - 1);
+                                if (lastDirection_1 != direction_1 || i >= path.length - 1) {
+                                    lastDirection_1 = direction_1;
+                                    self.game.orderManager.add('stand', pawn, path[i].x, path[i].y, direction_1);
                                     pawn.setAp(pawn.getAp() - 1);
-                                    if (lastDirection_1 != direction_1 || i >= path.length - 1) {
-                                        lastDirection_1 = direction_1;
-                                        self.game.orderManager.add('stand', pawn, path[i].x, path[i].y, direction_1);
-                                        pawn.setAp(pawn.getAp() - 1);
-                                    }
                                 }
                             }
                         }
-                        //self.game.uiManager.endOrderPhase();
-                    });
-                    this.game.pathfinder.calculate();
-                }
-            };
-            return AiManager;
-        }());
-        Controller.AiManager = AiManager;
-    })(Controller = TacticArena.Controller || (TacticArena.Controller = {}));
+                    }
+                    //self.game.uiManager.endOrderPhase();
+                });
+                this.game.pathfinder.calculate();
+            }
+        };
+        return AiManager;
+    }());
+    TacticArena.AiManager = AiManager;
 })(TacticArena || (TacticArena = {}));
 var TacticArena;
 (function (TacticArena) {
-    var Controller;
-    (function (Controller) {
-        var LogManager = (function () {
-            //[
-            //    turnIndex: [
-            //        stepIndex: {step}
-            //    ]
-            //]
-            function LogManager(game) {
-                this.logs = [];
-                this.game = game;
-            }
-            LogManager.prototype.add = function (steps) {
-                this.logs.push(steps);
-            };
-            LogManager.prototype.get = function (turnIndex, stepIndex) {
-                return this.logs[turnIndex][stepIndex];
-            };
-            return LogManager;
-        }());
-        Controller.LogManager = LogManager;
-    })(Controller = TacticArena.Controller || (TacticArena.Controller = {}));
+    var LogManager = (function () {
+        //[
+        //    turnIndex: [
+        //        stepIndex: {step}
+        //    ]
+        //]
+        function LogManager(game) {
+            this.logs = [];
+            this.game = game;
+        }
+        LogManager.prototype.add = function (steps) {
+            this.logs.push(steps);
+        };
+        LogManager.prototype.get = function (turnIndex, stepIndex) {
+            return this.logs[turnIndex][stepIndex];
+        };
+        return LogManager;
+    }());
+    TacticArena.LogManager = LogManager;
 })(TacticArena || (TacticArena = {}));
 /// <reference path="../TestGame.ts"/>
 // / <reference path="../state/Main.ts"/>
@@ -208,15 +202,15 @@ var TacticArena;
                 expect(steps[i][j].entity._id).toEqual(entityId);
                 expect(steps[i][j].order.action).toEqual(action);
                 expect(steps[i][j].order.direction).toEqual(direction);
-                expect(steps[i][j].order.x).toEqual(orderPosition.x);
-                expect(steps[i][j].order.y).toEqual(orderPosition.y);
+                expect(steps[i][j].order.position.x).toEqual(orderPosition.x);
+                expect(steps[i][j].order.position.y).toEqual(orderPosition.y);
                 expect(steps[i][j].entityState.ap).toEqual(ap);
                 expect(steps[i][j].entityState.hp).toEqual(hp);
                 expect(steps[i][j].entityState.moveHasBeenBlocked).toEqual(moveHasBeenBlocked);
                 expect(steps[i][j].entityState.positionBlocked).toEqual(positionBlocked);
             }
             beforeEach(function (done) {
-                spyOn(console, 'log').and.stub();
+                //spyOn(console, 'log').and.stub();
                 spyOn(console, 'info').and.stub();
                 spyOn(console, 'warn').and.stub();
                 testGame = new Specs.TestGame(true);
@@ -239,7 +233,7 @@ var TacticArena;
             });
             describe("2 players / Fleerate 0%", function () {
                 beforeEach(function () {
-                    spyOn(TacticArena.Controller.OrderManager, 'resolutionEsquive').and.callFake(function () {
+                    spyOn(TacticArena.OrderManager, 'resolutionEsquive').and.callFake(function () {
                         return true;
                     });
                 });
@@ -257,7 +251,7 @@ var TacticArena;
                         {
                             entity: currentState.pawns[0],
                             list: [
-                                { action: "stand", direction: "E", x: 8, y: 8 }
+                                new TacticArena.Order.Stand(new TacticArena.Position(8, 8), 'E')
                             ]
                         }
                     ];
@@ -274,8 +268,8 @@ var TacticArena;
                         {
                             entity: currentState.pawns[0],
                             list: [
-                                { action: "move", direction: "E", x: 9, y: 8 },
-                                { action: "move", direction: "E", x: 10, y: 8 }
+                                new TacticArena.Order.Move(new TacticArena.Position(9, 8), 'E'),
+                                new TacticArena.Order.Move(new TacticArena.Position(10, 8), 'E')
                             ]
                         }
                     ];
@@ -294,14 +288,14 @@ var TacticArena;
                         {
                             entity: currentState.pawns[0],
                             list: [
-                                { action: "move", direction: "E", x: 9, y: 8 },
-                                { action: "move", direction: "E", x: 9, y: 9 },
+                                new TacticArena.Order.Move(new TacticArena.Position(9, 8), 'E'),
+                                new TacticArena.Order.Move(new TacticArena.Position(9, 9), 'E')
                             ]
                         },
                         {
                             entity: currentState.pawns[1],
                             list: [
-                                { action: "move", direction: "W", x: 9, y: 8 }
+                                new TacticArena.Order.Move(new TacticArena.Position(9, 8), 'W')
                             ]
                         }
                     ];
@@ -320,9 +314,9 @@ var TacticArena;
                         {
                             entity: currentState.pawns[0],
                             list: [
-                                { action: "move", direction: "E", x: 9, y: 8 },
-                                { action: "move", direction: "E", x: 9, y: 9 },
-                                { action: "move", direction: "E", x: 10, y: 9 }
+                                new TacticArena.Order.Move(new TacticArena.Position(9, 8), 'E'),
+                                new TacticArena.Order.Move(new TacticArena.Position(9, 9), 'E'),
+                                new TacticArena.Order.Move(new TacticArena.Position(10, 8), 'E')
                             ]
                         }
                     ];
@@ -343,9 +337,9 @@ var TacticArena;
                         {
                             entity: currentState.pawns[0],
                             list: [
-                                { action: "stand", direction: "S", x: 8, y: 8 },
-                                { action: "move", direction: "S", x: 9, y: 8 },
-                                { action: "move", direction: "S", x: 9, y: 9 }
+                                new TacticArena.Order.Stand(new TacticArena.Position(8, 8), 'S'),
+                                new TacticArena.Order.Move(new TacticArena.Position(9, 8), 'S'),
+                                new TacticArena.Order.Move(new TacticArena.Position(9, 9), 'S')
                             ]
                         }
                     ];
@@ -366,16 +360,16 @@ var TacticArena;
                         {
                             entity: currentState.pawns[0],
                             list: [
-                                { action: "move", direction: "E", x: 8, y: 7 },
-                                { action: "cast", direction: "E", x: 8, y: 7 }
+                                new TacticArena.Order.Move(new TacticArena.Position(8, 7), 'E'),
+                                new TacticArena.Order.Fire(new TacticArena.Position(8, 7), 'E')
                             ]
                         },
                         {
                             entity: currentState.pawns[1],
                             list: [
-                                { action: "move", direction: "W", x: 10, y: 7 },
-                                { action: "move", direction: "W", x: 9, y: 7 },
-                                { action: "move", direction: "W", x: 8, y: 7 }
+                                new TacticArena.Order.Move(new TacticArena.Position(10, 7), 'W'),
+                                new TacticArena.Order.Move(new TacticArena.Position(9, 7), 'W'),
+                                new TacticArena.Order.Move(new TacticArena.Position(8, 7), 'W')
                             ]
                         },
                     ];
@@ -397,15 +391,15 @@ var TacticArena;
                         {
                             entity: currentState.pawns[0],
                             list: [
-                                { action: "cast", direction: "E", x: 8, y: 8 }
+                                new TacticArena.Order.Fire(new TacticArena.Position(8, 8), 'E')
                             ]
                         },
                         {
                             entity: currentState.pawns[1],
                             list: [
-                                { action: "move", direction: "W", x: 9, y: 8 },
-                                { action: "move", direction: "W", x: 8, y: 8 },
-                                { action: "move", direction: "W", x: 7, y: 8 }
+                                new TacticArena.Order.Move(new TacticArena.Position(9, 8), 'W'),
+                                new TacticArena.Order.Move(new TacticArena.Position(8, 8), 'W'),
+                                new TacticArena.Order.Move(new TacticArena.Position(7, 8), 'W')
                             ]
                         },
                     ];
@@ -427,15 +421,15 @@ var TacticArena;
                         {
                             entity: currentState.pawns[0],
                             list: [
-                                { action: "cast_wind", direction: "E", x: 8, y: 8 }
+                                new TacticArena.Order.Wind(new TacticArena.Position(8, 8), 'E')
                             ]
                         },
                         {
                             entity: currentState.pawns[1],
                             list: [
-                                { action: "move", direction: "W", x: 9, y: 8 },
-                                { action: "move", direction: "W", x: 8, y: 8 },
-                                { action: "move", direction: "W", x: 7, y: 8 }
+                                new TacticArena.Order.Move(new TacticArena.Position(9, 8), 'W'),
+                                new TacticArena.Order.Move(new TacticArena.Position(8, 8), 'W'),
+                                new TacticArena.Order.Move(new TacticArena.Position(7, 8), 'W')
                             ]
                         },
                     ];
@@ -455,7 +449,7 @@ var TacticArena;
             });
             describe("4 players / Fleerate 0%", function () {
                 beforeEach(function () {
-                    spyOn(TacticArena.Controller.OrderManager, 'resolutionEsquive').and.callFake(function () {
+                    spyOn(TacticArena.OrderManager, 'resolutionEsquive').and.callFake(function () {
                         return true;
                     });
                     currentState.pawns.push(new TacticArena.Entity.Pawn(currentState, 7, 7, 'E', 'skeleton', 3, false, 1, 'Diana'));
@@ -481,8 +475,8 @@ var TacticArena;
                         {
                             entity: currentState.pawns[3],
                             list: [
-                                { action: "move", direction: "W", x: 11, y: 7 },
-                                { action: "move", direction: "W", x: 11, y: 6 }
+                                new TacticArena.Order.Move(new TacticArena.Position(11, 7), 'W'),
+                                new TacticArena.Order.Move(new TacticArena.Position(11, 6), 'W')
                             ]
                         },
                     ];
@@ -510,25 +504,25 @@ var TacticArena;
                         {
                             entity: currentState.pawns[0],
                             list: [
-                                { action: "cast", direction: "E", x: 8, y: 8 },
-                                { action: "move", direction: "E", x: 7, y: 8 }
+                                new TacticArena.Order.Fire(new TacticArena.Position(8, 8), 'E'),
+                                new TacticArena.Order.Move(new TacticArena.Position(7, 8), 'E')
                             ]
                         },
                         {
                             entity: currentState.pawns[1],
                             list: [
-                                { action: "move", direction: "W", x: 9, y: 8 },
-                                { action: "cast", direction: "W", x: 9, y: 8 },
-                                { action: "move", direction: "W", x: 9, y: 7 },
+                                new TacticArena.Order.Move(new TacticArena.Position(9, 8), 'W'),
+                                new TacticArena.Order.Fire(new TacticArena.Position(9, 8), 'W'),
+                                new TacticArena.Order.Move(new TacticArena.Position(9, 7), 'W')
                             ]
                         },
                         {
                             entity: currentState.pawns[3],
                             list: [
-                                { action: "move", direction: "W", x: 11, y: 7 },
-                                { action: "move", direction: "W", x: 10, y: 7 },
-                                { action: "move", direction: "W", x: 9, y: 7 },
-                                { action: "move", direction: "W", x: 9, y: 8 },
+                                new TacticArena.Order.Move(new TacticArena.Position(11, 7), 'W'),
+                                new TacticArena.Order.Move(new TacticArena.Position(10, 7), 'W'),
+                                new TacticArena.Order.Move(new TacticArena.Position(9, 7), 'W'),
+                                new TacticArena.Order.Move(new TacticArena.Position(9, 8), 'W')
                             ]
                         },
                     ];
@@ -564,357 +558,251 @@ var TacticArena;
 })(TacticArena || (TacticArena = {}));
 var TacticArena;
 (function (TacticArena) {
-    var Controller;
-    (function (Controller) {
-        var OrderManager = (function () {
-            function OrderManager(game) {
-                this.orders = [];
-                this.game = game;
-                this.alteredPawns = [];
+    var OrderManager = (function () {
+        function OrderManager(game) {
+            this.orders = [];
+            this.game = game;
+            this.alteredPawns = [];
+        }
+        OrderManager.prototype.removeEntityOrder = function (pawn) {
+            var id = pawn._id;
+            var result = [];
+            for (var i = 0; i < this.orders.length; i++) {
+                if (this.orders[i].entity._id != id) {
+                    result.push(this.orders[i]);
+                }
             }
-            OrderManager.prototype.removeEntityOrder = function (pawn) {
-                var id = pawn._id;
-                var result = [];
-                for (var i = 0; i < this.orders.length; i++) {
-                    if (this.orders[i].entity._id != id) {
-                        result.push(this.orders[i]);
-                    }
+            this.orders = result;
+            this.game.signalManager.onOrderChange.dispatch(pawn);
+        };
+        OrderManager.prototype.hasOrder = function (id) {
+            for (var i = 0; i < this.orders.length; i++) {
+                if (this.orders[i].entity._id == id) {
+                    return true;
                 }
-                this.orders = result;
-                this.game.signalManager.onOrderChange.dispatch(pawn);
-            };
-            OrderManager.prototype.hasOrder = function (id) {
-                for (var i = 0; i < this.orders.length; i++) {
-                    if (this.orders[i].entity._id == id) {
-                        return true;
+            }
+            return false;
+        };
+        OrderManager.prototype.add = function (action, entity, x, y, direction, triggerDispatch, order) {
+            if (direction === void 0) { direction = null; }
+            if (triggerDispatch === void 0) { triggerDispatch = true; }
+            if (order === void 0) { order = null; }
+            if (!this.hasOrder(entity._id)) {
+                this.orders.push({ entity: entity, list: [] });
+            }
+            for (var i = 0; i < this.orders.length; i++) {
+                if (this.orders[i].entity._id == entity._id) {
+                    if (order === null) {
+                        order = new TacticArena.BaseOrder(action, new TacticArena.Position(x, y), direction);
                     }
+                    this.orders[i].list.push(order);
                 }
-                return false;
-            };
-            OrderManager.prototype.add = function (action, entity, x, y, direction, triggerDispatch) {
-                if (direction === void 0) { direction = null; }
-                if (triggerDispatch === void 0) { triggerDispatch = true; }
-                if (!this.hasOrder(entity._id)) {
-                    this.orders.push({
-                        'entity': entity,
-                        'list': []
+            }
+            if (triggerDispatch) {
+                this.game.signalManager.onOrderChange.dispatch(entity);
+            }
+        };
+        OrderManager.prototype.getOrders = function (entity_id) {
+            for (var i = 0; i < this.orders.length; i++) {
+                if (this.orders[i].entity._id == entity_id) {
+                    return this.orders[i].list;
+                }
+            }
+            return [];
+        };
+        OrderManager.prototype.getPlayerOrders = function (teamId) {
+            var result = [];
+            for (var i = 0; i < this.orders.length; i++) {
+                if (this.orders[i].entity.team == teamId) {
+                    result.push({
+                        entityId: this.orders[i].entity._id,
+                        list: this.orders[i].list
                     });
                 }
-                for (var i = 0; i < this.orders.length; i++) {
-                    if (this.orders[i].entity._id == entity._id) {
-                        var order = {
-                            action: action,
-                            x: x,
-                            y: y,
-                            direction: direction
-                        };
-                        this.orders[i].list.push(order);
-                    }
+            }
+            return result;
+        };
+        OrderManager.prototype.getMaxOrderListLength = function () {
+            var max = 0;
+            for (var i = 0; i < this.orders.length; i++) {
+                if (this.orders[i].list.length > max) {
+                    max = this.orders[i].list.length;
                 }
-                if (triggerDispatch) {
-                    this.game.signalManager.onOrderChange.dispatch(entity);
+            }
+            return max;
+        };
+        OrderManager.prototype.formatOrders = function () {
+            for (var i = 0; i < this.game.pawns.length; i++) {
+                var p = this.game.pawns[i];
+                if (!this.hasOrder(p._id)) {
+                    var position = p.getPosition();
+                    this.add('stand', p, position.x, position.y, p.getDirection(), false, new TacticArena.Order.Stand(position, p.getDirection()));
                 }
-            };
-            OrderManager.prototype.getOrders = function (entity_id) {
-                for (var i = 0; i < this.orders.length; i++) {
-                    if (this.orders[i].entity._id == entity_id) {
-                        return this.orders[i].list;
-                    }
-                }
-                return [];
-            };
-            OrderManager.prototype.getPlayerOrders = function (teamId) {
-                var result = [];
-                for (var i = 0; i < this.orders.length; i++) {
-                    if (this.orders[i].entity.team == teamId) {
-                        result.push({
-                            entityId: this.orders[i].entity._id,
-                            list: this.orders[i].list
-                        });
-                    }
-                }
-                return result;
-            };
-            OrderManager.prototype.getMaxOrderListLength = function () {
-                var max = 0;
-                for (var i = 0; i < this.orders.length; i++) {
-                    if (this.orders[i].list.length > max) {
-                        max = this.orders[i].list.length;
-                    }
-                }
-                return max;
-            };
-            OrderManager.getDefaultOrder = function (position, direction) {
-                return {
-                    'action': 'stand',
-                    'x': position.x,
-                    'y': position.y,
-                    'direction': direction
-                };
-            };
-            OrderManager.prototype.formatOrders = function () {
-                for (var i = 0; i < this.game.pawns.length; i++) {
-                    var p = this.game.pawns[i];
-                    if (!this.hasOrder(p._id)) {
-                        var position = p.getPosition();
-                        this.add('stand', p, position.x, position.y, p.getDirection(), false);
-                    }
-                }
-            };
-            OrderManager.prototype.getInitialStep = function () {
-                var step = [];
-                for (var i = 0; i < this.orders.length; i++) {
-                    var state = OrderManager.getDefaultEntityState();
-                    var pawn = this.orders[i].entity;
-                    var hp = pawn.getHp();
-                    state['ap'] = hp > 0 ? pawn._apMax : 0;
-                    state['hp'] = hp;
-                    var defaultOrder = OrderManager.getDefaultOrder(pawn.getPosition(), pawn.getDirection());
-                    if (hp <= 0)
-                        defaultOrder.action = 'dead';
-                    step.push({
-                        entity: pawn,
-                        entityState: state,
-                        order: defaultOrder
-                    });
-                }
-                return step;
-            };
-            OrderManager.resolutionEsquive = function (fleeRate) {
-                return (Math.floor(Math.random() * 100) > fleeRate);
-            };
-            OrderManager.prototype.blockEntity = function (steps, startI, j, order, entity) {
-                steps[startI][j].entityState.positionBlocked = { x: steps[startI][j].order.x, y: steps[startI][j].order.y };
-                for (var i = startI; i < steps.length; i++) {
-                    if (steps[i][j].order) {
-                        if (i > startI && steps[i][j].order.action == 'move') {
-                            steps[i][j].order = order;
-                        }
-                        steps[i][j].order.x = order.x;
-                        steps[i][j].order.y = order.y;
-                    }
-                }
-                this.alteredPawns.push(entity._id);
-                entity.destroyProjection();
-                return steps;
-            };
-            OrderManager.prototype.pacifyEntity = function (steps, startI, j, order, entity, state) {
-                console.log('pacify', steps, startI, j, order, entity, state);
-                for (var i = startI; i < steps.length; i++) {
-                    steps[i][j].order = {
-                        action: 'stand',
-                        direction: order.direction,
-                        x: state.moved.x,
-                        y: state.moved.y
-                    };
-                }
-                this.alteredPawns.push(entity._id);
-                entity.destroyProjection();
-                return steps;
-            };
-            OrderManager.prototype.getSteps = function () {
-                this.alteredPawns = [];
-                this.formatOrders();
-                var steps = new Array(this.getMaxOrderListLength());
-                for (var j = 0; j < steps.length; j++) {
-                    steps[j] = [];
-                    for (var i = 0; i < this.orders.length; i++) {
-                        var entity = this.orders[i].entity;
-                        entity.show();
-                        steps[j].push({
-                            'entity': entity,
-                            'order': this.orders[i].list[j] ? this.orders[i].list[j] : null
-                        });
-                    }
-                }
-                steps.unshift(this.getInitialStep());
-                this.orders = [];
-                return this.processOrders(steps);
-            };
-            OrderManager.getDefaultEntityState = function () {
-                return {
-                    moveHasBeenBlocked: false,
-                    positionBlocked: {}
-                };
-            };
-            OrderManager.prototype.getPawn = function (id) {
-                var result = null;
-                this.game.pawns.forEach(function (p) {
-                    if (p._id == id) {
-                        result = p;
-                    }
+            }
+        };
+        OrderManager.prototype.getInitialStep = function () {
+            var step = [];
+            for (var i = 0; i < this.orders.length; i++) {
+                var state = OrderManager.getDefaultEntityState();
+                var pawn = this.orders[i].entity;
+                var hp = pawn.getHp();
+                state['ap'] = hp > 0 ? pawn._apMax : 0;
+                state['hp'] = hp;
+                var defaultOrder = new TacticArena.Order.Stand(pawn.getPosition(), pawn.getDirection());
+                if (hp <= 0)
+                    defaultOrder.action = 'dead';
+                step.push({
+                    entity: pawn,
+                    entityState: state,
+                    order: defaultOrder
                 });
-                return result;
+            }
+            return step;
+        };
+        OrderManager.resolutionEsquive = function (fleeRate) {
+            return (Math.floor(Math.random() * 100) > fleeRate);
+        };
+        OrderManager.prototype.blockEntity = function (steps, startI, j, order, entity) {
+            steps[startI][j].entityState.positionBlocked = { x: steps[startI][j].order.position.x, y: steps[startI][j].order.position.y };
+            for (var i = startI; i < steps.length; i++) {
+                if (steps[i][j].order) {
+                    if (i > startI && steps[i][j].order.action == 'move') {
+                        steps[i][j].order = order;
+                    }
+                    steps[i][j].order.position = order.position;
+                }
+            }
+            this.alteredPawns.push(entity._id);
+            entity.destroyProjection();
+            return steps;
+        };
+        OrderManager.prototype.pacifyEntity = function (steps, startI, j, order, entity, state) {
+            for (var i = startI; i < steps.length; i++) {
+                steps[i][j].order = new TacticArena.Order.Stand(new TacticArena.Position(state.moved.x, state.moved.y), order.direction);
+            }
+            this.alteredPawns.push(entity._id);
+            entity.destroyProjection();
+            return steps;
+        };
+        OrderManager.prototype.getSteps = function () {
+            this.alteredPawns = [];
+            this.formatOrders();
+            var steps = new Array(this.getMaxOrderListLength());
+            for (var j = 0; j < steps.length; j++) {
+                steps[j] = [];
+                for (var i = 0; i < this.orders.length; i++) {
+                    var entity = this.orders[i].entity;
+                    entity.show();
+                    steps[j].push({
+                        entity: entity,
+                        order: this.orders[i].list[j] ? this.orders[i].list[j] : null
+                    });
+                }
+            }
+            steps.unshift(this.getInitialStep());
+            this.orders = [];
+            console.log(steps);
+            return this.processOrders(steps);
+        };
+        OrderManager.getDefaultEntityState = function () {
+            return {
+                moveHasBeenBlocked: false,
+                positionBlocked: {}
             };
-            OrderManager.prototype.tileIsFree = function (step, x, y) {
+        };
+        OrderManager.prototype.getPawn = function (id) {
+            var result = null;
+            this.game.pawns.forEach(function (p) {
+                if (p._id == id) {
+                    result = p;
+                }
+            });
+            return result;
+        };
+        OrderManager.prototype.tileIsFree = function (step, position) {
+            for (var i = 0; i < step.length; i++) {
+                var entityState = step[i].entityState;
+                var order = step[i].order;
+                if ((typeof entityState.moved === 'undefined' && position.equals(order.position)) || (entityState.moved && entityState.moved.equals(position))) {
+                    return false;
+                }
+            }
+            return true;
+        };
+        OrderManager.prototype.processOrders = function (steps) {
+            for (var l = 1; l < steps.length; l++) {
+                var step = steps[l];
+                var previousStep = steps[l - 1];
                 for (var i = 0; i < step.length; i++) {
-                    var entityState = step[i].entityState;
-                    var order = step[i].order;
-                    if ((typeof entityState.moved === 'undefined' && order.x == x && order.y == y) || (entityState.moved && entityState.moved.x == x && entityState.moved.y == y)) {
-                        console.log(entityState, order, x, y);
-                        return false;
+                    step[i].entityState = OrderManager.getDefaultEntityState();
+                    // Dans le cas où une entité à moins d'actions à jouer que les autres
+                    // On lui en assigne un par défaut pour qu'elle ne soit pas inactive
+                    // Mais si elle n'a plus de AP elle ne fera rien (ni même attaquer) à part rester dans sa position
+                    if (step[i].order == null) {
+                        step[i].order = new TacticArena.Order.Stand(previousStep[i].order.position, previousStep[i].order.direction);
                     }
                 }
-                return true;
-            };
-            OrderManager.prototype.processOrders = function (steps) {
-                for (var l = 1; l < steps.length; l++) {
-                    var step = steps[l];
-                    var previousStep = steps[l - 1];
-                    for (var i = 0; i < step.length; i++) {
-                        step[i].entityState = OrderManager.getDefaultEntityState();
-                        // Dans le cas où une entité à moins d'actions à jouer que les autres
-                        // On lui en assigne un par défaut pour qu'elle ne soit pas inactive
-                        // Mais si elle n'a plus de AP elle ne fera rien à part rester dans sa position
-                        if (step[i].order == null) {
-                            step[i].order = OrderManager.getDefaultOrder(previousStep[i].order, previousStep[i].order.direction);
+                // check actions for each entity in step
+                for (var i = 0; i < step.length; i++) {
+                    // foreach entities except A
+                    for (var j = 0; j < step.length; j++) {
+                        if (step[i].entity._id == step[j].entity._id)
+                            continue; // Pas d'interaction avec soi-même
+                        var positionBBeforeOrder = previousStep[j].order.position;
+                        if (previousStep[j].entityState.moved) {
+                            positionBBeforeOrder = previousStep[j].entityState.moved;
                         }
-                    }
-                    // check actions before for each entity in step
-                    for (var i = 0; i < step.length; i++) {
-                        var entityA = step[i].entity;
-                        var entityAState = step[i].entityState;
-                        // foreach entities except A
-                        for (var j = 0; j < step.length; j++) {
-                            var entityB = step[j].entity;
-                            if (entityA._id == entityB._id)
-                                continue; // Pas d'interaction avec soi-même
-                            var entityBState = step[j].entityState;
-                            var orderA = step[i].order;
-                            var orderB = step[j].order;
-                            var positionB = { x: orderB.x, y: orderB.y };
-                            var positionABeforeOrder = { x: previousStep[i].order.x, y: previousStep[i].order.y };
-                            var positionBBeforeOrder = { x: previousStep[j].order.x, y: previousStep[j].order.y };
-                            if (previousStep[j].entityState.moved) {
-                                positionBBeforeOrder = previousStep[j].entityState.moved;
-                            }
-                            var aWasFacingB = this.game.stageManager.isFacing(positionABeforeOrder, previousStep[i].order.direction, positionBBeforeOrder);
-                            var aWasNextToB = this.game.stageManager.getNbTilesBetween(positionABeforeOrder, positionBBeforeOrder) == 1;
-                            var fleeRate = 50;
-                            var entityAApCost = 1;
-                            var entityBHpLost = 0;
-                            var aIsActive = previousStep[i].entityState['ap'] > 0; // INACTIF = stand mais pas le droit d'attaquer
-                            var aIsAlive = previousStep[i].entityState['hp'] > 0;
-                            var keepDirection = (previousStep[i].order.direction == orderA.direction);
-                            var keepPosition = (orderA.x == positionABeforeOrder.x && orderA.y == positionABeforeOrder.y);
-                            var equalPositions = this.game.stageManager.equalPositions(orderA, orderB);
-                            var differentTeams = entityA.team != entityB.team;
-                            entityAState.hp = typeof entityAState.hp !== 'undefined' ? entityAState.hp : previousStep[i].entityState['hp'];
-                            if (!aIsAlive) {
-                                orderA.action = 'dead';
-                                orderA.x = previousStep[i].order.x;
-                                orderA.y = previousStep[i].order.y;
-                                entityAState.ap = previousStep[i].entityState['ap'];
-                                entityAState.hp = 0;
-                                if (previousStep[i].order.action !== 'dead') {
-                                    previousStep[i].entityState.dies = true;
-                                }
-                                continue;
-                            }
-                            if (equalPositions) {
-                                // Si A veut aller sur la même case que B (qu'il y soit déjà où qu'il veuille y aller)
-                                if (this.alteredPawns.indexOf(entityA._id) < 0)
-                                    entityAState.moveHasBeenBlocked = (orderA.action == 'move');
-                                if (this.alteredPawns.indexOf(entityB._id) < 0)
-                                    entityBState.moveHasBeenBlocked = (orderB.action == 'move');
-                            }
-                            // Possible cases :
-                            // [  ][A v][  ]
-                            // [A>][ B ][<A]
-                            // [  ][ A^][  ]
-                            // IF A was next to B
-                            // AND IF A was facing B
-                            // AND IF A is active (ap > 0)
-                            // AND IF A & B are not in the same team
-                            // AND IF A keeps its direction (aIsFacingB) (et ne va donc pas pas se détourner de B)
-                            // AND IF A stays next to B OR IF A moves toward B (equalPositions) (en lui faisant face)
-                            if (['stand', 'move', 'slash'].indexOf(orderA.action) >= 0 && aWasNextToB && aWasFacingB && aIsActive &&
-                                differentTeams && keepDirection && (keepPosition || equalPositions)) {
-                                var entityBIsDodging = true;
-                                if (orderA.action == 'slash') {
-                                    fleeRate = 0;
-                                }
-                                ;
-                                if (OrderManager.resolutionEsquive(fleeRate)) {
-                                    entityBHpLost += 1;
-                                    //if(orderA.action == 'slash') { entityBHpLost += 1; }
-                                    entityBIsDodging = false;
-                                    if (this.alteredPawns.indexOf(entityB._id) < 0) {
-                                        entityBState.moveHasBeenBlocked = (orderB.action == 'move');
-                                    }
-                                }
-                                orderA.action = 'attack';
-                                orderA.target = { entityId: entityB._id, dodge: entityBIsDodging, damages: entityBHpLost };
-                            }
-                            if (orderA.action == 'cast') {
-                                entityAApCost++;
-                                var path = this.game.stageManager.getLinearPath(entityA, 4, orderA.direction, orderA);
-                                orderA.targets = orderA.targets || [];
-                                for (var k = 0; k < path.length; k++) {
-                                    var targetPosition = entityBState.moveHasBeenBlocked ? positionBBeforeOrder : positionB;
-                                    if (path[k].x == targetPosition.x && path[k].y == targetPosition.y) {
-                                        orderA.targets.push(entityB._id);
-                                        entityBHpLost += 2;
-                                    }
-                                }
-                            }
-                            else if (orderA.action == 'cast_wind') {
-                                entityAApCost++;
-                                var path = this.game.stageManager.getLinearPath(entityA, 4, orderA.direction, orderA);
-                                orderA.targets = orderA.targets || [];
-                                for (var k = 0; k < path.length; k++) {
-                                    var targetPosition = entityBState.moveHasBeenBlocked ? positionBBeforeOrder : positionB;
-                                    if (path[k].x == targetPosition.x && path[k].y == targetPosition.y) {
-                                        var movedX = orderB.x;
-                                        var movedY = orderB.y;
-                                        if (entityBState.moved) {
-                                            movedX = entityBState.moved.x;
-                                            movedY = entityBState.moved.y;
-                                        }
-                                        if (orderA.direction == 'E') {
-                                            movedX++;
-                                        }
-                                        else if (orderA.direction == 'W') {
-                                            movedX--;
-                                        }
-                                        else if (orderA.direction == 'S') {
-                                            movedY++;
-                                        }
-                                        else if (orderA.direction == 'N') {
-                                            movedY--;
-                                        }
-                                        if (!this.tileIsFree(step, movedX, movedY) || this.game.stageManager.isObstacle(movedX, movedY)) {
-                                            movedX = false;
-                                            movedY = false;
-                                        }
-                                        entityBState.moved = { x: movedX, y: movedY };
-                                        orderA.targets.push({
-                                            entity: entityB._id,
-                                            moved: { x: movedX, y: movedY, d: this.game.stageManager.getNbTilesBetween({ x: orderA.x, y: orderA.y }, { x: orderB.x, y: orderB.y }) }
-                                        });
-                                        entityBHpLost += 1;
-                                        this.pacifyEntity(steps, l + 1, j, orderB, entityB, entityBState);
-                                    }
-                                }
-                            }
-                            entityBState.hp = typeof entityBState.hp !== 'undefined' ? entityBState.hp : previousStep[j].entityState['hp'];
-                            entityBState.hp -= entityBHpLost;
-                            entityAState.ap = aIsActive ? previousStep[i].entityState['ap'] - entityAApCost : 0;
-                            if (entityAState.moveHasBeenBlocked && this.alteredPawns.indexOf(entityA._id) < 0) {
-                                this.blockEntity(steps, l, i, OrderManager.getDefaultOrder(previousStep[i].order, previousStep[i].order.direction), entityA);
-                            }
-                            if (entityBState.moveHasBeenBlocked && this.alteredPawns.indexOf(entityB._id) < 0) {
-                                this.blockEntity(steps, l, j, OrderManager.getDefaultOrder(previousStep[j].order, previousStep[j].order.direction), entityB);
-                            }
+                        step[i].data = {
+                            aWasFacingB: previousStep[i].order.position.faces(positionBBeforeOrder, previousStep[i].order.direction),
+                            aWasNextToB: previousStep[i].order.position.getDistanceFrom(positionBBeforeOrder) == 1,
+                            fleeRate: 50,
+                            entityAApCost: 1,
+                            entityBHpLost: 0,
+                            aIsActive: previousStep[i].entityState['ap'] > 0,
+                            aIsAlive: previousStep[i].entityState['hp'] > 0,
+                            keepDirection: (previousStep[i].order.direction == step[i].order.direction),
+                            keepPosition: step[i].order.position.equals(previousStep[i].order.position),
+                            equalPositions: step[i].order.position.equals(step[j].order.position),
+                            differentTeams: step[i].entity.team != step[j].entity.team,
+                            alteredEntityB: this.alteredPawns.indexOf(step[j].entity._id) < 0,
+                            positionBBeforeOrder: positionBBeforeOrder,
+                            l: l,
+                            j: j
+                        };
+                        step[i].entityState.hp = typeof step[i].entityState.hp !== 'undefined' ? step[i].entityState.hp : previousStep[i].entityState['hp'];
+                        if (!step[i].data.aIsAlive) {
+                            step[i].order = new TacticArena.Order.Dead(previousStep[i].order.position, previousStep[i].order.direction);
+                            step[i].entityState.ap = previousStep[i].entityState['ap'];
+                            step[i].entityState.hp = 0;
+                            previousStep[i].entityState.dies = previousStep[i].order.action !== 'dead';
+                            continue;
+                        }
+                        if (step[i].data.equalPositions) {
+                            // Si A veut aller sur la même case que B (qu'il y soit déjà statique où qu'il veuille y aller)
+                            if (this.alteredPawns.indexOf(step[i].entity._id) < 0)
+                                step[i].entityState.moveHasBeenBlocked = (step[i].order.action == 'move');
+                            if (this.alteredPawns.indexOf(step[j].entity._id) < 0)
+                                step[j].entityState.moveHasBeenBlocked = (step[j].order.action == 'move');
+                        }
+                        console.log(step[i].order);
+                        step[i].order = step[i].order.process(step[i], step[j], this, steps);
+                        step[j].entityState.hp = typeof step[j].entityState.hp !== 'undefined' ? step[j].entityState.hp : previousStep[j].entityState['hp'];
+                        step[j].entityState.hp -= step[i].data.entityBHpLost;
+                        step[i].entityState.ap = step[i].data.aIsActive ? previousStep[i].entityState['ap'] - step[i].data.entityAApCost : 0;
+                        if (step[i].entityState.moveHasBeenBlocked && this.alteredPawns.indexOf(step[i].entity._id) < 0) {
+                            this.blockEntity(steps, l, i, new TacticArena.Order.Stand(previousStep[i].order.position, previousStep[i].order.direction), step[i].entity);
+                        }
+                        if (step[j].entityState.moveHasBeenBlocked && this.alteredPawns.indexOf(step[j].entity._id) < 0) {
+                            this.blockEntity(steps, l, j, new TacticArena.Order.Stand(previousStep[j].order.position, previousStep[j].order.direction), step[j].entity);
                         }
                     }
                 }
-                return steps;
-            };
-            return OrderManager;
-        }());
-        Controller.OrderManager = OrderManager;
-    })(Controller = TacticArena.Controller || (TacticArena.Controller = {}));
+            }
+            return steps;
+        };
+        return OrderManager;
+    }());
+    TacticArena.OrderManager = OrderManager;
 })(TacticArena || (TacticArena = {}));
 /// <reference path="../TestGame.ts"/>
 // / <reference path="../state/Main.ts"/>
@@ -948,7 +836,7 @@ var TacticArena;
             }
             function testStepResolution(index, position, ap, hp, direction) {
                 var pawn = currentState.pawns[index];
-                expect(pawn.getPosition()).toEqual(position);
+                expect(pawn.getPosition().equals(position)).toEqual(true);
                 expect(pawn.getAp()).toEqual(ap);
                 expect(pawn.getHp()).toEqual(hp);
                 expect(pawn.getDirection()).toEqual(direction);
@@ -1123,862 +1011,855 @@ var TacticArena;
 })(TacticArena || (TacticArena = {}));
 var TacticArena;
 (function (TacticArena) {
-    var Controller;
-    (function (Controller) {
-        var ResolveManager = (function () {
-            function ResolveManager(game) {
-                this.steps = [];
-                this.game = game;
-                this.currentIndex = 0;
-                this.processing = false;
-                this.active = false;
-            }
-            ResolveManager.prototype.createPromiseMove = function (entity, x, y, animate, direction) {
-                var _this = this;
-                if (direction === void 0) { direction = null; }
-                return entity.moveTo(x, y, null, animate).then(function (res) {
-                    if (direction) {
-                        _this.createPromiseStand(entity, direction).then(function (res) {
-                            return true;
-                        });
-                    }
-                    else {
-                        return res;
-                    }
-                });
-            };
-            ResolveManager.prototype.createPromiseBlock = function (entity, initialPosition, targetPosition, animate) {
-                if (animate) {
-                    return entity.moveTo(targetPosition.x, targetPosition.y).then(function (res) {
-                        entity.blocked();
-                        entity.moveTo(initialPosition.x, initialPosition.y).then(function (res) {
-                            return res;
-                        });
+    var ResolveManager = (function () {
+        function ResolveManager(game) {
+            this.steps = [];
+            this.game = game;
+            this.currentIndex = 0;
+            this.processing = false;
+            this.active = false;
+        }
+        ResolveManager.prototype.createPromiseMove = function (entity, x, y, animate, direction) {
+            var _this = this;
+            if (direction === void 0) { direction = null; }
+            return entity.moveTo(x, y, null, animate).then(function (res) {
+                if (direction) {
+                    _this.createPromiseStand(entity, direction).then(function (res) {
+                        return true;
                     });
                 }
                 else {
-                    return this.createPromiseStand(entity, entity.getDirection());
-                }
-            };
-            ResolveManager.prototype.createPromiseAttack = function (entity, target) {
-                return entity.attack(target).then(function (res) {
                     return res;
+                }
+            });
+        };
+        ResolveManager.prototype.createPromiseBlock = function (entity, initialPosition, targetPosition, animate) {
+            if (animate) {
+                return entity.moveTo(targetPosition.x, targetPosition.y).then(function (res) {
+                    entity.blocked();
+                    entity.moveTo(initialPosition.x, initialPosition.y).then(function (res) {
+                        return res;
+                    });
                 });
-            };
-            ResolveManager.prototype.createPromiseStand = function (entity, direction) {
-                return new Promise(function (resolve, reject) {
-                    entity.faceDirection(direction);
-                    setTimeout(function () {
-                        resolve(true);
-                    }, 250);
+            }
+            else {
+                return this.createPromiseStand(entity, entity.getDirection());
+            }
+        };
+        ResolveManager.prototype.createPromiseAttack = function (entity, target) {
+            return entity.attack(target).then(function (res) {
+                return res;
+            });
+        };
+        ResolveManager.prototype.createPromiseStand = function (entity, direction) {
+            return new Promise(function (resolve, reject) {
+                entity.faceDirection(direction);
+                setTimeout(function () {
+                    resolve(true);
+                }, 250);
+            });
+        };
+        ResolveManager.prototype.createPromiseDie = function (entity) {
+            return new Promise(function (resolve, reject) {
+                entity.die();
+                setTimeout(function () {
+                    resolve(true);
+                }, 250);
+            });
+        };
+        ResolveManager.prototype.init = function (steps) {
+            console.info(steps);
+            this.steps = steps;
+            this.manageProjectionDislay(steps[0], true);
+            this.currentIndex = 0;
+        };
+        ResolveManager.prototype.handleBackwardPromise = function (promise, entity, order, position, animate) {
+            var resultPromise;
+            if (position.x != order.x || position.y != order.y) {
+                resultPromise = entity.moveTo(order.x, order.y, null, false).then(function (res) {
+                    return true;
                 });
-            };
-            ResolveManager.prototype.createPromiseDie = function (entity) {
-                return new Promise(function (resolve, reject) {
-                    entity.die();
-                    setTimeout(function () {
-                        resolve(true);
-                    }, 250);
-                });
-            };
-            ResolveManager.prototype.init = function (steps) {
-                console.info(steps);
-                this.steps = steps;
-                this.manageProjectionDislay(steps[0], true);
-                this.currentIndex = 0;
-            };
-            ResolveManager.prototype.handleBackwardPromise = function (promise, entity, order, position, animate) {
-                var resultPromise;
-                if (position.x != order.x || position.y != order.y) {
-                    resultPromise = entity.moveTo(order.x, order.y, null, false).then(function (res) {
+                resultPromise.then(function (res) {
+                    promise.then(function (res) {
                         return true;
                     });
-                    resultPromise.then(function (res) {
-                        promise.then(function (res) {
-                            return true;
-                        });
-                    });
-                }
-                else {
-                    resultPromise = promise;
-                }
-                return resultPromise;
-            };
-            ResolveManager.prototype.processSteps = function (index, animate, backward) {
-                var _this = this;
-                if (animate === void 0) { animate = true; }
-                if (backward === void 0) { backward = false; }
-                this.processing = true;
-                this.active = true;
-                this.processStep(index, animate, backward).then(function (res) {
-                    _this.game.signalManager.resolvePhaseFinished.dispatch();
-                }, function (res) {
                 });
-            };
-            ResolveManager.prototype.processStep = function (index, animate, backward) {
-                var _this = this;
-                if (animate === void 0) { animate = true; }
-                if (backward === void 0) { backward = false; }
-                var self = this;
-                return new Promise(function (resolve, reject) {
-                    if (index >= _this.steps.length) {
-                        resolve(true);
-                        return true;
-                    }
-                    _this.currentIndex = index;
-                    _this.game.signalManager.stepResolutionIndexChange.dispatch(index);
-                    var step = _this.steps[index];
-                    var previousStep = index > 0 ? _this.steps[index - 1] : null;
-                    console.log('processStep', index, step);
-                    var promisesOrders = [];
-                    var _loop_1 = function () {
-                        o = step[i].order;
-                        e = step[i].entity;
-                        s = step[i].entityState;
-                        p = null;
-                        var position = e.getPosition();
-                        e.setAp(s.ap);
-                        if (o.action == 'move') {
-                            if (s.moveHasBeenBlocked) {
-                                p = _this.createPromiseBlock(e, { x: o.x, y: o.y }, s.positionBlocked, animate);
+            }
+            else {
+                resultPromise = promise;
+            }
+            return resultPromise;
+        };
+        ResolveManager.prototype.processSteps = function (index, animate, backward) {
+            var _this = this;
+            if (animate === void 0) { animate = true; }
+            if (backward === void 0) { backward = false; }
+            this.processing = true;
+            this.active = true;
+            this.processStep(index, animate, backward).then(function (res) {
+                _this.game.signalManager.resolvePhaseFinished.dispatch();
+            }, function (res) {
+            });
+        };
+        ResolveManager.prototype.processStep = function (index, animate, backward) {
+            var _this = this;
+            if (animate === void 0) { animate = true; }
+            if (backward === void 0) { backward = false; }
+            var self = this;
+            return new Promise(function (resolve, reject) {
+                if (index >= _this.steps.length) {
+                    resolve(true);
+                    return true;
+                }
+                _this.currentIndex = index;
+                _this.game.signalManager.stepResolutionIndexChange.dispatch(index);
+                var step = _this.steps[index];
+                var previousStep = index > 0 ? _this.steps[index - 1] : null;
+                console.log('processStep', index, step);
+                var promisesOrders = [];
+                var _loop_1 = function () {
+                    o = step[i].order;
+                    e = step[i].entity;
+                    s = step[i].entityState;
+                    p = null;
+                    var position = e.getPosition();
+                    e.setAp(s.ap);
+                    if (o.action == 'move') {
+                        if (s.moveHasBeenBlocked) {
+                            p = _this.createPromiseBlock(e, { x: o.x, y: o.y }, s.positionBlocked, animate);
+                        }
+                        else {
+                            if (backward && position.x == o.x && position.y == o.y) {
+                                var direction = previousStep ? previousStep[i].order.direction : e.getDirection();
+                                p = _this.createPromiseStand(e, direction);
                             }
                             else {
-                                if (backward && position.x == o.x && position.y == o.y) {
-                                    var direction = previousStep ? previousStep[i].order.direction : e.getDirection();
-                                    p = _this.createPromiseStand(e, direction);
-                                }
-                                else {
-                                    p = _this.createPromiseMove(e, o.x, o.y, animate, o.direction);
-                                }
+                                p = _this.createPromiseMove(e, o.x, o.y, animate, o.direction);
                             }
                         }
-                        else if (o.action == 'attack') {
-                            o.target.entity = _this.game.orderManager.getPawn(o.target.entityId);
-                            p = _this.handleBackwardPromise(_this.createPromiseAttack(e, o.target), e, o, position, animate);
-                        }
-                        else if (o.action == 'cast') {
-                            var targets_1 = [];
-                            o.targets.forEach(function (t) {
-                                targets_1.push(self.game.orderManager.getPawn(t));
-                            });
-                            p = _this.handleBackwardPromise(e.cast(targets_1, o.direction), e, o, position, animate);
-                        }
-                        else if (o.action == 'cast_wind') {
-                            var targets_2 = [];
-                            o.targets.forEach(function (t) {
-                                targets_2.push({
-                                    entity: self.game.orderManager.getPawn(t.entity),
-                                    moved: t.moved
-                                });
-                            });
-                            p = _this.handleBackwardPromise(e.castTornado(targets_2, o.direction), e, o, position, animate);
-                        }
-                        else if (o.action == 'stand') {
-                            p = _this.handleBackwardPromise(_this.createPromiseStand(e, o.direction), e, o, position, animate);
-                        }
-                        promisesOrders.push(p);
-                    };
-                    var o, e, s, p;
-                    for (var i = 0; i < step.length; i++) {
-                        _loop_1();
                     }
-                    _this.manageProjectionDislay(step);
-                    Promise.all(promisesOrders).then(function (res) {
-                        if (!backward) {
-                            _this.manageProjectionDislay(step);
-                        }
-                        step.forEach(function (s) {
-                            var forceAnimation = typeof s.entityState.dies !== 'undefined' && s.entityState.dies;
-                            s.entity.setHp(s.entityState.hp, forceAnimation);
+                    else if (o.action == 'attack') {
+                        o.target.entity = _this.game.orderManager.getPawn(o.target.entityId);
+                        p = _this.handleBackwardPromise(_this.createPromiseAttack(e, o.target), e, o, position, animate);
+                    }
+                    else if (o.action == 'cast') {
+                        var targets_1 = [];
+                        o.targets.forEach(function (t) {
+                            targets_1.push(self.game.orderManager.getPawn(t));
                         });
-                        _this.game.signalManager.stepResolutionFinished.dispatch(index);
-                        if (_this.steps.length > (index + 1) && !_this.game.isPaused) {
-                            _this.processStep(index + 1).then(function (res) {
-                                resolve(res);
-                            }, function (res) {
-                            }); // recursive
-                        }
-                        else {
-                            _this.processing = false;
-                            reject(false);
-                        }
-                    });
-                });
-            };
-            ResolveManager.prototype.manageProjectionDislay = function (step, compareActualEntity) {
-                if (compareActualEntity === void 0) { compareActualEntity = false; }
+                        p = _this.handleBackwardPromise(e.cast(targets_1, o.direction), e, o, position, animate);
+                    }
+                    else if (o.action == 'cast_wind') {
+                        var targets_2 = [];
+                        o.targets.forEach(function (t) {
+                            targets_2.push({
+                                entity: self.game.orderManager.getPawn(t.entity),
+                                moved: t.moved
+                            });
+                        });
+                        p = _this.handleBackwardPromise(e.castTornado(targets_2, o.direction), e, o, position, animate);
+                    }
+                    else if (o.action == 'stand') {
+                        p = _this.handleBackwardPromise(_this.createPromiseStand(e, o.direction), e, o, position, animate);
+                    }
+                    promisesOrders.push(p);
+                };
+                var o, e, s, p;
                 for (var i = 0; i < step.length; i++) {
-                    var entityA = step[i].entity;
-                    var order = step[i].order;
-                    var position = entityA.getProjectionOrReal().getPosition();
-                    if (entityA.projection) {
-                        var condition = false;
-                        if (compareActualEntity) {
-                            condition = (JSON.stringify(entityA.getPosition()) == JSON.stringify(entityA.getProjectionOrReal().getPosition()));
-                        }
-                        else {
-                            condition = (order.x == position.x && order.y == position.y);
-                        }
-                        if (condition) {
-                            entityA.projection.hide();
-                            entityA.show();
-                        }
-                        else {
-                            entityA.projection.show(0.7);
-                            //entityA.hide();
-                        }
+                    _loop_1();
+                }
+                _this.manageProjectionDislay(step);
+                Promise.all(promisesOrders).then(function (res) {
+                    if (!backward) {
+                        _this.manageProjectionDislay(step);
+                    }
+                    step.forEach(function (s) {
+                        var forceAnimation = typeof s.entityState.dies !== 'undefined' && s.entityState.dies;
+                        s.entity.setHp(s.entityState.hp, forceAnimation);
+                    });
+                    _this.game.signalManager.stepResolutionFinished.dispatch(index);
+                    if (_this.steps.length > (index + 1) && !_this.game.isPaused) {
+                        _this.processStep(index + 1).then(function (res) {
+                            resolve(res);
+                        }, function (res) {
+                        }); // recursive
+                    }
+                    else {
+                        _this.processing = false;
+                        reject(false);
+                    }
+                });
+            });
+        };
+        ResolveManager.prototype.manageProjectionDislay = function (step, compareActualEntity) {
+            if (compareActualEntity === void 0) { compareActualEntity = false; }
+            for (var i = 0; i < step.length; i++) {
+                var entityA = step[i].entity;
+                var order = step[i].order;
+                var position = entityA.getProjectionOrReal().getPosition();
+                if (entityA.projection) {
+                    var condition = false;
+                    if (compareActualEntity) {
+                        condition = (JSON.stringify(entityA.getPosition()) == JSON.stringify(entityA.getProjectionOrReal().getPosition()));
+                    }
+                    else {
+                        condition = (order.x == position.x && order.y == position.y);
+                    }
+                    if (condition) {
+                        entityA.projection.hide();
+                        entityA.show();
+                    }
+                    else {
+                        entityA.projection.show(0.7);
+                        //entityA.hide();
                     }
                 }
-            };
-            return ResolveManager;
-        }());
-        Controller.ResolveManager = ResolveManager;
-    })(Controller = TacticArena.Controller || (TacticArena.Controller = {}));
+            }
+        };
+        return ResolveManager;
+    }());
+    TacticArena.ResolveManager = ResolveManager;
 })(TacticArena || (TacticArena = {}));
 var TacticArena;
 (function (TacticArena) {
-    var Controller;
-    (function (Controller) {
-        var ServerManager = (function () {
-            function ServerManager(game, login, onChatMessageReceptionCallback, onPlayersListUpdateCallback, onDuelAskReceptionCallback, onDuelAcceptedCallback, onDuelStartCallback) {
-                this.game = game;
-                this.url = 'wss://polar-fortress-51758.herokuapp.com';
-                //this.url = 'ws://localhost:3000';
-                this.login = login;
-                this.token = '';
-                this.socketId = null;
-                this.playersList = [];
-                this.onChatMessageReceptionCallback = onChatMessageReceptionCallback;
-                this.onPlayersListUpdateCallback = onPlayersListUpdateCallback;
-                this.onDuelAskReceptionCallback = onDuelAskReceptionCallback;
-                this.onDuelAcceptedCallback = onDuelAcceptedCallback;
-                this.onDuelStartCallback = onDuelStartCallback;
-                this.intervalCount = 0;
-                this.connect();
-                this.request('NEW_CONNECTION', ' ', this.login);
-            }
-            ServerManager.prototype.connect = function () {
-                var self = this;
-                this.socket = new WebSocket(this.url);
-                this.socket.onmessage = function (message) {
-                    var data = JSON.parse(message.data).data;
-                    console.log(data);
-                    var server_msg = data.type == 'SERVER_NOTIFICATION';
-                    if (data.type == 'SERVER_PLAYERS_LIST') {
-                        self.onPlayersListUpdateCallback(data);
-                    }
-                    else if (data.type == 'SERVER_TOKEN') {
-                        self.token = data.content;
-                    }
-                    else if (data.type == 'ASK_DUEL') {
-                        self.onDuelAskReceptionCallback(data.content, data.name);
-                    }
-                    else if (data.type == 'DECLINE_DUEL') {
-                        self.onChatMessageReceptionCallback(data, true);
-                    }
-                    else if (data.type == 'ACCEPT_DUEL') {
-                        self.onChatMessageReceptionCallback(data, true);
-                        self.onDuelAcceptedCallback(data);
-                    }
-                    else if (data.type == 'START_DUEL') {
-                        self.onChatMessageReceptionCallback({ content: 'Début du duel' }, true);
-                        self.onDuelStartCallback(data);
-                    }
-                    else if (data.type == 'PROCESS_ORDERS') {
-                        var orders = [];
-                        for (var i = 0; i < data.content.length; i++) {
-                            if (data.content[i].orders) {
-                                for (var j = 0; j < data.content[i].orders.length; j++) {
-                                    if (data.content[i].orders[j].entityId) {
-                                        data.content[i].orders[j].entity = self.game.orderManager.getPawn(data.content[i].orders[j].entityId);
-                                    }
-                                    orders = orders.concat(data.content[i].orders[j]);
+    var ServerManager = (function () {
+        function ServerManager(game, login, onChatMessageReceptionCallback, onPlayersListUpdateCallback, onDuelAskReceptionCallback, onDuelAcceptedCallback, onDuelStartCallback) {
+            this.game = game;
+            this.url = 'wss://polar-fortress-51758.herokuapp.com';
+            //this.url = 'ws://localhost:3000';
+            this.login = login;
+            this.token = '';
+            this.socketId = null;
+            this.playersList = [];
+            this.onChatMessageReceptionCallback = onChatMessageReceptionCallback;
+            this.onPlayersListUpdateCallback = onPlayersListUpdateCallback;
+            this.onDuelAskReceptionCallback = onDuelAskReceptionCallback;
+            this.onDuelAcceptedCallback = onDuelAcceptedCallback;
+            this.onDuelStartCallback = onDuelStartCallback;
+            this.intervalCount = 0;
+            this.connect();
+            this.request('NEW_CONNECTION', ' ', this.login);
+        }
+        ServerManager.prototype.connect = function () {
+            var self = this;
+            this.socket = new WebSocket(this.url);
+            this.socket.onmessage = function (message) {
+                var data = JSON.parse(message.data).data;
+                console.log(data);
+                var server_msg = data.type == 'SERVER_NOTIFICATION';
+                if (data.type == 'SERVER_PLAYERS_LIST') {
+                    self.onPlayersListUpdateCallback(data);
+                }
+                else if (data.type == 'SERVER_TOKEN') {
+                    self.token = data.content;
+                }
+                else if (data.type == 'ASK_DUEL') {
+                    self.onDuelAskReceptionCallback(data.content, data.name);
+                }
+                else if (data.type == 'DECLINE_DUEL') {
+                    self.onChatMessageReceptionCallback(data, true);
+                }
+                else if (data.type == 'ACCEPT_DUEL') {
+                    self.onChatMessageReceptionCallback(data, true);
+                    self.onDuelAcceptedCallback(data);
+                }
+                else if (data.type == 'START_DUEL') {
+                    self.onChatMessageReceptionCallback({ content: 'Début du duel' }, true);
+                    self.onDuelStartCallback(data);
+                }
+                else if (data.type == 'PROCESS_ORDERS') {
+                    var orders = [];
+                    for (var i = 0; i < data.content.length; i++) {
+                        if (data.content[i].orders) {
+                            for (var j = 0; j < data.content[i].orders.length; j++) {
+                                if (data.content[i].orders[j].entityId) {
+                                    data.content[i].orders[j].entity = self.game.orderManager.getPawn(data.content[i].orders[j].entityId);
                                 }
+                                orders = orders.concat(data.content[i].orders[j]);
                             }
                         }
-                        self.game.orderManager.orders = orders;
-                        var steps = self.game.orderManager.getSteps();
-                        var serializedSteps = [];
-                        for (var i = 0; i < steps.length; i++) {
-                            serializedSteps.push([]);
-                            for (var j = 0; j < steps[i].length; j++) {
-                                var s = {
-                                    entityId: steps[i][j].entity._id,
-                                    entityState: steps[i][j].entityState,
-                                    order: steps[i][j].order,
-                                };
-                                serializedSteps[i].push(s);
-                            }
-                        }
-                        self.request('PROCESSED_ORDERS', serializedSteps);
                     }
-                    else if (data.type == 'PROCESSED_ORDERS') {
-                        var serializedSteps_1 = data.content;
-                        var steps = [];
-                        for (var i = 0; i < serializedSteps_1.length; i++) {
-                            steps.push([]);
-                            for (var j = 0; j < serializedSteps_1[i].length; j++) {
-                                var s = {
-                                    entity: self.game.pawns.find(function (o) { return o._id == serializedSteps_1[i][j].entityId; }),
-                                    entityState: serializedSteps_1[i][j].entityState,
-                                    order: serializedSteps_1[i][j].order,
-                                };
-                                steps[i].push(s);
-                            }
+                    self.game.orderManager.orders = orders;
+                    var steps = self.game.orderManager.getSteps();
+                    var serializedSteps = [];
+                    for (var i = 0; i < steps.length; i++) {
+                        serializedSteps.push([]);
+                        for (var j = 0; j < steps[i].length; j++) {
+                            var s = {
+                                entityId: steps[i][j].entity._id,
+                                entityState: steps[i][j].entityState,
+                                order: steps[i][j].order,
+                            };
+                            serializedSteps[i].push(s);
                         }
-                        self.game.signalManager.onProcessedOrders.dispatch(steps);
                     }
-                    else {
-                        self.onChatMessageReceptionCallback(data, server_msg);
-                    }
-                };
-                this.socket.onclose = function (e) {
-                    console.log('close', e);
-                };
-                this.socket.onerror = function (e) {
-                    console.log('error', e);
-                };
-                this.socket.onopen = function (e) {
-                    console.log('open', e);
-                    setInterval(function () {
-                        self.request('KEEP_ALIVE', 'keep me alive');
-                    }, 30000);
-                };
-                $(window).on('beforeunload', function () {
-                    console.log('disconnect');
-                    self.socket.close();
-                });
-            };
-            ServerManager.prototype.send = function (message, callback) {
-                if (callback === void 0) { callback = null; }
-                var self = this;
-                return new Promise(function (resolve, reject) {
-                    self.waitForConnection(function () {
-                        self.socket.send(JSON.stringify(message));
-                        if (typeof callback === "function") {
-                            callback();
+                    self.request('PROCESSED_ORDERS', serializedSteps);
+                }
+                else if (data.type == 'PROCESSED_ORDERS') {
+                    var serializedSteps_1 = data.content;
+                    var steps = [];
+                    for (var i = 0; i < serializedSteps_1.length; i++) {
+                        steps.push([]);
+                        for (var j = 0; j < serializedSteps_1[i].length; j++) {
+                            var s = {
+                                entity: self.game.pawns.find(function (o) { return o._id == serializedSteps_1[i][j].entityId; }),
+                                entityState: serializedSteps_1[i][j].entityState,
+                                order: serializedSteps_1[i][j].order,
+                            };
+                            steps[i].push(s);
                         }
-                        resolve(true);
-                    }, 1000);
-                });
-            };
-            ServerManager.prototype.waitForConnection = function (callback, interval) {
-                if (this.socket.readyState === 1) {
-                    this.intervalCount = 0;
-                    callback();
+                    }
+                    self.game.signalManager.onProcessedOrders.dispatch(steps);
                 }
                 else {
-                    this.intervalCount++;
-                    var that = this;
-                    // optional: implement backoff for interval here
-                    if (this.intervalCount > 2) {
-                        this.intervalCount = 0;
-                        this.connect();
-                    }
-                    else {
-                        setTimeout(function () {
-                            that.waitForConnection(callback, interval);
-                        }, interval);
-                    }
+                    self.onChatMessageReceptionCallback(data, server_msg);
                 }
             };
-            ;
-            ServerManager.prototype.request = function (type, content, name) {
-                if (name === void 0) { name = null; }
-                var self = this;
-                this.send({ type: type, name: (name ? name : self.token), content: content }).then(function (res) {
-                });
+            this.socket.onclose = function (e) {
+                console.log('close', e);
             };
-            return ServerManager;
-        }());
-        Controller.ServerManager = ServerManager;
-    })(Controller = TacticArena.Controller || (TacticArena.Controller = {}));
+            this.socket.onerror = function (e) {
+                console.log('error', e);
+            };
+            this.socket.onopen = function (e) {
+                console.log('open', e);
+                setInterval(function () {
+                    self.request('KEEP_ALIVE', 'keep me alive');
+                }, 30000);
+            };
+            $(window).on('beforeunload', function () {
+                console.log('disconnect');
+                self.socket.close();
+            });
+        };
+        ServerManager.prototype.send = function (message, callback) {
+            if (callback === void 0) { callback = null; }
+            var self = this;
+            return new Promise(function (resolve, reject) {
+                self.waitForConnection(function () {
+                    self.socket.send(JSON.stringify(message));
+                    if (typeof callback === "function") {
+                        callback();
+                    }
+                    resolve(true);
+                }, 1000);
+            });
+        };
+        ServerManager.prototype.waitForConnection = function (callback, interval) {
+            if (this.socket.readyState === 1) {
+                this.intervalCount = 0;
+                callback();
+            }
+            else {
+                this.intervalCount++;
+                var that = this;
+                // optional: implement backoff for interval here
+                if (this.intervalCount > 2) {
+                    this.intervalCount = 0;
+                    this.connect();
+                }
+                else {
+                    setTimeout(function () {
+                        that.waitForConnection(callback, interval);
+                    }, interval);
+                }
+            }
+        };
+        ;
+        ServerManager.prototype.request = function (type, content, name) {
+            if (name === void 0) { name = null; }
+            var self = this;
+            this.send({ type: type, name: (name ? name : self.token), content: content }).then(function (res) {
+            });
+        };
+        return ServerManager;
+    }());
+    TacticArena.ServerManager = ServerManager;
 })(TacticArena || (TacticArena = {}));
 var TacticArena;
 (function (TacticArena) {
-    var Controller;
-    (function (Controller) {
-        var SignalManager = (function () {
-            function SignalManager(game) {
-                this.game = game;
-                this.onApChange = new Phaser.Signal();
-                this.onHpChange = new Phaser.Signal();
-                this.onOrderChange = new Phaser.Signal();
-                this.onActionPlayed = new Phaser.Signal();
-                this.turnInitialized = new Phaser.Signal();
-                this.stepResolutionFinished = new Phaser.Signal();
-                this.resolvePhaseFinished = new Phaser.Signal();
-                this.stepResolutionIndexChange = new Phaser.Signal();
-                this.onTurnEnded = new Phaser.Signal();
-                this.onActivePawnChange = new Phaser.Signal();
-                this.onTeamChange = new Phaser.Signal();
-                this.onChatMessageReception = new Phaser.Signal();
-                this.onProcessedOrders = new Phaser.Signal();
-            }
-            SignalManager.prototype.init = function () {
-                var self = this;
-                this.onApChange.add(function () {
-                    self.game.uiManager.pawnsinfosUI.updateInfos();
+    var SignalManager = (function () {
+        function SignalManager(game) {
+            this.game = game;
+            this.onApChange = new Phaser.Signal();
+            this.onHpChange = new Phaser.Signal();
+            this.onOrderChange = new Phaser.Signal();
+            this.onActionPlayed = new Phaser.Signal();
+            this.turnInitialized = new Phaser.Signal();
+            this.stepResolutionFinished = new Phaser.Signal();
+            this.resolvePhaseFinished = new Phaser.Signal();
+            this.stepResolutionIndexChange = new Phaser.Signal();
+            this.onTurnEnded = new Phaser.Signal();
+            this.onActivePawnChange = new Phaser.Signal();
+            this.onTeamChange = new Phaser.Signal();
+            this.onChatMessageReception = new Phaser.Signal();
+            this.onProcessedOrders = new Phaser.Signal();
+        }
+        SignalManager.prototype.init = function () {
+            var self = this;
+            this.onApChange.add(function () {
+                self.game.uiManager.pawnsinfosUI.updateInfos();
+            });
+            this.onHpChange.add(function (pawn) {
+                self.game.uiManager.pawnsinfosUI.updateInfos();
+                self.game.stageManager.handleTile(pawn);
+            });
+            this.onOrderChange.add(function (pawn) {
+                self.game.uiManager.ordersnotificationsUI.update(self.game.orderManager.getOrders(pawn._id));
+            });
+            this.onActionPlayed.add(function (pawn) {
+                self.game.pointer.update();
+                //self.game.uiManager.actionUI.update(pawn.getAp());
+            });
+            this.turnInitialized.add(function (pawn) {
+                self.game.process = false;
+                self.game.selecting = true;
+                if (pawn.isBot) {
+                    self.game.aiManager.play(pawn);
+                }
+                else {
+                    //self.game.selecting = true;
+                }
+            });
+            this.stepResolutionFinished.add(function (stepIndex) {
+                self.game.uiManager.process = false;
+            });
+            this.resolvePhaseFinished.add(function () {
+                self.game.isGameReadyPromise().then(function (res) {
+                    self.game.uiManager.endResolvePhase();
                 });
-                this.onHpChange.add(function (pawn) {
-                    self.game.uiManager.pawnsinfosUI.updateInfos();
-                    self.game.stageManager.handleTile(pawn);
-                });
-                this.onOrderChange.add(function (pawn) {
-                    self.game.uiManager.ordersnotificationsUI.update(self.game.orderManager.getOrders(pawn._id));
-                });
-                this.onActionPlayed.add(function (pawn) {
-                    self.game.pointer.update();
-                    //self.game.uiManager.actionUI.update(pawn.getAp());
-                });
-                this.turnInitialized.add(function (pawn) {
-                    self.game.process = false;
-                    self.game.selecting = true;
-                    if (pawn.isBot) {
-                        self.game.aiManager.play(pawn);
-                    }
-                    else {
-                        //self.game.selecting = true;
-                    }
-                });
-                this.stepResolutionFinished.add(function (stepIndex) {
-                    self.game.uiManager.process = false;
-                });
-                this.resolvePhaseFinished.add(function () {
-                    self.game.isGameReadyPromise().then(function (res) {
-                        self.game.uiManager.endResolvePhase();
+            });
+            this.stepResolutionIndexChange.add(function (stepIndex) {
+                self.game.uiManager.notificationsUI.update(stepIndex);
+                self.game.uiManager.timelineUI.update(stepIndex);
+            });
+            this.onTurnEnded.add(function (activePawn) {
+                self.game.uiManager.ordersnotificationsUI.clean();
+                self.game.uiSpritesGroup.removeAll();
+            });
+            this.onActivePawnChange.add(function (activePawn) {
+                //self.game.uiManager.ordersnotificationsUI.clean();
+                //self.game.uiManager.ordersnotificationsUI.update(self.game.orderManager.getOrders(activePawn._id));
+                //self.game.uiManager.pawnsinfosUI.select(activePawn._id);
+                //self.game.uiManager.directionUI.init(activePawn.getDirection());
+                //self.game.uiManager.actionUI.update(activePawn.getAp());
+                //self.game.uiManager.actionUI.select('walk');
+                var position = activePawn.getPosition();
+                self.game.uiSpritesGroup.removeAll();
+                var s = self.game.uiSpritesGroup.create(position.x * self.game.tileSize - 1, position.y * self.game.tileSize + 15, 'circle');
+                s.animations.add('turn', ["selected_circle_01", "selected_circle_02"], 4, true);
+                s.play('turn');
+                //this.consolelogsUI.write('au tour du joueur ' + activePawn._id);
+                var actionMenu = new TacticArena.UI.ActionMenu(self.game, activePawn);
+            });
+            this.onTeamChange.add(function () {
+                if (self.game.hideProjections) {
+                    self.game.pawns.forEach(function (pawn) {
+                        pawn.destroyProjection();
                     });
-                });
-                this.stepResolutionIndexChange.add(function (stepIndex) {
-                    self.game.uiManager.notificationsUI.update(stepIndex);
-                    self.game.uiManager.timelineUI.update(stepIndex);
-                });
-                this.onTurnEnded.add(function (activePawn) {
-                    self.game.uiManager.ordersnotificationsUI.clean();
-                    self.game.uiSpritesGroup.removeAll();
-                });
-                this.onActivePawnChange.add(function (activePawn) {
-                    //self.game.uiManager.ordersnotificationsUI.clean();
-                    //self.game.uiManager.ordersnotificationsUI.update(self.game.orderManager.getOrders(activePawn._id));
-                    //self.game.uiManager.pawnsinfosUI.select(activePawn._id);
-                    //self.game.uiManager.directionUI.init(activePawn.getDirection());
-                    //self.game.uiManager.actionUI.update(activePawn.getAp());
-                    //self.game.uiManager.actionUI.select('walk');
-                    var position = activePawn.getPosition();
-                    self.game.uiSpritesGroup.removeAll();
-                    var s = self.game.uiSpritesGroup.create(position.x * self.game.tileSize - 1, position.y * self.game.tileSize + 15, 'circle');
-                    s.animations.add('turn', ["selected_circle_01", "selected_circle_02"], 4, true);
-                    s.play('turn');
-                    //this.consolelogsUI.write('au tour du joueur ' + activePawn._id);
-                    var actionMenu = new TacticArena.UI.ActionMenu(self.game, activePawn);
-                });
-                this.onTeamChange.add(function () {
-                    if (self.game.hideProjections) {
-                        self.game.pawns.forEach(function (pawn) {
-                            pawn.destroyProjection();
-                        });
-                    }
-                });
-                this.onChatMessageReception.add(function (data) {
-                    self.game.uiManager.chatUI.write(data.name + ': ' + data.message);
-                });
-                this.onProcessedOrders.add(function (steps) {
-                    self.game.uiManager.initResolvePhase(steps);
-                });
-            };
-            return SignalManager;
-        }());
-        Controller.SignalManager = SignalManager;
-    })(Controller = TacticArena.Controller || (TacticArena.Controller = {}));
+                }
+            });
+            this.onChatMessageReception.add(function (data) {
+                self.game.uiManager.chatUI.write(data.name + ': ' + data.message);
+            });
+            this.onProcessedOrders.add(function (steps) {
+                self.game.uiManager.initResolvePhase(steps);
+            });
+        };
+        return SignalManager;
+    }());
+    TacticArena.SignalManager = SignalManager;
 })(TacticArena || (TacticArena = {}));
 var TacticArena;
 (function (TacticArena) {
-    var Controller;
-    (function (Controller) {
-        var StageManager = (function () {
-            function StageManager(game) {
-                this.game = game;
-                this.map = null;
-                this.backgroundLayer = null;
-                this.uiLayer = null;
-                this.foregroundLayer = null;
-                this.decorationLayer1 = null;
-                this.decorationLayer2 = null;
-                this.decorationLayer3 = null;
-                this.collisionLayer = null;
-                this.blackLayer = null;
-                this.grid = [];
-                this.initialGrid = [];
-                console.log('stagemanager init', this.grid);
-            }
-            StageManager.prototype.init = function (name) {
-                if (name === void 0) { name = 'mapmobile'; }
-                this.map = this.game.make.tilemap(name);
-                this.map.addTilesetImage('tiles-collection', 'tiles-collection', this.game.tileSize, this.game.tileSize, 0, 0);
-                //this.parallaxLayer = this.game.mapGroup.add(this.map.createLayer('Parallax'));
-                if (this.parallaxLayer) {
-                    this.parallaxLayer.scrollFactorX = 0.5;
-                    this.parallaxLayer.scrollFactorY = 0.5;
-                }
-                this.backgroundLayer = this.game.mapGroup.add(this.map.createLayer('Background'));
-                this.uiLayer = this.game.mapGroup.add(this.map.createBlankLayer('UI', this.backgroundLayer.layer.data[0].length, this.backgroundLayer.layer.data.length, this.game.tileSize, this.game.tileSize));
-                this.foregroundLayer = this.game.mapGroup.add(this.map.createLayer('Foreground'));
-                this.collisionLayer = this.game.mapGroup.add(this.map.createLayer('Collision'));
-                //this.collisionLayer.debug = true;
-                this.decorationLayer1 = this.game.mapGroup.add(this.map.createLayer('Decorations'));
-                this.decorationLayer2 = this.game.mapGroup.add(this.map.createLayer('Decorations2'));
-                this.initGrid();
-                this.backgroundLayer.resizeWorld();
-                console.log('jajoute mes tiles', this.grid.length, this.backgroundLayer.layer.data.length);
-            };
-            StageManager.prototype.initFromArray = function (data, width, height, start) {
-                if (width === void 0) { width = 160; }
-                if (height === void 0) { height = 160; }
-                if (start === void 0) { start = { x: 0, y: 0 }; }
-                this.map = this.game.add.tilemap();
-                width = data.background.layer.width;
-                height = data.background.layer.height;
-                this.map.addTilesetImage('tiles-collection', 'tiles-collection', this.game.tileSize, this.game.tileSize, 0, 0, 1);
-                this.parallaxLayer = this.map.create('Parallax', width, height, this.game.tileSize, this.game.tileSize);
+    var StageManager = (function () {
+        function StageManager(game) {
+            this.game = game;
+            this.map = null;
+            this.backgroundLayer = null;
+            this.uiLayer = null;
+            this.foregroundLayer = null;
+            this.decorationLayer1 = null;
+            this.decorationLayer2 = null;
+            this.decorationLayer3 = null;
+            this.collisionLayer = null;
+            this.blackLayer = null;
+            this.grid = [];
+            this.initialGrid = [];
+        }
+        StageManager.prototype.init = function (name) {
+            if (name === void 0) { name = 'mapmobile'; }
+            this.map = this.game.make.tilemap(name);
+            this.map.addTilesetImage('tiles-collection', 'tiles-collection', this.game.tileSize, this.game.tileSize, 0, 0);
+            //this.parallaxLayer = this.game.mapGroup.add(this.map.createLayer('Parallax'));
+            if (this.parallaxLayer) {
                 this.parallaxLayer.scrollFactorX = 0.5;
                 this.parallaxLayer.scrollFactorY = 0.5;
-                this.backgroundLayer = this.map.createBlankLayer('Background', width, height, this.game.tileSize, this.game.tileSize);
-                this.uiLayer = this.map.createBlankLayer('UI', width, height, this.game.tileSize, this.game.tileSize);
-                this.foregroundLayer = this.map.createBlankLayer('Foreground', width, height, this.game.tileSize, this.game.tileSize);
-                this.collisionLayer = this.map.createBlankLayer('Collision', width, height, this.game.tileSize, this.game.tileSize);
-                //this.collisionLayer.debug = true;
-                this.decorationLayer1 = this.map.createBlankLayer('Decorations', width, height, this.game.tileSize, this.game.tileSize);
-                this.decorationLayer2 = this.map.createBlankLayer('Decorations2', width, height, this.game.tileSize, this.game.tileSize);
-                this.map.paste(0, 0, data.background.map.copy(start.x, start.y, width, height, data.parallax), this.parallaxLayer);
-                this.map.paste(0, 0, data.background.map.copy(start.x, start.y, width, height, data.background), this.backgroundLayer);
-                this.map.paste(0, 0, data.background.map.copy(start.x, start.y, width, height, data.foreground), this.foregroundLayer);
-                this.map.paste(0, 0, data.background.map.copy(start.x, start.y, width, height, data.collision), this.collisionLayer);
-                this.map.paste(0, 0, data.background.map.copy(start.x, start.y, width, height, data.decoration1), this.decorationLayer1);
-                this.map.paste(0, 0, data.background.map.copy(start.x, start.y, width, height, data.decoration2), this.decorationLayer2);
-                //for (var i = 0; i < data.background.layer.data.length; i++) {
-                //    for (var j = 0; j < data.background.layer.data[i].length; j++) {
-                //        console.log(data.background.layer.data[i][j]);
-                //        this.map.putTile(data.background.layer.data[i][j].index, j, i, this.backgroundLayer);
-                //    }
-                //}
-                this.initGrid();
-                this.backgroundLayer.resizeWorld();
-            };
-            StageManager.prototype.initGrid = function () {
-                for (var i = 0; i < this.collisionLayer.layer.data.length; i++) {
-                    this.grid[i] = [];
-                    for (var j = 0; j < this.collisionLayer.layer.data[i].length; j++) {
-                        this.grid[i][j] = this.collisionLayer.layer.data[i][j].index;
-                    }
+            }
+            this.backgroundLayer = this.game.mapGroup.add(this.map.createLayer('Background'));
+            this.uiLayer = this.game.mapGroup.add(this.map.createBlankLayer('UI', this.backgroundLayer.layer.data[0].length, this.backgroundLayer.layer.data.length, this.game.tileSize, this.game.tileSize));
+            this.foregroundLayer = this.game.mapGroup.add(this.map.createLayer('Foreground'));
+            this.collisionLayer = this.game.mapGroup.add(this.map.createLayer('Collision'));
+            //this.collisionLayer.debug = true;
+            this.decorationLayer1 = this.game.mapGroup.add(this.map.createLayer('Decorations'));
+            this.decorationLayer2 = this.game.mapGroup.add(this.map.createLayer('Decorations2'));
+            this.initGrid();
+            this.backgroundLayer.resizeWorld();
+        };
+        StageManager.prototype.initFromArray = function (data, width, height, start) {
+            if (width === void 0) { width = 160; }
+            if (height === void 0) { height = 160; }
+            if (start === void 0) { start = { x: 0, y: 0 }; }
+            this.map = this.game.add.tilemap();
+            width = data.background.layer.width;
+            height = data.background.layer.height;
+            this.map.addTilesetImage('tiles-collection', 'tiles-collection', this.game.tileSize, this.game.tileSize, 0, 0, 1);
+            this.parallaxLayer = this.map.create('Parallax', width, height, this.game.tileSize, this.game.tileSize);
+            this.parallaxLayer.scrollFactorX = 0.5;
+            this.parallaxLayer.scrollFactorY = 0.5;
+            this.backgroundLayer = this.map.createBlankLayer('Background', width, height, this.game.tileSize, this.game.tileSize);
+            this.uiLayer = this.map.createBlankLayer('UI', width, height, this.game.tileSize, this.game.tileSize);
+            this.foregroundLayer = this.map.createBlankLayer('Foreground', width, height, this.game.tileSize, this.game.tileSize);
+            this.collisionLayer = this.map.createBlankLayer('Collision', width, height, this.game.tileSize, this.game.tileSize);
+            //this.collisionLayer.debug = true;
+            this.decorationLayer1 = this.map.createBlankLayer('Decorations', width, height, this.game.tileSize, this.game.tileSize);
+            this.decorationLayer2 = this.map.createBlankLayer('Decorations2', width, height, this.game.tileSize, this.game.tileSize);
+            this.map.paste(0, 0, data.background.map.copy(start.x, start.y, width, height, data.parallax), this.parallaxLayer);
+            this.map.paste(0, 0, data.background.map.copy(start.x, start.y, width, height, data.background), this.backgroundLayer);
+            this.map.paste(0, 0, data.background.map.copy(start.x, start.y, width, height, data.foreground), this.foregroundLayer);
+            this.map.paste(0, 0, data.background.map.copy(start.x, start.y, width, height, data.collision), this.collisionLayer);
+            this.map.paste(0, 0, data.background.map.copy(start.x, start.y, width, height, data.decoration1), this.decorationLayer1);
+            this.map.paste(0, 0, data.background.map.copy(start.x, start.y, width, height, data.decoration2), this.decorationLayer2);
+            //for (var i = 0; i < data.background.layer.data.length; i++) {
+            //    for (var j = 0; j < data.background.layer.data[i].length; j++) {
+            //        console.log(data.background.layer.data[i][j]);
+            //        this.map.putTile(data.background.layer.data[i][j].index, j, i, this.backgroundLayer);
+            //    }
+            //}
+            this.initGrid();
+            this.backgroundLayer.resizeWorld();
+        };
+        StageManager.prototype.initGrid = function () {
+            for (var i = 0; i < this.collisionLayer.layer.data.length; i++) {
+                this.grid[i] = [];
+                for (var j = 0; j < this.collisionLayer.layer.data[i].length; j++) {
+                    this.grid[i][j] = this.collisionLayer.layer.data[i][j].index;
                 }
-                for (var i = 0; i < this.grid.length; i++) {
-                    this.initialGrid[i] = this.grid[i].slice();
+            }
+            for (var i = 0; i < this.grid.length; i++) {
+                this.initialGrid[i] = this.grid[i].slice();
+            }
+            for (var x = 0; x < this.map.width; x++) {
+                for (var y = 0; y < this.map.height; y++) {
+                    //this.map.removeTile(x, y, 'Collision');
+                    var tile = this.map.getTile(x, y, this.collisionLayer, true);
+                    tile.alpha = 0;
                 }
-                for (var x = 0; x < this.map.width; x++) {
-                    for (var y = 0; y < this.map.height; y++) {
-                        //this.map.removeTile(x, y, 'Collision');
-                        var tile = this.map.getTile(x, y, this.collisionLayer, true);
-                        tile.alpha = 0;
-                    }
-                }
-                this.collisionLayer.layer.dirty = true;
-            };
-            StageManager.prototype.addDecorations = function () {
-                this.decorationLayer3 = this.game.mapGroup.add(this.map.createLayer('Decorations3'));
-            };
-            StageManager.prototype.addDecorationsFromData = function (data) {
-                var width = data.stage.background.layer.width;
-                var height = data.stage.background.layer.height;
-                this.decorationLayer3 = this.map.createBlankLayer('Decorations3', width, height, this.game.tileSize, this.game.tileSize);
-                this.map.paste(0, 0, data.stage.background.map.copy(0, 0, width, height, data.stage.decoration3), this.decorationLayer3);
-            };
-            StageManager.prototype.addBlackLayer = function (data) {
-                var width = data.stage.background.layer.width;
-                var height = data.stage.background.layer.height;
-                this.blackLayer = this.map.createBlankLayer('Black', width, height, this.game.tileSize, this.game.tileSize);
-                var endX = data.startPosition.x + data.gridWidth;
-                var endY = data.startPosition.y + data.gridHeight;
-                for (var x = 0; x < width; x++) {
-                    for (var y = 0; y < height; y++) {
-                        if (x < data.startPosition.x || x > endX || y < data.startPosition.y || y > endY) {
-                            var tile = this.map.putTile(9, x, y, this.blackLayer);
-                            if (tile) {
-                                tile.alpha = 0.8;
-                                this.grid[y][x] = 1;
-                            }
+            }
+            this.collisionLayer.layer.dirty = true;
+        };
+        StageManager.prototype.addDecorations = function () {
+            this.decorationLayer3 = this.game.mapGroup.add(this.map.createLayer('Decorations3'));
+        };
+        StageManager.prototype.addDecorationsFromData = function (data) {
+            var width = data.stage.background.layer.width;
+            var height = data.stage.background.layer.height;
+            this.decorationLayer3 = this.map.createBlankLayer('Decorations3', width, height, this.game.tileSize, this.game.tileSize);
+            this.map.paste(0, 0, data.stage.background.map.copy(0, 0, width, height, data.stage.decoration3), this.decorationLayer3);
+        };
+        StageManager.prototype.addBlackLayer = function (data) {
+            var width = data.stage.background.layer.width;
+            var height = data.stage.background.layer.height;
+            this.blackLayer = this.map.createBlankLayer('Black', width, height, this.game.tileSize, this.game.tileSize);
+            var endX = data.startPosition.x + data.gridWidth;
+            var endY = data.startPosition.y + data.gridHeight;
+            for (var x = 0; x < width; x++) {
+                for (var y = 0; y < height; y++) {
+                    if (x < data.startPosition.x || x > endX || y < data.startPosition.y || y > endY) {
+                        var tile = this.map.putTile(9, x, y, this.blackLayer);
+                        if (tile) {
+                            tile.alpha = 0.8;
+                            this.grid[y][x] = 1;
                         }
                     }
                 }
+            }
+        };
+        StageManager.prototype.fillBlack = function () {
+            var _this = this;
+            return new Promise(function (resolve, reject) {
+                var width = _this.backgroundLayer.layer.width;
+                var height = _this.backgroundLayer.layer.height;
+                _this.blackLayer = _this.map.createBlankLayer('Black', width, height, _this.game.tileSize, _this.game.tileSize);
+                var startX = Math.floor(Math.abs(_this.game.world.position.x) / _this.game.tileSize);
+                var startY = Math.floor(Math.abs(_this.game.world.position.y) / _this.game.tileSize);
+                var endX = startX + 20;
+                var endY = startY + 19;
+                var self = _this;
+                var x = startX;
+                var y = startY;
+                var interval = setInterval(function () {
+                    if (y >= endY) {
+                        clearInterval(interval);
+                        resolve(true);
+                    }
+                    if (x >= endX) {
+                        x = startX;
+                        y++;
+                    }
+                    self.map.putTile(9, x, y, self.blackLayer);
+                    self.blackLayer.layer.dirty = true;
+                    x++;
+                }, 5);
+            });
+        };
+        StageManager.prototype.getLayers = function () {
+            return {
+                parallax: this.parallaxLayer,
+                background: this.backgroundLayer,
+                foreground: this.foregroundLayer,
+                collision: this.collisionLayer,
+                decoration1: this.decorationLayer1,
+                decoration2: this.decorationLayer2,
+                decoration3: this.decorationLayer3
             };
-            StageManager.prototype.fillBlack = function () {
-                var _this = this;
-                return new Promise(function (resolve, reject) {
-                    var width = _this.backgroundLayer.layer.width;
-                    var height = _this.backgroundLayer.layer.height;
-                    _this.blackLayer = _this.map.createBlankLayer('Black', width, height, _this.game.tileSize, _this.game.tileSize);
-                    var startX = Math.floor(Math.abs(_this.game.world.position.x) / _this.game.tileSize);
-                    var startY = Math.floor(Math.abs(_this.game.world.position.y) / _this.game.tileSize);
-                    var endX = startX + 20;
-                    var endY = startY + 19;
-                    var self = _this;
-                    var x = startX;
-                    var y = startY;
-                    var interval = setInterval(function () {
-                        if (y >= endY) {
-                            clearInterval(interval);
-                            resolve(true);
-                        }
-                        if (x >= endX) {
-                            x = startX;
-                            y++;
-                        }
-                        self.map.putTile(9, x, y, self.blackLayer);
-                        self.blackLayer.layer.dirty = true;
-                        x++;
-                    }, 5);
-                });
-            };
-            StageManager.prototype.getLayers = function () {
-                return {
-                    parallax: this.parallaxLayer,
-                    background: this.backgroundLayer,
-                    foreground: this.foregroundLayer,
-                    collision: this.collisionLayer,
-                    decoration1: this.decorationLayer1,
-                    decoration2: this.decorationLayer2,
-                    decoration3: this.decorationLayer3
-                };
-            };
-            StageManager.prototype.isObstacle = function (x, y) {
-                return this.grid[y][x] != -1;
-            };
-            StageManager.prototype.handleTile = function (pawn) {
-                var p = pawn.getPosition();
-                this.grid[p.y][p.x] = pawn.isAlive() ? -1 : 3;
-            };
-            StageManager.prototype.canMove = function (entity, x, y, ap) {
-                var _this = this;
-                if (ap === void 0) { ap = Infinity; }
-                return new Promise(function (resolve, reject) {
-                    //this.equalPositions(entity.getPosition(), {x: x, y: y});
-                    _this.game.pathfinder.findPath(entity.getPosition().x, entity.getPosition().y, x, y, function (path) {
-                        if (path && path.length > 0) {
-                            path.shift();
-                            if (path.length > ap) {
-                                reject(path);
-                            }
-                            else {
-                                resolve(path);
-                            }
-                        }
-                        else {
+        };
+        StageManager.prototype.isObstacle = function (position) {
+            return this.grid[position.y][position.x] != -1;
+        };
+        StageManager.prototype.handleTile = function (pawn) {
+            var p = pawn.getPosition();
+            this.grid[p.y][p.x] = pawn.isAlive() ? -1 : 3;
+        };
+        StageManager.prototype.canMove = function (entity, x, y, ap) {
+            var _this = this;
+            if (ap === void 0) { ap = Infinity; }
+            return new Promise(function (resolve, reject) {
+                //this.equalPositions(entity.getPosition(), {x: x, y: y});
+                _this.game.pathfinder.findPath(entity.getPosition().x, entity.getPosition().y, x, y, function (path) {
+                    if (path && path.length > 0) {
+                        path.shift();
+                        if (path.length > ap) {
                             reject(path);
                         }
-                    });
-                    _this.game.pathfinder.calculate();
+                        else {
+                            resolve(path);
+                        }
+                    }
+                    else {
+                        reject(path);
+                    }
                 });
-            };
-            StageManager.prototype.getLinearPath = function (pawn, distance, direction, position) {
-                if (direction === void 0) { direction = null; }
-                if (position === void 0) { position = null; }
-                var p = position ? position : pawn.getPosition();
-                var d = direction ? direction : pawn.getDirection();
-                var path = [];
-                for (var x = 0; x < this.map.width; x++) {
-                    for (var y = 0; y < this.map.height; y++) {
-                        if ((d == 'W' && p.x > x && p.y == y ||
-                            d == 'E' && p.x < x && p.y == y ||
-                            d == 'N' && p.x == x && p.y > y ||
-                            d == 'S' && p.x == x && p.y < y) &&
-                            this.getNbTilesBetween(p, { 'x': x, 'y': y }) <= distance) {
-                            path.push({ 'x': x, 'y': y });
-                        }
+                _this.game.pathfinder.calculate();
+            });
+        };
+        StageManager.prototype.getLinearPath = function (pawn, distance, direction, position) {
+            if (direction === void 0) { direction = null; }
+            if (position === void 0) { position = null; }
+            var p = position ? position : pawn.getPosition();
+            var d = direction ? direction : pawn.getDirection();
+            var path = [];
+            for (var x = 0; x < this.map.width; x++) {
+                for (var y = 0; y < this.map.height; y++) {
+                    if ((d == 'W' && p.x > x && p.y == y ||
+                        d == 'E' && p.x < x && p.y == y ||
+                        d == 'N' && p.x == x && p.y > y ||
+                        d == 'S' && p.x == x && p.y < y) &&
+                        this.getNbTilesBetween(p, { 'x': x, 'y': y }) <= distance) {
+                        path.push({ 'x': x, 'y': y });
                     }
                 }
-                return path;
-            };
-            StageManager.prototype.getFrontTile = function (pawn, direction, position) {
-                if (direction === void 0) { direction = null; }
-                if (position === void 0) { position = null; }
-                var p = position ? position : pawn.getPosition();
-                var d = direction ? direction : pawn.getDirection();
-                var path = [];
-                if (d == 'W') {
-                    path.push({ 'x': p.x - 1, 'y': p.y });
-                }
-                else if (d == 'E') {
-                    path.push({ 'x': p.x + 1, 'y': p.y });
-                }
-                else if (d == 'S') {
-                    path.push({ 'x': p.x, 'y': p.y + 1 });
-                }
-                else if (d == 'N') {
-                    path.push({ 'x': p.x, 'y': p.y - 1 });
-                }
-                return path;
-            };
-            StageManager.prototype.showPossibleLinearTrajectories = function (path) {
-                this.clearPossibleMove();
-                for (var i = 0; i < path.length; i++) {
-                    //let tile = this.map.getTile(path[i].x, path[i].y, this.backgroundLayer, true);
-                    var tile = this.map.putTile(2105, path[i].x, path[i].y, this.uiLayer);
-                    tile.alpha = 0.5;
-                }
-                this.backgroundLayer.layer.dirty = true;
-            };
-            StageManager.prototype.showPossibleMove = function (position, ap) {
-                for (var x = 0; x < this.map.width; x++) {
-                    for (var y = 0; y < this.map.height; y++) {
-                        //let tile = this.map.getTile(x, y, this.backgroundLayer, true);
-                        //tile.alpha = ap > 0 && this.getNbTilesBetween(position, {'x': x, 'y': y}) <= ap ? 0.7 : 1;
-                        if (this.getNbTilesBetween(position, { 'x': x, 'y': y }) <= ap &&
-                            this.grid[y][x] == -1 &&
-                            this.backgroundLayer.layer.data[y][x].index > -1) {
-                            var tile = this.map.putTile(2105, x, y, this.uiLayer);
-                            tile.alpha = 0.5;
-                        }
+            }
+            return path;
+        };
+        StageManager.prototype.getFrontTile = function (pawn, direction, position) {
+            if (direction === void 0) { direction = null; }
+            if (position === void 0) { position = null; }
+            var p = position ? position : pawn.getPosition();
+            var d = direction ? direction : pawn.getDirection();
+            var path = [];
+            if (d == 'W') {
+                path.push({ 'x': p.x - 1, 'y': p.y });
+            }
+            else if (d == 'E') {
+                path.push({ 'x': p.x + 1, 'y': p.y });
+            }
+            else if (d == 'S') {
+                path.push({ 'x': p.x, 'y': p.y + 1 });
+            }
+            else if (d == 'N') {
+                path.push({ 'x': p.x, 'y': p.y - 1 });
+            }
+            return path;
+        };
+        StageManager.prototype.showPossibleLinearTrajectories = function (path) {
+            this.clearPossibleMove();
+            for (var i = 0; i < path.length; i++) {
+                //let tile = this.map.getTile(path[i].x, path[i].y, this.backgroundLayer, true);
+                var tile = this.map.putTile(2105, path[i].x, path[i].y, this.uiLayer);
+                tile.alpha = 0.5;
+            }
+            this.backgroundLayer.layer.dirty = true;
+        };
+        StageManager.prototype.showPossibleMove = function (position, ap) {
+            for (var x = 0; x < this.map.width; x++) {
+                for (var y = 0; y < this.map.height; y++) {
+                    //let tile = this.map.getTile(x, y, this.backgroundLayer, true);
+                    //tile.alpha = ap > 0 && this.getNbTilesBetween(position, {'x': x, 'y': y}) <= ap ? 0.7 : 1;
+                    if (this.getNbTilesBetween(position, { 'x': x, 'y': y }) <= ap &&
+                        this.grid[y][x] == -1 &&
+                        this.backgroundLayer.layer.data[y][x].index > -1) {
+                        var tile = this.map.putTile(2105, x, y, this.uiLayer);
+                        tile.alpha = 0.5;
                     }
                 }
-                this.backgroundLayer.layer.dirty = true;
-            };
-            StageManager.prototype.clearPossibleMove = function () {
-                for (var x = 0; x < this.map.width; x++) {
-                    for (var y = 0; y < this.map.height; y++) {
-                        //let tile = this.map.getTile(x, y, this.backgroundLayer, true);
-                        //tile.alpha = 1;
-                        this.map.removeTile(x, y, this.uiLayer);
-                    }
+            }
+            this.backgroundLayer.layer.dirty = true;
+        };
+        StageManager.prototype.clearPossibleMove = function () {
+            for (var x = 0; x < this.map.width; x++) {
+                for (var y = 0; y < this.map.height; y++) {
+                    //let tile = this.map.getTile(x, y, this.backgroundLayer, true);
+                    //tile.alpha = 1;
+                    this.map.removeTile(x, y, this.uiLayer);
                 }
-                this.backgroundLayer.layer.dirty = true;
-            };
-            StageManager.prototype.showPath = function (path, group, tint) {
-                if (tint === void 0) { tint = null; }
-                for (var i = 0; i < path.length; i++) {
-                    var tile = this.map.getTile(path[i].x, path[i].y, this.backgroundLayer, true);
-                    var tileSprite = new Phaser.Sprite(this.game, tile.x * this.game.tileSize, tile.y * this.game.tileSize, 'path-tile', '');
-                    if (tint) {
-                        tileSprite.tint = tint;
-                    }
-                    group.add(tileSprite);
+            }
+            this.backgroundLayer.layer.dirty = true;
+        };
+        StageManager.prototype.showPath = function (path, group, tint) {
+            if (tint === void 0) { tint = null; }
+            for (var i = 0; i < path.length; i++) {
+                var tile = this.map.getTile(path[i].x, path[i].y, this.backgroundLayer, true);
+                var tileSprite = new Phaser.Sprite(this.game, tile.x * this.game.tileSize, tile.y * this.game.tileSize, 'path-tile', '');
+                if (tint) {
+                    tileSprite.tint = tint;
                 }
-            };
-            StageManager.prototype.clearPath = function (group) {
-                group.removeAll();
-            };
-            StageManager.prototype.clearHelp = function () {
-                this.clearPossibleMove();
-                this.clearPath(this.game.pathTilesGroup);
-            };
-            StageManager.prototype.getNbTilesBetween = function (coordsA, coordsB) {
-                return Math.abs(coordsA.x - coordsB.x) + Math.abs(coordsA.y - coordsB.y);
-            };
-            StageManager.prototype.isFacing = function (coordsA, directionA, coordsB) {
-                console.log(coordsA, directionA, coordsB);
-                return (coordsA.x == coordsB.x && ((coordsA.y == coordsB.y + 1 && directionA == 'N') || (coordsA.y == coordsB.y - 1 && directionA == 'S')) ||
-                    coordsA.y == coordsB.y && ((coordsA.x == coordsB.x + 1 && directionA == 'W') || (coordsA.x == coordsB.x - 1 && directionA == 'E')));
-            };
-            StageManager.prototype.isFacingAway = function (coordsA, directionA, coordsB) {
-                console.log(coordsA, directionA, coordsB);
-                return ((coordsA.x == coordsB.x && (directionA == 'N' || directionA == 'S')) ||
-                    (coordsA.y == coordsB.y && (directionA == 'W' || directionA == 'E')));
-            };
-            StageManager.prototype.equalPositions = function (p1, p2) {
-                return p1.x == p2.x && p1.y == p2.y;
-            };
-            StageManager.prototype.differenceBetweenPositions = function (p1, p2) {
-                return { x: Math.abs(p1.x - p2.x), y: Math.abs(p1.y - p2.y) };
-            };
-            StageManager.prototype.markPawns = function () {
-                for (var i = 0; i < this.initialGrid.length; i++) {
-                    this.grid[i] = this.initialGrid[i].slice();
-                }
-                for (var i = 0; i < this.game.pawns.length; i++) {
-                    var p = this.game.pawns[i].getPosition();
-                    this.grid[p.y][p.x] = 0;
-                }
-            };
-            return StageManager;
-        }());
-        Controller.StageManager = StageManager;
-    })(Controller = TacticArena.Controller || (TacticArena.Controller = {}));
+                group.add(tileSprite);
+            }
+        };
+        StageManager.prototype.clearPath = function (group) {
+            group.removeAll();
+        };
+        StageManager.prototype.clearHelp = function () {
+            this.clearPossibleMove();
+            this.clearPath(this.game.pathTilesGroup);
+        };
+        StageManager.prototype.getNbTilesBetween = function (coordsA, coordsB) {
+            return Math.abs(coordsA.x - coordsB.x) + Math.abs(coordsA.y - coordsB.y);
+        };
+        StageManager.prototype.isFacing = function (coordsA, directionA, coordsB) {
+            return (coordsA.x == coordsB.x && ((coordsA.y == coordsB.y + 1 && directionA == 'N') || (coordsA.y == coordsB.y - 1 && directionA == 'S')) ||
+                coordsA.y == coordsB.y && ((coordsA.x == coordsB.x + 1 && directionA == 'W') || (coordsA.x == coordsB.x - 1 && directionA == 'E')));
+        };
+        StageManager.prototype.isFacingAway = function (coordsA, directionA, coordsB) {
+            return ((coordsA.x == coordsB.x && (directionA == 'N' || directionA == 'S')) ||
+                (coordsA.y == coordsB.y && (directionA == 'W' || directionA == 'E')));
+        };
+        StageManager.prototype.equalPositions = function (p1, p2) {
+            return p1.x == p2.x && p1.y == p2.y;
+        };
+        StageManager.prototype.differenceBetweenPositions = function (p1, p2) {
+            return { x: Math.abs(p1.x - p2.x), y: Math.abs(p1.y - p2.y) };
+        };
+        StageManager.prototype.markPawns = function () {
+            for (var i = 0; i < this.initialGrid.length; i++) {
+                this.grid[i] = this.initialGrid[i].slice();
+            }
+            for (var i = 0; i < this.game.pawns.length; i++) {
+                var p = this.game.pawns[i].getPosition();
+                this.grid[p.y][p.x] = 0;
+            }
+        };
+        return StageManager;
+    }());
+    TacticArena.StageManager = StageManager;
 })(TacticArena || (TacticArena = {}));
 var TacticArena;
 (function (TacticArena) {
-    var Controller;
-    (function (Controller) {
-        var TurnManager = (function () {
-            function TurnManager(game) {
-                this.game = game;
-                this.currentTurnIndex = -1;
-                this.playedPawns = [];
+    var TurnManager = (function () {
+        function TurnManager(game) {
+            this.game = game;
+            this.currentTurnIndex = -1;
+            this.playedPawns = [];
+        }
+        TurnManager.prototype.init = function (pawn, firstTurnCall) {
+            var _this = this;
+            if (firstTurnCall === void 0) { firstTurnCall = false; }
+            return new Promise(function (resolve, reject) {
+                if (firstTurnCall) {
+                    for (var i = 0; i < _this.game.pawns.length; i++) {
+                        _this.game.pawns[i].setAp(3);
+                        _this.game.pawns[i].ghost = null;
+                    }
+                    _this.currentTurnIndex++;
+                    _this.playedPawns = [];
+                }
+                _this.setActivePawn(pawn);
+                resolve(true);
+            });
+        };
+        TurnManager.prototype.getRemainingPawns = function (teamId) {
+            var _this = this;
+            if (teamId === void 0) { teamId = null; }
+            return this.game.pawns.filter(function (pawn) {
+                var condition = pawn.isAlive() && _this.playedPawns.indexOf(pawn._id) < 0;
+                if (teamId !== null) {
+                    condition = condition && pawn.team == teamId;
+                }
+                return condition;
+            });
+        };
+        TurnManager.prototype.endTurn = function () {
+            var _this = this;
+            return new Promise(function (resolve, reject) {
+                _this.setActivePawnAsPlayed();
+                var nextPawn;
+                var remainingPawns = _this.getRemainingPawns();
+                if (remainingPawns.length > 0) {
+                    nextPawn = remainingPawns[0];
+                    if (nextPawn.team != _this.currentTeam) {
+                        _this.game.signalManager.onTeamChange.dispatch();
+                    }
+                }
+                resolve(nextPawn);
+            });
+        };
+        TurnManager.prototype.getActivePawn = function () {
+            for (var i = 0; i < this.game.pawns.length; i++) {
+                if (this.game.pawns[i].active) {
+                    return this.game.pawns[i];
+                }
             }
-            TurnManager.prototype.init = function (pawn, firstTurnCall) {
-                var _this = this;
-                if (firstTurnCall === void 0) { firstTurnCall = false; }
-                return new Promise(function (resolve, reject) {
-                    if (firstTurnCall) {
-                        for (var i = 0; i < _this.game.pawns.length; i++) {
-                            _this.game.pawns[i].setAp(3);
-                            _this.game.pawns[i].ghost = null;
-                        }
-                        _this.currentTurnIndex++;
-                        _this.playedPawns = [];
-                    }
-                    _this.setActivePawn(pawn);
-                    resolve(true);
-                });
-            };
-            TurnManager.prototype.getRemainingPawns = function (teamId) {
-                var _this = this;
-                if (teamId === void 0) { teamId = null; }
-                return this.game.pawns.filter(function (pawn) {
-                    var condition = pawn.isAlive() && _this.playedPawns.indexOf(pawn._id) < 0;
-                    if (teamId !== null) {
-                        condition = condition && pawn.team == teamId;
-                    }
-                    return condition;
-                });
-            };
-            TurnManager.prototype.endTurn = function () {
-                var _this = this;
-                return new Promise(function (resolve, reject) {
-                    _this.setActivePawnAsPlayed();
-                    var nextPawn;
-                    var remainingPawns = _this.getRemainingPawns();
-                    if (remainingPawns.length > 0) {
-                        nextPawn = remainingPawns[0];
-                        if (nextPawn.team != _this.currentTeam) {
-                            _this.game.signalManager.onTeamChange.dispatch();
-                        }
-                    }
-                    resolve(nextPawn);
-                });
-            };
-            TurnManager.prototype.getActivePawn = function () {
+            return null;
+        };
+        TurnManager.prototype.setActivePawn = function (pawn) {
+            var activePawn = this.getActivePawn();
+            if (pawn.isAlive() && (!activePawn || pawn._id != activePawn._id)) {
                 for (var i = 0; i < this.game.pawns.length; i++) {
-                    if (this.game.pawns[i].active) {
-                        return this.game.pawns[i];
-                    }
+                    this.game.pawns[i].active = (this.game.pawns[i]._id == pawn._id);
                 }
-                return null;
-            };
-            TurnManager.prototype.setActivePawn = function (pawn) {
-                var activePawn = this.getActivePawn();
-                if (pawn.isAlive() && (!activePawn || pawn._id != activePawn._id)) {
-                    for (var i = 0; i < this.game.pawns.length; i++) {
-                        this.game.pawns[i].active = (this.game.pawns[i]._id == pawn._id);
-                    }
-                    this.currentTeam = pawn.team;
-                    this.game.signalManager.onActivePawnChange.dispatch(pawn);
-                }
-            };
-            TurnManager.prototype.setActivePawnAsPlayed = function () {
-                this.playedPawns.push(this.getActivePawn()._id);
-            };
-            return TurnManager;
-        }());
-        Controller.TurnManager = TurnManager;
-    })(Controller = TacticArena.Controller || (TacticArena.Controller = {}));
+                this.currentTeam = pawn.team;
+                this.game.signalManager.onActivePawnChange.dispatch(pawn);
+            }
+        };
+        TurnManager.prototype.setActivePawnAsPlayed = function () {
+            this.playedPawns.push(this.getActivePawn()._id);
+        };
+        return TurnManager;
+    }());
+    TacticArena.TurnManager = TurnManager;
+})(TacticArena || (TacticArena = {}));
+var TacticArena;
+(function (TacticArena) {
+    var BaseOrder = (function () {
+        function BaseOrder(action, position, direction) {
+            this.action = action;
+            this.position = position;
+            this.direction = direction;
+        }
+        return BaseOrder;
+    }());
+    TacticArena.BaseOrder = BaseOrder;
 })(TacticArena || (TacticArena = {}));
 var TacticArena;
 (function (TacticArena) {
@@ -2192,7 +2073,7 @@ var TacticArena;
                             var target = targets[i];
                             setTimeout(function () {
                                 target.entity.hurt(1);
-                                if (target.moved.x && target.moved.y) {
+                                if (target.moved) {
                                     target.entity.moveTo(target.moved.x, target.moved.y);
                                 }
                             }, target.moved.d * 100);
@@ -2436,10 +2317,7 @@ var TacticArena;
                 return this.projection ? this.projection : this;
             };
             Pawn.prototype.getPosition = function () {
-                return {
-                    x: (this.sprite.position.x + this.sprite._size / 4) / this.game.tileSize,
-                    y: (this.sprite.position.y + this.sprite._size / 2) / this.game.tileSize
-                };
+                return new TacticArena.Position((this.sprite.position.x + this.sprite._size / 4) / this.game.tileSize, (this.sprite.position.y + this.sprite._size / 2) / this.game.tileSize);
             };
             Pawn.prototype.attack = function (target) {
                 var _this = this;
@@ -2661,6 +2539,43 @@ var TacticArena;
 })(TacticArena || (TacticArena = {}));
 var TacticArena;
 (function (TacticArena) {
+    var Position = (function () {
+        function Position(x, y) {
+            this.x = x;
+            this.y = y;
+        }
+        Position.prototype.get = function () {
+            return {
+                x: this.x,
+                y: this.y
+            };
+        };
+        Position.prototype.set = function (x, y) {
+            this.x = x;
+            this.y = y;
+        };
+        Position.prototype.setX = function (x) {
+            this.x = x;
+        };
+        Position.prototype.setY = function (y) {
+            this.y = y;
+        };
+        Position.prototype.equals = function (position) {
+            return this.x == position.x && this.y == position.y;
+        };
+        Position.prototype.faces = function (position, direction) {
+            return (this.x == position.x && ((this.y == position.y + 1 && direction == 'N') || (this.y == position.y - 1 && direction == 'S')) ||
+                this.y == position.y && ((this.x == position.x + 1 && direction == 'W') || (this.x == position.x - 1 && direction == 'E')));
+        };
+        Position.prototype.getDistanceFrom = function (position) {
+            return Math.abs(this.x - position.x) + Math.abs(this.y - position.y);
+        };
+        return Position;
+    }());
+    TacticArena.Position = Position;
+})(TacticArena || (TacticArena = {}));
+var TacticArena;
+(function (TacticArena) {
     var Entity;
     (function (Entity) {
         var Character;
@@ -2683,6 +2598,256 @@ var TacticArena;
             Character.Ruairi = Ruairi;
         })(Character = Entity.Character || (Entity.Character = {}));
     })(Entity = TacticArena.Entity || (TacticArena.Entity = {}));
+})(TacticArena || (TacticArena = {}));
+var TacticArena;
+(function (TacticArena) {
+    var Order;
+    (function (Order) {
+        var Attack = (function (_super) {
+            __extends(Attack, _super);
+            function Attack(position, direction, target) {
+                var _this = _super.call(this, 'attack', position, direction) || this;
+                _this.target = target;
+                return _this;
+            }
+            Attack.prototype.process = function () {
+            };
+            return Attack;
+        }(TacticArena.BaseOrder));
+        Order.Attack = Attack;
+    })(Order = TacticArena.Order || (TacticArena.Order = {}));
+})(TacticArena || (TacticArena = {}));
+var TacticArena;
+(function (TacticArena) {
+    var Order;
+    (function (Order) {
+        var Dead = (function (_super) {
+            __extends(Dead, _super);
+            function Dead(position, direction) {
+                return _super.call(this, 'dead', position, direction) || this;
+            }
+            Dead.prototype.process = function () {
+            };
+            return Dead;
+        }(TacticArena.BaseOrder));
+        Order.Dead = Dead;
+    })(Order = TacticArena.Order || (TacticArena.Order = {}));
+})(TacticArena || (TacticArena = {}));
+var TacticArena;
+(function (TacticArena) {
+    var Order;
+    (function (Order) {
+        var Fire = (function (_super) {
+            __extends(Fire, _super);
+            function Fire(position, direction) {
+                return _super.call(this, 'cast', position, direction) || this;
+            }
+            Fire.prototype.process = function (step, stepB, ordermanager) {
+                var result = this;
+                step.data.entityAApCost++;
+                var path = ordermanager.game.stageManager.getLinearPath(step.entity, 4, step.order.direction, step.order.position);
+                step.order.targets = step.order.targets || [];
+                for (var k = 0; k < path.length; k++) {
+                    var targetPosition = stepB.entityState.moveHasBeenBlocked ? step.data.positionBBeforeOrder : stepB.order.position;
+                    if (path[k].x == targetPosition.x && path[k].y == targetPosition.y) {
+                        step.order.targets.push(stepB.entity._id);
+                        step.data.entityBHpLost += 2;
+                    }
+                }
+                return result;
+            };
+            return Fire;
+        }(TacticArena.BaseOrder));
+        Order.Fire = Fire;
+    })(Order = TacticArena.Order || (TacticArena.Order = {}));
+})(TacticArena || (TacticArena = {}));
+var TacticArena;
+(function (TacticArena) {
+    var Order;
+    (function (Order) {
+        var Move = (function (_super) {
+            __extends(Move, _super);
+            function Move(position, direction) {
+                return _super.call(this, 'move', position, direction) || this;
+            }
+            Move.prototype.process = function (step, stepB, ordermanager) {
+                var result = this;
+                if (step.data.aWasNextToB &&
+                    step.data.aWasFacingB &&
+                    step.data.aIsActive &&
+                    step.data.differentTeams &&
+                    step.data.keepDirection &&
+                    (step.data.keepPosition || step.data.equalPositions)) {
+                    var entityBIsDodging = true;
+                    if (step.order.action == 'slash') {
+                        step.data.fleeRate = 0;
+                    }
+                    if (TacticArena.OrderManager.resolutionEsquive(step.data.fleeRate)) {
+                        step.data.entityBHpLost += 1;
+                        //if(orderA.action == 'slash') { entityBHpLost += 1; }
+                        entityBIsDodging = false;
+                        if (ordermanager.alteredPawns.indexOf(stepB._id) < 0) {
+                            stepB.entityState.moveHasBeenBlocked = (stepB.order.action == 'move');
+                        }
+                    }
+                    result = new Order.Attack(this.position, this.direction, {
+                        entityId: stepB._id,
+                        dodge: entityBIsDodging,
+                        damages: step.data.entityBHpLost
+                    });
+                }
+                return result;
+            };
+            return Move;
+        }(TacticArena.BaseOrder));
+        Order.Move = Move;
+    })(Order = TacticArena.Order || (TacticArena.Order = {}));
+})(TacticArena || (TacticArena = {}));
+var TacticArena;
+(function (TacticArena) {
+    var Order;
+    (function (Order) {
+        var Slash = (function (_super) {
+            __extends(Slash, _super);
+            function Slash(position, direction) {
+                return _super.call(this, 'slash', position, direction) || this;
+            }
+            Slash.prototype.process = function (step, stepB, ordermanager) {
+                var result = this;
+                if (step.data.aWasNextToB &&
+                    step.data.aWasFacingB &&
+                    step.data.aIsActive &&
+                    step.data.differentTeams &&
+                    step.data.keepDirection &&
+                    (step.data.keepPosition || step.data.equalPositions)) {
+                    var entityBIsDodging = true;
+                    if (step.order.action == 'slash') {
+                        step.data.fleeRate = 0;
+                    }
+                    if (TacticArena.OrderManager.resolutionEsquive(step.data.fleeRate)) {
+                        step.data.entityBHpLost += 1;
+                        //if(orderA.action == 'slash') { entityBHpLost += 1; }
+                        entityBIsDodging = false;
+                        if (ordermanager.alteredPawns.indexOf(stepB._id) < 0) {
+                            stepB.entityState.moveHasBeenBlocked = (stepB.order.action == 'move');
+                        }
+                    }
+                    result = new Order.Attack(this.position, this.direction, {
+                        entityId: stepB._id,
+                        dodge: entityBIsDodging,
+                        damages: step.data.entityBHpLost
+                    });
+                }
+                return result;
+            };
+            return Slash;
+        }(TacticArena.BaseOrder));
+        Order.Slash = Slash;
+    })(Order = TacticArena.Order || (TacticArena.Order = {}));
+})(TacticArena || (TacticArena = {}));
+var TacticArena;
+(function (TacticArena) {
+    var Order;
+    (function (Order) {
+        var Stand = (function (_super) {
+            __extends(Stand, _super);
+            function Stand(position, direction) {
+                return _super.call(this, 'stand', position, direction) || this;
+            }
+            // Possible cases :
+            // [  ][A v][  ]
+            // [A>][ B ][<A]
+            // [  ][ A^][  ]
+            // IF A was next to B
+            // AND IF A was facing B
+            // AND IF A is active (ap > 0)
+            // AND IF A & B are not in the same team
+            // AND IF A keeps its direction (aIsFacingB) (et ne va donc pas pas se détourner de B)
+            // AND IF A stays next to B OR IF A moves toward B (equalPositions) (en lui faisant face)
+            Stand.prototype.process = function (step, stepB, ordermanager) {
+                var result = this;
+                if (step.data.aWasNextToB &&
+                    step.data.aWasFacingB &&
+                    step.data.aIsActive &&
+                    step.data.differentTeams &&
+                    step.data.keepDirection &&
+                    (step.data.keepPosition || step.data.equalPositions)) {
+                    var entityBIsDodging = true;
+                    if (step.order.action == 'slash') {
+                        step.data.fleeRate = 0;
+                    }
+                    if (TacticArena.OrderManager.resolutionEsquive(step.data.fleeRate)) {
+                        step.data.entityBHpLost += 1;
+                        //if(orderA.action == 'slash') { entityBHpLost += 1; }
+                        entityBIsDodging = false;
+                        if (step.data.alteredEntityB) {
+                            stepB.entityState.moveHasBeenBlocked = (stepB.order.action == 'move');
+                        }
+                    }
+                    result = new Order.Attack(this.position, this.direction, {
+                        entityId: stepB._id,
+                        dodge: entityBIsDodging,
+                        damages: step.data.entityBHpLost
+                    });
+                }
+                return result;
+            };
+            return Stand;
+        }(TacticArena.BaseOrder));
+        Order.Stand = Stand;
+    })(Order = TacticArena.Order || (TacticArena.Order = {}));
+})(TacticArena || (TacticArena = {}));
+var TacticArena;
+(function (TacticArena) {
+    var Order;
+    (function (Order) {
+        var Wind = (function (_super) {
+            __extends(Wind, _super);
+            function Wind(position, direction) {
+                return _super.call(this, 'cast_wind', position, direction) || this;
+            }
+            Wind.prototype.process = function (step, stepB, ordermanager, steps) {
+                var result = this;
+                step.data.entityAApCost++;
+                var path = ordermanager.game.stageManager.getLinearPath(step.entity, 4, step.order.direction, step.order.position);
+                step.order.targets = step.order.targets || [];
+                for (var k = 0; k < path.length; k++) {
+                    var targetPosition = stepB.entityState.moveHasBeenBlocked ? step.data.positionBBeforeOrder : stepB.order.position;
+                    if (path[k].x == targetPosition.x && path[k].y == targetPosition.y) {
+                        var moved = new TacticArena.Position(stepB.order.position.x, stepB.order.position.y);
+                        if (stepB.entityState.moved) {
+                            moved = stepB.entityState.moved;
+                        }
+                        if (step.order.direction == 'E') {
+                            moved.setX(moved.x + 1);
+                        }
+                        else if (step.order.direction == 'W') {
+                            moved.setX(moved.x - 1);
+                        }
+                        else if (step.order.direction == 'S') {
+                            moved.setY(moved.y + 1);
+                        }
+                        else if (step.order.direction == 'N') {
+                            moved.setY(moved.y - 1);
+                        }
+                        if (!ordermanager.tileIsFree(step, moved) || ordermanager.game.stageManager.isObstacle(moved)) {
+                            moved = null;
+                        }
+                        stepB.entityState.moved = moved;
+                        step.order.targets.push({
+                            entity: stepB.entity._id,
+                            moved: { x: moved.x, y: moved.y, d: ordermanager.game.stageManager.getNbTilesBetween(step.order.position, stepB.order.position) }
+                        });
+                        step.data.entityBHpLost += 1;
+                        ordermanager.pacifyEntity(steps, step.data.l + 1, step.data.j, stepB.order, stepB.entity, stepB.entityState);
+                    }
+                }
+                return result;
+            };
+            return Wind;
+        }(TacticArena.BaseOrder));
+        Order.Wind = Wind;
+    })(Order = TacticArena.Order || (TacticArena.Order = {}));
 })(TacticArena || (TacticArena = {}));
 var TacticArena;
 (function (TacticArena) {
@@ -2890,7 +3055,8 @@ var TacticArena;
                             _this.pawn.setAp(_this.pawn.getAp() - distance);
                             for (var i = 0; i < resultPath.length; i++) {
                                 console.log(_this.pawn.getProjectionOrReal().getDirection());
-                                _this.state.orderManager.add('move', _this.pawn, resultPath[i].x, resultPath[i].y, _this.pawn.getProjectionOrReal().getDirection());
+                                var order = new TacticArena.Entity.Order.Move(_this.state, resultPath[i].x, resultPath[i].y, _this.pawn.getProjectionOrReal().getDirection());
+                                _this.state.orderManager.add('move', _this.pawn, resultPath[i].x, resultPath[i].y, _this.pawn.getProjectionOrReal().getDirection(), true, order);
                             }
                             _this.state.process = false;
                             _this.state.signalManager.onActionPlayed.dispatch(_this.pawn);
@@ -3067,7 +3233,7 @@ var TacticArena;
                 this.pawnsSpritesGroup.sort('y', Phaser.Group.SORT_ASCENDING);
             };
             BasePlayable.prototype.initMap = function () {
-                this.stageManager = new TacticArena.Controller.StageManager(this);
+                this.stageManager = new TacticArena.StageManager(this);
                 this.stageManager.init(this.mapName);
             };
             BasePlayable.prototype.addDecorations = function () {
@@ -3115,17 +3281,17 @@ var TacticArena;
                 this.teamColors = ['0x8ad886', '0xd68686', '0x87bfdb', '0xcdd385'];
                 this.teams = {};
                 //this.serializer = new TS.Serializer(TacticArena);
-                this.signalManager = new TacticArena.Controller.SignalManager(this);
+                this.signalManager = new TacticArena.SignalManager(this);
                 this.signalManager.init();
                 this.pointer = new TacticArena.UI.Pointer(this);
             };
             BaseBattle.prototype.create = function () {
                 _super.prototype.create.call(this);
                 var self = this;
-                this.logManager = new TacticArena.Controller.LogManager(this);
-                this.orderManager = new TacticArena.Controller.OrderManager(this);
-                this.resolveManager = new TacticArena.Controller.ResolveManager(this);
-                this.turnManager = new TacticArena.Controller.TurnManager(this);
+                this.logManager = new TacticArena.LogManager(this);
+                this.orderManager = new TacticArena.OrderManager(this);
+                this.resolveManager = new TacticArena.ResolveManager(this);
+                this.turnManager = new TacticArena.TurnManager(this);
                 this.uiManager = new TacticArena.UI.UIManager(this);
                 if (this.chatUI) {
                     this.chatUI.menu = this.uiManager;
@@ -3298,7 +3464,7 @@ var TacticArena;
             Lobby.prototype.initChat = function (login) {
                 this.menu.html('');
                 var self = this;
-                this.serverManager = new TacticArena.Controller.ServerManager(this, login, function (data, server) {
+                this.serverManager = new TacticArena.ServerManager(this, login, function (data, server) {
                     if (server === void 0) { server = false; }
                     console.log(data);
                     var msg = server ? '<span class="notification">' + data.content + '</span>' : data.name + ': ' + data.content;
@@ -3390,7 +3556,8 @@ var TacticArena;
 (function (TacticArena) {
     var State;
     (function (State) {
-        var StageManager = TacticArena.Controller.StageManager;
+        var AiManager = TacticArena.AiManager;
+        var StageManager = TacticArena.StageManager;
         var MainAdventureBattle = (function (_super) {
             __extends(MainAdventureBattle, _super);
             function MainAdventureBattle() {
@@ -3410,7 +3577,7 @@ var TacticArena;
                         isBot = false;
                     }
                     else {
-                        _this.aiManager = new TacticArena.Controller.AiManager(_this, k);
+                        _this.aiManager = new AiManager(_this, k);
                     }
                     _this.pawns.push(new TacticArena.Entity.Pawn(_this, p.position.x, p.position.y, p.direction, p.type, _this.getUniqueId(), isBot, k, p.name, p.spriteClass));
                 });
@@ -3485,6 +3652,7 @@ var TacticArena;
 (function (TacticArena) {
     var State;
     (function (State) {
+        var AiManager = TacticArena.AiManager;
         var MainSoloOffline = (function (_super) {
             __extends(MainSoloOffline, _super);
             function MainSoloOffline() {
@@ -3505,7 +3673,7 @@ var TacticArena;
                         isBot = false;
                     }
                     else {
-                        _this.aiManager = new TacticArena.Controller.AiManager(_this, k);
+                        _this.aiManager = new AiManager(_this, k);
                     }
                     if (p.faction == 'human') {
                         var pawn = new TacticArena.Entity.Character.Ruairi(_this, startPositions[k][0].x, startPositions[k][0].y, startPositions[k][0].d, _this.getUniqueId(), isBot, k);
@@ -3702,7 +3870,7 @@ var TacticArena;
                 this.worldGroup.add(this.pawnsSpritesGroup);
                 this.uiGroup = this.add.group();
                 this.worldGroup.add(this.uiGroup);
-                this.stageManager = new TacticArena.Controller.StageManager(this);
+                this.stageManager = new TacticArena.StageManager(this);
                 this.stageManager.init('map');
                 this.pawns = [];
                 this.pathTilesGroup = this.add.group();
@@ -3713,11 +3881,11 @@ var TacticArena;
                 this.pathfinder.disableDiagonals();
                 this.pathfinder.disableSync();
                 this.pathfinder.setGrid(this.stageManager.grid);
-                this.signalManager = new TacticArena.Controller.SignalManager(this);
-                this.logManager = new TacticArena.Controller.LogManager(this);
-                this.orderManager = new TacticArena.Controller.OrderManager(this);
-                this.resolveManager = new TacticArena.Controller.ResolveManager(this);
-                this.turnManager = new TacticArena.Controller.TurnManager(this);
+                this.signalManager = new TacticArena.SignalManager(this);
+                this.logManager = new TacticArena.LogManager(this);
+                this.orderManager = new TacticArena.OrderManager(this);
+                this.resolveManager = new TacticArena.ResolveManager(this);
+                this.turnManager = new TacticArena.TurnManager(this);
             };
             return Test;
         }(TacticArena.State.BaseState));

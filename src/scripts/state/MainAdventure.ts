@@ -58,7 +58,7 @@ module TacticArena.State {
         }
 
         //initMap() {
-        //    this.stageManager = new Controller.StageManager(this);
+        //    this.stageManager = new StageManager(this);
         //    this.stageManager.initFromArray([]);
         //}
     }

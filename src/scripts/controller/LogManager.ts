@@ -1,4 +1,4 @@
-module TacticArena.Controller {
+module TacticArena {
     export class LogManager {
         logs;
         game;

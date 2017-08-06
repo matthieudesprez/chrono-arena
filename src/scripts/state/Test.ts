@@ -14,12 +14,12 @@ module TacticArena.State {
         uiSpritesGroup: Phaser.Group;
         uiGroup: Phaser.Group;
 
-        turnManager: Controller.TurnManager;
-        orderManager: Controller.OrderManager;
-        resolveManager: Controller.ResolveManager;
-        stageManager: Controller.StageManager;
-        logManager: Controller.LogManager;
-        signalManager: Controller.SignalManager;
+        turnManager: TurnManager;
+        orderManager: OrderManager;
+        resolveManager: ResolveManager;
+        stageManager: StageManager;
+        logManager: LogManager;
+        signalManager: SignalManager;
         uiManager: UI.UIManager;
         process: Boolean;
         selecting: Boolean;
@@ -62,7 +62,7 @@ module TacticArena.State {
             this.uiGroup = this.add.group();
             this.worldGroup.add(this.uiGroup);
 
-            this.stageManager = new Controller.StageManager(this);
+            this.stageManager = new StageManager(this);
             this.stageManager.init('map');
 
             this.pawns = [];
@@ -77,11 +77,11 @@ module TacticArena.State {
             this.pathfinder.disableSync();
             this.pathfinder.setGrid(this.stageManager.grid);
 
-            this.signalManager = new Controller.SignalManager(this);
-            this.logManager = new Controller.LogManager(this);
-            this.orderManager = new Controller.OrderManager(this);
-            this.resolveManager = new Controller.ResolveManager(this);
-            this.turnManager = new Controller.TurnManager(this);
+            this.signalManager = new SignalManager(this);
+            this.logManager = new LogManager(this);
+            this.orderManager = new OrderManager(this);
+            this.resolveManager = new ResolveManager(this);
+            this.turnManager = new TurnManager(this);
         }
     }
 }
