@@ -191,9 +191,8 @@ module TacticArena {
                 let previousStep = steps[l - 1];
                 for (var i = 0; i < step.length; i++) {
                     step[i].entityState = OrderManager.getDefaultEntityState();
-                    // Dans le cas où une entité à moins d'actions à jouer que les autres
-                    // On lui en assigne un par défaut pour qu'elle ne soit pas inactive
-                    // Mais si elle n'a plus de AP elle ne fera rien (ni même attaquer) à part rester dans sa position
+                    // Dans le cas où un pawn à moins d'actions à jouer que les autres on lui en assigne un par défaut
+                    // pour qu'i ne soit pas inactif mais si elle n'a plus de AP il ne fera rien à part rester dans sa position
                     if (step[i].order == null) {
                         step[i].order = new Order.Stand(previousStep[i].order.position, previousStep[i].order.direction);
                     }
@@ -206,9 +205,7 @@ module TacticArena {
                         if (step[i].entity._id == step[j].entity._id) continue; // Pas d'interaction avec soi-même
 
                         let positionBBeforeOrder = previousStep[j].order.position;
-                        if(previousStep[j].entityState.moved) {
-                            positionBBeforeOrder = previousStep[j].entityState.moved;
-                        }
+                        if(previousStep[j].entityState.moved) { positionBBeforeOrder = previousStep[j].entityState.moved; }
 
                         step[i].data = {
                             aWasFacingB: previousStep[i].order.position.faces(positionBBeforeOrder, previousStep[i].order.direction),

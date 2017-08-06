@@ -735,9 +735,8 @@ var TacticArena;
                 var previousStep = steps[l - 1];
                 for (var i = 0; i < step.length; i++) {
                     step[i].entityState = OrderManager.getDefaultEntityState();
-                    // Dans le cas où une entité à moins d'actions à jouer que les autres
-                    // On lui en assigne un par défaut pour qu'elle ne soit pas inactive
-                    // Mais si elle n'a plus de AP elle ne fera rien (ni même attaquer) à part rester dans sa position
+                    // Dans le cas où un pawn à moins d'actions à jouer que les autres on lui en assigne un par défaut
+                    // pour qu'i ne soit pas inactif mais si elle n'a plus de AP il ne fera rien à part rester dans sa position
                     if (step[i].order == null) {
                         step[i].order = new TacticArena.Order.Stand(previousStep[i].order.position, previousStep[i].order.direction);
                     }
@@ -2665,94 +2664,10 @@ var TacticArena;
 (function (TacticArena) {
     var Order;
     (function (Order) {
-        var Move = (function (_super) {
-            __extends(Move, _super);
-            function Move(position, direction) {
-                return _super.call(this, 'move', position, direction) || this;
-            }
-            Move.prototype.process = function (step, stepB, ordermanager) {
-                var result = this;
-                if (step.data.aWasNextToB &&
-                    step.data.aWasFacingB &&
-                    step.data.aIsActive &&
-                    step.data.differentTeams &&
-                    step.data.keepDirection &&
-                    (step.data.keepPosition || step.data.equalPositions)) {
-                    var entityBIsDodging = true;
-                    if (step.order.action == 'slash') {
-                        step.data.fleeRate = 0;
-                    }
-                    if (TacticArena.OrderManager.resolutionEsquive(step.data.fleeRate)) {
-                        step.data.entityBHpLost += 1;
-                        //if(orderA.action == 'slash') { entityBHpLost += 1; }
-                        entityBIsDodging = false;
-                        if (ordermanager.alteredPawns.indexOf(stepB._id) < 0) {
-                            stepB.entityState.moveHasBeenBlocked = (stepB.order.action == 'move');
-                        }
-                    }
-                    result = new Order.Attack(this.position, this.direction, {
-                        entityId: stepB._id,
-                        dodge: entityBIsDodging,
-                        damages: step.data.entityBHpLost
-                    });
-                }
-                return result;
-            };
-            return Move;
-        }(TacticArena.BaseOrder));
-        Order.Move = Move;
-    })(Order = TacticArena.Order || (TacticArena.Order = {}));
-})(TacticArena || (TacticArena = {}));
-var TacticArena;
-(function (TacticArena) {
-    var Order;
-    (function (Order) {
-        var Slash = (function (_super) {
-            __extends(Slash, _super);
-            function Slash(position, direction) {
-                return _super.call(this, 'slash', position, direction) || this;
-            }
-            Slash.prototype.process = function (step, stepB, ordermanager) {
-                var result = this;
-                if (step.data.aWasNextToB &&
-                    step.data.aWasFacingB &&
-                    step.data.aIsActive &&
-                    step.data.differentTeams &&
-                    step.data.keepDirection &&
-                    (step.data.keepPosition || step.data.equalPositions)) {
-                    var entityBIsDodging = true;
-                    if (step.order.action == 'slash') {
-                        step.data.fleeRate = 0;
-                    }
-                    if (TacticArena.OrderManager.resolutionEsquive(step.data.fleeRate)) {
-                        step.data.entityBHpLost += 1;
-                        //if(orderA.action == 'slash') { entityBHpLost += 1; }
-                        entityBIsDodging = false;
-                        if (ordermanager.alteredPawns.indexOf(stepB._id) < 0) {
-                            stepB.entityState.moveHasBeenBlocked = (stepB.order.action == 'move');
-                        }
-                    }
-                    result = new Order.Attack(this.position, this.direction, {
-                        entityId: stepB._id,
-                        dodge: entityBIsDodging,
-                        damages: step.data.entityBHpLost
-                    });
-                }
-                return result;
-            };
-            return Slash;
-        }(TacticArena.BaseOrder));
-        Order.Slash = Slash;
-    })(Order = TacticArena.Order || (TacticArena.Order = {}));
-})(TacticArena || (TacticArena = {}));
-var TacticArena;
-(function (TacticArena) {
-    var Order;
-    (function (Order) {
-        var Stand = (function (_super) {
-            __extends(Stand, _super);
-            function Stand(position, direction) {
-                return _super.call(this, 'stand', position, direction) || this;
+        var ReflexOrder = (function (_super) {
+            __extends(ReflexOrder, _super);
+            function ReflexOrder(action, position, direction) {
+                return _super.call(this, action, position, direction) || this;
             }
             // Possible cases :
             // [  ][A v][  ]
@@ -2764,21 +2679,13 @@ var TacticArena;
             // AND IF A & B are not in the same team
             // AND IF A keeps its direction (aIsFacingB) (et ne va donc pas pas se détourner de B)
             // AND IF A stays next to B OR IF A moves toward B (equalPositions) (en lui faisant face)
-            Stand.prototype.process = function (step, stepB, ordermanager) {
+            ReflexOrder.prototype.process = function (step, stepB, ordermanager) {
                 var result = this;
-                if (step.data.aWasNextToB &&
-                    step.data.aWasFacingB &&
-                    step.data.aIsActive &&
-                    step.data.differentTeams &&
-                    step.data.keepDirection &&
-                    (step.data.keepPosition || step.data.equalPositions)) {
+                if (step.data.aWasNextToB && step.data.aWasFacingB && step.data.aIsActive && step.data.differentTeams &&
+                    step.data.keepDirection && (step.data.keepPosition || step.data.equalPositions)) {
                     var entityBIsDodging = true;
-                    if (step.order.action == 'slash') {
-                        step.data.fleeRate = 0;
-                    }
                     if (TacticArena.OrderManager.resolutionEsquive(step.data.fleeRate)) {
                         step.data.entityBHpLost += 1;
-                        //if(orderA.action == 'slash') { entityBHpLost += 1; }
                         entityBIsDodging = false;
                         if (step.data.alteredEntityB) {
                             stepB.entityState.moveHasBeenBlocked = (stepB.order.action == 'move');
@@ -2792,8 +2699,61 @@ var TacticArena;
                 }
                 return result;
             };
-            return Stand;
+            return ReflexOrder;
         }(TacticArena.BaseOrder));
+        Order.ReflexOrder = ReflexOrder;
+    })(Order = TacticArena.Order || (TacticArena.Order = {}));
+})(TacticArena || (TacticArena = {}));
+/// <reference path="ReflexOrder.ts"/>
+var TacticArena;
+(function (TacticArena) {
+    var Order;
+    (function (Order) {
+        var Move = (function (_super) {
+            __extends(Move, _super);
+            function Move(position, direction) {
+                return _super.call(this, 'move', position, direction) || this;
+            }
+            return Move;
+        }(Order.ReflexOrder));
+        Order.Move = Move;
+    })(Order = TacticArena.Order || (TacticArena.Order = {}));
+})(TacticArena || (TacticArena = {}));
+/// <reference path="ReflexOrder.ts"/>
+var TacticArena;
+(function (TacticArena) {
+    var Order;
+    (function (Order) {
+        var Slash = (function (_super) {
+            __extends(Slash, _super);
+            function Slash(position, direction) {
+                return _super.call(this, 'slash', position, direction) || this;
+            }
+            Slash.prototype.process = function (step, stepB, ordermanager) {
+                step.data.fleeRate = 0;
+                var result = _super.prototype.process.call(this, step, stepB, ordermanager);
+                if (result instanceof Order.Attack) {
+                    //entityBHpLost += 1;
+                }
+                return result;
+            };
+            return Slash;
+        }(Order.ReflexOrder));
+        Order.Slash = Slash;
+    })(Order = TacticArena.Order || (TacticArena.Order = {}));
+})(TacticArena || (TacticArena = {}));
+/// <reference path="ReflexOrder.ts"/>
+var TacticArena;
+(function (TacticArena) {
+    var Order;
+    (function (Order) {
+        var Stand = (function (_super) {
+            __extends(Stand, _super);
+            function Stand(position, direction) {
+                return _super.call(this, 'stand', position, direction) || this;
+            }
+            return Stand;
+        }(Order.ReflexOrder));
         Order.Stand = Stand;
     })(Order = TacticArena.Order || (TacticArena.Order = {}));
 })(TacticArena || (TacticArena = {}));
