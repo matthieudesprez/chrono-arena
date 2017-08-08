@@ -33,9 +33,8 @@ module TacticArena.Entity.Skill {
                 this.pawn.projection.moveTo(0, 0, path).then( (res) => {
                     this.pawn.setAp(this.pawn.getAp() - distance);
                     for (var i = 0; i < (resultPath as any).length; i++) {
-                        console.log(this.pawn.getProjectionOrReal().getDirection());
-                        let order = new TacticArena.Entity.Order.Move(this.state, resultPath[i].x, resultPath[i].y, this.pawn.getProjectionOrReal().getDirection());
-                        this.state.orderManager.add('move', this.pawn, resultPath[i].x, resultPath[i].y, this.pawn.getProjectionOrReal().getDirection(), true, order);
+                        let order = new Order.Move(new Position(resultPath[i].x, resultPath[i].y), this.pawn.getProjectionOrReal().getDirection());
+                        this.state.orderManager.add(this.pawn, order);
                     }
                     this.state.process = false;
                     this.state.signalManager.onActionPlayed.dispatch(this.pawn);

@@ -43,11 +43,11 @@ module TacticArena {
 
                 let direction = self.getDirection(p, targetPosition);
                 if(pawn.getDirection() != direction) {
-                    this.game.orderManager.add('stand', pawn, p.x, p.y, direction);
+                    this.game.orderManager.add(pawn, new Order.Stand(p, direction));
                     pawn.setAp(pawn.getAp() - 1);
                 }
                 if(self.game.stageManager.isFacingAway(p, pawn.getDirection(), targetPosition)) {
-                    this.game.orderManager.add('cast', pawn, p.x, p.y, pawn.getDirection());
+                    this.game.orderManager.add(pawn, new Order.Fire(p, pawn.getDirection()));
                     pawn.setAp(pawn.getAp() - 2);
                 }
 
@@ -63,12 +63,12 @@ module TacticArena {
                             for (var i = 0; i < (path as any).length; i++) {
                                 if(pawn.getAp() > 0) {
                                     direction = self.getDirection(p, targetPosition);
-                                    self.game.orderManager.add('move', pawn, path[i].x, path[i].y, direction);
+                                    self.game.orderManager.add(pawn, new Order.Move(new Position(path[i].x, path[i].y), direction));
                                     pawn.setAp(pawn.getAp() - 1);
 
                                     if(lastDirection != direction || i >= path.length - 1) {
                                         lastDirection = direction;
-                                        self.game.orderManager.add('stand', pawn, path[i].x, path[i].y, direction);
+                                        self.game.orderManager.add(pawn, new Order.Stand(new Position(path[i].x, path[i].y), direction));
                                         pawn.setAp(pawn.getAp() - 1);
                                     }
                                 }

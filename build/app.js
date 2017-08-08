@@ -135,11 +135,11 @@ var TacticArena;
                 var targetPosition_1 = target.getPosition();
                 var direction_1 = self.getDirection(p, targetPosition_1);
                 if (pawn.getDirection() != direction_1) {
-                    this.game.orderManager.add('stand', pawn, p.x, p.y, direction_1);
+                    this.game.orderManager.add(pawn, new TacticArena.Order.Stand(p, direction_1));
                     pawn.setAp(pawn.getAp() - 1);
                 }
                 if (self.game.stageManager.isFacingAway(p, pawn.getDirection(), targetPosition_1)) {
-                    this.game.orderManager.add('cast', pawn, p.x, p.y, pawn.getDirection());
+                    this.game.orderManager.add(pawn, new TacticArena.Order.Fire(p, pawn.getDirection()));
                     pawn.setAp(pawn.getAp() - 2);
                 }
                 var lastDirection_1 = pawn.getDirection();
@@ -149,11 +149,11 @@ var TacticArena;
                         for (var i = 0; i < path.length; i++) {
                             if (pawn.getAp() > 0) {
                                 direction_1 = self.getDirection(p, targetPosition_1);
-                                self.game.orderManager.add('move', pawn, path[i].x, path[i].y, direction_1);
+                                self.game.orderManager.add(pawn, new TacticArena.Order.Move(new TacticArena.Position(path[i].x, path[i].y), direction_1));
                                 pawn.setAp(pawn.getAp() - 1);
                                 if (lastDirection_1 != direction_1 || i >= path.length - 1) {
                                     lastDirection_1 = direction_1;
-                                    self.game.orderManager.add('stand', pawn, path[i].x, path[i].y, direction_1);
+                                    self.game.orderManager.add(pawn, new TacticArena.Order.Stand(new TacticArena.Position(path[i].x, path[i].y), direction_1));
                                     pawn.setAp(pawn.getAp() - 1);
                                 }
                             }
@@ -210,7 +210,7 @@ var TacticArena;
                 expect(steps[i][j].entityState.positionBlocked).toEqual(positionBlocked);
             }
             beforeEach(function (done) {
-                //spyOn(console, 'log').and.stub();
+                spyOn(console, 'log').and.stub();
                 spyOn(console, 'info').and.stub();
                 spyOn(console, 'warn').and.stub();
                 testGame = new Specs.TestGame(true);
@@ -241,10 +241,10 @@ var TacticArena;
                     var steps = currentState.orderManager.getSteps();
                     expect(steps.length).toEqual(2);
                     expect(steps[0].length).toEqual(2);
-                    testStep(steps, 0, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 3, 4, false, {});
-                    testStep(steps, 0, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 3, 4, false, {});
-                    testStep(steps, 1, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 2, 4, false, {});
-                    testStep(steps, 1, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 2, 4, false, {});
+                    testStep(steps, 0, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 3, 4, false, null);
+                    testStep(steps, 0, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 3, 4, false, null);
+                    testStep(steps, 1, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 2, 4, false, null);
+                    testStep(steps, 1, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 2, 4, false, null);
                 });
                 it("1st one stands same position for 1 step", function () {
                     currentState.orderManager.orders = [
@@ -258,10 +258,10 @@ var TacticArena;
                     var steps = currentState.orderManager.getSteps();
                     expect(steps.length).toEqual(2);
                     expect(steps[0].length).toEqual(2);
-                    testStep(steps, 0, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 3, 4, false, {});
-                    testStep(steps, 0, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 3, 4, false, {});
-                    testStep(steps, 1, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 2, 4, false, {});
-                    testStep(steps, 1, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 2, 4, false, {});
+                    testStep(steps, 0, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 3, 4, false, null);
+                    testStep(steps, 0, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 3, 4, false, null);
+                    testStep(steps, 1, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 2, 4, false, null);
+                    testStep(steps, 1, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 2, 4, false, null);
                 });
                 it("1st one moves toward the 2nd for 2 steps", function () {
                     currentState.orderManager.orders = [
@@ -276,12 +276,12 @@ var TacticArena;
                     var steps = currentState.orderManager.getSteps();
                     expect(steps.length).toEqual(3);
                     expect(steps[0].length).toEqual(2);
-                    testStep(steps, 0, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 3, 4, false, {});
-                    testStep(steps, 0, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 3, 4, false, {});
-                    testStep(steps, 1, 0, 1, 'move', 'E', { x: 9, y: 8 }, 2, 4, false, {});
-                    testStep(steps, 1, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 2, 4, false, {});
-                    testStep(steps, 2, 0, 1, 'attack', 'E', { x: 9, y: 8 }, 1, 3, true, { x: 10, y: 8 });
-                    testStep(steps, 2, 1, 2, 'attack', 'W', { x: 10, y: 8 }, 1, 3, false, {});
+                    testStep(steps, 0, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 3, 4, false, null);
+                    testStep(steps, 0, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 3, 4, false, null);
+                    testStep(steps, 1, 0, 1, 'move', 'E', { x: 9, y: 8 }, 2, 4, false, null);
+                    testStep(steps, 1, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 2, 4, false, null);
+                    testStep(steps, 2, 0, 1, 'attack', 'E', { x: 9, y: 8 }, 1, 3, true, new TacticArena.Position(10, 8));
+                    testStep(steps, 2, 1, 2, 'attack', 'W', { x: 10, y: 8 }, 1, 3, false, null);
                 });
                 it("both going same position then the first one wants to continue moving", function () {
                     currentState.orderManager.orders = [
@@ -302,12 +302,12 @@ var TacticArena;
                     var steps = currentState.orderManager.getSteps();
                     expect(steps.length).toEqual(3);
                     expect(steps[0].length).toEqual(2);
-                    testStep(steps, 0, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 3, 4, false, {});
-                    testStep(steps, 0, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 3, 4, false, {});
-                    testStep(steps, 1, 0, 1, 'move', 'E', { x: 8, y: 8 }, 2, 4, true, { x: 9, y: 8 });
-                    testStep(steps, 1, 1, 2, 'move', 'W', { x: 10, y: 8 }, 2, 4, true, { x: 9, y: 8 });
-                    testStep(steps, 2, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 1, 4, false, {});
-                    testStep(steps, 2, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 1, 4, false, {});
+                    testStep(steps, 0, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 3, 4, false, null);
+                    testStep(steps, 0, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 3, 4, false, null);
+                    testStep(steps, 1, 0, 1, 'move', 'E', { x: 8, y: 8 }, 2, 4, true, new TacticArena.Position(9, 8));
+                    testStep(steps, 1, 1, 2, 'move', 'W', { x: 10, y: 8 }, 2, 4, true, new TacticArena.Position(9, 8));
+                    testStep(steps, 2, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 1, 4, false, null);
+                    testStep(steps, 2, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 1, 4, false, null);
                 });
                 it("the first one wants moves in front of the second, then continues moving, facing the other", function () {
                     currentState.orderManager.orders = [
@@ -323,14 +323,14 @@ var TacticArena;
                     var steps = currentState.orderManager.getSteps();
                     expect(steps.length).toEqual(4);
                     expect(steps[0].length).toEqual(2);
-                    testStep(steps, 0, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 3, 4, false, {});
-                    testStep(steps, 0, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 3, 4, false, {});
-                    testStep(steps, 1, 0, 1, 'move', 'E', { x: 9, y: 8 }, 2, 4, false, {});
-                    testStep(steps, 1, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 2, 4, false, {});
-                    testStep(steps, 2, 0, 1, 'move', 'E', { x: 9, y: 8 }, 1, 3, true, { x: 9, y: 9 });
-                    testStep(steps, 2, 1, 2, 'attack', 'W', { x: 10, y: 8 }, 1, 4, false, {});
-                    testStep(steps, 3, 0, 1, 'attack', 'E', { x: 9, y: 8 }, 0, 2, false, {});
-                    testStep(steps, 3, 1, 2, 'attack', 'W', { x: 10, y: 8 }, 0, 3, false, {});
+                    testStep(steps, 0, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 3, 4, false, null);
+                    testStep(steps, 0, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 3, 4, false, null);
+                    testStep(steps, 1, 0, 1, 'move', 'E', { x: 9, y: 8 }, 2, 4, false, null);
+                    testStep(steps, 1, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 2, 4, false, null);
+                    testStep(steps, 2, 0, 1, 'move', 'E', { x: 9, y: 8 }, 1, 3, true, new TacticArena.Position(9, 9));
+                    testStep(steps, 2, 1, 2, 'attack', 'W', { x: 10, y: 8 }, 1, 4, false, null);
+                    testStep(steps, 3, 0, 1, 'attack', 'E', { x: 9, y: 8 }, 0, 2, false, null);
+                    testStep(steps, 3, 1, 2, 'attack', 'W', { x: 10, y: 8 }, 0, 3, false, null);
                 });
                 it("the first one wants moves in front of the second, then continues moving, without facing the other", function () {
                     currentState.orderManager.orders = [
@@ -346,14 +346,14 @@ var TacticArena;
                     var steps = currentState.orderManager.getSteps();
                     expect(steps.length).toEqual(4);
                     expect(steps[0].length).toEqual(2);
-                    testStep(steps, 0, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 3, 4, false, {});
-                    testStep(steps, 0, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 3, 4, false, {});
-                    testStep(steps, 1, 0, 1, 'stand', 'S', { x: 8, y: 8 }, 2, 4, false, {});
-                    testStep(steps, 1, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 2, 4, false, {});
-                    testStep(steps, 2, 0, 1, 'move', 'S', { x: 9, y: 8 }, 1, 4, false, {});
-                    testStep(steps, 2, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 1, 4, false, {});
-                    testStep(steps, 3, 0, 1, 'move', 'S', { x: 9, y: 8 }, 0, 3, true, { x: 9, y: 9 });
-                    testStep(steps, 3, 1, 2, 'attack', 'W', { x: 10, y: 8 }, 0, 4, false, {});
+                    testStep(steps, 0, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 3, 4, false, null);
+                    testStep(steps, 0, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 3, 4, false, null);
+                    testStep(steps, 1, 0, 1, 'stand', 'S', { x: 8, y: 8 }, 2, 4, false, null);
+                    testStep(steps, 1, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 2, 4, false, null);
+                    testStep(steps, 2, 0, 1, 'move', 'S', { x: 9, y: 8 }, 1, 4, false, null);
+                    testStep(steps, 2, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 1, 4, false, null);
+                    testStep(steps, 3, 0, 1, 'move', 'S', { x: 9, y: 8 }, 0, 3, true, new TacticArena.Position(9, 9));
+                    testStep(steps, 3, 1, 2, 'attack', 'W', { x: 10, y: 8 }, 0, 4, false, null);
                 });
                 it("the first one wants moves north then casts to the east while the other moves in the dmg area then comes cac", function () {
                     currentState.orderManager.orders = [
@@ -376,15 +376,15 @@ var TacticArena;
                     var steps = currentState.orderManager.getSteps();
                     expect(steps.length).toEqual(4);
                     expect(steps[0].length).toEqual(2);
-                    testStep(steps, 0, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 3, 4, false, {});
-                    testStep(steps, 0, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 3, 4, false, {});
-                    testStep(steps, 1, 0, 1, 'move', 'E', { x: 8, y: 7 }, 2, 4, false, {});
-                    testStep(steps, 1, 1, 2, 'move', 'W', { x: 10, y: 7 }, 2, 4, false, {});
-                    testStep(steps, 2, 0, 1, 'cast', 'E', { x: 8, y: 7 }, 0, 4, false, {});
+                    testStep(steps, 0, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 3, 4, false, null);
+                    testStep(steps, 0, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 3, 4, false, null);
+                    testStep(steps, 1, 0, 1, 'move', 'E', { x: 8, y: 7 }, 2, 4, false, null);
+                    testStep(steps, 1, 1, 2, 'move', 'W', { x: 10, y: 7 }, 2, 4, false, null);
+                    testStep(steps, 2, 0, 1, 'cast', 'E', { x: 8, y: 7 }, 0, 4, false, null);
                     expect(steps[2][0].order.targets).toEqual([currentState.pawns[1]._id]);
-                    testStep(steps, 2, 1, 2, 'move', 'W', { x: 9, y: 7 }, 1, 2, false, {});
-                    testStep(steps, 3, 0, 1, 'stand', 'E', { x: 8, y: 7 }, 0, 3, false, {});
-                    testStep(steps, 3, 1, 2, 'attack', 'W', { x: 9, y: 7 }, 0, 2, true, { x: 8, y: 7 });
+                    testStep(steps, 2, 1, 2, 'move', 'W', { x: 9, y: 7 }, 1, 2, false, null);
+                    testStep(steps, 3, 0, 1, 'stand', 'E', { x: 8, y: 7 }, 0, 3, false, null);
+                    testStep(steps, 3, 1, 2, 'attack', 'W', { x: 9, y: 7 }, 0, 2, true, new TacticArena.Position(8, 7));
                 });
                 it("the first one casts to the east while the other moves toward him", function () {
                     currentState.orderManager.orders = [
@@ -406,15 +406,15 @@ var TacticArena;
                     var steps = currentState.orderManager.getSteps();
                     expect(steps.length).toEqual(4);
                     expect(steps[0].length).toEqual(2);
-                    testStep(steps, 0, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 3, 4, false, {});
-                    testStep(steps, 0, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 3, 4, false, {});
-                    testStep(steps, 1, 0, 1, 'cast', 'E', { x: 8, y: 8 }, 1, 4, false, {});
+                    testStep(steps, 0, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 3, 4, false, null);
+                    testStep(steps, 0, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 3, 4, false, null);
+                    testStep(steps, 1, 0, 1, 'cast', 'E', { x: 8, y: 8 }, 1, 4, false, null);
                     expect(steps[1][0].order.targets).toEqual([currentState.pawns[1]._id]);
-                    testStep(steps, 1, 1, 2, 'move', 'W', { x: 9, y: 8 }, 2, 2, false, {});
-                    testStep(steps, 2, 0, 1, 'attack', 'E', { x: 8, y: 8 }, 0, 3, false, {});
-                    testStep(steps, 2, 1, 2, 'attack', 'W', { x: 9, y: 8 }, 1, 1, true, { x: 8, y: 8 });
-                    testStep(steps, 3, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 0, 2, false, {});
-                    testStep(steps, 3, 1, 2, 'attack', 'W', { x: 9, y: 8 }, 0, 1, false, {});
+                    testStep(steps, 1, 1, 2, 'move', 'W', { x: 9, y: 8 }, 2, 2, false, null);
+                    testStep(steps, 2, 0, 1, 'attack', 'E', { x: 8, y: 8 }, 0, 3, false, null);
+                    testStep(steps, 2, 1, 2, 'attack', 'W', { x: 9, y: 8 }, 1, 1, true, new TacticArena.Position(8, 8));
+                    testStep(steps, 3, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 0, 2, false, null);
+                    testStep(steps, 3, 1, 2, 'attack', 'W', { x: 9, y: 8 }, 0, 1, false, null);
                 });
                 it("the first one cast_wind to the east while the other moves and get pushed to where it came from", function () {
                     currentState.orderManager.orders = [
@@ -436,15 +436,15 @@ var TacticArena;
                     var steps = currentState.orderManager.getSteps();
                     expect(steps.length).toEqual(4);
                     expect(steps[0].length).toEqual(2);
-                    testStep(steps, 0, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 3, 4, false, {});
-                    testStep(steps, 0, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 3, 4, false, {});
-                    testStep(steps, 1, 0, 1, 'cast_wind', 'E', { x: 8, y: 8 }, 1, 4, false, {});
+                    testStep(steps, 0, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 3, 4, false, null);
+                    testStep(steps, 0, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 3, 4, false, null);
+                    testStep(steps, 1, 0, 1, 'cast_wind', 'E', { x: 8, y: 8 }, 1, 4, false, null);
                     expect(steps[1][0].order.targets).toEqual([{ entity: currentState.pawns[1]._id, moved: { x: 10, y: 8, d: 1 } }]);
-                    testStep(steps, 1, 1, 2, 'move', 'W', { x: 9, y: 8 }, 2, 3, false, {});
-                    testStep(steps, 2, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 0, 4, false, {});
-                    testStep(steps, 2, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 1, 3, false, {});
-                    testStep(steps, 3, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 0, 4, false, {});
-                    testStep(steps, 3, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 0, 3, false, {});
+                    testStep(steps, 1, 1, 2, 'move', 'W', { x: 9, y: 8 }, 2, 3, false, null);
+                    testStep(steps, 2, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 0, 4, false, null);
+                    testStep(steps, 2, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 1, 3, false, null);
+                    testStep(steps, 3, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 0, 4, false, null);
+                    testStep(steps, 3, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 0, 3, false, null);
                 });
             });
             describe("4 players / Fleerate 0%", function () {
@@ -460,14 +460,14 @@ var TacticArena;
                     var steps = currentState.orderManager.getSteps();
                     expect(steps.length).toEqual(2);
                     expect(steps[0].length).toEqual(4);
-                    testStep(steps, 0, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 3, 4, false, {});
-                    testStep(steps, 0, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 3, 4, false, {});
-                    testStep(steps, 0, 2, 3, 'dead', 'E', { x: 7, y: 7 }, 0, 0, false, {});
-                    testStep(steps, 0, 3, 4, 'stand', 'W', { x: 12, y: 7 }, 3, 4, false, {});
-                    testStep(steps, 1, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 2, 4, false, {});
-                    testStep(steps, 1, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 2, 4, false, {});
-                    testStep(steps, 1, 2, 3, 'dead', 'E', { x: 7, y: 7 }, 0, 0, false, {});
-                    testStep(steps, 1, 3, 4, 'stand', 'W', { x: 12, y: 7 }, 2, 4, false, {});
+                    testStep(steps, 0, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 3, 4, false, null);
+                    testStep(steps, 0, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 3, 4, false, null);
+                    testStep(steps, 0, 2, 3, 'dead', 'E', { x: 7, y: 7 }, 0, 0, false, null);
+                    testStep(steps, 0, 3, 4, 'stand', 'W', { x: 12, y: 7 }, 3, 4, false, null);
+                    testStep(steps, 1, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 2, 4, false, null);
+                    testStep(steps, 1, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 2, 4, false, null);
+                    testStep(steps, 1, 2, 3, 'dead', 'E', { x: 7, y: 7 }, 0, 0, false, null);
+                    testStep(steps, 1, 3, 4, 'stand', 'W', { x: 12, y: 7 }, 2, 4, false, null);
                 });
                 it("with 1 dead - 4th pawn moves", function () {
                     currentState.pawns[2].setHp(0);
@@ -483,18 +483,18 @@ var TacticArena;
                     var steps = currentState.orderManager.getSteps();
                     expect(steps.length).toEqual(3);
                     expect(steps[0].length).toEqual(4);
-                    testStep(steps, 0, 0, 4, 'stand', 'W', { x: 12, y: 7 }, 3, 4, false, {});
-                    testStep(steps, 0, 1, 1, 'stand', 'E', { x: 8, y: 8 }, 3, 4, false, {});
-                    testStep(steps, 0, 2, 2, 'stand', 'W', { x: 10, y: 8 }, 3, 4, false, {});
-                    testStep(steps, 0, 3, 3, 'dead', 'E', { x: 7, y: 7 }, 0, 0, false, {});
-                    testStep(steps, 1, 0, 4, 'move', 'W', { x: 11, y: 7 }, 2, 4, false, {});
-                    testStep(steps, 1, 1, 1, 'stand', 'E', { x: 8, y: 8 }, 2, 4, false, {});
-                    testStep(steps, 1, 2, 2, 'stand', 'W', { x: 10, y: 8 }, 2, 4, false, {});
-                    testStep(steps, 1, 3, 3, 'dead', 'E', { x: 7, y: 7 }, 0, 0, false, {});
-                    testStep(steps, 2, 0, 4, 'move', 'W', { x: 11, y: 6 }, 1, 4, false, {});
-                    testStep(steps, 2, 1, 1, 'stand', 'E', { x: 8, y: 8 }, 1, 4, false, {});
-                    testStep(steps, 2, 2, 2, 'stand', 'W', { x: 10, y: 8 }, 1, 4, false, {});
-                    testStep(steps, 2, 3, 3, 'dead', 'E', { x: 7, y: 7 }, 0, 0, false, {});
+                    testStep(steps, 0, 0, 4, 'stand', 'W', { x: 12, y: 7 }, 3, 4, false, null);
+                    testStep(steps, 0, 1, 1, 'stand', 'E', { x: 8, y: 8 }, 3, 4, false, null);
+                    testStep(steps, 0, 2, 2, 'stand', 'W', { x: 10, y: 8 }, 3, 4, false, null);
+                    testStep(steps, 0, 3, 3, 'dead', 'E', { x: 7, y: 7 }, 0, 0, false, null);
+                    testStep(steps, 1, 0, 4, 'move', 'W', { x: 11, y: 7 }, 2, 4, false, null);
+                    testStep(steps, 1, 1, 1, 'stand', 'E', { x: 8, y: 8 }, 2, 4, false, null);
+                    testStep(steps, 1, 2, 2, 'stand', 'W', { x: 10, y: 8 }, 2, 4, false, null);
+                    testStep(steps, 1, 3, 3, 'dead', 'E', { x: 7, y: 7 }, 0, 0, false, null);
+                    testStep(steps, 2, 0, 4, 'move', 'W', { x: 11, y: 6 }, 1, 4, false, null);
+                    testStep(steps, 2, 1, 1, 'stand', 'E', { x: 8, y: 8 }, 1, 4, false, null);
+                    testStep(steps, 2, 2, 2, 'stand', 'W', { x: 10, y: 8 }, 1, 4, false, null);
+                    testStep(steps, 2, 3, 3, 'dead', 'E', { x: 7, y: 7 }, 0, 0, false, null);
                 });
                 it("the 1st one cast, the 2nd one dies so it blocks the way and sees its actions cancelled - the 4th pawn moves but is blocked", function () {
                     currentState.pawns[1].setHp(2);
@@ -529,28 +529,28 @@ var TacticArena;
                     var steps = currentState.orderManager.getSteps();
                     expect(steps.length).toEqual(5);
                     expect(steps[0].length).toEqual(4);
-                    testStep(steps, 0, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 3, 4, false, {});
-                    testStep(steps, 0, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 4, 2, false, {});
-                    testStep(steps, 0, 2, 4, 'stand', 'W', { x: 12, y: 7 }, 4, 4, false, {});
-                    testStep(steps, 0, 3, 3, 'stand', 'E', { x: 7, y: 7 }, 3, 4, false, {});
-                    testStep(steps, 1, 0, 1, 'cast', 'E', { x: 8, y: 8 }, 1, 4, false, {});
-                    testStep(steps, 1, 1, 2, 'move', 'W', { x: 9, y: 8 }, 3, 0, false, {});
+                    testStep(steps, 0, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 3, 4, false, null);
+                    testStep(steps, 0, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 4, 2, false, null);
+                    testStep(steps, 0, 2, 4, 'stand', 'W', { x: 12, y: 7 }, 4, 4, false, null);
+                    testStep(steps, 0, 3, 3, 'stand', 'E', { x: 7, y: 7 }, 3, 4, false, null);
+                    testStep(steps, 1, 0, 1, 'cast', 'E', { x: 8, y: 8 }, 1, 4, false, null);
+                    testStep(steps, 1, 1, 2, 'move', 'W', { x: 9, y: 8 }, 3, 0, false, null);
                     expect(steps[1][1].entityState.dies).toBeTruthy();
-                    testStep(steps, 1, 2, 4, 'move', 'W', { x: 11, y: 7 }, 3, 4, false, {});
-                    testStep(steps, 1, 3, 3, 'stand', 'E', { x: 7, y: 7 }, 2, 4, false, {});
-                    testStep(steps, 2, 0, 1, 'move', 'E', { x: 7, y: 8 }, 0, 4, false, {});
-                    testStep(steps, 2, 1, 2, 'dead', 'W', { x: 9, y: 8 }, 3, 0, false, {});
+                    testStep(steps, 1, 2, 4, 'move', 'W', { x: 11, y: 7 }, 3, 4, false, null);
+                    testStep(steps, 1, 3, 3, 'stand', 'E', { x: 7, y: 7 }, 2, 4, false, null);
+                    testStep(steps, 2, 0, 1, 'move', 'E', { x: 7, y: 8 }, 0, 4, false, null);
+                    testStep(steps, 2, 1, 2, 'dead', 'W', { x: 9, y: 8 }, 3, 0, false, null);
                     expect(steps[2][1].entityState.dies).toBeFalsy();
-                    testStep(steps, 2, 2, 4, 'move', 'W', { x: 10, y: 7 }, 2, 4, false, {});
-                    testStep(steps, 2, 3, 3, 'stand', 'E', { x: 7, y: 7 }, 1, 4, false, {});
-                    testStep(steps, 3, 0, 1, 'stand', 'E', { x: 7, y: 8 }, 0, 4, false, {});
-                    testStep(steps, 3, 1, 2, 'dead', 'W', { x: 9, y: 8 }, 3, 0, false, {});
-                    testStep(steps, 3, 2, 4, 'move', 'W', { x: 9, y: 7 }, 1, 4, false, {});
-                    testStep(steps, 3, 3, 3, 'stand', 'E', { x: 7, y: 7 }, 0, 4, false, {});
-                    testStep(steps, 4, 0, 1, 'stand', 'E', { x: 7, y: 8 }, 0, 4, false, {});
-                    testStep(steps, 4, 1, 2, 'dead', 'W', { x: 9, y: 8 }, 3, 0, false, {});
-                    testStep(steps, 4, 2, 4, 'move', 'W', { x: 9, y: 7 }, 0, 4, true, { x: 9, y: 8 });
-                    testStep(steps, 4, 3, 3, 'stand', 'E', { x: 7, y: 7 }, 0, 4, false, {});
+                    testStep(steps, 2, 2, 4, 'move', 'W', { x: 10, y: 7 }, 2, 4, false, null);
+                    testStep(steps, 2, 3, 3, 'stand', 'E', { x: 7, y: 7 }, 1, 4, false, null);
+                    testStep(steps, 3, 0, 1, 'stand', 'E', { x: 7, y: 8 }, 0, 4, false, null);
+                    testStep(steps, 3, 1, 2, 'dead', 'W', { x: 9, y: 8 }, 3, 0, false, null);
+                    testStep(steps, 3, 2, 4, 'move', 'W', { x: 9, y: 7 }, 1, 4, false, null);
+                    testStep(steps, 3, 3, 3, 'stand', 'E', { x: 7, y: 7 }, 0, 4, false, null);
+                    testStep(steps, 4, 0, 1, 'stand', 'E', { x: 7, y: 8 }, 0, 4, false, null);
+                    testStep(steps, 4, 1, 2, 'dead', 'W', { x: 9, y: 8 }, 3, 0, false, null);
+                    testStep(steps, 4, 2, 4, 'move', 'W', { x: 9, y: 7 }, 0, 4, true, new TacticArena.Position(9, 8));
+                    testStep(steps, 4, 3, 3, 'stand', 'E', { x: 7, y: 7 }, 0, 4, false, null);
                 });
             });
         });
@@ -583,18 +583,13 @@ var TacticArena;
             }
             return false;
         };
-        OrderManager.prototype.add = function (action, entity, x, y, direction, triggerDispatch, order) {
-            if (direction === void 0) { direction = null; }
+        OrderManager.prototype.add = function (entity, order, triggerDispatch) {
             if (triggerDispatch === void 0) { triggerDispatch = true; }
-            if (order === void 0) { order = null; }
             if (!this.hasOrder(entity._id)) {
                 this.orders.push({ entity: entity, list: [] });
             }
             for (var i = 0; i < this.orders.length; i++) {
                 if (this.orders[i].entity._id == entity._id) {
-                    if (order === null) {
-                        order = new TacticArena.BaseOrder(action, new TacticArena.Position(x, y), direction);
-                    }
                     this.orders[i].list.push(order);
                 }
             }
@@ -636,7 +631,7 @@ var TacticArena;
                 var p = this.game.pawns[i];
                 if (!this.hasOrder(p._id)) {
                     var position = p.getPosition();
-                    this.add('stand', p, position.x, position.y, p.getDirection(), false, new TacticArena.Order.Stand(position, p.getDirection()));
+                    this.add(p, new TacticArena.Order.Stand(position, p.getDirection()), false);
                 }
             }
         };
@@ -646,8 +641,8 @@ var TacticArena;
                 var state = OrderManager.getDefaultEntityState();
                 var pawn = this.orders[i].entity;
                 var hp = pawn.getHp();
-                state['ap'] = hp > 0 ? pawn._apMax : 0;
-                state['hp'] = hp;
+                state.ap = hp > 0 ? pawn._apMax : 0;
+                state.hp = hp;
                 var defaultOrder = new TacticArena.Order.Stand(pawn.getPosition(), pawn.getDirection());
                 if (hp <= 0)
                     defaultOrder.action = 'dead';
@@ -663,7 +658,7 @@ var TacticArena;
             return (Math.floor(Math.random() * 100) > fleeRate);
         };
         OrderManager.prototype.blockEntity = function (steps, startI, j, order, entity) {
-            steps[startI][j].entityState.positionBlocked = { x: steps[startI][j].order.position.x, y: steps[startI][j].order.position.y };
+            steps[startI][j].entityState.positionBlocked = steps[startI][j].order.position;
             for (var i = startI; i < steps.length; i++) {
                 if (steps[i][j].order) {
                     if (i > startI && steps[i][j].order.action == 'move') {
@@ -705,10 +700,7 @@ var TacticArena;
             return this.processOrders(steps);
         };
         OrderManager.getDefaultEntityState = function () {
-            return {
-                moveHasBeenBlocked: false,
-                positionBlocked: {}
-            };
+            return new TacticArena.Entity.StepUnitState();
         };
         OrderManager.prototype.getPawn = function (id) {
             var result = null;
@@ -735,6 +727,8 @@ var TacticArena;
                 var previousStep = steps[l - 1];
                 for (var i = 0; i < step.length; i++) {
                     step[i].entityState = OrderManager.getDefaultEntityState();
+                    step[i].entityState.ap = previousStep[i].entityState.ap;
+                    step[i].entityState.hp = previousStep[i].entityState.hp;
                     // Dans le cas où un pawn à moins d'actions à jouer que les autres on lui en assigne un par défaut
                     // pour qu'i ne soit pas inactif mais si elle n'a plus de AP il ne fera rien à part rester dans sa position
                     if (step[i].order == null) {
@@ -757,8 +751,8 @@ var TacticArena;
                             fleeRate: 50,
                             entityAApCost: 1,
                             entityBHpLost: 0,
-                            aIsActive: previousStep[i].entityState['ap'] > 0,
-                            aIsAlive: previousStep[i].entityState['hp'] > 0,
+                            aIsActive: previousStep[i].entityState.ap > 0,
+                            aIsAlive: previousStep[i].entityState.hp > 0,
                             keepDirection: (previousStep[i].order.direction == step[i].order.direction),
                             keepPosition: step[i].order.position.equals(previousStep[i].order.position),
                             equalPositions: step[i].order.position.equals(step[j].order.position),
@@ -768,10 +762,10 @@ var TacticArena;
                             l: l,
                             j: j
                         };
-                        step[i].entityState.hp = typeof step[i].entityState.hp !== 'undefined' ? step[i].entityState.hp : previousStep[i].entityState['hp'];
+                        step[i].entityState.hp = typeof step[i].entityState.hp !== 'undefined' ? step[i].entityState.hp : previousStep[i].entityState.hp;
                         if (!step[i].data.aIsAlive) {
                             step[i].order = new TacticArena.Order.Dead(previousStep[i].order.position, previousStep[i].order.direction);
-                            step[i].entityState.ap = previousStep[i].entityState['ap'];
+                            step[i].entityState.ap = previousStep[i].entityState.ap;
                             step[i].entityState.hp = 0;
                             previousStep[i].entityState.dies = previousStep[i].order.action !== 'dead';
                             continue;
@@ -785,9 +779,9 @@ var TacticArena;
                         }
                         console.log(step[i].order);
                         step[i].order = step[i].order.process(step[i], step[j], this, steps);
-                        step[j].entityState.hp = typeof step[j].entityState.hp !== 'undefined' ? step[j].entityState.hp : previousStep[j].entityState['hp'];
+                        step[j].entityState.hp = typeof step[j].entityState.hp !== 'undefined' ? step[j].entityState.hp : previousStep[j].entityState.hp;
                         step[j].entityState.hp -= step[i].data.entityBHpLost;
-                        step[i].entityState.ap = step[i].data.aIsActive ? previousStep[i].entityState['ap'] - step[i].data.entityAApCost : 0;
+                        step[i].entityState.ap = step[i].data.aIsActive ? previousStep[i].entityState.ap - step[i].data.entityAApCost : 0;
                         if (step[i].entityState.moveHasBeenBlocked && this.alteredPawns.indexOf(step[i].entity._id) < 0) {
                             this.blockEntity(steps, l, i, new TacticArena.Order.Stand(previousStep[i].order.position, previousStep[i].order.direction), step[i].entity);
                         }
@@ -2577,6 +2571,54 @@ var TacticArena;
 (function (TacticArena) {
     var Entity;
     (function (Entity) {
+        var Step = (function () {
+            function Step() {
+                this.stepUnits = [];
+            }
+            return Step;
+        }());
+        Entity.Step = Step;
+    })(Entity = TacticArena.Entity || (TacticArena.Entity = {}));
+})(TacticArena || (TacticArena = {}));
+var TacticArena;
+(function (TacticArena) {
+    var Entity;
+    (function (Entity) {
+        var StepUnit = (function () {
+            function StepUnit(pawn, stepUnitState, order) {
+                this.pawn = pawn;
+                this.stepUnitState = stepUnitState;
+                this.order = order;
+            }
+            return StepUnit;
+        }());
+        Entity.StepUnit = StepUnit;
+    })(Entity = TacticArena.Entity || (TacticArena.Entity = {}));
+})(TacticArena || (TacticArena = {}));
+var TacticArena;
+(function (TacticArena) {
+    var Entity;
+    (function (Entity) {
+        var StepUnitState = (function () {
+            function StepUnitState(ap, hp) {
+                if (ap === void 0) { ap = null; }
+                if (hp === void 0) { hp = null; }
+                this.moveHasBeenBlocked = false;
+                this.positionBlocked = null;
+                this.moved = null;
+                this.ap = ap;
+                this.hp = hp;
+                this.dies = false;
+            }
+            return StepUnitState;
+        }());
+        Entity.StepUnitState = StepUnitState;
+    })(Entity = TacticArena.Entity || (TacticArena.Entity = {}));
+})(TacticArena || (TacticArena = {}));
+var TacticArena;
+(function (TacticArena) {
+    var Entity;
+    (function (Entity) {
         var Character;
         (function (Character) {
             var Ruairi = (function (_super) {
@@ -2680,7 +2722,7 @@ var TacticArena;
             // AND IF A keeps its direction (aIsFacingB) (et ne va donc pas pas se détourner de B)
             // AND IF A stays next to B OR IF A moves toward B (equalPositions) (en lui faisant face)
             ReflexOrder.prototype.process = function (step, stepB, ordermanager) {
-                var result = this;
+                var result = null;
                 if (step.data.aWasNextToB && step.data.aWasFacingB && step.data.aIsActive && step.data.differentTeams &&
                     step.data.keepDirection && (step.data.keepPosition || step.data.equalPositions)) {
                     var entityBIsDodging = true;
@@ -2696,6 +2738,9 @@ var TacticArena;
                         dodge: entityBIsDodging,
                         damages: step.data.entityBHpLost
                     });
+                }
+                if (result === null) {
+                    result = this;
                 }
                 return result;
             };
@@ -2870,7 +2915,7 @@ var TacticArena;
                             this.pawn.getProjectionOrReal().halfcast();
                             this.pawn.setAp(this.pawn.getAp() - 2);
                             this.state.uiManager.pawnsinfosUI.showApCost(this.pawn, 0);
-                            this.state.orderManager.add('cast', this.pawn, position.x, position.y, this.pawn.getProjectionOrReal().getDirection());
+                            this.state.orderManager.add(this.pawn, new TacticArena.Order.Fire(position, this.pawn.getProjectionOrReal().getDirection()));
                             this.state.stageManager.clearHelp();
                             this.state.signalManager.onActionPlayed.dispatch(this.pawn);
                         }
@@ -2938,7 +2983,7 @@ var TacticArena;
                             this.pawn.getProjectionOrReal().getSprite().attack();
                             this.pawn.setAp(this.pawn.getAp() - 1);
                             this.state.uiManager.this.pawnsinfosUI.showApCost(this.pawn, 0);
-                            this.state.orderManager.add('slash', this.pawn, position.x, position.y, this.pawn.getProjectionOrReal().getDirection());
+                            this.state.orderManager.add(this.pawn, new TacticArena.Order.Slash(position, this.pawn.getProjectionOrReal().getDirection()));
                             this.state.stageManager.clearHelp();
                             this.state.signalManager.onActionPlayed.dispatch(this.pawn);
                         }
@@ -3014,9 +3059,8 @@ var TacticArena;
                         _this.pawn.projection.moveTo(0, 0, path).then(function (res) {
                             _this.pawn.setAp(_this.pawn.getAp() - distance);
                             for (var i = 0; i < resultPath.length; i++) {
-                                console.log(_this.pawn.getProjectionOrReal().getDirection());
-                                var order = new TacticArena.Entity.Order.Move(_this.state, resultPath[i].x, resultPath[i].y, _this.pawn.getProjectionOrReal().getDirection());
-                                _this.state.orderManager.add('move', _this.pawn, resultPath[i].x, resultPath[i].y, _this.pawn.getProjectionOrReal().getDirection(), true, order);
+                                var order = new TacticArena.Order.Move(new TacticArena.Position(resultPath[i].x, resultPath[i].y), _this.pawn.getProjectionOrReal().getDirection());
+                                _this.state.orderManager.add(_this.pawn, order);
                             }
                             _this.state.process = false;
                             _this.state.signalManager.onActionPlayed.dispatch(_this.pawn);
@@ -3091,7 +3135,7 @@ var TacticArena;
                             this.pawn.getProjectionOrReal().halfcast();
                             this.pawn.setAp(this.pawn.getAp() - 2);
                             this.state.uiManager.pawnsinfosUI.showApCost(this.pawn, 0);
-                            this.state.orderManager.add('cast_wind', this.pawn, position.x, position.y, this.pawn.getProjectionOrReal().getDirection());
+                            this.state.orderManager.add(this.pawn, new TacticArena.Order.Wind(position, this.pawn.getProjectionOrReal().getDirection()));
                             this.state.stageManager.clearHelp();
                             this.state.signalManager.onActionPlayed.dispatch(this.pawn);
                         }

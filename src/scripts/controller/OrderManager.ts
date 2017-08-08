@@ -31,13 +31,12 @@ module TacticArena {
             return false;
         }
 
-        add(action, entity, x, y, direction = null, triggerDispatch = true, order = null) {
+        add(entity, order, triggerDispatch = true) {
             if (!this.hasOrder(entity._id)) {
                 this.orders.push({ entity: entity, list: [] });
             }
             for (var i = 0; i < this.orders.length; i++) {
                 if (this.orders[i].entity._id == entity._id) {
-                    if(order === null) { order = new BaseOrder(action,  new Position(x, y), direction); }
                     this.orders[i].list.push(order);
                 }
             }
@@ -81,7 +80,7 @@ module TacticArena {
                 let p = this.game.pawns[i];
                 if (!this.hasOrder(p._id)) {
                     let position = p.getPosition();
-                    this.add('stand', p, position.x, position.y, p.getDirection(), false, new Order.Stand(position, p.getDirection()));
+                    this.add(p, new Order.Stand(position, p.getDirection()), false);
                 }
             }
         }
@@ -92,8 +91,8 @@ module TacticArena {
                 let state = OrderManager.getDefaultEntityState();
                 let pawn = this.orders[i].entity;
                 let hp = pawn.getHp();
-                state['ap'] = hp > 0 ? pawn._apMax : 0;
-                state['hp'] = hp;
+                state.ap = hp > 0 ? pawn._apMax : 0;
+                state.hp = hp;
                 let defaultOrder = new Order.Stand(pawn.getPosition(), pawn.getDirection());
                 if(hp <= 0) defaultOrder.action = 'dead';
                 step.push({
@@ -110,7 +109,7 @@ module TacticArena {
         }
 
         blockEntity(steps, startI, j, order, entity) {
-            steps[startI][j].entityState.positionBlocked = {x: steps[startI][j].order.position.x, y: steps[startI][j].order.position.y};
+            steps[startI][j].entityState.positionBlocked = steps[startI][j].order.position;
             for (var i = startI; i < steps.length; i++) {
                 if (steps[i][j].order) {
                     if (i > startI && steps[i][j].order.action == 'move') {
@@ -158,10 +157,7 @@ module TacticArena {
         }
 
         static getDefaultEntityState() {
-            return {
-                moveHasBeenBlocked: false,
-                positionBlocked: {}
-            };
+            return new Entity.StepUnitState();
         }
 
         getPawn(id) {
@@ -191,6 +187,9 @@ module TacticArena {
                 let previousStep = steps[l - 1];
                 for (var i = 0; i < step.length; i++) {
                     step[i].entityState = OrderManager.getDefaultEntityState();
+                    step[i].entityState.ap = previousStep[i].entityState.ap;
+                    step[i].entityState.hp = previousStep[i].entityState.hp;
+
                     // Dans le cas où un pawn à moins d'actions à jouer que les autres on lui en assigne un par défaut
                     // pour qu'i ne soit pas inactif mais si elle n'a plus de AP il ne fera rien à part rester dans sa position
                     if (step[i].order == null) {
@@ -213,8 +212,8 @@ module TacticArena {
                             fleeRate: 50,
                             entityAApCost: 1,
                             entityBHpLost: 0,
-                            aIsActive: previousStep[i].entityState['ap'] > 0, // INACTIF = stand mais pas le droit d'attaquer
-                            aIsAlive: previousStep[i].entityState['hp'] > 0,
+                            aIsActive: previousStep[i].entityState.ap > 0, // INACTIF = stand mais pas le droit d'attaquer
+                            aIsAlive: previousStep[i].entityState.hp > 0,
                             keepDirection: (previousStep[i].order.direction == step[i].order.direction),
                             keepPosition: step[i].order.position.equals(previousStep[i].order.position),
                             equalPositions: step[i].order.position.equals(step[j].order.position),
@@ -225,11 +224,11 @@ module TacticArena {
                             j: j
                         };
 
-                        step[i].entityState.hp = typeof step[i].entityState.hp !== 'undefined' ? step[i].entityState.hp : previousStep[i].entityState['hp'];
+                        step[i].entityState.hp = typeof step[i].entityState.hp !== 'undefined' ? step[i].entityState.hp : previousStep[i].entityState.hp;
 
                         if(!step[i].data.aIsAlive) {
                             step[i].order = new Order.Dead(previousStep[i].order.position, previousStep[i].order.direction);
-                            step[i].entityState.ap = previousStep[i].entityState['ap'];
+                            step[i].entityState.ap = previousStep[i].entityState.ap;
                             step[i].entityState.hp = 0;
                             previousStep[i].entityState.dies = previousStep[i].order.action !== 'dead';
                             continue;
@@ -244,9 +243,9 @@ module TacticArena {
                         console.log(step[i].order);
                         step[i].order = step[i].order.process(step[i], step[j], this, steps);
 
-                        step[j].entityState.hp = typeof step[j].entityState.hp !== 'undefined' ? step[j].entityState.hp : previousStep[j].entityState['hp'];
+                        step[j].entityState.hp = typeof step[j].entityState.hp !== 'undefined' ? step[j].entityState.hp : previousStep[j].entityState.hp;
                         step[j].entityState.hp -= step[i].data.entityBHpLost;
-                        step[i].entityState.ap = step[i].data.aIsActive ? previousStep[i].entityState['ap'] - step[i].data.entityAApCost : 0;
+                        step[i].entityState.ap = step[i].data.aIsActive ? previousStep[i].entityState.ap - step[i].data.entityAApCost : 0;
 
                         if (step[i].entityState.moveHasBeenBlocked && this.alteredPawns.indexOf(step[i].entity._id) < 0) {
                             this.blockEntity(steps, l, i, new Order.Stand(previousStep[i].order.position, previousStep[i].order.direction), step[i].entity);

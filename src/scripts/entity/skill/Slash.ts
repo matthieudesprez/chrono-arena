@@ -49,7 +49,7 @@ module TacticArena.Entity.Skill {
                     this.pawn.getProjectionOrReal().getSprite().attack();
                     this.pawn.setAp(this.pawn.getAp() - 1);
                     this.state.uiManager.this.pawnsinfosUI.showApCost(this.pawn, 0);
-                    this.state.orderManager.add('slash', this.pawn, position.x, position.y, this.pawn.getProjectionOrReal().getDirection());
+                    this.state.orderManager.add(this.pawn, new Order.Slash(position, this.pawn.getProjectionOrReal().getDirection()));
                     this.state.stageManager.clearHelp();
                     this.state.signalManager.onActionPlayed.dispatch(this.pawn);
                 }

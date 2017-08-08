@@ -54,7 +54,7 @@ module TacticArena.Entity.Skill {
                     this.pawn.getProjectionOrReal().halfcast();
                     this.pawn.setAp(this.pawn.getAp() - 2);
                     this.state.uiManager.pawnsinfosUI.showApCost(this.pawn, 0);
-                    this.state.orderManager.add('cast', this.pawn, position.x, position.y, this.pawn.getProjectionOrReal().getDirection());
+                    this.state.orderManager.add(this.pawn, new Order.Fire(position, this.pawn.getProjectionOrReal().getDirection()));
                     this.state.stageManager.clearHelp();
                     this.state.signalManager.onActionPlayed.dispatch(this.pawn);
                 }

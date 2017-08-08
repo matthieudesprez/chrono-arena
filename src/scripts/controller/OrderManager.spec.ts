@@ -18,7 +18,7 @@ module TacticArena.Specs {
         }
 
         beforeEach(function (done) {
-            //spyOn(console, 'log').and.stub();
+            spyOn(console, 'log').and.stub();
             spyOn(console, 'info').and.stub();
             spyOn(console, 'warn').and.stub();
             testGame = new TestGame(true);
@@ -52,10 +52,10 @@ module TacticArena.Specs {
                 let steps = currentState.orderManager.getSteps();
                 expect(steps.length).toEqual(2);
                 expect(steps[0].length).toEqual(2);
-                testStep(steps, 0, 0, 1, 'stand', 'E', {x: 8, y: 8}, 3, 4, false, {});
-                testStep(steps, 0, 1, 2, 'stand', 'W', {x: 10, y: 8}, 3, 4, false, {});
-                testStep(steps, 1, 0, 1, 'stand', 'E', {x: 8, y: 8}, 2, 4, false, {});
-                testStep(steps, 1, 1, 2, 'stand', 'W', {x: 10, y: 8}, 2, 4, false, {});
+                testStep(steps, 0, 0, 1, 'stand', 'E', {x: 8, y: 8}, 3, 4, false, null);
+                testStep(steps, 0, 1, 2, 'stand', 'W', {x: 10, y: 8}, 3, 4, false, null);
+                testStep(steps, 1, 0, 1, 'stand', 'E', {x: 8, y: 8}, 2, 4, false, null);
+                testStep(steps, 1, 1, 2, 'stand', 'W', {x: 10, y: 8}, 2, 4, false, null);
             });
 
             it("1st one stands same position for 1 step", function () {
@@ -70,10 +70,10 @@ module TacticArena.Specs {
                 let steps = currentState.orderManager.getSteps();
                 expect(steps.length).toEqual(2);
                 expect(steps[0].length).toEqual(2);
-                testStep(steps, 0, 0, 1, 'stand', 'E', {x: 8, y: 8}, 3, 4, false, {});
-                testStep(steps, 0, 1, 2, 'stand', 'W', {x: 10, y: 8}, 3, 4, false, {});
-                testStep(steps, 1, 0, 1, 'stand', 'E', {x: 8, y: 8}, 2, 4, false, {});
-                testStep(steps, 1, 1, 2, 'stand', 'W', {x: 10, y: 8}, 2, 4, false, {});
+                testStep(steps, 0, 0, 1, 'stand', 'E', {x: 8, y: 8}, 3, 4, false, null);
+                testStep(steps, 0, 1, 2, 'stand', 'W', {x: 10, y: 8}, 3, 4, false, null);
+                testStep(steps, 1, 0, 1, 'stand', 'E', {x: 8, y: 8}, 2, 4, false, null);
+                testStep(steps, 1, 1, 2, 'stand', 'W', {x: 10, y: 8}, 2, 4, false, null);
             });
 
             it("1st one moves toward the 2nd for 2 steps", function () {
@@ -89,12 +89,12 @@ module TacticArena.Specs {
                 let steps = currentState.orderManager.getSteps();
                 expect(steps.length).toEqual(3);
                 expect(steps[0].length).toEqual(2);
-                testStep(steps, 0, 0, 1, 'stand', 'E', {x: 8, y: 8}, 3, 4, false, {});
-                testStep(steps, 0, 1, 2, 'stand', 'W', {x: 10, y: 8}, 3, 4, false, {});
-                testStep(steps, 1, 0, 1, 'move', 'E', {x: 9, y: 8}, 2, 4, false, {});
-                testStep(steps, 1, 1, 2, 'stand', 'W', {x: 10, y: 8}, 2, 4, false, {});
-                testStep(steps, 2, 0, 1, 'attack', 'E', {x: 9, y: 8}, 1, 3, true, {x: 10, y: 8});
-                testStep(steps, 2, 1, 2, 'attack', 'W', {x: 10, y: 8}, 1, 3, false, {});
+                testStep(steps, 0, 0, 1, 'stand', 'E', {x: 8, y: 8}, 3, 4, false, null);
+                testStep(steps, 0, 1, 2, 'stand', 'W', {x: 10, y: 8}, 3, 4, false, null);
+                testStep(steps, 1, 0, 1, 'move', 'E', {x: 9, y: 8}, 2, 4, false, null);
+                testStep(steps, 1, 1, 2, 'stand', 'W', {x: 10, y: 8}, 2, 4, false, null);
+                testStep(steps, 2, 0, 1, 'attack', 'E', {x: 9, y: 8}, 1, 3, true, new Position(10, 8));
+                testStep(steps, 2, 1, 2, 'attack', 'W', {x: 10, y: 8}, 1, 3, false, null);
             });
 
             it("both going same position then the first one wants to continue moving", function () {
@@ -116,12 +116,12 @@ module TacticArena.Specs {
                 let steps = currentState.orderManager.getSteps();
                 expect(steps.length).toEqual(3);
                 expect(steps[0].length).toEqual(2);
-                testStep(steps, 0, 0, 1, 'stand', 'E', {x: 8, y: 8}, 3, 4, false, {});
-                testStep(steps, 0, 1, 2, 'stand', 'W', {x: 10, y: 8}, 3, 4, false, {});
-                testStep(steps, 1, 0, 1, 'move', 'E', {x: 8, y: 8}, 2, 4, true, {x: 9, y: 8});
-                testStep(steps, 1, 1, 2, 'move', 'W', {x: 10, y: 8}, 2, 4, true, {x: 9, y: 8});
-                testStep(steps, 2, 0, 1, 'stand', 'E', {x: 8, y: 8}, 1, 4, false, {});
-                testStep(steps, 2, 1, 2, 'stand', 'W', {x: 10, y: 8}, 1, 4, false, {});
+                testStep(steps, 0, 0, 1, 'stand', 'E', {x: 8, y: 8}, 3, 4, false, null);
+                testStep(steps, 0, 1, 2, 'stand', 'W', {x: 10, y: 8}, 3, 4, false, null);
+                testStep(steps, 1, 0, 1, 'move', 'E', {x: 8, y: 8}, 2, 4, true, new Position(9, 8));
+                testStep(steps, 1, 1, 2, 'move', 'W', {x: 10, y: 8}, 2, 4, true, new Position(9, 8));
+                testStep(steps, 2, 0, 1, 'stand', 'E', {x: 8, y: 8}, 1, 4, false, null);
+                testStep(steps, 2, 1, 2, 'stand', 'W', {x: 10, y: 8}, 1, 4, false, null);
             });
 
             it("the first one wants moves in front of the second, then continues moving, facing the other", function () {
@@ -138,14 +138,14 @@ module TacticArena.Specs {
                 let steps = currentState.orderManager.getSteps();
                 expect(steps.length).toEqual(4);
                 expect(steps[0].length).toEqual(2);
-                testStep(steps, 0, 0, 1, 'stand', 'E', {x: 8, y: 8}, 3, 4, false, {});
-                testStep(steps, 0, 1, 2, 'stand', 'W', {x: 10, y: 8}, 3, 4, false, {});
-                testStep(steps, 1, 0, 1, 'move', 'E', {x: 9, y: 8}, 2, 4, false, {});
-                testStep(steps, 1, 1, 2, 'stand', 'W', {x: 10, y: 8}, 2, 4, false, {});
-                testStep(steps, 2, 0, 1, 'move', 'E', {x: 9, y: 8}, 1, 3, true, {x: 9, y: 9});
-                testStep(steps, 2, 1, 2, 'attack', 'W', {x: 10, y: 8}, 1, 4, false, {});
-                testStep(steps, 3, 0, 1, 'attack', 'E', {x: 9, y: 8}, 0, 2, false, {});
-                testStep(steps, 3, 1, 2, 'attack', 'W', {x: 10, y: 8}, 0, 3, false, {});
+                testStep(steps, 0, 0, 1, 'stand', 'E', {x: 8, y: 8}, 3, 4, false, null);
+                testStep(steps, 0, 1, 2, 'stand', 'W', {x: 10, y: 8}, 3, 4, false, null);
+                testStep(steps, 1, 0, 1, 'move', 'E', {x: 9, y: 8}, 2, 4, false, null);
+                testStep(steps, 1, 1, 2, 'stand', 'W', {x: 10, y: 8}, 2, 4, false, null);
+                testStep(steps, 2, 0, 1, 'move', 'E', {x: 9, y: 8}, 1, 3, true, new Position(9, 9));
+                testStep(steps, 2, 1, 2, 'attack', 'W', {x: 10, y: 8}, 1, 4, false, null);
+                testStep(steps, 3, 0, 1, 'attack', 'E', {x: 9, y: 8}, 0, 2, false, null);
+                testStep(steps, 3, 1, 2, 'attack', 'W', {x: 10, y: 8}, 0, 3, false, null);
             });
 
             it("the first one wants moves in front of the second, then continues moving, without facing the other", function () {
@@ -162,14 +162,14 @@ module TacticArena.Specs {
                 let steps = currentState.orderManager.getSteps();
                 expect(steps.length).toEqual(4);
                 expect(steps[0].length).toEqual(2);
-                testStep(steps, 0, 0, 1, 'stand', 'E', {x: 8, y: 8}, 3, 4, false, {});
-                testStep(steps, 0, 1, 2, 'stand', 'W', {x: 10, y: 8}, 3, 4, false, {});
-                testStep(steps, 1, 0, 1, 'stand', 'S', {x: 8, y: 8}, 2, 4, false, {});
-                testStep(steps, 1, 1, 2, 'stand', 'W', {x: 10, y: 8}, 2, 4, false, {});
-                testStep(steps, 2, 0, 1, 'move', 'S', {x: 9, y: 8}, 1, 4, false, {});
-                testStep(steps, 2, 1, 2, 'stand', 'W', {x: 10, y: 8}, 1, 4, false, {});
-                testStep(steps, 3, 0, 1, 'move', 'S', {x: 9, y: 8}, 0, 3, true, {x: 9, y: 9});
-                testStep(steps, 3, 1, 2, 'attack', 'W', {x: 10, y: 8}, 0, 4, false, {});
+                testStep(steps, 0, 0, 1, 'stand', 'E', {x: 8, y: 8}, 3, 4, false, null);
+                testStep(steps, 0, 1, 2, 'stand', 'W', {x: 10, y: 8}, 3, 4, false, null);
+                testStep(steps, 1, 0, 1, 'stand', 'S', {x: 8, y: 8}, 2, 4, false, null);
+                testStep(steps, 1, 1, 2, 'stand', 'W', {x: 10, y: 8}, 2, 4, false, null);
+                testStep(steps, 2, 0, 1, 'move', 'S', {x: 9, y: 8}, 1, 4, false, null);
+                testStep(steps, 2, 1, 2, 'stand', 'W', {x: 10, y: 8}, 1, 4, false, null);
+                testStep(steps, 3, 0, 1, 'move', 'S', {x: 9, y: 8}, 0, 3, true, new Position(9, 9));
+                testStep(steps, 3, 1, 2, 'attack', 'W', {x: 10, y: 8}, 0, 4, false, null);
             });
 
             it("the first one wants moves north then casts to the east while the other moves in the dmg area then comes cac", function () {
@@ -193,15 +193,15 @@ module TacticArena.Specs {
                 let steps = currentState.orderManager.getSteps();
                 expect(steps.length).toEqual(4);
                 expect(steps[0].length).toEqual(2);
-                testStep(steps, 0, 0, 1, 'stand', 'E', {x: 8, y: 8}, 3, 4, false, {});
-                testStep(steps, 0, 1, 2, 'stand', 'W', {x: 10, y: 8}, 3, 4, false, {});
-                testStep(steps, 1, 0, 1, 'move', 'E', {x: 8, y: 7}, 2, 4, false, {});
-                testStep(steps, 1, 1, 2, 'move', 'W', {x: 10, y: 7}, 2, 4, false, {});
-                testStep(steps, 2, 0, 1, 'cast', 'E', {x: 8, y: 7}, 0, 4, false, {});
+                testStep(steps, 0, 0, 1, 'stand', 'E', {x: 8, y: 8}, 3, 4, false, null);
+                testStep(steps, 0, 1, 2, 'stand', 'W', {x: 10, y: 8}, 3, 4, false, null);
+                testStep(steps, 1, 0, 1, 'move', 'E', {x: 8, y: 7}, 2, 4, false, null);
+                testStep(steps, 1, 1, 2, 'move', 'W', {x: 10, y: 7}, 2, 4, false, null);
+                testStep(steps, 2, 0, 1, 'cast', 'E', {x: 8, y: 7}, 0, 4, false, null);
                 expect(steps[2][0].order.targets).toEqual([currentState.pawns[1]._id]);
-                testStep(steps, 2, 1, 2, 'move', 'W', {x: 9, y: 7}, 1, 2, false, {});
-                testStep(steps, 3, 0, 1, 'stand', 'E', {x: 8, y: 7}, 0, 3, false, {});
-                testStep(steps, 3, 1, 2, 'attack', 'W', {x: 9, y: 7}, 0, 2, true, {x: 8, y: 7});
+                testStep(steps, 2, 1, 2, 'move', 'W', {x: 9, y: 7}, 1, 2, false, null);
+                testStep(steps, 3, 0, 1, 'stand', 'E', {x: 8, y: 7}, 0, 3, false, null);
+                testStep(steps, 3, 1, 2, 'attack', 'W', {x: 9, y: 7}, 0, 2, true, new Position(8, 7));
             });
 
             it("the first one casts to the east while the other moves toward him", function () {
@@ -224,15 +224,15 @@ module TacticArena.Specs {
                 let steps = currentState.orderManager.getSteps();
                 expect(steps.length).toEqual(4);
                 expect(steps[0].length).toEqual(2);
-                testStep(steps, 0, 0, 1, 'stand', 'E', {x: 8, y: 8}, 3, 4, false, {});
-                testStep(steps, 0, 1, 2, 'stand', 'W', {x: 10, y: 8}, 3, 4, false, {});
-                testStep(steps, 1, 0, 1, 'cast', 'E', {x: 8, y: 8}, 1, 4, false, {});
+                testStep(steps, 0, 0, 1, 'stand', 'E', {x: 8, y: 8}, 3, 4, false, null);
+                testStep(steps, 0, 1, 2, 'stand', 'W', {x: 10, y: 8}, 3, 4, false, null);
+                testStep(steps, 1, 0, 1, 'cast', 'E', {x: 8, y: 8}, 1, 4, false, null);
                 expect(steps[1][0].order.targets).toEqual([currentState.pawns[1]._id]);
-                testStep(steps, 1, 1, 2, 'move', 'W', {x: 9, y: 8}, 2, 2, false, {});
-                testStep(steps, 2, 0, 1, 'attack', 'E', {x: 8, y: 8}, 0, 3, false, {});
-                testStep(steps, 2, 1, 2, 'attack', 'W', {x: 9, y: 8}, 1, 1, true, {x: 8, y: 8});
-                testStep(steps, 3, 0, 1, 'stand', 'E', {x: 8, y: 8}, 0, 2, false, {});
-                testStep(steps, 3, 1, 2, 'attack', 'W', {x: 9, y: 8}, 0, 1, false, {});
+                testStep(steps, 1, 1, 2, 'move', 'W', {x: 9, y: 8}, 2, 2, false, null);
+                testStep(steps, 2, 0, 1, 'attack', 'E', {x: 8, y: 8}, 0, 3, false, null);
+                testStep(steps, 2, 1, 2, 'attack', 'W', {x: 9, y: 8}, 1, 1, true, new Position(8, 8));
+                testStep(steps, 3, 0, 1, 'stand', 'E', {x: 8, y: 8}, 0, 2, false, null);
+                testStep(steps, 3, 1, 2, 'attack', 'W', {x: 9, y: 8}, 0, 1, false, null);
             });
 
             it("the first one cast_wind to the east while the other moves and get pushed to where it came from", function () {
@@ -255,15 +255,15 @@ module TacticArena.Specs {
                 let steps = currentState.orderManager.getSteps();
                 expect(steps.length).toEqual(4);
                 expect(steps[0].length).toEqual(2);
-                testStep(steps, 0, 0, 1, 'stand', 'E', {x: 8, y: 8}, 3, 4, false, {});
-                testStep(steps, 0, 1, 2, 'stand', 'W', {x: 10, y: 8}, 3, 4, false, {});
-                testStep(steps, 1, 0, 1, 'cast_wind', 'E', {x: 8, y: 8}, 1, 4, false, {});
+                testStep(steps, 0, 0, 1, 'stand', 'E', {x: 8, y: 8}, 3, 4, false, null);
+                testStep(steps, 0, 1, 2, 'stand', 'W', {x: 10, y: 8}, 3, 4, false, null);
+                testStep(steps, 1, 0, 1, 'cast_wind', 'E', {x: 8, y: 8}, 1, 4, false, null);
                 expect(steps[1][0].order.targets).toEqual([{entity: currentState.pawns[1]._id, moved: {x: 10, y: 8, d: 1}}]);
-                testStep(steps, 1, 1, 2, 'move', 'W', {x: 9, y: 8}, 2, 3, false, {});
-                testStep(steps, 2, 0, 1, 'stand', 'E', {x: 8, y: 8}, 0, 4, false, {});
-                testStep(steps, 2, 1, 2, 'stand', 'W', {x: 10, y: 8}, 1, 3, false, {});
-                testStep(steps, 3, 0, 1, 'stand', 'E', {x: 8, y: 8}, 0, 4, false, {});
-                testStep(steps, 3, 1, 2, 'stand', 'W', {x: 10, y: 8}, 0, 3, false, {});
+                testStep(steps, 1, 1, 2, 'move', 'W', {x: 9, y: 8}, 2, 3, false, null);
+                testStep(steps, 2, 0, 1, 'stand', 'E', {x: 8, y: 8}, 0, 4, false, null);
+                testStep(steps, 2, 1, 2, 'stand', 'W', {x: 10, y: 8}, 1, 3, false, null);
+                testStep(steps, 3, 0, 1, 'stand', 'E', {x: 8, y: 8}, 0, 4, false, null);
+                testStep(steps, 3, 1, 2, 'stand', 'W', {x: 10, y: 8}, 0, 3, false, null);
             });
         });
 
@@ -283,14 +283,14 @@ module TacticArena.Specs {
                 let steps = currentState.orderManager.getSteps();
                 expect(steps.length).toEqual(2);
                 expect(steps[0].length).toEqual(4);
-                testStep(steps, 0, 0, 1, 'stand', 'E', {x: 8, y: 8}, 3, 4, false, {});
-                testStep(steps, 0, 1, 2, 'stand', 'W', {x: 10, y: 8}, 3, 4, false, {});
-                testStep(steps, 0, 2, 3, 'dead', 'E', {x: 7, y: 7}, 0, 0, false, {});
-                testStep(steps, 0, 3, 4, 'stand', 'W', {x: 12, y: 7}, 3, 4, false, {});
-                testStep(steps, 1, 0, 1, 'stand', 'E', {x: 8, y: 8}, 2, 4, false, {});
-                testStep(steps, 1, 1, 2, 'stand', 'W', {x: 10, y: 8}, 2, 4, false, {});
-                testStep(steps, 1, 2, 3, 'dead', 'E', {x: 7, y: 7}, 0, 0, false, {});
-                testStep(steps, 1, 3, 4, 'stand', 'W', {x: 12, y: 7}, 2, 4, false, {});
+                testStep(steps, 0, 0, 1, 'stand', 'E', {x: 8, y: 8}, 3, 4, false, null);
+                testStep(steps, 0, 1, 2, 'stand', 'W', {x: 10, y: 8}, 3, 4, false, null);
+                testStep(steps, 0, 2, 3, 'dead', 'E', {x: 7, y: 7}, 0, 0, false, null);
+                testStep(steps, 0, 3, 4, 'stand', 'W', {x: 12, y: 7}, 3, 4, false, null);
+                testStep(steps, 1, 0, 1, 'stand', 'E', {x: 8, y: 8}, 2, 4, false, null);
+                testStep(steps, 1, 1, 2, 'stand', 'W', {x: 10, y: 8}, 2, 4, false, null);
+                testStep(steps, 1, 2, 3, 'dead', 'E', {x: 7, y: 7}, 0, 0, false, null);
+                testStep(steps, 1, 3, 4, 'stand', 'W', {x: 12, y: 7}, 2, 4, false, null);
             });
 
             it("with 1 dead - 4th pawn moves", function () {
@@ -307,20 +307,20 @@ module TacticArena.Specs {
                 let steps = currentState.orderManager.getSteps();
                 expect(steps.length).toEqual(3);
                 expect(steps[0].length).toEqual(4);
-                testStep(steps, 0, 0, 4, 'stand', 'W', {x: 12, y: 7}, 3, 4, false, {});
-                testStep(steps, 0, 1, 1, 'stand', 'E', {x: 8, y: 8}, 3, 4, false, {});
-                testStep(steps, 0, 2, 2, 'stand', 'W', {x: 10, y: 8}, 3, 4, false, {});
-                testStep(steps, 0, 3, 3, 'dead', 'E', {x: 7, y: 7}, 0, 0, false, {});
+                testStep(steps, 0, 0, 4, 'stand', 'W', {x: 12, y: 7}, 3, 4, false, null);
+                testStep(steps, 0, 1, 1, 'stand', 'E', {x: 8, y: 8}, 3, 4, false, null);
+                testStep(steps, 0, 2, 2, 'stand', 'W', {x: 10, y: 8}, 3, 4, false, null);
+                testStep(steps, 0, 3, 3, 'dead', 'E', {x: 7, y: 7}, 0, 0, false, null);
 
-                testStep(steps, 1, 0, 4, 'move', 'W', {x: 11, y: 7}, 2, 4, false, {});
-                testStep(steps, 1, 1, 1, 'stand', 'E', {x: 8, y: 8}, 2, 4, false, {});
-                testStep(steps, 1, 2, 2, 'stand', 'W', {x: 10, y: 8}, 2, 4, false, {});
-                testStep(steps, 1, 3, 3, 'dead', 'E', {x: 7, y: 7}, 0, 0, false, {});
+                testStep(steps, 1, 0, 4, 'move', 'W', {x: 11, y: 7}, 2, 4, false, null);
+                testStep(steps, 1, 1, 1, 'stand', 'E', {x: 8, y: 8}, 2, 4, false, null);
+                testStep(steps, 1, 2, 2, 'stand', 'W', {x: 10, y: 8}, 2, 4, false, null);
+                testStep(steps, 1, 3, 3, 'dead', 'E', {x: 7, y: 7}, 0, 0, false, null);
 
-                testStep(steps, 2, 0, 4, 'move', 'W', {x: 11, y: 6}, 1, 4, false, {});
-                testStep(steps, 2, 1, 1, 'stand', 'E', {x: 8, y: 8}, 1, 4, false, {});
-                testStep(steps, 2, 2, 2, 'stand', 'W', {x: 10, y: 8}, 1, 4, false, {});
-                testStep(steps, 2, 3, 3, 'dead', 'E', {x: 7, y: 7}, 0, 0, false, {});
+                testStep(steps, 2, 0, 4, 'move', 'W', {x: 11, y: 6}, 1, 4, false, null);
+                testStep(steps, 2, 1, 1, 'stand', 'E', {x: 8, y: 8}, 1, 4, false, null);
+                testStep(steps, 2, 2, 2, 'stand', 'W', {x: 10, y: 8}, 1, 4, false, null);
+                testStep(steps, 2, 3, 3, 'dead', 'E', {x: 7, y: 7}, 0, 0, false, null);
             });
 
             it("the 1st one cast, the 2nd one dies so it blocks the way and sees its actions cancelled - the 4th pawn moves but is blocked", function () {
@@ -356,32 +356,32 @@ module TacticArena.Specs {
                 let steps = currentState.orderManager.getSteps();
                 expect(steps.length).toEqual(5);
                 expect(steps[0].length).toEqual(4);
-                testStep(steps, 0, 0, 1, 'stand', 'E', {x: 8, y: 8}, 3, 4, false, {});
-                testStep(steps, 0, 1, 2, 'stand', 'W', {x: 10, y: 8}, 4, 2, false, {});
-                testStep(steps, 0, 2, 4, 'stand', 'W', {x: 12, y: 7}, 4, 4, false, {});
-                testStep(steps, 0, 3, 3, 'stand', 'E', {x: 7, y: 7}, 3, 4, false, {});
+                testStep(steps, 0, 0, 1, 'stand', 'E', {x: 8, y: 8}, 3, 4, false, null);
+                testStep(steps, 0, 1, 2, 'stand', 'W', {x: 10, y: 8}, 4, 2, false, null);
+                testStep(steps, 0, 2, 4, 'stand', 'W', {x: 12, y: 7}, 4, 4, false, null);
+                testStep(steps, 0, 3, 3, 'stand', 'E', {x: 7, y: 7}, 3, 4, false, null);
 
-                testStep(steps, 1, 0, 1, 'cast', 'E', {x: 8, y: 8}, 1, 4, false, {});
-                testStep(steps, 1, 1, 2, 'move', 'W', {x: 9, y: 8}, 3, 0, false, {});
+                testStep(steps, 1, 0, 1, 'cast', 'E', {x: 8, y: 8}, 1, 4, false, null);
+                testStep(steps, 1, 1, 2, 'move', 'W', {x: 9, y: 8}, 3, 0, false, null);
                 expect(steps[1][1].entityState.dies).toBeTruthy();
-                testStep(steps, 1, 2, 4, 'move', 'W', {x: 11, y: 7}, 3, 4, false, {});
-                testStep(steps, 1, 3, 3, 'stand', 'E', {x: 7, y: 7}, 2, 4, false, {});
+                testStep(steps, 1, 2, 4, 'move', 'W', {x: 11, y: 7}, 3, 4, false, null);
+                testStep(steps, 1, 3, 3, 'stand', 'E', {x: 7, y: 7}, 2, 4, false, null);
 
-                testStep(steps, 2, 0, 1, 'move', 'E', {x: 7, y: 8}, 0, 4, false, {});
-                testStep(steps, 2, 1, 2, 'dead', 'W', {x: 9, y: 8}, 3, 0, false, {});
+                testStep(steps, 2, 0, 1, 'move', 'E', {x: 7, y: 8}, 0, 4, false, null);
+                testStep(steps, 2, 1, 2, 'dead', 'W', {x: 9, y: 8}, 3, 0, false, null);
                 expect(steps[2][1].entityState.dies).toBeFalsy();
-                testStep(steps, 2, 2, 4, 'move', 'W', {x: 10, y: 7}, 2, 4, false, {});
-                testStep(steps, 2, 3, 3, 'stand', 'E', {x: 7, y: 7}, 1, 4, false, {});
+                testStep(steps, 2, 2, 4, 'move', 'W', {x: 10, y: 7}, 2, 4, false, null);
+                testStep(steps, 2, 3, 3, 'stand', 'E', {x: 7, y: 7}, 1, 4, false, null);
 
-                testStep(steps, 3, 0, 1, 'stand', 'E', {x: 7, y: 8}, 0, 4, false, {});
-                testStep(steps, 3, 1, 2, 'dead', 'W', {x: 9, y: 8}, 3, 0, false, {});
-                testStep(steps, 3, 2, 4, 'move', 'W', {x: 9, y: 7}, 1, 4, false, {});
-                testStep(steps, 3, 3, 3, 'stand', 'E', {x: 7, y: 7}, 0, 4, false, {});
+                testStep(steps, 3, 0, 1, 'stand', 'E', {x: 7, y: 8}, 0, 4, false, null);
+                testStep(steps, 3, 1, 2, 'dead', 'W', {x: 9, y: 8}, 3, 0, false, null);
+                testStep(steps, 3, 2, 4, 'move', 'W', {x: 9, y: 7}, 1, 4, false, null);
+                testStep(steps, 3, 3, 3, 'stand', 'E', {x: 7, y: 7}, 0, 4, false, null);
 
-                testStep(steps, 4, 0, 1, 'stand', 'E', {x: 7, y: 8}, 0, 4, false, {});
-                testStep(steps, 4, 1, 2, 'dead', 'W', {x: 9, y: 8}, 3, 0, false, {});
-                testStep(steps, 4, 2, 4, 'move', 'W', {x: 9, y: 7}, 0, 4, true, {x: 9, y: 8});
-                testStep(steps, 4, 3, 3, 'stand', 'E', {x: 7, y: 7}, 0, 4, false, {});
+                testStep(steps, 4, 0, 1, 'stand', 'E', {x: 7, y: 8}, 0, 4, false, null);
+                testStep(steps, 4, 1, 2, 'dead', 'W', {x: 9, y: 8}, 3, 0, false, null);
+                testStep(steps, 4, 2, 4, 'move', 'W', {x: 9, y: 7}, 0, 4, true, new Position(9, 8));
+                testStep(steps, 4, 3, 3, 'stand', 'E', {x: 7, y: 7}, 0, 4, false, null);
             });
         });
     });

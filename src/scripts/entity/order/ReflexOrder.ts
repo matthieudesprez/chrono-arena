@@ -16,7 +16,7 @@ module TacticArena.Order {
         // AND IF A keeps its direction (aIsFacingB) (et ne va donc pas pas se détourner de B)
         // AND IF A stays next to B OR IF A moves toward B (equalPositions) (en lui faisant face)
         process(step, stepB, ordermanager) {
-            let result = this;
+            let result = null;
             if (step.data.aWasNextToB && step.data.aWasFacingB && step.data.aIsActive && step.data.differentTeams &&
                 step.data.keepDirection && (step.data.keepPosition || step.data.equalPositions)) {
                 let entityBIsDodging = true;
@@ -32,6 +32,9 @@ module TacticArena.Order {
                     dodge: entityBIsDodging,
                     damages: step.data.entityBHpLost
                 });
+            }
+            if(result === null) {
+                result = this;
             }
             return result;
         }
