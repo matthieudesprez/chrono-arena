@@ -8,12 +8,12 @@ module TacticArena.Order {
         process(step, stepB, ordermanager) {
             let result = this;
             step.data.entityAApCost++;
-            let path = ordermanager.game.stageManager.getLinearPath(step.entity, 4, step.order.direction, step.order.position);
+            let path = ordermanager.game.stageManager.getLinearPath(step.pawn, 4, step.order.direction, step.order.position);
             step.order.targets = step.order.targets || [];
             for (var k = 0; k < path.length; k++) {
-                let targetPosition = stepB.entityState.moveHasBeenBlocked ? step.data.positionBBeforeOrder : stepB.order.position;
+                let targetPosition = stepB.stepUnitState.moveHasBeenBlocked ? step.data.positionBBeforeOrder : stepB.order.position;
                 if (path[k].x == targetPosition.x && path[k].y == targetPosition.y) {
-                    step.order.targets.push(stepB.entity._id);
+                    step.order.targets.push(stepB.pawn._id);
                     step.data.entityBHpLost += 2;
                 }
             }

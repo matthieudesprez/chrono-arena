@@ -2,9 +2,9 @@ module TacticArena {
     export class ResolveManager {
         steps;
         game;
-        processing;
-        currentIndex;
-        active;
+        processing:boolean;
+        currentIndex:Number;
+        active:boolean;
 
         constructor(game) {
             this.steps = [];
@@ -64,7 +64,6 @@ module TacticArena {
         }
 
         init(steps) {
-            console.info(steps);
             this.steps = steps;
             this.manageProjectionDislay(steps[0], true);
             this.currentIndex = 0;
@@ -108,13 +107,12 @@ module TacticArena {
                 this.game.signalManager.stepResolutionIndexChange.dispatch(index);
                 let step = this.steps[index];
                 let previousStep = index > 0 ? this.steps[index - 1] : null;
-                console.log('processStep', index, step);
 
                 var promisesOrders = [];
                 for (var i = 0; i < step.length; i++) {
                     var o = step[i].order;
                     var e = step[i].entity;
-                    var s = step[i].entityState;
+                    var s = step[i].stepUnitState;
                     var p = null;
                     let position = e.getPosition();
 
@@ -161,8 +159,8 @@ module TacticArena {
                         this.manageProjectionDislay(step);
                     }
                     step.forEach( s => {
-                        let forceAnimation = typeof s.entityState.dies !== 'undefined' && s.entityState.dies;
-                        s.entity.setHp(s.entityState.hp, forceAnimation);
+                        let forceAnimation = typeof s.stepUnitState.dies !== 'undefined' && s.stepUnitState.dies;
+                        s.entity.setHp(s.stepUnitState.hp, forceAnimation);
                     });
                     this.game.signalManager.stepResolutionFinished.dispatch(index);
                     if (this.steps.length > (index + 1) && !this.game.isPaused) {

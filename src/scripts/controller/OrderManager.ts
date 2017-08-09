@@ -33,14 +33,16 @@ module TacticArena {
 
         add(entity, order, triggerDispatch = true) {
             if (!this.hasOrder(entity._id)) {
-                this.orders.push({ entity: entity, list: [] });
+                this.orders.push({entity: entity, list: []});
             }
             for (var i = 0; i < this.orders.length; i++) {
                 if (this.orders[i].entity._id == entity._id) {
                     this.orders[i].list.push(order);
                 }
             }
-            if(triggerDispatch) { this.game.signalManager.onOrderChange.dispatch(entity); }
+            if (triggerDispatch) {
+                this.game.signalManager.onOrderChange.dispatch(entity);
+            }
         }
 
         getOrders(entity_id) {
@@ -86,20 +88,14 @@ module TacticArena {
         }
 
         getInitialStep() {
-            var step = [];
+            var step = new Entity.Step();
             for (var i = 0; i < this.orders.length; i++) {
-                let state = OrderManager.getDefaultEntityState();
                 let pawn = this.orders[i].entity;
-                let hp = pawn.getHp();
-                state.ap = hp > 0 ? pawn._apMax : 0;
-                state.hp = hp;
-                let defaultOrder = new Order.Stand(pawn.getPosition(), pawn.getDirection());
-                if(hp <= 0) defaultOrder.action = 'dead';
-                step.push({
-                    entity: pawn,
-                    entityState: state,
-                    order: defaultOrder
-                });
+                step.stepUnits.push(new Entity.StepUnit(
+                    pawn,
+                    new Entity.StepUnitState((pawn.getHp() > 0 ? pawn._apMax : 0), pawn.getHp()),
+                    (pawn.getHp() <= 0) ? new Order.Dead(pawn.getPosition(), pawn.getDirection()) : new Order.Stand(pawn.getPosition(), pawn.getDirection())
+                ));
             }
             return step;
         }
@@ -109,13 +105,13 @@ module TacticArena {
         }
 
         blockEntity(steps, startI, j, order, entity) {
-            steps[startI][j].entityState.positionBlocked = steps[startI][j].order.position;
+            steps[startI].stepUnits[j].stepUnitState.positionBlocked = steps[startI].stepUnits[j].order.position;
             for (var i = startI; i < steps.length; i++) {
-                if (steps[i][j].order) {
-                    if (i > startI && steps[i][j].order.action == 'move') {
-                        steps[i][j].order = order;
+                if (steps[i].stepUnits[j].order) {
+                    if (i > startI && steps[i].stepUnits[j].order.action == 'move') {
+                        steps[i].stepUnits[j].order = order;
                     }
-                    steps[i][j].order.position = order.position;
+                    steps[i].stepUnits[j].order.position = order.position;
                 }
             }
             this.alteredPawns.push(entity._id);
@@ -125,7 +121,7 @@ module TacticArena {
 
         pacifyEntity(steps, startI, j, order, entity, state) {
             for (var i = startI; i < steps.length; i++) {
-                steps[i][j].order = new TacticArena.Order.Stand(
+                steps[i].stepUnits[j].order = new TacticArena.Order.Stand(
                     new Position(state.moved.x, state.moved.y),
                     order.direction
                 );
@@ -140,118 +136,106 @@ module TacticArena {
             this.formatOrders();
             let steps = new Array(this.getMaxOrderListLength());
             for (var j = 0; j < steps.length; j++) {
-                steps[j] = [];
+                steps[j] = new Entity.Step();
                 for (var i = 0; i < this.orders.length; i++) {
-                    var entity = this.orders[i].entity;
-                    entity.show();
-                    steps[j].push({
-                        entity: entity,
-                        order: this.orders[i].list[j] ? this.orders[i].list[j] : null
-                    });
+                    var pawn = this.orders[i].entity;
+                    pawn.show(); // TODO ugly
+                    steps[j].stepUnits.push( new Entity.StepUnit(
+                        pawn,
+                        new Entity.StepUnitState(),
+                        this.orders[i].list[j] ? this.orders[i].list[j] : null
+                    ));
                 }
             }
             steps.unshift(this.getInitialStep());
             this.orders = [];
-            console.log(steps);
             return this.processOrders(steps);
-        }
-
-        static getDefaultEntityState() {
-            return new Entity.StepUnitState();
         }
 
         getPawn(id) {
             let result = null;
-            this.game.pawns.forEach( p => {
-                if(p._id == id) {
+            this.game.pawns.forEach(p => {
+                if (p._id == id) {
                     result = p;
                 }
             });
             return result;
         }
 
-        tileIsFree(step, position:Position) {
-            for (var i = 0; i < step.length; i++) {
-                let entityState = step[i].entityState;
-                let order = step[i].order;
-                if((typeof entityState.moved === 'undefined' && position.equals(order.position)) || (entityState.moved && entityState.moved.equals(position))) {
+        tileIsFree(stepUnit:Entity.StepUnit, position:Position) {
+            // TODO ça devrait pas marcher
+            for (var i = 0; i < stepUnit.length; i++) {
+                let stepUnitState = stepUnit[i].stepUnitState;
+                let order = stepUnit[i].order;
+                if ((typeof stepUnitState.moved === 'undefined' && position.equals(order.position)) || (stepUnitState.moved && stepUnitState.moved.equals(position))) {
                     return false;
                 }
             }
             return true;
         }
 
-        processOrders(steps) {
+        processOrders(steps:Entity.Step[]) {
             for (var l = 1; l < steps.length; l++) {
-                var step = steps[l];
-                let previousStep = steps[l - 1];
-                for (var i = 0; i < step.length; i++) {
-                    step[i].entityState = OrderManager.getDefaultEntityState();
-                    step[i].entityState.ap = previousStep[i].entityState.ap;
-                    step[i].entityState.hp = previousStep[i].entityState.hp;
-
-                    // Dans le cas où un pawn à moins d'actions à jouer que les autres on lui en assigne un par défaut
-                    // pour qu'i ne soit pas inactif mais si elle n'a plus de AP il ne fera rien à part rester dans sa position
-                    if (step[i].order == null) {
-                        step[i].order = new Order.Stand(previousStep[i].order.position, previousStep[i].order.direction);
-                    }
+                var stepUnit = steps[l].stepUnits;
+                let previousStepUnit = steps[l - 1].stepUnits;
+                for (var i = 0; i < stepUnit.length; i++) {
+                    stepUnit[i].stepUnitState = new Entity.StepUnitState(previousStepUnit[i].stepUnitState.ap, previousStepUnit[i].stepUnitState.hp);
+                    // In case a pawn has less actions to play than the others he got a default one but if he has 0 AP he won't do anything
+                    if (stepUnit[i].order == null) { stepUnit[i].order = new Order.Stand(previousStepUnit[i].order.position, previousStepUnit[i].order.direction); }
                 }
 
                 // check actions for each entity in step
-                for (var i = 0; i < step.length; i++) {
+                for (var i = 0; i < stepUnit.length; i++) {
                     // foreach entities except A
-                    for (var j = 0; j < step.length; j++) {
-                        if (step[i].entity._id == step[j].entity._id) continue; // Pas d'interaction avec soi-même
+                    for (var j = 0; j < stepUnit.length; j++) {
+                        if (stepUnit[i].pawn._id == stepUnit[j].pawn._id) continue; // Pas d'interaction avec soi-même
 
-                        let positionBBeforeOrder = previousStep[j].order.position;
-                        if(previousStep[j].entityState.moved) { positionBBeforeOrder = previousStep[j].entityState.moved; }
+                        let positionBBeforeOrder = previousStepUnit[j].stepUnitState.moved ? previousStepUnit[j].stepUnitState.moved : previousStepUnit[j].order.position;
 
-                        step[i].data = {
-                            aWasFacingB: previousStep[i].order.position.faces(positionBBeforeOrder, previousStep[i].order.direction),
-                            aWasNextToB: previousStep[i].order.position.getDistanceFrom(positionBBeforeOrder) == 1,
+                        stepUnit[i].data = {
+                            aWasFacingB: previousStepUnit[i].order.position.faces(positionBBeforeOrder, previousStepUnit[i].order.direction),
+                            aWasNextToB: previousStepUnit[i].order.position.getDistanceFrom(positionBBeforeOrder) == 1,
                             fleeRate: 50,
                             entityAApCost: 1,
                             entityBHpLost: 0,
-                            aIsActive: previousStep[i].entityState.ap > 0, // INACTIF = stand mais pas le droit d'attaquer
-                            aIsAlive: previousStep[i].entityState.hp > 0,
-                            keepDirection: (previousStep[i].order.direction == step[i].order.direction),
-                            keepPosition: step[i].order.position.equals(previousStep[i].order.position),
-                            equalPositions: step[i].order.position.equals(step[j].order.position),
-                            differentTeams: step[i].entity.team != step[j].entity.team,
-                            alteredEntityB: this.alteredPawns.indexOf(step[j].entity._id) < 0,
+                            aIsActive: previousStepUnit[i].stepUnitState.ap > 0, // INACTIF = stand mais pas le droit d'attaquer
+                            aIsAlive: previousStepUnit[i].stepUnitState.hp > 0,
+                            keepDirection: (previousStepUnit[i].order.direction == stepUnit[i].order.direction),
+                            keepPosition: stepUnit[i].order.position.equals(previousStepUnit[i].order.position),
+                            equalPositions: stepUnit[i].order.position.equals(stepUnit[j].order.position),
+                            differentTeams: stepUnit[i].pawn.team != stepUnit[j].pawn.team,
+                            alteredEntityB: this.alteredPawns.indexOf(stepUnit[j].pawn._id) < 0,
                             positionBBeforeOrder: positionBBeforeOrder,
                             l: l,
                             j: j
                         };
 
-                        step[i].entityState.hp = typeof step[i].entityState.hp !== 'undefined' ? step[i].entityState.hp : previousStep[i].entityState.hp;
+                        stepUnit[i].stepUnitState.hp = typeof stepUnit[i].stepUnitState.hp !== 'undefined' ? stepUnit[i].stepUnitState.hp : previousStepUnit[i].stepUnitState.hp;
 
-                        if(!step[i].data.aIsAlive) {
-                            step[i].order = new Order.Dead(previousStep[i].order.position, previousStep[i].order.direction);
-                            step[i].entityState.ap = previousStep[i].entityState.ap;
-                            step[i].entityState.hp = 0;
-                            previousStep[i].entityState.dies = previousStep[i].order.action !== 'dead';
+                        if (!stepUnit[i].data.aIsAlive) {
+                            stepUnit[i].order = new Order.Dead(previousStepUnit[i].order.position, previousStepUnit[i].order.direction);
+                            stepUnit[i].stepUnitState.ap = previousStepUnit[i].stepUnitState.ap;
+                            stepUnit[i].stepUnitState.hp = 0;
+                            previousStepUnit[i].stepUnitState.dies = !(previousStepUnit[i].order instanceof Order.Dead);
                             continue;
                         }
 
-                        if (step[i].data.equalPositions) {
+                        if (stepUnit[i].data.equalPositions) {
                             // Si A veut aller sur la même case que B (qu'il y soit déjà statique où qu'il veuille y aller)
-                            if (this.alteredPawns.indexOf(step[i].entity._id) < 0) step[i].entityState.moveHasBeenBlocked = (step[i].order.action == 'move');
-                            if (this.alteredPawns.indexOf(step[j].entity._id) < 0) step[j].entityState.moveHasBeenBlocked = (step[j].order.action == 'move');
+                            if (this.alteredPawns.indexOf(stepUnit[i].pawn._id) < 0) stepUnit[i].stepUnitState.moveHasBeenBlocked = stepUnit[i].order instanceof Order.Move;
+                            if (this.alteredPawns.indexOf(stepUnit[j].pawn._id) < 0) stepUnit[j].stepUnitState.moveHasBeenBlocked = stepUnit[j].order instanceof Order.Move;
                         }
 
-                        console.log(step[i].order);
-                        step[i].order = step[i].order.process(step[i], step[j], this, steps);
+                        stepUnit[i].order = stepUnit[i].order.process(stepUnit[i], stepUnit[j], this, steps);
 
-                        step[j].entityState.hp = typeof step[j].entityState.hp !== 'undefined' ? step[j].entityState.hp : previousStep[j].entityState.hp;
-                        step[j].entityState.hp -= step[i].data.entityBHpLost;
-                        step[i].entityState.ap = step[i].data.aIsActive ? previousStep[i].entityState.ap - step[i].data.entityAApCost : 0;
+                        stepUnit[j].stepUnitState.hp -= stepUnit[i].data.entityBHpLost;
+                        stepUnit[i].stepUnitState.ap = stepUnit[i].data.aIsActive ? previousStepUnit[i].stepUnitState.ap - stepUnit[i].data.entityAApCost : 0;
 
-                        if (step[i].entityState.moveHasBeenBlocked && this.alteredPawns.indexOf(step[i].entity._id) < 0) {
-                            this.blockEntity(steps, l, i, new Order.Stand(previousStep[i].order.position, previousStep[i].order.direction), step[i].entity);
+                        if (stepUnit[i].stepUnitState.moveHasBeenBlocked && this.alteredPawns.indexOf(stepUnit[i].pawn._id) < 0) {
+                            this.blockEntity(steps, l, i, new Order.Stand(previousStepUnit[i].order.position, previousStepUnit[i].order.direction), stepUnit[i].pawn);
                         }
-                        if (step[j].entityState.moveHasBeenBlocked && this.alteredPawns.indexOf(step[j].entity._id) < 0) {
-                            this.blockEntity(steps, l, j, new Order.Stand(previousStep[j].order.position, previousStep[j].order.direction), step[j].entity);
+                        if (stepUnit[j].stepUnitState.moveHasBeenBlocked && this.alteredPawns.indexOf(stepUnit[j].pawn._id) < 0) {
+                            this.blockEntity(steps, l, j, new Order.Stand(previousStepUnit[j].order.position, previousStepUnit[j].order.direction), stepUnit[j].pawn);
                         }
                     }
                 }

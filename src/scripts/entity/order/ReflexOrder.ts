@@ -24,7 +24,7 @@ module TacticArena.Order {
                     step.data.entityBHpLost += 1;
                     entityBIsDodging = false;
                     if (step.data.alteredEntityB) {
-                        stepB.entityState.moveHasBeenBlocked = (stepB.order.action == 'move');
+                        stepB.stepUnitState.moveHasBeenBlocked = (stepB.order.action == 'move');
                     }
                 }
                 result = new Attack(this.position, this.direction, {

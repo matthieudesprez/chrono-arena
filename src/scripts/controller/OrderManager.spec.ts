@@ -6,15 +6,15 @@ module TacticArena.Specs {
         var testGame, currentState;
 
         function testStep(steps, i, j, entityId, action, direction, orderPosition, ap, hp, moveHasBeenBlocked, positionBlocked) {
-            expect(steps[i][j].entity._id).toEqual(entityId);
-            expect(steps[i][j].order.action).toEqual(action);
-            expect(steps[i][j].order.direction).toEqual(direction);
-            expect(steps[i][j].order.position.x).toEqual(orderPosition.x);
-            expect(steps[i][j].order.position.y).toEqual(orderPosition.y);
-            expect(steps[i][j].entityState.ap).toEqual(ap);
-            expect(steps[i][j].entityState.hp).toEqual(hp);
-            expect(steps[i][j].entityState.moveHasBeenBlocked).toEqual(moveHasBeenBlocked);
-            expect(steps[i][j].entityState.positionBlocked).toEqual(positionBlocked);
+            expect(steps[i].stepUnits[j].pawn._id).toEqual(entityId);
+            expect(steps[i].stepUnits[j].order.action).toEqual(action);
+            expect(steps[i].stepUnits[j].order.direction).toEqual(direction);
+            expect(steps[i].stepUnits[j].order.position.x).toEqual(orderPosition.x);
+            expect(steps[i].stepUnits[j].order.position.y).toEqual(orderPosition.y);
+            expect(steps[i].stepUnits[j].stepUnitState.ap).toEqual(ap);
+            expect(steps[i].stepUnits[j].stepUnitState.hp).toEqual(hp);
+            expect(steps[i].stepUnits[j].stepUnitState.moveHasBeenBlocked).toEqual(moveHasBeenBlocked);
+            expect(steps[i].stepUnits[j].stepUnitState.positionBlocked).toEqual(positionBlocked);
         }
 
         beforeEach(function (done) {
@@ -51,7 +51,7 @@ module TacticArena.Specs {
             it("nothing is played", function () {
                 let steps = currentState.orderManager.getSteps();
                 expect(steps.length).toEqual(2);
-                expect(steps[0].length).toEqual(2);
+                expect(steps[0].stepUnits.length).toEqual(2);
                 testStep(steps, 0, 0, 1, 'stand', 'E', {x: 8, y: 8}, 3, 4, false, null);
                 testStep(steps, 0, 1, 2, 'stand', 'W', {x: 10, y: 8}, 3, 4, false, null);
                 testStep(steps, 1, 0, 1, 'stand', 'E', {x: 8, y: 8}, 2, 4, false, null);
@@ -69,7 +69,7 @@ module TacticArena.Specs {
                 ];
                 let steps = currentState.orderManager.getSteps();
                 expect(steps.length).toEqual(2);
-                expect(steps[0].length).toEqual(2);
+                expect(steps[0].stepUnits.length).toEqual(2);
                 testStep(steps, 0, 0, 1, 'stand', 'E', {x: 8, y: 8}, 3, 4, false, null);
                 testStep(steps, 0, 1, 2, 'stand', 'W', {x: 10, y: 8}, 3, 4, false, null);
                 testStep(steps, 1, 0, 1, 'stand', 'E', {x: 8, y: 8}, 2, 4, false, null);
@@ -88,7 +88,7 @@ module TacticArena.Specs {
                 ];
                 let steps = currentState.orderManager.getSteps();
                 expect(steps.length).toEqual(3);
-                expect(steps[0].length).toEqual(2);
+                expect(steps[0].stepUnits.length).toEqual(2);
                 testStep(steps, 0, 0, 1, 'stand', 'E', {x: 8, y: 8}, 3, 4, false, null);
                 testStep(steps, 0, 1, 2, 'stand', 'W', {x: 10, y: 8}, 3, 4, false, null);
                 testStep(steps, 1, 0, 1, 'move', 'E', {x: 9, y: 8}, 2, 4, false, null);
@@ -115,7 +115,7 @@ module TacticArena.Specs {
                 ];
                 let steps = currentState.orderManager.getSteps();
                 expect(steps.length).toEqual(3);
-                expect(steps[0].length).toEqual(2);
+                expect(steps[0].stepUnits.length).toEqual(2);
                 testStep(steps, 0, 0, 1, 'stand', 'E', {x: 8, y: 8}, 3, 4, false, null);
                 testStep(steps, 0, 1, 2, 'stand', 'W', {x: 10, y: 8}, 3, 4, false, null);
                 testStep(steps, 1, 0, 1, 'move', 'E', {x: 8, y: 8}, 2, 4, true, new Position(9, 8));
@@ -137,7 +137,7 @@ module TacticArena.Specs {
                 ];
                 let steps = currentState.orderManager.getSteps();
                 expect(steps.length).toEqual(4);
-                expect(steps[0].length).toEqual(2);
+                expect(steps[0].stepUnits.length).toEqual(2);
                 testStep(steps, 0, 0, 1, 'stand', 'E', {x: 8, y: 8}, 3, 4, false, null);
                 testStep(steps, 0, 1, 2, 'stand', 'W', {x: 10, y: 8}, 3, 4, false, null);
                 testStep(steps, 1, 0, 1, 'move', 'E', {x: 9, y: 8}, 2, 4, false, null);
@@ -161,7 +161,7 @@ module TacticArena.Specs {
                 ];
                 let steps = currentState.orderManager.getSteps();
                 expect(steps.length).toEqual(4);
-                expect(steps[0].length).toEqual(2);
+                expect(steps[0].stepUnits.length).toEqual(2);
                 testStep(steps, 0, 0, 1, 'stand', 'E', {x: 8, y: 8}, 3, 4, false, null);
                 testStep(steps, 0, 1, 2, 'stand', 'W', {x: 10, y: 8}, 3, 4, false, null);
                 testStep(steps, 1, 0, 1, 'stand', 'S', {x: 8, y: 8}, 2, 4, false, null);
@@ -192,13 +192,13 @@ module TacticArena.Specs {
                 ];
                 let steps = currentState.orderManager.getSteps();
                 expect(steps.length).toEqual(4);
-                expect(steps[0].length).toEqual(2);
+                expect(steps[0].stepUnits.length).toEqual(2);
                 testStep(steps, 0, 0, 1, 'stand', 'E', {x: 8, y: 8}, 3, 4, false, null);
                 testStep(steps, 0, 1, 2, 'stand', 'W', {x: 10, y: 8}, 3, 4, false, null);
                 testStep(steps, 1, 0, 1, 'move', 'E', {x: 8, y: 7}, 2, 4, false, null);
                 testStep(steps, 1, 1, 2, 'move', 'W', {x: 10, y: 7}, 2, 4, false, null);
                 testStep(steps, 2, 0, 1, 'cast', 'E', {x: 8, y: 7}, 0, 4, false, null);
-                expect(steps[2][0].order.targets).toEqual([currentState.pawns[1]._id]);
+                expect(steps[2].stepUnits[0].order.targets).toEqual([currentState.pawns[1]._id]);
                 testStep(steps, 2, 1, 2, 'move', 'W', {x: 9, y: 7}, 1, 2, false, null);
                 testStep(steps, 3, 0, 1, 'stand', 'E', {x: 8, y: 7}, 0, 3, false, null);
                 testStep(steps, 3, 1, 2, 'attack', 'W', {x: 9, y: 7}, 0, 2, true, new Position(8, 7));
@@ -223,11 +223,11 @@ module TacticArena.Specs {
                 ];
                 let steps = currentState.orderManager.getSteps();
                 expect(steps.length).toEqual(4);
-                expect(steps[0].length).toEqual(2);
+                expect(steps[0].stepUnits.length).toEqual(2);
                 testStep(steps, 0, 0, 1, 'stand', 'E', {x: 8, y: 8}, 3, 4, false, null);
                 testStep(steps, 0, 1, 2, 'stand', 'W', {x: 10, y: 8}, 3, 4, false, null);
                 testStep(steps, 1, 0, 1, 'cast', 'E', {x: 8, y: 8}, 1, 4, false, null);
-                expect(steps[1][0].order.targets).toEqual([currentState.pawns[1]._id]);
+                expect(steps[1].stepUnits[0].order.targets).toEqual([currentState.pawns[1]._id]);
                 testStep(steps, 1, 1, 2, 'move', 'W', {x: 9, y: 8}, 2, 2, false, null);
                 testStep(steps, 2, 0, 1, 'attack', 'E', {x: 8, y: 8}, 0, 3, false, null);
                 testStep(steps, 2, 1, 2, 'attack', 'W', {x: 9, y: 8}, 1, 1, true, new Position(8, 8));
@@ -254,11 +254,11 @@ module TacticArena.Specs {
                 ];
                 let steps = currentState.orderManager.getSteps();
                 expect(steps.length).toEqual(4);
-                expect(steps[0].length).toEqual(2);
+                expect(steps[0].stepUnits.length).toEqual(2);
                 testStep(steps, 0, 0, 1, 'stand', 'E', {x: 8, y: 8}, 3, 4, false, null);
                 testStep(steps, 0, 1, 2, 'stand', 'W', {x: 10, y: 8}, 3, 4, false, null);
                 testStep(steps, 1, 0, 1, 'cast_wind', 'E', {x: 8, y: 8}, 1, 4, false, null);
-                expect(steps[1][0].order.targets).toEqual([{entity: currentState.pawns[1]._id, moved: {x: 10, y: 8, d: 1}}]);
+                expect(steps[1].stepUnits[0].order.targets).toEqual([{entity: currentState.pawns[1]._id, moved: {x: 10, y: 8, d: 1}}]);
                 testStep(steps, 1, 1, 2, 'move', 'W', {x: 9, y: 8}, 2, 3, false, null);
                 testStep(steps, 2, 0, 1, 'stand', 'E', {x: 8, y: 8}, 0, 4, false, null);
                 testStep(steps, 2, 1, 2, 'stand', 'W', {x: 10, y: 8}, 1, 3, false, null);
@@ -282,7 +282,7 @@ module TacticArena.Specs {
                 currentState.pawns[2].setHp(0);
                 let steps = currentState.orderManager.getSteps();
                 expect(steps.length).toEqual(2);
-                expect(steps[0].length).toEqual(4);
+                expect(steps[0].stepUnits.length).toEqual(4);
                 testStep(steps, 0, 0, 1, 'stand', 'E', {x: 8, y: 8}, 3, 4, false, null);
                 testStep(steps, 0, 1, 2, 'stand', 'W', {x: 10, y: 8}, 3, 4, false, null);
                 testStep(steps, 0, 2, 3, 'dead', 'E', {x: 7, y: 7}, 0, 0, false, null);
@@ -306,7 +306,7 @@ module TacticArena.Specs {
                 ];
                 let steps = currentState.orderManager.getSteps();
                 expect(steps.length).toEqual(3);
-                expect(steps[0].length).toEqual(4);
+                expect(steps[0].stepUnits.length).toEqual(4);
                 testStep(steps, 0, 0, 4, 'stand', 'W', {x: 12, y: 7}, 3, 4, false, null);
                 testStep(steps, 0, 1, 1, 'stand', 'E', {x: 8, y: 8}, 3, 4, false, null);
                 testStep(steps, 0, 2, 2, 'stand', 'W', {x: 10, y: 8}, 3, 4, false, null);
@@ -355,7 +355,7 @@ module TacticArena.Specs {
                 ];
                 let steps = currentState.orderManager.getSteps();
                 expect(steps.length).toEqual(5);
-                expect(steps[0].length).toEqual(4);
+                expect(steps[0].stepUnits.length).toEqual(4);
                 testStep(steps, 0, 0, 1, 'stand', 'E', {x: 8, y: 8}, 3, 4, false, null);
                 testStep(steps, 0, 1, 2, 'stand', 'W', {x: 10, y: 8}, 4, 2, false, null);
                 testStep(steps, 0, 2, 4, 'stand', 'W', {x: 12, y: 7}, 4, 4, false, null);
@@ -363,13 +363,13 @@ module TacticArena.Specs {
 
                 testStep(steps, 1, 0, 1, 'cast', 'E', {x: 8, y: 8}, 1, 4, false, null);
                 testStep(steps, 1, 1, 2, 'move', 'W', {x: 9, y: 8}, 3, 0, false, null);
-                expect(steps[1][1].entityState.dies).toBeTruthy();
+                expect(steps[1].stepUnits[1].stepUnitState.dies).toBeTruthy();
                 testStep(steps, 1, 2, 4, 'move', 'W', {x: 11, y: 7}, 3, 4, false, null);
                 testStep(steps, 1, 3, 3, 'stand', 'E', {x: 7, y: 7}, 2, 4, false, null);
 
                 testStep(steps, 2, 0, 1, 'move', 'E', {x: 7, y: 8}, 0, 4, false, null);
                 testStep(steps, 2, 1, 2, 'dead', 'W', {x: 9, y: 8}, 3, 0, false, null);
-                expect(steps[2][1].entityState.dies).toBeFalsy();
+                expect(steps[2].stepUnits[1].stepUnitState.dies).toBeFalsy();
                 testStep(steps, 2, 2, 4, 'move', 'W', {x: 10, y: 7}, 2, 4, false, null);
                 testStep(steps, 2, 3, 3, 'stand', 'E', {x: 7, y: 7}, 1, 4, false, null);
 

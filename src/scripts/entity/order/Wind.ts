@@ -5,29 +5,29 @@ module TacticArena.Order {
             super('cast_wind', position, direction);
         }
 
-        process(step, stepB, ordermanager, steps?) {
+        process(stepUnit:Entity.StepUnit, stepUnitB:Entity.StepUnit, ordermanager, steps?) {
             let result = this;
-            step.data.entityAApCost++;
-            let path = ordermanager.game.stageManager.getLinearPath(step.entity, 4, step.order.direction, step.order.position);
-            step.order.targets = step.order.targets || [];
+            stepUnit.data.entityAApCost++;
+            let path = ordermanager.game.stageManager.getLinearPath(stepUnit.pawn, 4, stepUnit.order.direction, stepUnit.order.position);
+            stepUnit.order.targets = stepUnit.order.targets || [];
             for (var k = 0; k < path.length; k++) {
-                let targetPosition = stepB.entityState.moveHasBeenBlocked ? step.data.positionBBeforeOrder : stepB.order.position;
+                let targetPosition = stepUnitB.stepUnitState.moveHasBeenBlocked ? stepUnit.data.positionBBeforeOrder : stepUnitB.order.position;
                 if (path[k].x == targetPosition.x && path[k].y == targetPosition.y) {
-                    let moved = new Position(stepB.order.position.x, stepB.order.position.y);
-                    if(stepB.entityState.moved) { moved = stepB.entityState.moved; }
-                    if(step.order.direction == 'E') { moved.setX(moved.x + 1); }
-                    else if(step.order.direction == 'W') { moved.setX(moved.x - 1); }
-                    else if(step.order.direction == 'S') {moved.setY(moved.y + 1); }
-                    else if(step.order.direction == 'N') { moved.setY(moved.y - 1); }
+                    let moved = new Position(stepUnitB.order.position.x, stepUnitB.order.position.y);
+                    if(stepUnitB.stepUnitState.moved) { moved = stepUnitB.stepUnitState.moved; }
+                    if(stepUnit.order.direction == 'E') { moved.setX(moved.x + 1); }
+                    else if(stepUnit.order.direction == 'W') { moved.setX(moved.x - 1); }
+                    else if(stepUnit.order.direction == 'S') {moved.setY(moved.y + 1); }
+                    else if(stepUnit.order.direction == 'N') { moved.setY(moved.y - 1); }
 
-                    if(!ordermanager.tileIsFree(step, moved) || ordermanager.game.stageManager.isObstacle(moved)) { moved = null; }
-                    stepB.entityState.moved = moved;
-                    step.order.targets.push({
-                        entity: stepB.entity._id,
-                        moved: {x: moved.x, y: moved.y, d: ordermanager.game.stageManager.getNbTilesBetween(step.order.position, stepB.order.position)}
+                    if(!ordermanager.tileIsFree(stepUnit, moved) || ordermanager.game.stageManager.isObstacle(moved)) { moved = null; }
+                    stepUnitB.stepUnitState.moved = moved;
+                    stepUnit.order.targets.push({
+                        entity: stepUnitB.pawn._id,
+                        moved: {x: moved.x, y: moved.y, d: ordermanager.game.stageManager.getNbTilesBetween(stepUnit.order.position, stepUnitB.order.position)}
                     });
-                    step.data.entityBHpLost += 1;
-                    ordermanager.pacifyEntity(steps, step.data.l + 1, step.data.j, stepB.order, stepB.entity, stepB.entityState);
+                    stepUnit.data.entityBHpLost += 1;
+                    ordermanager.pacifyEntity(steps, stepUnit.data.l + 1, stepUnit.data.j, stepUnitB.order, stepUnitB.pawn, stepUnitB.stepUnitState);
                 }
             }
             return result
