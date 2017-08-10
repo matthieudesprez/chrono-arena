@@ -11,10 +11,10 @@ module TacticArena.Specs {
             expect(steps[i].stepUnits[j].order.direction).toEqual(direction);
             expect(steps[i].stepUnits[j].order.position.x).toEqual(orderPosition.x);
             expect(steps[i].stepUnits[j].order.position.y).toEqual(orderPosition.y);
-            expect(steps[i].stepUnits[j].stepUnitState.ap).toEqual(ap);
-            expect(steps[i].stepUnits[j].stepUnitState.hp).toEqual(hp);
-            expect(steps[i].stepUnits[j].stepUnitState.moveHasBeenBlocked).toEqual(moveHasBeenBlocked);
-            expect(steps[i].stepUnits[j].stepUnitState.positionBlocked).toEqual(positionBlocked);
+            expect(steps[i].stepUnits[j].data.ap).toEqual(ap);
+            expect(steps[i].stepUnits[j].data.hp).toEqual(hp);
+            expect(steps[i].stepUnits[j].data.moveHasBeenBlocked).toEqual(moveHasBeenBlocked);
+            expect(steps[i].stepUnits[j].data.positionBlocked).toEqual(positionBlocked);
         }
 
         beforeEach(function (done) {
@@ -363,13 +363,13 @@ module TacticArena.Specs {
 
                 testStep(steps, 1, 0, 1, 'cast', 'E', {x: 8, y: 8}, 1, 4, false, null);
                 testStep(steps, 1, 1, 2, 'move', 'W', {x: 9, y: 8}, 3, 0, false, null);
-                expect(steps[1].stepUnits[1].stepUnitState.dies).toBeTruthy();
+                expect(steps[1].stepUnits[1].data.dies).toBeTruthy();
                 testStep(steps, 1, 2, 4, 'move', 'W', {x: 11, y: 7}, 3, 4, false, null);
                 testStep(steps, 1, 3, 3, 'stand', 'E', {x: 7, y: 7}, 2, 4, false, null);
 
                 testStep(steps, 2, 0, 1, 'move', 'E', {x: 7, y: 8}, 0, 4, false, null);
                 testStep(steps, 2, 1, 2, 'dead', 'W', {x: 9, y: 8}, 3, 0, false, null);
-                expect(steps[2].stepUnits[1].stepUnitState.dies).toBeFalsy();
+                expect(steps[2].stepUnits[1].data.dies).toBeFalsy();
                 testStep(steps, 2, 2, 4, 'move', 'W', {x: 10, y: 7}, 2, 4, false, null);
                 testStep(steps, 2, 3, 3, 'stand', 'E', {x: 7, y: 7}, 1, 4, false, null);
 

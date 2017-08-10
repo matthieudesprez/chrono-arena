@@ -5,10 +5,5 @@ module TacticArena.Order {
         constructor(position, direction) {
             super('dead', position, direction);
         }
-
-        process() {
-
-        }
-
     }
 }

@@ -6,10 +6,5 @@ module TacticArena.Order {
             super('attack', position, direction);
             this.target = target;
         }
-
-        process() {
-
-        }
-
     }
 }

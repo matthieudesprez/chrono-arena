@@ -199,15 +199,15 @@ var TacticArena;
         describe("OrderManager", function () {
             var testGame, currentState;
             function testStep(steps, i, j, entityId, action, direction, orderPosition, ap, hp, moveHasBeenBlocked, positionBlocked) {
-                expect(steps[i][j].entity._id).toEqual(entityId);
-                expect(steps[i][j].order.action).toEqual(action);
-                expect(steps[i][j].order.direction).toEqual(direction);
-                expect(steps[i][j].order.position.x).toEqual(orderPosition.x);
-                expect(steps[i][j].order.position.y).toEqual(orderPosition.y);
-                expect(steps[i][j].entityState.ap).toEqual(ap);
-                expect(steps[i][j].entityState.hp).toEqual(hp);
-                expect(steps[i][j].entityState.moveHasBeenBlocked).toEqual(moveHasBeenBlocked);
-                expect(steps[i][j].entityState.positionBlocked).toEqual(positionBlocked);
+                expect(steps[i].stepUnits[j].pawn._id).toEqual(entityId);
+                expect(steps[i].stepUnits[j].order.action).toEqual(action);
+                expect(steps[i].stepUnits[j].order.direction).toEqual(direction);
+                expect(steps[i].stepUnits[j].order.position.x).toEqual(orderPosition.x);
+                expect(steps[i].stepUnits[j].order.position.y).toEqual(orderPosition.y);
+                expect(steps[i].stepUnits[j].data.ap).toEqual(ap);
+                expect(steps[i].stepUnits[j].data.hp).toEqual(hp);
+                expect(steps[i].stepUnits[j].data.moveHasBeenBlocked).toEqual(moveHasBeenBlocked);
+                expect(steps[i].stepUnits[j].data.positionBlocked).toEqual(positionBlocked);
             }
             beforeEach(function (done) {
                 spyOn(console, 'log').and.stub();
@@ -240,7 +240,7 @@ var TacticArena;
                 it("nothing is played", function () {
                     var steps = currentState.orderManager.getSteps();
                     expect(steps.length).toEqual(2);
-                    expect(steps[0].length).toEqual(2);
+                    expect(steps[0].stepUnits.length).toEqual(2);
                     testStep(steps, 0, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 3, 4, false, null);
                     testStep(steps, 0, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 3, 4, false, null);
                     testStep(steps, 1, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 2, 4, false, null);
@@ -257,7 +257,7 @@ var TacticArena;
                     ];
                     var steps = currentState.orderManager.getSteps();
                     expect(steps.length).toEqual(2);
-                    expect(steps[0].length).toEqual(2);
+                    expect(steps[0].stepUnits.length).toEqual(2);
                     testStep(steps, 0, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 3, 4, false, null);
                     testStep(steps, 0, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 3, 4, false, null);
                     testStep(steps, 1, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 2, 4, false, null);
@@ -275,7 +275,7 @@ var TacticArena;
                     ];
                     var steps = currentState.orderManager.getSteps();
                     expect(steps.length).toEqual(3);
-                    expect(steps[0].length).toEqual(2);
+                    expect(steps[0].stepUnits.length).toEqual(2);
                     testStep(steps, 0, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 3, 4, false, null);
                     testStep(steps, 0, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 3, 4, false, null);
                     testStep(steps, 1, 0, 1, 'move', 'E', { x: 9, y: 8 }, 2, 4, false, null);
@@ -301,7 +301,7 @@ var TacticArena;
                     ];
                     var steps = currentState.orderManager.getSteps();
                     expect(steps.length).toEqual(3);
-                    expect(steps[0].length).toEqual(2);
+                    expect(steps[0].stepUnits.length).toEqual(2);
                     testStep(steps, 0, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 3, 4, false, null);
                     testStep(steps, 0, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 3, 4, false, null);
                     testStep(steps, 1, 0, 1, 'move', 'E', { x: 8, y: 8 }, 2, 4, true, new TacticArena.Position(9, 8));
@@ -322,7 +322,7 @@ var TacticArena;
                     ];
                     var steps = currentState.orderManager.getSteps();
                     expect(steps.length).toEqual(4);
-                    expect(steps[0].length).toEqual(2);
+                    expect(steps[0].stepUnits.length).toEqual(2);
                     testStep(steps, 0, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 3, 4, false, null);
                     testStep(steps, 0, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 3, 4, false, null);
                     testStep(steps, 1, 0, 1, 'move', 'E', { x: 9, y: 8 }, 2, 4, false, null);
@@ -345,7 +345,7 @@ var TacticArena;
                     ];
                     var steps = currentState.orderManager.getSteps();
                     expect(steps.length).toEqual(4);
-                    expect(steps[0].length).toEqual(2);
+                    expect(steps[0].stepUnits.length).toEqual(2);
                     testStep(steps, 0, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 3, 4, false, null);
                     testStep(steps, 0, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 3, 4, false, null);
                     testStep(steps, 1, 0, 1, 'stand', 'S', { x: 8, y: 8 }, 2, 4, false, null);
@@ -375,13 +375,13 @@ var TacticArena;
                     ];
                     var steps = currentState.orderManager.getSteps();
                     expect(steps.length).toEqual(4);
-                    expect(steps[0].length).toEqual(2);
+                    expect(steps[0].stepUnits.length).toEqual(2);
                     testStep(steps, 0, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 3, 4, false, null);
                     testStep(steps, 0, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 3, 4, false, null);
                     testStep(steps, 1, 0, 1, 'move', 'E', { x: 8, y: 7 }, 2, 4, false, null);
                     testStep(steps, 1, 1, 2, 'move', 'W', { x: 10, y: 7 }, 2, 4, false, null);
                     testStep(steps, 2, 0, 1, 'cast', 'E', { x: 8, y: 7 }, 0, 4, false, null);
-                    expect(steps[2][0].order.targets).toEqual([currentState.pawns[1]._id]);
+                    expect(steps[2].stepUnits[0].order.targets).toEqual([currentState.pawns[1]._id]);
                     testStep(steps, 2, 1, 2, 'move', 'W', { x: 9, y: 7 }, 1, 2, false, null);
                     testStep(steps, 3, 0, 1, 'stand', 'E', { x: 8, y: 7 }, 0, 3, false, null);
                     testStep(steps, 3, 1, 2, 'attack', 'W', { x: 9, y: 7 }, 0, 2, true, new TacticArena.Position(8, 7));
@@ -405,11 +405,11 @@ var TacticArena;
                     ];
                     var steps = currentState.orderManager.getSteps();
                     expect(steps.length).toEqual(4);
-                    expect(steps[0].length).toEqual(2);
+                    expect(steps[0].stepUnits.length).toEqual(2);
                     testStep(steps, 0, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 3, 4, false, null);
                     testStep(steps, 0, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 3, 4, false, null);
                     testStep(steps, 1, 0, 1, 'cast', 'E', { x: 8, y: 8 }, 1, 4, false, null);
-                    expect(steps[1][0].order.targets).toEqual([currentState.pawns[1]._id]);
+                    expect(steps[1].stepUnits[0].order.targets).toEqual([currentState.pawns[1]._id]);
                     testStep(steps, 1, 1, 2, 'move', 'W', { x: 9, y: 8 }, 2, 2, false, null);
                     testStep(steps, 2, 0, 1, 'attack', 'E', { x: 8, y: 8 }, 0, 3, false, null);
                     testStep(steps, 2, 1, 2, 'attack', 'W', { x: 9, y: 8 }, 1, 1, true, new TacticArena.Position(8, 8));
@@ -435,11 +435,11 @@ var TacticArena;
                     ];
                     var steps = currentState.orderManager.getSteps();
                     expect(steps.length).toEqual(4);
-                    expect(steps[0].length).toEqual(2);
+                    expect(steps[0].stepUnits.length).toEqual(2);
                     testStep(steps, 0, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 3, 4, false, null);
                     testStep(steps, 0, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 3, 4, false, null);
                     testStep(steps, 1, 0, 1, 'cast_wind', 'E', { x: 8, y: 8 }, 1, 4, false, null);
-                    expect(steps[1][0].order.targets).toEqual([{ entity: currentState.pawns[1]._id, moved: { x: 10, y: 8, d: 1 } }]);
+                    expect(steps[1].stepUnits[0].order.targets).toEqual([{ entity: currentState.pawns[1]._id, moved: { x: 10, y: 8, d: 1 } }]);
                     testStep(steps, 1, 1, 2, 'move', 'W', { x: 9, y: 8 }, 2, 3, false, null);
                     testStep(steps, 2, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 0, 4, false, null);
                     testStep(steps, 2, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 1, 3, false, null);
@@ -459,7 +459,7 @@ var TacticArena;
                     currentState.pawns[2].setHp(0);
                     var steps = currentState.orderManager.getSteps();
                     expect(steps.length).toEqual(2);
-                    expect(steps[0].length).toEqual(4);
+                    expect(steps[0].stepUnits.length).toEqual(4);
                     testStep(steps, 0, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 3, 4, false, null);
                     testStep(steps, 0, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 3, 4, false, null);
                     testStep(steps, 0, 2, 3, 'dead', 'E', { x: 7, y: 7 }, 0, 0, false, null);
@@ -482,7 +482,7 @@ var TacticArena;
                     ];
                     var steps = currentState.orderManager.getSteps();
                     expect(steps.length).toEqual(3);
-                    expect(steps[0].length).toEqual(4);
+                    expect(steps[0].stepUnits.length).toEqual(4);
                     testStep(steps, 0, 0, 4, 'stand', 'W', { x: 12, y: 7 }, 3, 4, false, null);
                     testStep(steps, 0, 1, 1, 'stand', 'E', { x: 8, y: 8 }, 3, 4, false, null);
                     testStep(steps, 0, 2, 2, 'stand', 'W', { x: 10, y: 8 }, 3, 4, false, null);
@@ -528,19 +528,19 @@ var TacticArena;
                     ];
                     var steps = currentState.orderManager.getSteps();
                     expect(steps.length).toEqual(5);
-                    expect(steps[0].length).toEqual(4);
+                    expect(steps[0].stepUnits.length).toEqual(4);
                     testStep(steps, 0, 0, 1, 'stand', 'E', { x: 8, y: 8 }, 3, 4, false, null);
                     testStep(steps, 0, 1, 2, 'stand', 'W', { x: 10, y: 8 }, 4, 2, false, null);
                     testStep(steps, 0, 2, 4, 'stand', 'W', { x: 12, y: 7 }, 4, 4, false, null);
                     testStep(steps, 0, 3, 3, 'stand', 'E', { x: 7, y: 7 }, 3, 4, false, null);
                     testStep(steps, 1, 0, 1, 'cast', 'E', { x: 8, y: 8 }, 1, 4, false, null);
                     testStep(steps, 1, 1, 2, 'move', 'W', { x: 9, y: 8 }, 3, 0, false, null);
-                    expect(steps[1][1].entityState.dies).toBeTruthy();
+                    expect(steps[1].stepUnits[1].data.dies).toBeTruthy();
                     testStep(steps, 1, 2, 4, 'move', 'W', { x: 11, y: 7 }, 3, 4, false, null);
                     testStep(steps, 1, 3, 3, 'stand', 'E', { x: 7, y: 7 }, 2, 4, false, null);
                     testStep(steps, 2, 0, 1, 'move', 'E', { x: 7, y: 8 }, 0, 4, false, null);
                     testStep(steps, 2, 1, 2, 'dead', 'W', { x: 9, y: 8 }, 3, 0, false, null);
-                    expect(steps[2][1].entityState.dies).toBeFalsy();
+                    expect(steps[2].stepUnits[1].data.dies).toBeFalsy();
                     testStep(steps, 2, 2, 4, 'move', 'W', { x: 10, y: 7 }, 2, 4, false, null);
                     testStep(steps, 2, 3, 3, 'stand', 'E', { x: 7, y: 7 }, 1, 4, false, null);
                     testStep(steps, 3, 0, 1, 'stand', 'E', { x: 7, y: 8 }, 0, 4, false, null);
@@ -636,21 +636,10 @@ var TacticArena;
             }
         };
         OrderManager.prototype.getInitialStep = function () {
-            var step = [];
+            var step = new TacticArena.Entity.Step();
             for (var i = 0; i < this.orders.length; i++) {
-                var state = OrderManager.getDefaultEntityState();
                 var pawn = this.orders[i].entity;
-                var hp = pawn.getHp();
-                state.ap = hp > 0 ? pawn._apMax : 0;
-                state.hp = hp;
-                var defaultOrder = new TacticArena.Order.Stand(pawn.getPosition(), pawn.getDirection());
-                if (hp <= 0)
-                    defaultOrder.action = 'dead';
-                step.push({
-                    entity: pawn,
-                    entityState: state,
-                    order: defaultOrder
-                });
+                step.stepUnits.push(new TacticArena.Entity.StepUnit(pawn, new TacticArena.Entity.StepUnitData((pawn.getHp() > 0 ? pawn._apMax : 0), pawn.getHp()), (pawn.getHp() <= 0) ? new TacticArena.Order.Dead(pawn.getPosition(), pawn.getDirection()) : new TacticArena.Order.Stand(pawn.getPosition(), pawn.getDirection())));
             }
             return step;
         };
@@ -658,13 +647,13 @@ var TacticArena;
             return (Math.floor(Math.random() * 100) > fleeRate);
         };
         OrderManager.prototype.blockEntity = function (steps, startI, j, order, entity) {
-            steps[startI][j].entityState.positionBlocked = steps[startI][j].order.position;
+            steps[startI].stepUnits[j].data.positionBlocked = steps[startI].stepUnits[j].order.position;
             for (var i = startI; i < steps.length; i++) {
-                if (steps[i][j].order) {
-                    if (i > startI && steps[i][j].order.action == 'move') {
-                        steps[i][j].order = order;
+                if (steps[i].stepUnits[j].order) {
+                    if (i > startI && steps[i].stepUnits[j].order.action == 'move') {
+                        steps[i].stepUnits[j].order = order;
                     }
-                    steps[i][j].order.position = order.position;
+                    steps[i].stepUnits[j].order.position = order.position;
                 }
             }
             this.alteredPawns.push(entity._id);
@@ -673,7 +662,7 @@ var TacticArena;
         };
         OrderManager.prototype.pacifyEntity = function (steps, startI, j, order, entity, state) {
             for (var i = startI; i < steps.length; i++) {
-                steps[i][j].order = new TacticArena.Order.Stand(new TacticArena.Position(state.moved.x, state.moved.y), order.direction);
+                steps[i].stepUnits[j].order = new TacticArena.Order.Stand(new TacticArena.Position(state.moved.x, state.moved.y), order.direction);
             }
             this.alteredPawns.push(entity._id);
             entity.destroyProjection();
@@ -684,23 +673,16 @@ var TacticArena;
             this.formatOrders();
             var steps = new Array(this.getMaxOrderListLength());
             for (var j = 0; j < steps.length; j++) {
-                steps[j] = [];
+                steps[j] = new TacticArena.Entity.Step();
                 for (var i = 0; i < this.orders.length; i++) {
-                    var entity = this.orders[i].entity;
-                    entity.show();
-                    steps[j].push({
-                        entity: entity,
-                        order: this.orders[i].list[j] ? this.orders[i].list[j] : null
-                    });
+                    var pawn = this.orders[i].entity;
+                    pawn.show(); // TODO ugly
+                    steps[j].stepUnits.push(new TacticArena.Entity.StepUnit(pawn, new TacticArena.Entity.StepUnitData(), this.orders[i].list[j] ? this.orders[i].list[j] : null));
                 }
             }
             steps.unshift(this.getInitialStep());
             this.orders = [];
-            console.log(steps);
             return this.processOrders(steps);
-        };
-        OrderManager.getDefaultEntityState = function () {
-            return new TacticArena.Entity.StepUnitState();
         };
         OrderManager.prototype.getPawn = function (id) {
             var result = null;
@@ -711,11 +693,10 @@ var TacticArena;
             });
             return result;
         };
-        OrderManager.prototype.tileIsFree = function (step, position) {
-            for (var i = 0; i < step.length; i++) {
-                var entityState = step[i].entityState;
-                var order = step[i].order;
-                if ((typeof entityState.moved === 'undefined' && position.equals(order.position)) || (entityState.moved && entityState.moved.equals(position))) {
+        OrderManager.prototype.tileIsFree = function (stepUnits, position) {
+            for (var i = 0; i < stepUnits.length; i++) {
+                if ((typeof stepUnits[i].data.moved === 'undefined' && position.equals(stepUnits[i].order.position)) ||
+                    (stepUnits[i].data.moved && stepUnits[i].data.moved.equals(position))) {
                     return false;
                 }
             }
@@ -723,70 +704,57 @@ var TacticArena;
         };
         OrderManager.prototype.processOrders = function (steps) {
             for (var l = 1; l < steps.length; l++) {
-                var step = steps[l];
-                var previousStep = steps[l - 1];
-                for (var i = 0; i < step.length; i++) {
-                    step[i].entityState = OrderManager.getDefaultEntityState();
-                    step[i].entityState.ap = previousStep[i].entityState.ap;
-                    step[i].entityState.hp = previousStep[i].entityState.hp;
-                    // Dans le cas où un pawn à moins d'actions à jouer que les autres on lui en assigne un par défaut
-                    // pour qu'i ne soit pas inactif mais si elle n'a plus de AP il ne fera rien à part rester dans sa position
-                    if (step[i].order == null) {
-                        step[i].order = new TacticArena.Order.Stand(previousStep[i].order.position, previousStep[i].order.direction);
+                var stepUnits = steps[l].stepUnits;
+                var previousStepUnit = steps[l - 1].stepUnits;
+                for (var i = 0; i < stepUnits.length; i++) {
+                    stepUnits[i].data = new TacticArena.Entity.StepUnitData(previousStepUnit[i].data.ap, previousStepUnit[i].data.hp);
+                    // In case a pawn has less actions to play than the others he got a default one but if he has 0 AP he won't do anything
+                    if (stepUnits[i].order == null) {
+                        stepUnits[i].order = new TacticArena.Order.Stand(previousStepUnit[i].order.position, previousStepUnit[i].order.direction);
                     }
                 }
                 // check actions for each entity in step
-                for (var i = 0; i < step.length; i++) {
+                for (var i = 0; i < stepUnits.length; i++) {
                     // foreach entities except A
-                    for (var j = 0; j < step.length; j++) {
-                        if (step[i].entity._id == step[j].entity._id)
+                    for (var j = 0; j < stepUnits.length; j++) {
+                        if (stepUnits[i].pawn._id == stepUnits[j].pawn._id)
                             continue; // Pas d'interaction avec soi-même
-                        var positionBBeforeOrder = previousStep[j].order.position;
-                        if (previousStep[j].entityState.moved) {
-                            positionBBeforeOrder = previousStep[j].entityState.moved;
-                        }
-                        step[i].data = {
-                            aWasFacingB: previousStep[i].order.position.faces(positionBBeforeOrder, previousStep[i].order.direction),
-                            aWasNextToB: previousStep[i].order.position.getDistanceFrom(positionBBeforeOrder) == 1,
-                            fleeRate: 50,
-                            entityAApCost: 1,
-                            entityBHpLost: 0,
-                            aIsActive: previousStep[i].entityState.ap > 0,
-                            aIsAlive: previousStep[i].entityState.hp > 0,
-                            keepDirection: (previousStep[i].order.direction == step[i].order.direction),
-                            keepPosition: step[i].order.position.equals(previousStep[i].order.position),
-                            equalPositions: step[i].order.position.equals(step[j].order.position),
-                            differentTeams: step[i].entity.team != step[j].entity.team,
-                            alteredEntityB: this.alteredPawns.indexOf(step[j].entity._id) < 0,
-                            positionBBeforeOrder: positionBBeforeOrder,
-                            l: l,
-                            j: j
-                        };
-                        step[i].entityState.hp = typeof step[i].entityState.hp !== 'undefined' ? step[i].entityState.hp : previousStep[i].entityState.hp;
-                        if (!step[i].data.aIsAlive) {
-                            step[i].order = new TacticArena.Order.Dead(previousStep[i].order.position, previousStep[i].order.direction);
-                            step[i].entityState.ap = previousStep[i].entityState.ap;
-                            step[i].entityState.hp = 0;
-                            previousStep[i].entityState.dies = previousStep[i].order.action !== 'dead';
+                        var positionBBeforeOrder = previousStepUnit[j].data.moved ? previousStepUnit[j].data.moved : previousStepUnit[j].order.position;
+                        stepUnits[i].data.aWasFacingB = previousStepUnit[i].order.position.faces(positionBBeforeOrder, previousStepUnit[i].order.direction);
+                        stepUnits[i].data.aWasNextToB = previousStepUnit[i].order.position.getDistanceFrom(positionBBeforeOrder) == 1;
+                        stepUnits[i].data.entityAApCost = 1;
+                        stepUnits[i].data.entityBHpLost = 0;
+                        stepUnits[i].data.aIsActive = previousStepUnit[i].data.ap > 0; // INACTIF = stand mais pas le droit d'attaquer
+                        stepUnits[i].data.aIsAlive = previousStepUnit[i].data.hp > 0;
+                        stepUnits[i].data.keepDirection = (previousStepUnit[i].order.direction == stepUnits[i].order.direction);
+                        stepUnits[i].data.keepPosition = stepUnits[i].order.position.equals(previousStepUnit[i].order.position);
+                        stepUnits[i].data.equalPositions = stepUnits[i].order.position.equals(stepUnits[j].order.position);
+                        stepUnits[i].data.differentTeams = stepUnits[i].pawn.team != stepUnits[j].pawn.team;
+                        stepUnits[i].data.alteredEntityB = this.alteredPawns.indexOf(stepUnits[j].pawn._id) < 0;
+                        stepUnits[i].data.positionBBeforeOrder = positionBBeforeOrder;
+                        stepUnits[i].data.hp = typeof stepUnits[i].data.hp !== 'undefined' ? stepUnits[i].data.hp : previousStepUnit[i].data.hp;
+                        if (!stepUnits[i].data.aIsAlive) {
+                            stepUnits[i].order = new TacticArena.Order.Dead(previousStepUnit[i].order.position, previousStepUnit[i].order.direction);
+                            stepUnits[i].data.ap = previousStepUnit[i].data.ap;
+                            stepUnits[i].data.hp = 0;
+                            previousStepUnit[i].data.dies = !(previousStepUnit[i].order instanceof TacticArena.Order.Dead);
                             continue;
                         }
-                        if (step[i].data.equalPositions) {
+                        if (stepUnits[i].data.equalPositions) {
                             // Si A veut aller sur la même case que B (qu'il y soit déjà statique où qu'il veuille y aller)
-                            if (this.alteredPawns.indexOf(step[i].entity._id) < 0)
-                                step[i].entityState.moveHasBeenBlocked = (step[i].order.action == 'move');
-                            if (this.alteredPawns.indexOf(step[j].entity._id) < 0)
-                                step[j].entityState.moveHasBeenBlocked = (step[j].order.action == 'move');
+                            if (this.alteredPawns.indexOf(stepUnits[i].pawn._id) < 0)
+                                stepUnits[i].data.moveHasBeenBlocked = stepUnits[i].order instanceof TacticArena.Order.Move;
+                            if (this.alteredPawns.indexOf(stepUnits[j].pawn._id) < 0)
+                                stepUnits[j].data.moveHasBeenBlocked = stepUnits[j].order instanceof TacticArena.Order.Move;
                         }
-                        console.log(step[i].order);
-                        step[i].order = step[i].order.process(step[i], step[j], this, steps);
-                        step[j].entityState.hp = typeof step[j].entityState.hp !== 'undefined' ? step[j].entityState.hp : previousStep[j].entityState.hp;
-                        step[j].entityState.hp -= step[i].data.entityBHpLost;
-                        step[i].entityState.ap = step[i].data.aIsActive ? previousStep[i].entityState.ap - step[i].data.entityAApCost : 0;
-                        if (step[i].entityState.moveHasBeenBlocked && this.alteredPawns.indexOf(step[i].entity._id) < 0) {
-                            this.blockEntity(steps, l, i, new TacticArena.Order.Stand(previousStep[i].order.position, previousStep[i].order.direction), step[i].entity);
+                        stepUnits[i].order = stepUnits[i].order.process(this, steps, l, i, j);
+                        stepUnits[j].data.hp -= stepUnits[i].data.entityBHpLost;
+                        stepUnits[i].data.ap = stepUnits[i].data.aIsActive ? previousStepUnit[i].data.ap - stepUnits[i].data.entityAApCost : 0;
+                        if (stepUnits[i].data.moveHasBeenBlocked && this.alteredPawns.indexOf(stepUnits[i].pawn._id) < 0) {
+                            this.blockEntity(steps, l, i, new TacticArena.Order.Stand(previousStepUnit[i].order.position, previousStepUnit[i].order.direction), stepUnits[i].pawn);
                         }
-                        if (step[j].entityState.moveHasBeenBlocked && this.alteredPawns.indexOf(step[j].entity._id) < 0) {
-                            this.blockEntity(steps, l, j, new TacticArena.Order.Stand(previousStep[j].order.position, previousStep[j].order.direction), step[j].entity);
+                        if (stepUnits[j].data.moveHasBeenBlocked && this.alteredPawns.indexOf(stepUnits[j].pawn._id) < 0) {
+                            this.blockEntity(steps, l, j, new TacticArena.Order.Stand(previousStepUnit[j].order.position, previousStepUnit[j].order.direction), stepUnits[j].pawn);
                         }
                     }
                 }
@@ -810,16 +778,16 @@ var TacticArena;
                     {
                         entity: currentState.pawns[0],
                         order: { action: "stand", direction: "E", x: 8, y: 8 },
-                        entityState: getEntityState(3, 4)
+                        data: getStepUnitData(3, 4)
                     },
                     {
                         entity: currentState.pawns[1],
                         order: { action: "stand", direction: "W", x: 10, y: 8 },
-                        entityState: getEntityState(3, 4)
+                        data: getStepUnitData(3, 4)
                     }
                 ];
             }
-            function getEntityState(ap, hp) {
+            function getStepUnitData(ap, hp) {
                 return {
                     ap: ap,
                     hp: hp,
@@ -864,12 +832,12 @@ var TacticArena;
                         {
                             entity: currentState.pawns[0],
                             order: { action: "move", direction: "E", x: 9, y: 8 },
-                            entityState: getEntityState(2, 4)
+                            data: getStepUnitData(2, 4)
                         },
                         {
                             entity: currentState.pawns[1],
                             order: { action: "stand", direction: "W", x: 10, y: 8 },
-                            entityState: getEntityState(2, 4)
+                            data: getStepUnitData(2, 4)
                         }
                     ]
                 ]);
@@ -893,12 +861,12 @@ var TacticArena;
                         {
                             entity: currentState.pawns[0],
                             order: { action: "move", direction: "E", x: 9, y: 8 },
-                            entityState: getEntityState(2, 4)
+                            data: getStepUnitData(2, 4)
                         },
                         {
                             entity: currentState.pawns[1],
                             order: { action: "stand", direction: "W", x: 10, y: 8 },
-                            entityState: getEntityState(2, 4)
+                            data: getStepUnitData(2, 4)
                         }
                     ],
                     [
@@ -907,14 +875,14 @@ var TacticArena;
                             order: {
                                 action: "attack", direction: "E", x: 9, y: 8, target: { entityId: currentState.pawns[1]._id, dodge: false }
                             },
-                            entityState: getEntityState(1, 4)
+                            data: getStepUnitData(1, 4)
                         },
                         {
                             entity: currentState.pawns[1],
                             order: {
                                 action: "attack", direction: "W", x: 10, y: 8, target: { entityId: currentState.pawns[0]._id, dodge: true }
                             },
-                            entityState: getEntityState(1, 3)
+                            data: getStepUnitData(1, 3)
                         }
                     ]
                 ]);
@@ -943,36 +911,36 @@ var TacticArena;
                         {
                             entity: currentState.pawns[0],
                             order: { action: "move", direction: "E", x: 8, y: 7 },
-                            entityState: getEntityState(2, 4)
+                            data: getStepUnitData(2, 4)
                         },
                         {
                             entity: currentState.pawns[1],
                             order: { action: "move", direction: "W", x: 10, y: 7 },
-                            entityState: getEntityState(2, 4)
+                            data: getStepUnitData(2, 4)
                         }
                     ],
                     [
                         {
                             entity: currentState.pawns[0],
                             order: { action: "cast", direction: "E", x: 8, y: 7, targets: [currentState.pawns[1]._id] },
-                            entityState: getEntityState(0, 4)
+                            data: getStepUnitData(0, 4)
                         },
                         {
                             entity: currentState.pawns[1],
                             order: { action: "move", direction: "W", x: 9, y: 7 },
-                            entityState: getEntityState(1, 2)
+                            data: getStepUnitData(1, 2)
                         }
                     ],
                     [
                         {
                             entity: currentState.pawns[0],
                             order: { action: "stand", direction: "E", x: 8, y: 7, targets: [currentState.pawns[1]._id] },
-                            entityState: getEntityState(0, 3)
+                            data: getStepUnitData(0, 3)
                         },
                         {
                             entity: currentState.pawns[1],
                             order: { action: "move", direction: "W", x: 9, y: 7, target: { entity: currentState.pawns[0]._id, dodge: false } },
-                            entityState: getEntityState(0, 2)
+                            data: getStepUnitData(0, 2)
                         }
                     ]
                 ]);
@@ -1061,7 +1029,6 @@ var TacticArena;
             });
         };
         ResolveManager.prototype.init = function (steps) {
-            console.info(steps);
             this.steps = steps;
             this.manageProjectionDislay(steps[0], true);
             this.currentIndex = 0;
@@ -1108,12 +1075,11 @@ var TacticArena;
                 _this.game.signalManager.stepResolutionIndexChange.dispatch(index);
                 var step = _this.steps[index];
                 var previousStep = index > 0 ? _this.steps[index - 1] : null;
-                console.log('processStep', index, step);
                 var promisesOrders = [];
                 var _loop_1 = function () {
                     o = step[i].order;
                     e = step[i].entity;
-                    s = step[i].entityState;
+                    s = step[i].data;
                     p = null;
                     var position = e.getPosition();
                     e.setAp(s.ap);
@@ -1167,8 +1133,8 @@ var TacticArena;
                         _this.manageProjectionDislay(step);
                     }
                     step.forEach(function (s) {
-                        var forceAnimation = typeof s.entityState.dies !== 'undefined' && s.entityState.dies;
-                        s.entity.setHp(s.entityState.hp, forceAnimation);
+                        var forceAnimation = typeof s.data.dies !== 'undefined' && s.data.dies;
+                        s.entity.setHp(s.data.hp, forceAnimation);
                     });
                     _this.game.signalManager.stepResolutionFinished.dispatch(index);
                     if (_this.steps.length > (index + 1) && !_this.game.isPaused) {
@@ -1279,9 +1245,9 @@ var TacticArena;
                         serializedSteps.push([]);
                         for (var j = 0; j < steps[i].length; j++) {
                             var s = {
-                                entityId: steps[i][j].entity._id,
-                                entityState: steps[i][j].entityState,
-                                order: steps[i][j].order,
+                                entityId: steps[i].stepUnits[j].pawn._id,
+                                stepUnitState: steps[i].stepUnits[j].stepUnitData,
+                                order: steps[i].stepUnits[j].order,
                             };
                             serializedSteps[i].push(s);
                         }
@@ -1295,9 +1261,9 @@ var TacticArena;
                         steps.push([]);
                         for (var j = 0; j < serializedSteps_1[i].length; j++) {
                             var s = {
-                                entity: self.game.pawns.find(function (o) { return o._id == serializedSteps_1[i][j].entityId; }),
-                                entityState: serializedSteps_1[i][j].entityState,
-                                order: serializedSteps_1[i][j].order,
+                                entity: self.game.pawns.find(function (o) { return o._id == serializedSteps_1[i].stepUnits[j].entityId; }),
+                                stepUnitState: serializedSteps_1[i].stepUnits[j].stepUnitData,
+                                order: serializedSteps_1[i].stepUnits[j].order,
                             };
                             steps[i].push(s);
                         }
@@ -1849,7 +1815,11 @@ var TacticArena;
             this.action = action;
             this.position = position;
             this.direction = direction;
+            this.targets = [];
         }
+        BaseOrder.prototype.process = function (ordermanager, steps, stepIndex, aIndex, bIndex) {
+            return this;
+        };
         return BaseOrder;
     }());
     TacticArena.BaseOrder = BaseOrder;
@@ -2585,9 +2555,10 @@ var TacticArena;
     var Entity;
     (function (Entity) {
         var StepUnit = (function () {
-            function StepUnit(pawn, stepUnitState, order) {
+            function StepUnit(pawn, data, order) {
+                this._id = null;
                 this.pawn = pawn;
-                this.stepUnitState = stepUnitState;
+                this.data = data;
                 this.order = order;
             }
             return StepUnit;
@@ -2599,8 +2570,8 @@ var TacticArena;
 (function (TacticArena) {
     var Entity;
     (function (Entity) {
-        var StepUnitState = (function () {
-            function StepUnitState(ap, hp) {
+        var StepUnitData = (function () {
+            function StepUnitData(ap, hp) {
                 if (ap === void 0) { ap = null; }
                 if (hp === void 0) { hp = null; }
                 this.moveHasBeenBlocked = false;
@@ -2609,10 +2580,23 @@ var TacticArena;
                 this.ap = ap;
                 this.hp = hp;
                 this.dies = false;
+                this.aWasFacingB = false;
+                this.aWasNextToB = false;
+                this.fleeRate = 50;
+                this.entityAApCost = 1;
+                this.entityBHpLost = 0;
+                this.aIsActive = false;
+                this.aIsAlive = true;
+                this.keepDirection = false;
+                this.keepPosition = false;
+                this.equalPositions = false;
+                this.differentTeams = false;
+                this.alteredEntityB = false;
+                this.positionBBeforeOrder = null;
             }
-            return StepUnitState;
+            return StepUnitData;
         }());
-        Entity.StepUnitState = StepUnitState;
+        Entity.StepUnitData = StepUnitData;
     })(Entity = TacticArena.Entity || (TacticArena.Entity = {}));
 })(TacticArena || (TacticArena = {}));
 var TacticArena;
@@ -2651,8 +2635,6 @@ var TacticArena;
                 _this.target = target;
                 return _this;
             }
-            Attack.prototype.process = function () {
-            };
             return Attack;
         }(TacticArena.BaseOrder));
         Order.Attack = Attack;
@@ -2667,8 +2649,6 @@ var TacticArena;
             function Dead(position, direction) {
                 return _super.call(this, 'dead', position, direction) || this;
             }
-            Dead.prototype.process = function () {
-            };
             return Dead;
         }(TacticArena.BaseOrder));
         Order.Dead = Dead;
@@ -2683,16 +2663,19 @@ var TacticArena;
             function Fire(position, direction) {
                 return _super.call(this, 'cast', position, direction) || this;
             }
-            Fire.prototype.process = function (step, stepB, ordermanager) {
+            Fire.prototype.process = function (ordermanager, steps, stepIndex, aIndex, bIndex) {
                 var result = this;
-                step.data.entityAApCost++;
-                var path = ordermanager.game.stageManager.getLinearPath(step.entity, 4, step.order.direction, step.order.position);
-                step.order.targets = step.order.targets || [];
+                var stepUnits = steps[stepIndex].stepUnits;
+                var stepUnitA = stepUnits[aIndex];
+                var stepUnitB = stepUnits[bIndex];
+                stepUnitA.data.entityAApCost++;
+                var path = ordermanager.game.stageManager.getLinearPath(stepUnitA.pawn, 4, stepUnitA.order.direction, stepUnitA.order.position);
+                stepUnitA.order.targets = stepUnitA.order.targets || [];
                 for (var k = 0; k < path.length; k++) {
-                    var targetPosition = stepB.entityState.moveHasBeenBlocked ? step.data.positionBBeforeOrder : stepB.order.position;
+                    var targetPosition = stepUnitB.data.moveHasBeenBlocked ? stepUnitA.data.positionBBeforeOrder : stepUnitB.order.position;
                     if (path[k].x == targetPosition.x && path[k].y == targetPosition.y) {
-                        step.order.targets.push(stepB.entity._id);
-                        step.data.entityBHpLost += 2;
+                        stepUnitA.order.targets.push(stepUnitB.pawn._id);
+                        stepUnitA.data.entityBHpLost += 2;
                     }
                 }
                 return result;
@@ -2721,22 +2704,25 @@ var TacticArena;
             // AND IF A & B are not in the same team
             // AND IF A keeps its direction (aIsFacingB) (et ne va donc pas pas se détourner de B)
             // AND IF A stays next to B OR IF A moves toward B (equalPositions) (en lui faisant face)
-            ReflexOrder.prototype.process = function (step, stepB, ordermanager) {
-                var result = null;
-                if (step.data.aWasNextToB && step.data.aWasFacingB && step.data.aIsActive && step.data.differentTeams &&
-                    step.data.keepDirection && (step.data.keepPosition || step.data.equalPositions)) {
+            ReflexOrder.prototype.process = function (ordermanager, steps, stepIndex, aIndex, bIndex) {
+                var result = this;
+                var stepUnits = steps[stepIndex].stepUnits;
+                var stepUnitA = stepUnits[aIndex];
+                var stepUnitB = stepUnits[bIndex];
+                if (stepUnitA.data.aWasNextToB && stepUnitA.data.aWasFacingB && stepUnitA.data.aIsActive && stepUnitA.data.differentTeams &&
+                    stepUnitA.data.keepDirection && (stepUnitA.data.keepPosition || stepUnitA.data.equalPositions)) {
                     var entityBIsDodging = true;
-                    if (TacticArena.OrderManager.resolutionEsquive(step.data.fleeRate)) {
-                        step.data.entityBHpLost += 1;
+                    if (TacticArena.OrderManager.resolutionEsquive(stepUnitA.data.fleeRate)) {
+                        stepUnitA.data.entityBHpLost += 1;
                         entityBIsDodging = false;
-                        if (step.data.alteredEntityB) {
-                            stepB.entityState.moveHasBeenBlocked = (stepB.order.action == 'move');
+                        if (stepUnitA.data.alteredEntityB) {
+                            stepUnitB.data.moveHasBeenBlocked = (stepUnitB.order.action == 'move');
                         }
                     }
                     result = new Order.Attack(this.position, this.direction, {
-                        entityId: stepB._id,
+                        entityId: stepUnitB._id,
                         dodge: entityBIsDodging,
-                        damages: step.data.entityBHpLost
+                        damages: stepUnitA.data.entityBHpLost
                     });
                 }
                 if (result === null) {
@@ -2774,9 +2760,12 @@ var TacticArena;
             function Slash(position, direction) {
                 return _super.call(this, 'slash', position, direction) || this;
             }
-            Slash.prototype.process = function (step, stepB, ordermanager) {
-                step.data.fleeRate = 0;
-                var result = _super.prototype.process.call(this, step, stepB, ordermanager);
+            Slash.prototype.process = function (ordermanager, steps, stepIndex, aIndex, bIndex) {
+                var result = _super.prototype.process.call(this, ordermanager, steps, stepIndex, aIndex, bIndex);
+                var stepUnits = steps[stepIndex].stepUnits;
+                var stepUnitA = stepUnits[aIndex];
+                var stepUnitB = stepUnits[bIndex];
+                stepUnitA.data.fleeRate = 0;
                 if (result instanceof Order.Attack) {
                     //entityBHpLost += 1;
                 }
@@ -2811,40 +2800,43 @@ var TacticArena;
             function Wind(position, direction) {
                 return _super.call(this, 'cast_wind', position, direction) || this;
             }
-            Wind.prototype.process = function (step, stepB, ordermanager, steps) {
+            Wind.prototype.process = function (ordermanager, steps, stepIndex, aIndex, bIndex) {
                 var result = this;
-                step.data.entityAApCost++;
-                var path = ordermanager.game.stageManager.getLinearPath(step.entity, 4, step.order.direction, step.order.position);
-                step.order.targets = step.order.targets || [];
+                var stepUnits = steps[stepIndex].stepUnits;
+                var stepUnitA = stepUnits[aIndex];
+                var stepUnitB = stepUnits[bIndex];
+                stepUnitA.data.entityAApCost++;
+                var path = ordermanager.game.stageManager.getLinearPath(stepUnitA.pawn, 4, stepUnitA.order.direction, stepUnitA.order.position);
+                stepUnitA.order.targets = stepUnitA.order.targets || [];
                 for (var k = 0; k < path.length; k++) {
-                    var targetPosition = stepB.entityState.moveHasBeenBlocked ? step.data.positionBBeforeOrder : stepB.order.position;
+                    var targetPosition = stepUnitB.data.moveHasBeenBlocked ? stepUnitA.data.positionBBeforeOrder : stepUnitB.order.position;
                     if (path[k].x == targetPosition.x && path[k].y == targetPosition.y) {
-                        var moved = new TacticArena.Position(stepB.order.position.x, stepB.order.position.y);
-                        if (stepB.entityState.moved) {
-                            moved = stepB.entityState.moved;
+                        var moved = new TacticArena.Position(stepUnitB.order.position.x, stepUnitB.order.position.y);
+                        if (stepUnitB.data.moved) {
+                            moved = stepUnitB.data.moved;
                         }
-                        if (step.order.direction == 'E') {
+                        if (stepUnitA.order.direction == 'E') {
                             moved.setX(moved.x + 1);
                         }
-                        else if (step.order.direction == 'W') {
+                        else if (stepUnitA.order.direction == 'W') {
                             moved.setX(moved.x - 1);
                         }
-                        else if (step.order.direction == 'S') {
+                        else if (stepUnitA.order.direction == 'S') {
                             moved.setY(moved.y + 1);
                         }
-                        else if (step.order.direction == 'N') {
+                        else if (stepUnitA.order.direction == 'N') {
                             moved.setY(moved.y - 1);
                         }
-                        if (!ordermanager.tileIsFree(step, moved) || ordermanager.game.stageManager.isObstacle(moved)) {
+                        if (!ordermanager.tileIsFree(stepUnits, moved) || ordermanager.game.stageManager.isObstacle(moved)) {
                             moved = null;
                         }
-                        stepB.entityState.moved = moved;
-                        step.order.targets.push({
-                            entity: stepB.entity._id,
-                            moved: { x: moved.x, y: moved.y, d: ordermanager.game.stageManager.getNbTilesBetween(step.order.position, stepB.order.position) }
+                        stepUnitB.data.moved = moved;
+                        stepUnitA.order.targets.push({
+                            entity: stepUnitB.pawn._id,
+                            moved: { x: moved.x, y: moved.y, d: ordermanager.game.stageManager.getNbTilesBetween(stepUnitA.order.position, stepUnitB.order.position) }
                         });
-                        step.data.entityBHpLost += 1;
-                        ordermanager.pacifyEntity(steps, step.data.l + 1, step.data.j, stepB.order, stepB.entity, stepB.entityState);
+                        stepUnitA.data.entityBHpLost += 1;
+                        ordermanager.pacifyEntity(steps, stepIndex + 1, bIndex, stepUnitB.order, stepUnitB.pawn, stepUnitB.data);
                     }
                 }
                 return result;
@@ -6774,7 +6766,7 @@ var TacticArena;
                 for (var i = 0; i < step.length; i++) {
                     var e = step[i].entity;
                     var o = step[i].order;
-                    var s = step[i].entityState;
+                    var s = step[i].stepUnitData;
                     var logColor = '#ffffff';
                     //let logColor = '#78dd77';
                     // logColor = '#f45d62';

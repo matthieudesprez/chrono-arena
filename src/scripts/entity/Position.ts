@@ -28,11 +28,11 @@ module TacticArena {
             this.y = y;
         }
 
-        equals(position:Position):Boolean {
+        equals(position:Position):boolean {
             return this.x == position.x && this.y == position.y;
         }
 
-        faces(position:Position, direction):Boolean {
+        faces(position:Position, direction):boolean {
             return (
                 this.x == position.x && (
                     (this.y == position.y + 1 && direction == 'N') || (this.y == position.y - 1 && direction == 'S')

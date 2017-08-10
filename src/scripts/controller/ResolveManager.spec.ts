@@ -10,17 +10,17 @@ module TacticArena.Specs {
                 {
                     entity: currentState.pawns[0],
                     order: { action: "stand", direction: "E", x: 8, y: 8 },
-                    stepUnitState: getStepUnitState(3, 4)
+                    data: getStepUnitData(3, 4)
                 },
                 {
                     entity: currentState.pawns[1],
                     order: { action: "stand", direction: "W", x: 10, y: 8 },
-                    stepUnitState: getStepUnitState(3, 4)
+                    data: getStepUnitData(3, 4)
                 }
             ];
         }
 
-        function getStepUnitState(ap, hp) {
+        function getStepUnitData(ap, hp) {
             return {
                 ap: ap,
                 hp: hp,
@@ -70,12 +70,12 @@ module TacticArena.Specs {
                         {
                             entity: currentState.pawns[0],
                             order: { action: "move", direction: "E", x: 9, y: 8 },
-                            stepUnitState: getStepUnitState(2, 4)
+                            data: getStepUnitData(2, 4)
                         },
                         {
                             entity: currentState.pawns[1],
                             order: { action: "stand", direction: "W", x: 10, y: 8 },
-                            stepUnitState: getStepUnitState(2, 4)
+                            data: getStepUnitData(2, 4)
                         }
                     ]
                 ]
@@ -104,12 +104,12 @@ module TacticArena.Specs {
                         {
                             entity: currentState.pawns[0],
                             order: { action: "move", direction: "E", x: 9, y: 8 },
-                            stepUnitState: getStepUnitState(2, 4)
+                            data: getStepUnitData(2, 4)
                         },
                         {
                             entity: currentState.pawns[1],
                             order: { action: "stand", direction: "W", x: 10, y: 8 },
-                            stepUnitState: getStepUnitState(2, 4)
+                            data: getStepUnitData(2, 4)
                         }
                     ],
                     [
@@ -118,14 +118,14 @@ module TacticArena.Specs {
                             order: {
                                 action: "attack", direction: "E", x: 9, y: 8, target: { entityId: currentState.pawns[1]._id, dodge: false }
                             },
-                            stepUnitState: getStepUnitState(1, 4)
+                            data: getStepUnitData(1, 4)
                         },
                         {
                             entity: currentState.pawns[1],
                             order: {
                                 action: "attack", direction: "W", x: 10, y: 8, target: { entityId: currentState.pawns[0]._id, dodge: true }
                             },
-                            stepUnitState: getStepUnitState(1, 3)
+                            data: getStepUnitData(1, 3)
                         }
                     ]
                 ]
@@ -160,36 +160,36 @@ module TacticArena.Specs {
                         {
                             entity: currentState.pawns[0],
                             order: { action: "move", direction: "E", x: 8, y: 7 },
-                            stepUnitState: getStepUnitState(2, 4)
+                            data: getStepUnitData(2, 4)
                         },
                         {
                             entity: currentState.pawns[1],
                             order: { action: "move", direction: "W", x: 10, y: 7 },
-                            stepUnitState: getStepUnitState(2, 4)
+                            data: getStepUnitData(2, 4)
                         }
                     ],
                     [
                         {
                             entity: currentState.pawns[0],
                             order: {action: "cast", direction: "E", x: 8, y: 7, targets: [currentState.pawns[1]._id] },
-                            stepUnitState: getStepUnitState(0, 4)
+                            data: getStepUnitData(0, 4)
                         },
                         {
                             entity: currentState.pawns[1],
                             order: { action: "move", direction: "W", x: 9, y: 7 },
-                            stepUnitState: getStepUnitState(1, 2)
+                            data: getStepUnitData(1, 2)
                         }
                     ],
                     [
                         {
                             entity: currentState.pawns[0],
                             order: {action: "stand", direction: "E", x: 8, y: 7, targets: [currentState.pawns[1]._id] },
-                            stepUnitState: getStepUnitState(0, 3)
+                            data: getStepUnitData(0, 3)
                         },
                         {
                             entity: currentState.pawns[1],
                             order: { action: "move", direction: "W", x: 9, y: 7, target: { entity: currentState.pawns[0]._id, dodge: false } },
-                            stepUnitState: getStepUnitState(0, 2)
+                            data: getStepUnitData(0, 2)
                         }
                     ]
                 ]

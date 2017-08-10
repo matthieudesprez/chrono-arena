@@ -5,16 +5,19 @@ module TacticArena.Order {
             super('cast', position, direction);
         }
 
-        process(step, stepB, ordermanager) {
+        process(ordermanager:OrderManager, steps:Entity.Step[], stepIndex:number, aIndex:number, bIndex:number):BaseOrder {
             let result = this;
-            step.data.entityAApCost++;
-            let path = ordermanager.game.stageManager.getLinearPath(step.pawn, 4, step.order.direction, step.order.position);
-            step.order.targets = step.order.targets || [];
+            let stepUnits = steps[stepIndex].stepUnits;
+            let stepUnitA = stepUnits[aIndex];
+            let stepUnitB = stepUnits[bIndex];
+            stepUnitA.data.entityAApCost++;
+            let path = ordermanager.game.stageManager.getLinearPath(stepUnitA.pawn, 4, stepUnitA.order.direction, stepUnitA.order.position);
+            stepUnitA.order.targets = stepUnitA.order.targets || [];
             for (var k = 0; k < path.length; k++) {
-                let targetPosition = stepB.stepUnitState.moveHasBeenBlocked ? step.data.positionBBeforeOrder : stepB.order.position;
+                let targetPosition = stepUnitB.data.moveHasBeenBlocked ? stepUnitA.data.positionBBeforeOrder : stepUnitB.order.position;
                 if (path[k].x == targetPosition.x && path[k].y == targetPosition.y) {
-                    step.order.targets.push(stepB.pawn._id);
-                    step.data.entityBHpLost += 2;
+                    stepUnitA.order.targets.push(stepUnitB.pawn._id);
+                    stepUnitA.data.entityBHpLost += 2;
                 }
             }
             return result

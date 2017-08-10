@@ -1,15 +1,15 @@
 module TacticArena.Entity {
     export class StepUnit {
+        _id;
         pawn:Pawn;
-        stepUnitState:StepUnitState;
+        data:StepUnitData;
         order:BaseOrder;
-        data:Object;
 
-        constructor(pawn:Pawn, stepUnitState:StepUnitState, order:BaseOrder) {
+        constructor(pawn:Pawn, data:StepUnitData, order:BaseOrder) {
+            this._id = null;
             this.pawn = pawn;
-            this.stepUnitState = stepUnitState;
+            this.data = data;
             this.order = order;
-            this.data = {};
         }
     }
 }

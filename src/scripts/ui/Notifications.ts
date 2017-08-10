@@ -61,7 +61,7 @@ module TacticArena.UI {
             for(let i = 0; i < step.length; i++) {
                 let e = step[i].entity;
                 let o = step[i].order;
-                let s = step[i].stepUnitState;
+                let s = step[i].stepUnitData;
                 let logColor = '#ffffff';
                 //let logColor = '#78dd77';
                 // logColor = '#f45d62';

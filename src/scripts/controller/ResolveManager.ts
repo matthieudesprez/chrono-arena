@@ -112,7 +112,7 @@ module TacticArena {
                 for (var i = 0; i < step.length; i++) {
                     var o = step[i].order;
                     var e = step[i].entity;
-                    var s = step[i].stepUnitState;
+                    var s = step[i].data;
                     var p = null;
                     let position = e.getPosition();
 
@@ -159,8 +159,8 @@ module TacticArena {
                         this.manageProjectionDislay(step);
                     }
                     step.forEach( s => {
-                        let forceAnimation = typeof s.stepUnitState.dies !== 'undefined' && s.stepUnitState.dies;
-                        s.entity.setHp(s.stepUnitState.hp, forceAnimation);
+                        let forceAnimation = typeof s.data.dies !== 'undefined' && s.data.dies;
+                        s.entity.setHp(s.data.hp, forceAnimation);
                     });
                     this.game.signalManager.stepResolutionFinished.dispatch(index);
                     if (this.steps.length > (index + 1) && !this.game.isPaused) {
