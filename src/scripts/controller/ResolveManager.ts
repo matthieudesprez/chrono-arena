@@ -14,46 +14,6 @@ module TacticArena {
             this.active = false;
         }
 
-        createPromiseMove(entity, x, y, animate, direction = null) {
-            return entity.moveTo(x, y, null, animate).then((res) => {
-                if(direction) {
-                    this.createPromiseStand(entity, direction).then((res) => {
-                        return true;
-                    });
-                } else {
-                    return res;
-                }
-            });
-        }
-
-        createPromiseBlock(entity, initialPosition, targetPosition, animate) {
-            if (animate) {
-                return entity.moveTo(targetPosition.x, targetPosition.y).then((res) => {
-                    entity.blocked();
-                    entity.moveTo(initialPosition.x, initialPosition.y).then((res) => {
-                        return res;
-                    });
-                });
-            } else {
-                return this.createPromiseStand(entity, entity.getDirection());
-            }
-        }
-
-        createPromiseAttack(entity, target) {
-            return entity.attack(target).then((res) => {
-                return res;
-            });
-        }
-
-        createPromiseStand(entity, direction) {
-            return new Promise((resolve, reject) => {
-                entity.faceDirection(direction);
-                setTimeout(function () {
-                    resolve(true);
-                }, 250);
-            });
-        }
-
         createPromiseDie(entity) {
             return new Promise((resolve, reject) => {
                 entity.die();
@@ -71,8 +31,8 @@ module TacticArena {
 
         handleBackwardPromise(promise, entity, order, position, animate) {
             let resultPromise;
-            if(position.x != order.x || position.y != order.y) {
-                resultPromise = entity.moveTo(order.x, order.y, null, false).then((res) => {
+            if(position.x != order.position.x || position.y != order.position.y) {
+                resultPromise = entity.moveTo(order.position.x, order.position.y, null, false).then((res) => {
                     return true;
                 });
                 resultPromise.then((res) => {
@@ -118,19 +78,10 @@ module TacticArena {
 
                     e.setAp(s.ap);
                     if (o.action == 'move') {
-                        if (s.moveHasBeenBlocked) {
-                            p = this.createPromiseBlock(e, {x: o.x, y: o.y}, s.positionBlocked, animate);
-                        } else {
-                            if (backward && position.x == o.x && position.y == o.y) {
-                                let direction = previousStep ? previousStep[i].order.direction : e.getDirection();
-                                p = this.createPromiseStand(e, direction);
-                            } else {
-                                p = this.createPromiseMove(e, o.x, o.y, animate, o.direction);
-                            }
-                        }
+                        p = o.resolve(e, s, previousStep, animate, backward, i);
                     } else if (o.action == 'attack') {
                         o.target.entity = this.game.orderManager.getPawn(o.target.entityId);
-                        p = this.handleBackwardPromise(this.createPromiseAttack(e, o.target), e, o, position, animate);
+                        p = this.handleBackwardPromise(new Animation.Attack(e, o.target).get(), e, o, position, animate);
                     } else if (o.action == 'cast') {
                         let targets = [];
                         o.targets.forEach( t => {
@@ -147,7 +98,7 @@ module TacticArena {
                         });
                         p = this.handleBackwardPromise(e.castTornado(targets, o.direction), e, o, position, animate);
                     } else if (o.action == 'stand') {
-                        p = this.handleBackwardPromise(this.createPromiseStand(e, o.direction), e, o, position, animate);
+                        p = this.handleBackwardPromise(new Animation.Stand(e, o.direction).get(), e, o, position, animate);
                     }
                     promisesOrders.push(p);
                 }
@@ -188,7 +139,7 @@ module TacticArena {
                     if(compareActualEntity) {
                         condition = (JSON.stringify(entityA.getPosition()) == JSON.stringify(entityA.getProjectionOrReal().getPosition()));
                     } else {
-                        condition = (order.x == position.x && order.y == position.y);
+                        condition = order.position.equals(position);
                     }
 
                     if (condition) {

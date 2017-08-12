@@ -1,8 +1,10 @@
 module TacticArena.Order {
     export class Fire extends BaseOrder {
+        targets;
 
-        constructor(position, direction) {
+        constructor(position, direction, targets?) {
             super('cast', position, direction);
+            this.targets = targets;
         }
 
         process(ordermanager:OrderManager, steps:Entity.Step[], stepIndex:number, aIndex:number, bIndex:number):BaseOrder {

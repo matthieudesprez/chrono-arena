@@ -148,7 +148,7 @@ module TacticArena.Entity {
             return this._hp > 0;
         }
 
-        moveTo(x, y, path, animate = true, faceDirection = false) {
+        moveTo(x, y, path = [], animate = true, faceDirection = false) {
             return new Promise((resolve, reject) => {
                 var tile_y, tile_x;
                 if (path != undefined && path.length > 0) {
