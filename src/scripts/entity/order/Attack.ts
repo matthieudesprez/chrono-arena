@@ -1,10 +1,12 @@
 module TacticArena.Order {
     export class Attack extends BaseOrder {
-        target;
 
-        constructor(position, direction, target) {
-            super('attack', position, direction);
-            this.target = target;
+        constructor(position, direction, targets) {
+            super('attack', position, direction, targets);
+        }
+
+        resolve (pawn:Entity.Pawn, stepUnitData:Entity.StepUnitData, previousStep:Entity.StepUnit, animate:boolean, backward:boolean, i:number, state):Promise<any> {
+            return new Animation.Attack(pawn, this, pawn.getPosition(), state).get();
         }
     }
 }

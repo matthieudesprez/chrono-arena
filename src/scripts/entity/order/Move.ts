@@ -9,16 +9,16 @@ module TacticArena.Order {
             this.target = target;
         }
 
-        resolve (pawn:Entity.Pawn, stepUnitData:Entity.StepUnitData, previousStep:Entity.StepUnit, animate:boolean, backward:boolean, i:number):Promise {
+        resolve (pawn:Entity.Pawn, stepUnitData:Entity.StepUnitData, previousStep:Entity.StepUnit, animate:boolean, backward:boolean, i:number, state):Promise<any> {
             let result = null;
             if (stepUnitData.moveHasBeenBlocked) {
-                result = new Animation.Block(pawn, this.position, stepUnitData.positionBlocked, animate).get();
+                result = new Animation.Block(pawn, this, pawn.getPosition(), stepUnitData.positionBlocked, animate).get();
             } else {
                 if (backward && pawn.getPosition().equals(this.position)) {
                     let direction = previousStep ? previousStep[i].order.direction : pawn.getDirection();
-                    result = new Animation.Stand(pawn, direction).get();
+                    result = new Animation.Stand(pawn, this, pawn.getPosition()).get();
                 } else {
-                    result = new Animation.Move(pawn, this.position, animate, this.direction).get();
+                    result = new Animation.Move(pawn, this, pawn.getPosition(), animate, this.direction).get();
                 }
             }
             return result;

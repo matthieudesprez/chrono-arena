@@ -30,11 +30,11 @@ module TacticArena.Order {
                         stepUnitB.data.moveHasBeenBlocked = (stepUnitB.order.action == 'move');
                     }
                 }
-                result = new Attack(this.position, this.direction, {
+                result = new Attack(this.position, this.direction, [{
                     entityId: stepUnitB._id,
                     dodge: entityBIsDodging,
                     damages: stepUnitA.data.entityBHpLost
-                });
+                }]);
             }
             if(result === null) {
                 result = this;

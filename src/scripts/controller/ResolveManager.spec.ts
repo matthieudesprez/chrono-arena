@@ -2,19 +2,19 @@
 // / <reference path="../state/Main.ts"/>
 
 module TacticArena.Specs {
-    fdescribe("ResolveManager", () => {
+    describe("ResolveManager", () => {
         var testGame, currentState;
 
         function getInitialStep() {
             return [
                 {
                     entity: currentState.pawns[0],
-                    order: { action: "stand", direction: "E", position: new Position(8, 8) },
+                    order: new Order.Stand(new Position(8, 8), 'E'),
                     data: getStepUnitData(3, 4)
                 },
                 {
                     entity: currentState.pawns[1],
-                    order: { action: "stand", direction: "W", position: new Position(10, 8) },
+                    order: new Order.Stand(new Position(10, 8), 'W'),
                     data: getStepUnitData(3, 4)
                 }
             ];
@@ -115,12 +115,12 @@ module TacticArena.Specs {
                     [
                         {
                             entity: currentState.pawns[0],
-                            order: new Order.Attack(new Position(9, 8), 'E', { entityId: currentState.pawns[1]._id, dodge: false }),
+                            order: new Order.Attack(new Position(9, 8), 'E', [{ entityId: currentState.pawns[1]._id, dodge: false }]),
                             data: getStepUnitData(1, 4)
                         },
                         {
                             entity: currentState.pawns[1],
-                            order: new Order.Attack(new Position(10, 8), 'W', { entityId: currentState.pawns[0]._id, dodge: true }),
+                            order: new Order.Attack(new Position(10, 8), 'W', [{ entityId: currentState.pawns[0]._id, dodge: true }]),
                             data: getStepUnitData(1, 3)
                         }
                     ]

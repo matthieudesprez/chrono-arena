@@ -1,10 +1,8 @@
 module TacticArena.Order {
     export class Fire extends BaseOrder {
-        targets;
 
-        constructor(position, direction, targets?) {
-            super('cast', position, direction);
-            this.targets = targets;
+        constructor(position, direction, targets=[]) {
+            super('cast', position, direction, targets);
         }
 
         process(ordermanager:OrderManager, steps:Entity.Step[], stepIndex:number, aIndex:number, bIndex:number):BaseOrder {
@@ -23,6 +21,10 @@ module TacticArena.Order {
                 }
             }
             return result
+        }
+
+        resolve (pawn:Entity.Pawn, stepUnitData:Entity.StepUnitData, previousStep:Entity.StepUnit, animate:boolean, backward:boolean, i:number, state):Promise<any> {
+            return new Animation.CastFire(pawn, this, pawn.getPosition(), state).get();
         }
 
     }

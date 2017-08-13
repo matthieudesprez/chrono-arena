@@ -1,5 +1,5 @@
 module TacticArena.Animation {
-    export class CastFire extends BaseAnimation {
+    export class CastWind extends BaseAnimation {
         state;
         targets;
 
@@ -8,7 +8,12 @@ module TacticArena.Animation {
             // TODO voué à disparaitre
             this.state = state;
             this.targets = [];
-            order.targets.forEach( t => { this.targets.push(this.state.orderManager.getPawn(t)); });
+            this.order.targets.forEach( t => {
+                this.targets.push({
+                    entity: this.state.orderManager.getPawn(t.entity),
+                    moved: t.moved
+                });
+            });
         }
 
         get():Promise<any> {
@@ -19,7 +24,7 @@ module TacticArena.Animation {
                     this.pawn.show();
                 }
                 this.pawn.faceDirection(this.order.direction);
-                this.pawn.sprite.cast(this.targets, function() {
+                this.pawn.sprite.castTornado(this.targets, function() {
                     self.pawn.sprite.stand();
                     resolve(true);
                 });

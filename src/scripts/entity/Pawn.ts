@@ -1,6 +1,6 @@
 module TacticArena.Entity {
     export class Pawn {
-        private sprite;
+        sprite;
         game;
         projection;
         _parent;
@@ -26,6 +26,7 @@ module TacticArena.Entity {
             this.projection = null;
             this._parent = null;
             let tint = null; //team != this.game.playerTeam ? this.game.teamColors[team-1] : null;
+            //TODO séparer pawn et sprite pour avoir des pawns serializable (sans le game de phaser)
             this.spriteClass = spriteClass;
             if(type) {
                 this.sprite = new spriteClass(game, x, y, ext, type, this, 64, tint);

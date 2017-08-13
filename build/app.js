@@ -771,18 +771,18 @@ var TacticArena;
 (function (TacticArena) {
     var Specs;
     (function (Specs) {
-        fdescribe("ResolveManager", function () {
+        describe("ResolveManager", function () {
             var testGame, currentState;
             function getInitialStep() {
                 return [
                     {
                         entity: currentState.pawns[0],
-                        order: { action: "stand", direction: "E", position: new TacticArena.Position(8, 8) },
+                        order: new TacticArena.Order.Stand(new TacticArena.Position(8, 8), 'E'),
                         data: getStepUnitData(3, 4)
                     },
                     {
                         entity: currentState.pawns[1],
-                        order: { action: "stand", direction: "W", position: new TacticArena.Position(10, 8) },
+                        order: new TacticArena.Order.Stand(new TacticArena.Position(10, 8), 'W'),
                         data: getStepUnitData(3, 4)
                     }
                 ];
@@ -872,12 +872,12 @@ var TacticArena;
                     [
                         {
                             entity: currentState.pawns[0],
-                            order: new TacticArena.Order.Attack(new TacticArena.Position(9, 8), 'E', { entityId: currentState.pawns[1]._id, dodge: false }),
+                            order: new TacticArena.Order.Attack(new TacticArena.Position(9, 8), 'E', [{ entityId: currentState.pawns[1]._id, dodge: false }]),
                             data: getStepUnitData(1, 4)
                         },
                         {
                             entity: currentState.pawns[1],
-                            order: new TacticArena.Order.Attack(new TacticArena.Position(10, 8), 'W', { entityId: currentState.pawns[0]._id, dodge: true }),
+                            order: new TacticArena.Order.Attack(new TacticArena.Position(10, 8), 'W', [{ entityId: currentState.pawns[0]._id, dodge: true }]),
                             data: getStepUnitData(1, 3)
                         }
                     ]
@@ -976,35 +976,10 @@ var TacticArena;
             this.processing = false;
             this.active = false;
         }
-        ResolveManager.prototype.createPromiseDie = function (entity) {
-            return new Promise(function (resolve, reject) {
-                entity.die();
-                setTimeout(function () {
-                    resolve(true);
-                }, 250);
-            });
-        };
         ResolveManager.prototype.init = function (steps) {
             this.steps = steps;
             this.manageProjectionDislay(steps[0], true);
             this.currentIndex = 0;
-        };
-        ResolveManager.prototype.handleBackwardPromise = function (promise, entity, order, position, animate) {
-            var resultPromise;
-            if (position.x != order.position.x || position.y != order.position.y) {
-                resultPromise = entity.moveTo(order.position.x, order.position.y, null, false).then(function (res) {
-                    return true;
-                });
-                resultPromise.then(function (res) {
-                    promise.then(function (res) {
-                        return true;
-                    });
-                });
-            }
-            else {
-                resultPromise = promise;
-            }
-            return resultPromise;
         };
         ResolveManager.prototype.processSteps = function (index, animate, backward) {
             var _this = this;
@@ -1032,45 +1007,11 @@ var TacticArena;
                 var step = _this.steps[index];
                 var previousStep = index > 0 ? _this.steps[index - 1] : null;
                 var promisesOrders = [];
-                var _loop_1 = function () {
-                    o = step[i].order;
-                    e = step[i].entity;
-                    s = step[i].data;
-                    p = null;
-                    var position = e.getPosition();
-                    e.setAp(s.ap);
-                    if (o.action == 'move') {
-                        p = o.resolve(e, s, previousStep, animate, backward, i);
-                    }
-                    else if (o.action == 'attack') {
-                        o.target.entity = _this.game.orderManager.getPawn(o.target.entityId);
-                        p = _this.handleBackwardPromise(new TacticArena.Animation.Attack(e, o.target).get(), e, o, position, animate);
-                    }
-                    else if (o.action == 'cast') {
-                        var targets_1 = [];
-                        o.targets.forEach(function (t) {
-                            targets_1.push(self.game.orderManager.getPawn(t));
-                        });
-                        p = _this.handleBackwardPromise(e.cast(targets_1, o.direction), e, o, position, animate);
-                    }
-                    else if (o.action == 'cast_wind') {
-                        var targets_2 = [];
-                        o.targets.forEach(function (t) {
-                            targets_2.push({
-                                entity: self.game.orderManager.getPawn(t.entity),
-                                moved: t.moved
-                            });
-                        });
-                        p = _this.handleBackwardPromise(e.castTornado(targets_2, o.direction), e, o, position, animate);
-                    }
-                    else if (o.action == 'stand') {
-                        p = _this.handleBackwardPromise(new TacticArena.Animation.Stand(e, o.direction).get(), e, o, position, animate);
-                    }
-                    promisesOrders.push(p);
-                };
-                var o, e, s, p;
                 for (var i = 0; i < step.length; i++) {
-                    _loop_1();
+                    var pawn = step[i].entity;
+                    var stepUnitData = step[i].data;
+                    pawn.setAp(stepUnitData.ap);
+                    promisesOrders.push(step[i].order.resolve(pawn, stepUnitData, previousStep, animate, backward, i, self.game));
                 }
                 _this.manageProjectionDislay(step);
                 Promise.all(promisesOrders).then(function (res) {
@@ -1756,9 +1697,31 @@ var TacticArena;
 var TacticArena;
 (function (TacticArena) {
     var BaseAnimation = (function () {
-        function BaseAnimation(pawn) {
+        function BaseAnimation(pawn, order, position) {
             this.pawn = pawn;
+            this.order = order;
+            this.position = position;
         }
+        BaseAnimation.prototype.get = function () {
+            return null;
+        };
+        BaseAnimation.prototype.handleBackward = function (animation) {
+            var result;
+            if (this.position.x != this.order.position.x || this.position.y != this.order.position.y) {
+                result = this.pawn.moveTo(this.order.position.x, this.order.position.y, null, false).then(function (res) {
+                    return true;
+                });
+                result.then(function (res) {
+                    animation.then(function (res) {
+                        return true;
+                    });
+                });
+            }
+            else {
+                result = animation;
+            }
+            return result;
+        };
         return BaseAnimation;
     }());
     TacticArena.BaseAnimation = BaseAnimation;
@@ -1766,11 +1729,12 @@ var TacticArena;
 var TacticArena;
 (function (TacticArena) {
     var BaseOrder = (function () {
-        function BaseOrder(action, position, direction) {
+        function BaseOrder(action, position, direction, targets) {
+            if (targets === void 0) { targets = []; }
             this.action = action;
             this.position = position;
             this.direction = direction;
-            this.targets = [];
+            this.targets = targets;
         }
         BaseOrder.prototype.process = function (ordermanager, steps, stepIndex, aIndex, bIndex) {
             return this;
@@ -1987,7 +1951,7 @@ var TacticArena;
                     tornado.animations.add('wind', ["wind_01", "wind_02", "wind_03", "wind_04", "wind_05", "wind_06", "wind_07"], 7, false);
                     tornado.animations.play('wind');
                     if (targets) {
-                        var _loop_2 = function () {
+                        var _loop_1 = function () {
                             var target = targets[i];
                             setTimeout(function () {
                                 target.entity.hurt(1);
@@ -1997,7 +1961,7 @@ var TacticArena;
                             }, target.moved.d * 100);
                         };
                         for (var i = 0; i < targets.length; i++) {
-                            _loop_2();
+                            _loop_1();
                         }
                     }
                     var t = self._parent.game.add.tween(tornado).to({ x: targetX, y: targetY }, 1000, Phaser.Easing.Linear.None, true);
@@ -2213,6 +2177,7 @@ var TacticArena;
                 this.projection = null;
                 this._parent = null;
                 var tint = null; //team != this.game.playerTeam ? this.game.teamColors[team-1] : null;
+                //TODO séparer pawn et sprite pour avoir des pawns serializable (sans le game de phaser)
                 this.spriteClass = spriteClass;
                 if (type) {
                     this.sprite = new spriteClass(game, x, y, ext, type, this, 64, tint);
@@ -2561,15 +2526,19 @@ var TacticArena;
     (function (Animation) {
         var Attack = (function (_super) {
             __extends(Attack, _super);
-            function Attack(pawn, target) {
-                var _this = _super.call(this, pawn) || this;
-                _this.target = target;
+            function Attack(pawn, order, position, state) {
+                var _this = _super.call(this, pawn, order, position) || this;
+                _this.targets = [];
+                // TODO voué à disparaître
+                _this.state = state;
+                _this.order.targets.forEach(function (t) { _this.targets.push(_this.state.orderManager.getPawn(t)); });
                 return _this;
             }
             Attack.prototype.get = function () {
-                return this.pawn.attack(this.target).then(function (res) {
+                var animation = this.pawn.attack(this.targets[0]).then(function (res) {
                     return res;
                 });
+                return _super.prototype.handleBackward.call(this, animation);
             };
             return Attack;
         }(TacticArena.BaseAnimation));
@@ -2582,9 +2551,8 @@ var TacticArena;
     (function (Animation) {
         var Block = (function (_super) {
             __extends(Block, _super);
-            function Block(pawn, initialPosition, targetPosition, animate) {
-                var _this = _super.call(this, pawn) || this;
-                _this.initialPosition = initialPosition;
+            function Block(pawn, order, position, targetPosition, animate) {
+                var _this = _super.call(this, pawn, order, position) || this;
                 _this.targetPosition = targetPosition;
                 _this.animate = animate;
                 return _this;
@@ -2594,13 +2562,13 @@ var TacticArena;
                 if (this.animate) {
                     return this.pawn.moveTo(this.targetPosition.x, this.targetPosition.y).then(function (res) {
                         _this.pawn.blocked();
-                        _this.pawn.moveTo(_this.initialPosition.x, _this.initialPosition.y).then(function (res) {
+                        _this.pawn.moveTo(_this.position.x, _this.position.y).then(function (res) {
                             return res;
                         });
                     });
                 }
                 else {
-                    return new Animation.Stand(this.pawn, this.pawn.getDirection()).get();
+                    return new Animation.Stand(this.pawn, this.order, this.position).get();
                 }
             };
             return Block;
@@ -2614,11 +2582,29 @@ var TacticArena;
     (function (Animation) {
         var CastFire = (function (_super) {
             __extends(CastFire, _super);
-            function CastFire(pawn) {
-                return _super.call(this, pawn) || this;
+            function CastFire(pawn, order, position, state) {
+                var _this = _super.call(this, pawn, order, position) || this;
+                // TODO voué à disparaitre
+                _this.state = state;
+                _this.targets = [];
+                order.targets.forEach(function (t) { _this.targets.push(_this.state.orderManager.getPawn(t)); });
+                return _this;
             }
             CastFire.prototype.get = function () {
-                //TODO
+                var _this = this;
+                var self = this;
+                var animation = new Promise(function (resolve, reject) {
+                    if (_this.pawn.projection) {
+                        _this.pawn.projection.hide();
+                        _this.pawn.show();
+                    }
+                    _this.pawn.faceDirection(_this.order.direction);
+                    _this.pawn.sprite.cast(_this.targets, function () {
+                        self.pawn.sprite.stand();
+                        resolve(true);
+                    });
+                });
+                return _super.prototype.handleBackward.call(this, animation);
             };
             return CastFire;
         }(TacticArena.BaseAnimation));
@@ -2629,12 +2615,51 @@ var TacticArena;
 (function (TacticArena) {
     var Animation;
     (function (Animation) {
+        var CastWind = (function (_super) {
+            __extends(CastWind, _super);
+            function CastWind(pawn, order, position, state) {
+                var _this = _super.call(this, pawn, order, position) || this;
+                // TODO voué à disparaitre
+                _this.state = state;
+                _this.targets = [];
+                _this.order.targets.forEach(function (t) {
+                    _this.targets.push({
+                        entity: _this.state.orderManager.getPawn(t.entity),
+                        moved: t.moved
+                    });
+                });
+                return _this;
+            }
+            CastWind.prototype.get = function () {
+                var _this = this;
+                var self = this;
+                var animation = new Promise(function (resolve, reject) {
+                    if (_this.pawn.projection) {
+                        _this.pawn.projection.hide();
+                        _this.pawn.show();
+                    }
+                    _this.pawn.faceDirection(_this.order.direction);
+                    _this.pawn.sprite.castTornado(_this.targets, function () {
+                        self.pawn.sprite.stand();
+                        resolve(true);
+                    });
+                });
+                return _super.prototype.handleBackward.call(this, animation);
+            };
+            return CastWind;
+        }(TacticArena.BaseAnimation));
+        Animation.CastWind = CastWind;
+    })(Animation = TacticArena.Animation || (TacticArena.Animation = {}));
+})(TacticArena || (TacticArena = {}));
+var TacticArena;
+(function (TacticArena) {
+    var Animation;
+    (function (Animation) {
         var Move = (function (_super) {
             __extends(Move, _super);
-            function Move(pawn, position, animate, direction) {
+            function Move(pawn, order, position, animate, direction) {
                 if (direction === void 0) { direction = null; }
-                var _this = _super.call(this, pawn) || this;
-                _this.position = position;
+                var _this = _super.call(this, pawn, order, position) || this;
                 _this.animate = animate;
                 _this.direction = direction;
                 return _this;
@@ -2643,7 +2668,7 @@ var TacticArena;
                 var _this = this;
                 return this.pawn.moveTo(this.position.x, this.position.y, null, this.animate).then(function (res) {
                     if (_this.direction) {
-                        new Animation.Stand(_this.pawn, _this.direction).get().then(function (res) {
+                        new Animation.Stand(_this.pawn, _this.order, _this.position).get().then(function (res) {
                             return true;
                         });
                     }
@@ -2663,20 +2688,18 @@ var TacticArena;
     (function (Animation) {
         var Stand = (function (_super) {
             __extends(Stand, _super);
-            function Stand(pawn, direction) {
-                if (direction === void 0) { direction = null; }
-                var _this = _super.call(this, pawn) || this;
-                _this.direction = direction;
-                return _this;
+            function Stand(pawn, order, position) {
+                return _super.call(this, pawn, order, position) || this;
             }
             Stand.prototype.get = function () {
                 var _this = this;
-                return new Promise(function (resolve, reject) {
-                    _this.pawn.faceDirection(_this.direction);
+                var animation = new Promise(function (resolve, reject) {
+                    _this.pawn.faceDirection(_this.order.direction);
                     setTimeout(function () {
                         resolve(true);
                     }, 250);
                 });
+                return _super.prototype.handleBackward.call(this, animation);
             };
             return Stand;
         }(TacticArena.BaseAnimation));
@@ -2714,11 +2737,12 @@ var TacticArena;
     (function (Order) {
         var Attack = (function (_super) {
             __extends(Attack, _super);
-            function Attack(position, direction, target) {
-                var _this = _super.call(this, 'attack', position, direction) || this;
-                _this.target = target;
-                return _this;
+            function Attack(position, direction, targets) {
+                return _super.call(this, 'attack', position, direction, targets) || this;
             }
+            Attack.prototype.resolve = function (pawn, stepUnitData, previousStep, animate, backward, i, state) {
+                return new TacticArena.Animation.Attack(pawn, this, pawn.getPosition(), state).get();
+            };
             return Attack;
         }(TacticArena.BaseOrder));
         Order.Attack = Attack;
@@ -2745,9 +2769,8 @@ var TacticArena;
         var Fire = (function (_super) {
             __extends(Fire, _super);
             function Fire(position, direction, targets) {
-                var _this = _super.call(this, 'cast', position, direction) || this;
-                _this.targets = targets;
-                return _this;
+                if (targets === void 0) { targets = []; }
+                return _super.call(this, 'cast', position, direction, targets) || this;
             }
             Fire.prototype.process = function (ordermanager, steps, stepIndex, aIndex, bIndex) {
                 var result = this;
@@ -2765,6 +2788,9 @@ var TacticArena;
                     }
                 }
                 return result;
+            };
+            Fire.prototype.resolve = function (pawn, stepUnitData, previousStep, animate, backward, i, state) {
+                return new TacticArena.Animation.CastFire(pawn, this, pawn.getPosition(), state).get();
             };
             return Fire;
         }(TacticArena.BaseOrder));
@@ -2805,11 +2831,11 @@ var TacticArena;
                             stepUnitB.data.moveHasBeenBlocked = (stepUnitB.order.action == 'move');
                         }
                     }
-                    result = new Order.Attack(this.position, this.direction, {
-                        entityId: stepUnitB._id,
-                        dodge: entityBIsDodging,
-                        damages: stepUnitA.data.entityBHpLost
-                    });
+                    result = new Order.Attack(this.position, this.direction, [{
+                            entityId: stepUnitB._id,
+                            dodge: entityBIsDodging,
+                            damages: stepUnitA.data.entityBHpLost
+                        }]);
                 }
                 if (result === null) {
                     result = this;
@@ -2833,18 +2859,18 @@ var TacticArena;
                 _this.target = target;
                 return _this;
             }
-            Move.prototype.resolve = function (pawn, stepUnitData, previousStep, animate, backward, i) {
+            Move.prototype.resolve = function (pawn, stepUnitData, previousStep, animate, backward, i, state) {
                 var result = null;
                 if (stepUnitData.moveHasBeenBlocked) {
-                    result = new TacticArena.Animation.Block(pawn, this.position, stepUnitData.positionBlocked, animate).get();
+                    result = new TacticArena.Animation.Block(pawn, this, pawn.getPosition(), stepUnitData.positionBlocked, animate).get();
                 }
                 else {
                     if (backward && pawn.getPosition().equals(this.position)) {
                         var direction = previousStep ? previousStep[i].order.direction : pawn.getDirection();
-                        result = new TacticArena.Animation.Stand(pawn, direction).get();
+                        result = new TacticArena.Animation.Stand(pawn, this, pawn.getPosition()).get();
                     }
                     else {
-                        result = new TacticArena.Animation.Move(pawn, this.position, animate, this.direction).get();
+                        result = new TacticArena.Animation.Move(pawn, this, pawn.getPosition(), animate, this.direction).get();
                     }
                 }
                 return result;
@@ -2892,6 +2918,9 @@ var TacticArena;
                 _this.targets = targets;
                 return _this;
             }
+            Stand.prototype.resolve = function (pawn, stepUnitData, previousStep, animate, backward, i, state) {
+                return new TacticArena.Animation.Stand(pawn, this, pawn.getPosition()).get();
+            };
             return Stand;
         }(Order.ReflexOrder));
         Order.Stand = Stand;
@@ -2946,6 +2975,9 @@ var TacticArena;
                     }
                 }
                 return result;
+            };
+            Wind.prototype.resolve = function (pawn, stepUnitData, previousStep, animate, backward, i, state) {
+                return new TacticArena.Animation.CastWind(pawn, this, pawn.getPosition(), state).get();
             };
             return Wind;
         }(TacticArena.BaseOrder));

@@ -1,16 +1,21 @@
 module TacticArena.Animation {
     export class Attack extends BaseAnimation {
-        target;
+        state;
+        targets;
 
-        constructor(pawn, target) {
-            super(pawn);
-            this.target = target;
+        constructor(pawn:Entity.Pawn, order:BaseOrder, position:Position, state) {
+            super(pawn, order, position);
+            this.targets = [];
+            // TODO voué à disparaître
+            this.state = state;
+            this.order.targets.forEach( t => {this.targets.push(this.state.orderManager.getPawn(t)); });
         }
 
-        get() {
-            return this.pawn.attack(this.target).then((res) => {
+        get():Promise<any> {
+            let animation = this.pawn.attack(this.targets[0]).then((res) => {
                 return res;
             });
+            return super.handleBackward(animation);
         }
     }
 }

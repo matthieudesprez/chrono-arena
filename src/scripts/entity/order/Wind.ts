@@ -36,5 +36,9 @@ module TacticArena.Order {
             return result
         }
 
+        resolve (pawn:Entity.Pawn, stepUnitData:Entity.StepUnitData, previousStep:Entity.StepUnit, animate:boolean, backward:boolean, i:number, state):Promise<any> {
+            return new Animation.CastWind(pawn, this, pawn.getPosition(), state).get();
+        }
+
     }
 }

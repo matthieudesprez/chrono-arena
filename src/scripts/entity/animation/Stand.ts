@@ -1,19 +1,18 @@
 module TacticArena.Animation {
     export class Stand extends BaseAnimation {
-        direction:string;
 
-        constructor(pawn, direction:string = null) {
-            super(pawn);
-            this.direction = direction;
+        constructor(pawn:Entity.Pawn, order:BaseOrder, position:Position) {
+            super(pawn, order, position);
         }
 
-        get() {
-            return new Promise((resolve, reject) => {
-                this.pawn.faceDirection(this.direction);
+        get():Promise<any> {
+            let animation = new Promise((resolve, reject) => {
+                this.pawn.faceDirection(this.order.direction);
                 setTimeout(function () {
                     resolve(true);
                 }, 250);
             });
+            return super.handleBackward(animation);
         }
     }
 }
