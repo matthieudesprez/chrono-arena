@@ -40,8 +40,9 @@ var TacticArena;
             //Math.round((window.screen.availHeight * window.devicePixelRatio / 1.667) / 32) * 32
             //let height = Math.min(window.screen.availHeight * window.devicePixelRatio, 832);
             var height = window.screen.availHeight * window.devicePixelRatio;
+            console.log(height, Math.round((height / 1.667) / 32) * 32);
             _this = _super.call(this, {
-                width: Math.round((height / 1.667) / 32) * 32,
+                width: height / 1.667,
                 height: height,
                 renderer: headless ? Phaser.HEADLESS : Phaser.AUTO,
                 parent: 'game-container'
@@ -3308,7 +3309,9 @@ var TacticArena;
                     '</div>');
             };
             BaseState.prototype.getScaleRatio = function () {
-                return Math.max(this.game.width / 512, 1);
+                console.log(this.game.width / 320, this.game.height / 800, 1, this.game.height);
+                //return Math.max(this.game.height / 800, 1);
+                return Math.max(this.game.width / 384, 1);
             };
             return BaseState;
         }(Phaser.State));
@@ -3560,6 +3563,7 @@ var TacticArena;
                 this.stage.disableVisibilityChange = true;
                 this.stage.backgroundColor = '#000000';
                 //this.game.scaleRatio = scaleRatio > 1 ? scaleRatio : 1;
+                console.log(this.game.height);
                 this.game.state.start('preload');
             };
             return Boot;
@@ -3799,7 +3803,7 @@ var TacticArena;
                 this.playMode = 'offline';
                 this.chatUI = chatUI;
                 this.players = data.players;
-                var startPositions = [[{ x: 6, y: 10, d: 'E' }, { x: 5, y: 9, d: 'E' }], [{ x: 9, y: 10, d: 'W' }, { x: 10, y: 9, d: 'W' }]];
+                var startPositions = [[{ x: 4, y: 9, d: 'E' }, { x: 3, y: 8, d: 'E' }], [{ x: 7, y: 9, d: 'W' }, { x: 8, y: 8, d: 'W' }]];
                 this.players.forEach(function (p, k) {
                     var isBot = true;
                     if (p.player) {

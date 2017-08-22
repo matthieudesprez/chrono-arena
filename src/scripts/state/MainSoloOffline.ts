@@ -10,7 +10,7 @@ module TacticArena.State {
             this.playMode = 'offline';
             this.chatUI = chatUI;
             this.players = data.players;
-            let startPositions = [[{x: 6, y: 10, d: 'E'}, {x: 5, y: 9, d: 'E'}], [{x: 9, y: 10, d: 'W'}, {x: 10, y: 9, d: 'W'}]];
+            let startPositions = [[{x: 4, y: 9, d: 'E'}, {x: 3, y: 8, d: 'E'}], [{x: 7, y: 9, d: 'W'}, {x: 8, y: 8, d: 'W'}]];
             this.players.forEach( (p, k) => {
                 let isBot = true;
                 if (p.player) {
