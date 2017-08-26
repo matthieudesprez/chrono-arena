@@ -58,8 +58,6 @@ module TacticArena.State {
 
             //this.game.scaleRatio = scaleRatio > 1 ? scaleRatio : 1;
 
-            console.log(this.game.height);
-
             this.game.state.start('preload');
         }
     }

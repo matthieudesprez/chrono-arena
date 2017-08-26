@@ -36,11 +36,10 @@ var TacticArena;
         function Game(headless) {
             if (headless === void 0) { headless = false; }
             var _this = this;
-            console.log(window.screen.availHeight * window.devicePixelRatio);
+            //console.log(window.screen.availHeight * window.devicePixelRatio);
             //Math.round((window.screen.availHeight * window.devicePixelRatio / 1.667) / 32) * 32
             //let height = Math.min(window.screen.availHeight * window.devicePixelRatio, 832);
             var height = window.screen.availHeight * window.devicePixelRatio;
-            console.log(height, Math.round((height / 1.667) / 32) * 32);
             _this = _super.call(this, {
                 width: height / 1.667,
                 height: height,
@@ -160,7 +159,7 @@ var TacticArena;
                             }
                         }
                     }
-                    //self.game.uiManager.endOrderPhase();
+                    //Action.ConfirmOrder.process();
                 });
                 this.game.pathfinder.calculate();
             }
@@ -775,26 +774,11 @@ var TacticArena;
         describe("ResolveManager", function () {
             var testGame, currentState;
             function getInitialStep() {
-                return [
-                    {
-                        entity: currentState.pawns[0],
-                        order: new TacticArena.Order.Stand(new TacticArena.Position(8, 8), 'E'),
-                        data: getStepUnitData(3, 4)
-                    },
-                    {
-                        entity: currentState.pawns[1],
-                        order: new TacticArena.Order.Stand(new TacticArena.Position(10, 8), 'W'),
-                        data: getStepUnitData(3, 4)
-                    }
-                ];
-            }
-            function getStepUnitData(ap, hp) {
-                return {
-                    ap: ap,
-                    hp: hp,
-                    moveHasBeenBlocked: false,
-                    positionBlocked: false
-                };
+                var result = new TacticArena.Entity.Step([
+                    new TacticArena.Entity.StepUnit(currentState.pawns[0], new TacticArena.Entity.StepUnitData(3, 4), new TacticArena.Order.Stand(new TacticArena.Position(8, 8), 'E')),
+                    new TacticArena.Entity.StepUnit(currentState.pawns[1], new TacticArena.Entity.StepUnitData(3, 4), new TacticArena.Order.Stand(new TacticArena.Position(10, 8), 'W'))
+                ]);
+                return result;
             }
             function testStepResolution(index, position, ap, hp, direction) {
                 var pawn = currentState.pawns[index];
@@ -829,139 +813,81 @@ var TacticArena;
             it("basic move from 1st pawn", function (done) {
                 currentState.resolveManager.init([
                     getInitialStep(),
-                    [
-                        {
-                            entity: currentState.pawns[0],
-                            order: new TacticArena.Order.Move(new TacticArena.Position(9, 8), 'E'),
-                            data: getStepUnitData(2, 4)
-                        },
-                        {
-                            entity: currentState.pawns[1],
-                            order: new TacticArena.Order.Stand(new TacticArena.Position(10, 8), 'W'),
-                            data: getStepUnitData(2, 4)
-                        }
-                    ]
+                    new TacticArena.Entity.Step([
+                        new TacticArena.Entity.StepUnit(currentState.pawns[0], new TacticArena.Entity.StepUnitData(2, 4), new TacticArena.Order.Move(new TacticArena.Position(9, 8), 'E')),
+                        new TacticArena.Entity.StepUnit(currentState.pawns[1], new TacticArena.Entity.StepUnitData(2, 4), new TacticArena.Order.Stand(new TacticArena.Position(10, 8), 'W'))
+                    ])
                 ]);
-                currentState.resolveManager.processStep(0).then(function (res) {
-                }).then(function (res) {
-                }, function (res) {
+                currentState.resolveManager.processStep(0).then(function () {
                     testStepResolution(0, { x: 8, y: 8 }, 3, 4, 'E');
                     testStepResolution(1, { x: 10, y: 8 }, 3, 4, 'W');
-                    currentState.resolveManager.processStep(1).then(function (res) {
-                    }, function (res) {
-                        testStepResolution(0, { x: 9, y: 8 }, 2, 4, 'E');
-                        testStepResolution(1, { x: 10, y: 8 }, 2, 4, 'W');
-                        done();
-                    });
+                    return currentState.resolveManager.processStep(1);
+                }).then(function () {
+                    testStepResolution(0, { x: 9, y: 8 }, 2, 4, 'E');
+                    testStepResolution(1, { x: 10, y: 8 }, 2, 4, 'W');
+                    done();
                 });
             });
             it("attack from 1st pawn", function (done) {
                 currentState.resolveManager.init([
                     getInitialStep(),
-                    [
-                        {
-                            entity: currentState.pawns[0],
-                            order: new TacticArena.Order.Move(new TacticArena.Position(9, 8), 'E'),
-                            data: getStepUnitData(2, 4)
-                        },
-                        {
-                            entity: currentState.pawns[1],
-                            order: new TacticArena.Order.Stand(new TacticArena.Position(10, 8), 'W'),
-                            data: getStepUnitData(2, 4)
-                        }
-                    ],
-                    [
-                        {
-                            entity: currentState.pawns[0],
-                            order: new TacticArena.Order.Attack(new TacticArena.Position(9, 8), 'E', [{ entityId: currentState.pawns[1]._id, dodge: false }]),
-                            data: getStepUnitData(1, 4)
-                        },
-                        {
-                            entity: currentState.pawns[1],
-                            order: new TacticArena.Order.Attack(new TacticArena.Position(10, 8), 'W', [{ entityId: currentState.pawns[0]._id, dodge: true }]),
-                            data: getStepUnitData(1, 3)
-                        }
-                    ]
+                    new TacticArena.Entity.Step([
+                        new TacticArena.Entity.StepUnit(currentState.pawns[0], new TacticArena.Entity.StepUnitData(2, 4), new TacticArena.Order.Move(new TacticArena.Position(9, 8), 'E')),
+                        new TacticArena.Entity.StepUnit(currentState.pawns[1], new TacticArena.Entity.StepUnitData(2, 4), new TacticArena.Order.Stand(new TacticArena.Position(10, 8), 'W'))
+                    ]),
+                    new TacticArena.Entity.Step([
+                        new TacticArena.Entity.StepUnit(currentState.pawns[0], new TacticArena.Entity.StepUnitData(1, 4), new TacticArena.Order.Attack(new TacticArena.Position(9, 8), 'E', [{ entityId: currentState.pawns[1]._id, dodge: false }])),
+                        new TacticArena.Entity.StepUnit(currentState.pawns[1], new TacticArena.Entity.StepUnitData(1, 3), new TacticArena.Order.Attack(new TacticArena.Position(10, 8), 'W', [{ entityId: currentState.pawns[0]._id, dodge: true }]))
+                    ])
                 ]);
-                currentState.resolveManager.processStep(0).then(function (res) {
-                }).then(function (res) {
-                }, function (res) {
+                currentState.resolveManager.processStep(0).then(function () {
+                }).then(function () {
                     testStepResolution(0, { x: 8, y: 8 }, 3, 4, 'E');
                     testStepResolution(1, { x: 10, y: 8 }, 3, 4, 'W');
-                    currentState.resolveManager.processStep(1).then(function (res) {
-                    }, function (res) {
-                        testStepResolution(0, { x: 9, y: 8 }, 2, 4, 'E');
-                        testStepResolution(1, { x: 10, y: 8 }, 2, 4, 'W');
-                        currentState.resolveManager.processStep(2).then(function (res) {
-                        }, function (res) {
-                            testStepResolution(0, { x: 9, y: 8 }, 1, 4, 'E');
-                            testStepResolution(1, { x: 10, y: 8 }, 1, 3, 'W');
-                            done();
-                        });
-                    });
+                    return currentState.resolveManager.processStep(1);
+                }).then(function () {
+                    testStepResolution(0, { x: 9, y: 8 }, 2, 4, 'E');
+                    testStepResolution(1, { x: 10, y: 8 }, 2, 4, 'W');
+                    return currentState.resolveManager.processStep(2);
+                }).then(function () {
+                    testStepResolution(0, { x: 9, y: 8 }, 1, 4, 'E');
+                    testStepResolution(1, { x: 10, y: 8 }, 1, 3, 'W');
+                    done();
                 });
             });
             it("move then cast from 1st pawn while 2nd move", function (done) {
                 currentState.resolveManager.init([
                     getInitialStep(),
-                    [
-                        {
-                            entity: currentState.pawns[0],
-                            order: new TacticArena.Order.Move(new TacticArena.Position(8, 7), 'E'),
-                            data: getStepUnitData(2, 4)
-                        },
-                        {
-                            entity: currentState.pawns[1],
-                            order: new TacticArena.Order.Move(new TacticArena.Position(10, 7), 'W'),
-                            data: getStepUnitData(2, 4)
-                        }
-                    ],
-                    [
-                        {
-                            entity: currentState.pawns[0],
-                            order: new TacticArena.Order.Fire(new TacticArena.Position(8, 7), 'E', [currentState.pawns[1]._id]),
-                            data: getStepUnitData(0, 4)
-                        },
-                        {
-                            entity: currentState.pawns[1],
-                            order: new TacticArena.Order.Move(new TacticArena.Position(9, 7), 'W'),
-                            data: getStepUnitData(1, 2)
-                        }
-                    ],
-                    [
-                        {
-                            entity: currentState.pawns[0],
-                            order: new TacticArena.Order.Stand(new TacticArena.Position(8, 7), 'E', [currentState.pawns[1]._id]),
-                            data: getStepUnitData(0, 3)
-                        },
-                        {
-                            entity: currentState.pawns[1],
-                            order: new TacticArena.Order.Move(new TacticArena.Position(9, 7), 'W', { entity: currentState.pawns[0]._id, dodge: false }),
-                            data: getStepUnitData(0, 2)
-                        }
-                    ]
+                    new TacticArena.Entity.Step([
+                        new TacticArena.Entity.StepUnit(currentState.pawns[0], new TacticArena.Entity.StepUnitData(2, 4), new TacticArena.Order.Move(new TacticArena.Position(8, 7), 'E')),
+                        new TacticArena.Entity.StepUnit(currentState.pawns[1], new TacticArena.Entity.StepUnitData(2, 4), new TacticArena.Order.Move(new TacticArena.Position(10, 7), 'W'))
+                    ]),
+                    new TacticArena.Entity.Step([
+                        new TacticArena.Entity.StepUnit(currentState.pawns[0], new TacticArena.Entity.StepUnitData(0, 4), new TacticArena.Order.Fire(new TacticArena.Position(8, 7), 'E', [currentState.pawns[1]._id])),
+                        new TacticArena.Entity.StepUnit(currentState.pawns[1], new TacticArena.Entity.StepUnitData(1, 2), new TacticArena.Order.Move(new TacticArena.Position(9, 7), 'W'))
+                    ]),
+                    new TacticArena.Entity.Step([
+                        new TacticArena.Entity.StepUnit(currentState.pawns[0], new TacticArena.Entity.StepUnitData(0, 3), new TacticArena.Order.Stand(new TacticArena.Position(8, 7), 'E', [currentState.pawns[1]._id])),
+                        new TacticArena.Entity.StepUnit(currentState.pawns[1], new TacticArena.Entity.StepUnitData(0, 2), new TacticArena.Order.Move(new TacticArena.Position(9, 7), 'W', { entity: currentState.pawns[0]._id, dodge: false }))
+                    ])
                 ]);
-                currentState.resolveManager.processStep(0).then(function (res) {
-                }).then(function (res) {
-                }, function (res) {
+                currentState.resolveManager.processStep(0).then(function () {
+                }).then(function () {
                     testStepResolution(0, { x: 8, y: 8 }, 3, 4, 'E');
                     testStepResolution(1, { x: 10, y: 8 }, 3, 4, 'W');
-                    currentState.resolveManager.processStep(1).then(function (res) {
-                    }, function (res) {
-                        testStepResolution(0, { x: 8, y: 7 }, 2, 4, 'E');
-                        testStepResolution(1, { x: 10, y: 7 }, 2, 4, 'W');
-                        currentState.resolveManager.processStep(2).then(function (res) {
-                        }, function (res) {
-                            testStepResolution(0, { x: 8, y: 7 }, 0, 4, 'E');
-                            testStepResolution(1, { x: 9, y: 7 }, 1, 2, 'W');
-                            currentState.resolveManager.processStep(3).then(function (res) {
-                            }, function (res) {
-                                testStepResolution(0, { x: 8, y: 7 }, 0, 3, 'E');
-                                testStepResolution(1, { x: 9, y: 7 }, 0, 2, 'W');
-                                done();
-                            });
-                        });
-                    });
+                    return currentState.resolveManager.processStep(1);
+                }).then(function () {
+                    testStepResolution(0, { x: 8, y: 7 }, 2, 4, 'E');
+                    testStepResolution(1, { x: 10, y: 7 }, 2, 4, 'W');
+                    return currentState.resolveManager.processStep(2);
+                }).then(function () {
+                    testStepResolution(0, { x: 8, y: 7 }, 0, 4, 'E');
+                    testStepResolution(1, { x: 9, y: 7 }, 1, 2, 'W');
+                    return currentState.resolveManager.processStep(3);
+                }).then(function () {
+                    testStepResolution(0, { x: 8, y: 7 }, 0, 3, 'E');
+                    testStepResolution(1, { x: 9, y: 7 }, 0, 2, 'W');
+                    done();
                 });
             });
         });
@@ -982,66 +908,60 @@ var TacticArena;
             this.manageProjectionDislay(steps[0], true);
             this.currentIndex = 0;
         };
+        /*
+         * Call processStep
+         */
         ResolveManager.prototype.processSteps = function (index, animate, backward) {
             var _this = this;
             if (animate === void 0) { animate = true; }
             if (backward === void 0) { backward = false; }
             this.processing = true;
             this.active = true;
+            var self = this;
             this.processStep(index, animate, backward).then(function (res) {
-                _this.game.signalManager.resolvePhaseFinished.dispatch();
+                if (index >= self.steps.length) {
+                    return _this.game.signalManager.resolvePhaseFinished.dispatch();
+                }
+                _this.game.signalManager.stepResolutionFinished.dispatch(index);
+                if (!_this.game.isPaused) {
+                    self.processSteps(index + 1, animate, backward); // recursive
+                }
             }, function (res) {
+                console.log(res, 'something failed during animation');
             });
         };
+        /*
+         * Retourne une promesse qui est résolue lorsque toutes les animations de this.steps[index] sont résolues
+         */
         ResolveManager.prototype.processStep = function (index, animate, backward) {
-            var _this = this;
             if (animate === void 0) { animate = true; }
             if (backward === void 0) { backward = false; }
+            if (index >= this.steps.length)
+                return Promise.resolve(true);
             var self = this;
-            return new Promise(function (resolve, reject) {
-                if (index >= _this.steps.length) {
-                    resolve(true);
-                    return true;
+            this.setCurrentIndex(index);
+            var previousStep = index > 0 ? this.steps[index - 1] : null;
+            var promisesOrders = [];
+            this.steps[index].stepUnits.forEach(function (stepUnit, i) {
+                stepUnit.pawn.setAp(stepUnit.data.ap); // met à jour le nombre d'AP du pawn
+                promisesOrders.push(stepUnit.order.resolve(stepUnit.pawn, stepUnit.data, previousStep, animate, backward, i, self.game)); //lance l'animation
+            });
+            this.manageProjectionDislay(this.steps[index]);
+            return Promise.all(promisesOrders).then(function (res) {
+                if (!backward) {
+                    self.manageProjectionDislay(self.steps[index]);
                 }
-                _this.currentIndex = index;
-                _this.game.signalManager.stepResolutionIndexChange.dispatch(index);
-                var step = _this.steps[index];
-                var previousStep = index > 0 ? _this.steps[index - 1] : null;
-                var promisesOrders = [];
-                for (var i = 0; i < step.length; i++) {
-                    var pawn = step[i].entity;
-                    var stepUnitData = step[i].data;
-                    pawn.setAp(stepUnitData.ap);
-                    promisesOrders.push(step[i].order.resolve(pawn, stepUnitData, previousStep, animate, backward, i, self.game));
-                }
-                _this.manageProjectionDislay(step);
-                Promise.all(promisesOrders).then(function (res) {
-                    if (!backward) {
-                        _this.manageProjectionDislay(step);
-                    }
-                    step.forEach(function (s) {
-                        var forceAnimation = typeof s.data.dies !== 'undefined' && s.data.dies;
-                        s.entity.setHp(s.data.hp, forceAnimation);
-                    });
-                    _this.game.signalManager.stepResolutionFinished.dispatch(index);
-                    if (_this.steps.length > (index + 1) && !_this.game.isPaused) {
-                        _this.processStep(index + 1).then(function (res) {
-                            resolve(res);
-                        }, function (res) {
-                        }); // recursive
-                    }
-                    else {
-                        _this.processing = false;
-                        reject(false);
-                    }
+                self.steps[index].stepUnits.forEach(function (stepUnit) {
+                    var forceAnimation = typeof stepUnit.data.dies !== 'undefined' && stepUnit.data.dies;
+                    stepUnit.pawn.setHp(stepUnit.data.hp, forceAnimation);
                 });
             });
         };
         ResolveManager.prototype.manageProjectionDislay = function (step, compareActualEntity) {
             if (compareActualEntity === void 0) { compareActualEntity = false; }
-            for (var i = 0; i < step.length; i++) {
-                var entityA = step[i].entity;
-                var order = step[i].order;
+            step.stepUnits.forEach(function (stepUnit, i) {
+                var entityA = stepUnit.pawn;
+                var order = stepUnit.order;
                 var position = entityA.getProjectionOrReal().getPosition();
                 if (entityA.projection) {
                     var condition = false;
@@ -1060,7 +980,11 @@ var TacticArena;
                         //entityA.hide();
                     }
                 }
-            }
+            });
+        };
+        ResolveManager.prototype.setCurrentIndex = function (index) {
+            this.currentIndex = index;
+            this.game.signalManager.stepResolutionIndexChange.dispatch(index);
         };
         return ResolveManager;
     }());
@@ -1269,25 +1193,28 @@ var TacticArena;
             });
             this.stepResolutionFinished.add(function (stepIndex) {
                 self.game.uiManager.process = false;
+                self.game.resolveManager.processing = false; // On repasse process à false pour regagner la main sur le ResolveManager
             });
             this.resolvePhaseFinished.add(function () {
                 self.game.isGameReadyPromise().then(function (res) {
-                    self.game.uiManager.endResolvePhase();
+                    TacticArena.Action.ConfirmResolve.process(self.game);
                 });
             });
             this.stepResolutionIndexChange.add(function (stepIndex) {
-                self.game.uiManager.notificationsUI.update(stepIndex);
+                //self.game.uiManager.notificationsUI.update(stepIndex);
                 self.game.uiManager.timelineUI.update(stepIndex);
             });
             this.onTurnEnded.add(function (activePawn) {
                 self.game.uiManager.ordersnotificationsUI.clean();
                 self.game.uiSpritesGroup.removeAll();
+                if (self.game.uiManager.actionMenu) {
+                    self.game.uiManager.actionMenu.clean();
+                }
             });
             this.onActivePawnChange.add(function (activePawn) {
                 //self.game.uiManager.ordersnotificationsUI.clean();
                 //self.game.uiManager.ordersnotificationsUI.update(self.game.orderManager.getOrders(activePawn._id));
                 //self.game.uiManager.pawnsinfosUI.select(activePawn._id);
-                //self.game.uiManager.directionUI.init(activePawn.getDirection());
                 //self.game.uiManager.actionUI.update(activePawn.getAp());
                 //self.game.uiManager.actionUI.select('walk');
                 var position = activePawn.getPosition();
@@ -1296,7 +1223,8 @@ var TacticArena;
                 s.animations.add('turn', ["selected_circle_01", "selected_circle_02"], 4, true);
                 s.play('turn');
                 //this.consolelogsUI.write('au tour du joueur ' + activePawn._id);
-                var actionMenu = new TacticArena.UI.ActionMenu(self.game, activePawn);
+                self.game.uiManager.actionMenu = new TacticArena.UI.ActionMenu(self.game, activePawn);
+                self.game.uiManager.actionMenu.initDirection(activePawn.getDirection());
             });
             this.onTeamChange.add(function () {
                 if (self.game.hideProjections) {
@@ -1709,13 +1637,9 @@ var TacticArena;
         BaseAnimation.prototype.handleBackward = function (animation) {
             var result;
             if (this.position.x != this.order.position.x || this.position.y != this.order.position.y) {
-                result = this.pawn.moveTo(this.order.position.x, this.order.position.y, null, false).then(function (res) {
-                    return true;
-                });
+                result = this.pawn.moveTo(this.order.position.x, this.order.position.y, null, false);
                 result.then(function (res) {
-                    animation.then(function (res) {
-                        return true;
-                    });
+                    return animation;
                 });
             }
             else {
@@ -2464,8 +2388,9 @@ var TacticArena;
     var Entity;
     (function (Entity) {
         var Step = (function () {
-            function Step() {
-                this.stepUnits = [];
+            function Step(stepUnits) {
+                if (stepUnits === void 0) { stepUnits = []; }
+                this.stepUnits = stepUnits;
             }
             return Step;
         }());
@@ -2668,10 +2593,9 @@ var TacticArena;
             Move.prototype.get = function () {
                 var _this = this;
                 return this.pawn.moveTo(this.position.x, this.position.y, null, this.animate).then(function (res) {
+                    console.log(_this.direction);
                     if (_this.direction) {
-                        new Animation.Stand(_this.pawn, _this.order, _this.position).get().then(function (res) {
-                            return true;
-                        });
+                        return new Animation.Stand(_this.pawn, _this.order, _this.position).get();
                     }
                     else {
                         return res;
@@ -2719,7 +2643,7 @@ var TacticArena;
                     var _this = _super.call(this, game, x, y, ext, 'redhead', id, bot, team, "Ruairi", Entity.Sprite) || this;
                     _this.skills = _this.skills.concat([
                         new TacticArena.Entity.Skill.Slash(_this.game, _this),
-                        new TacticArena.Entity.Skill.Wind(_this.game, _this),
+                        //new TacticArena.Entity.Skill.Wind(this.game, this),
                         new TacticArena.Entity.Skill.Fire(_this.game, _this),
                         new TacticArena.Entity.Skill.Walk(_this.game, _this),
                         new TacticArena.Entity.Skill.Wait(_this.game, _this)
@@ -2871,7 +2795,7 @@ var TacticArena;
                         result = new TacticArena.Animation.Stand(pawn, this, pawn.getPosition()).get();
                     }
                     else {
-                        result = new TacticArena.Animation.Move(pawn, this, pawn.getPosition(), animate, this.direction).get();
+                        result = new TacticArena.Animation.Move(pawn, this, this.position, animate, this.direction).get();
                     }
                 }
                 return result;
@@ -3143,6 +3067,12 @@ var TacticArena;
                     _this.minCost = 1;
                     return _this;
                 }
+                Wait.prototype.order = function () {
+                    var position = this.pawn.getProjectionOrReal().getPosition();
+                    this.state.orderManager.add('stand', this.pawn, position.x, position.y, this.pawn.getProjectionOrReal().getDirection());
+                    this.pawn.setAp(this.pawn.getAp() - 1);
+                    this.state.signalManager.onActionPlayed.dispatch(this.pawn);
+                };
                 return Wait;
             }(TacticArena.Entity.BaseSkill));
             Skill.Wait = Wait;
@@ -3309,7 +3239,7 @@ var TacticArena;
                     '</div>');
             };
             BaseState.prototype.getScaleRatio = function () {
-                console.log(this.game.width / 320, this.game.height / 800, 1, this.game.height);
+                //console.log(this.game.width / 320, this.game.height / 800, 1, this.game.height);
                 //return Math.max(this.game.height / 800, 1);
                 return Math.max(this.game.width / 384, 1);
             };
@@ -3349,7 +3279,7 @@ var TacticArena;
                 this.uiGroup = this.add.group();
                 this.worldGroup.add(this.uiGroup);
                 this.worldGroup.scale.set(this.getScaleRatio());
-                console.log(this.getScaleRatio());
+                //console.log(this.getScaleRatio());
                 this.pawns = [];
                 this.generator = new TacticArena.Utils.Generator();
                 this.initMap();
@@ -3563,7 +3493,6 @@ var TacticArena;
                 this.stage.disableVisibilityChange = true;
                 this.stage.backgroundColor = '#000000';
                 //this.game.scaleRatio = scaleRatio > 1 ? scaleRatio : 1;
-                console.log(this.game.height);
                 this.game.state.start('preload');
             };
             return Boot;
@@ -3920,6 +3849,12 @@ var TacticArena;
                 this.load.image('modal-bg', 'assets/images/modal-bg.png');
                 this.load.image('modal-close', 'assets/images/modal-close.png');
                 this.load.image('menu-icon', 'assets/images/menu_icon.png');
+                this.load.image('icon-wait', 'assets/images/ui/icons/wait.png');
+                this.load.image('button-bg', 'assets/images/ui/button.png');
+                this.load.image('button-confirm', 'assets/images/ui/button-confirm.png');
+                this.load.image('button-cancel', 'assets/images/ui/button-cancel.png');
+                this.load.image('border', 'assets/images/ui/border.png');
+                this.load.image('vertical-border', 'assets/images/ui/vertical-border.png');
                 var icons = ['arrow-east', 'arrow-north', 'arrow-south', 'arrow-west', 'cancel', 'compass', 'fire', 'next', 'pause', 'play', 'previous', 'slash', 'submit', 'wait', 'walk', 'wind'];
                 icons.forEach(function (icon) {
                     self.load.image('icon-' + icon, 'assets/images/icons/icon-' + icon + '.png');
@@ -5858,82 +5793,128 @@ var TacticArena;
 (function (TacticArena) {
     var UI;
     (function (UI) {
-        var Action = (function () {
-            function Action(menu) {
-                this.menu = menu;
-                this.menu.element.append();
-                this.element = this.menu.element.find('.ui-menu');
-                //TODO WAIT
-                //let activePawn = this.menu.game.turnManager.getActivePawn();
-                //let position = activePawn.getProjectionOrReal().getPosition();
-                //this.menu.game.orderManager.add('stand', activePawn, position.x, position.y, activePawn.getProjectionOrReal().getDirection());
-                //activePawn.setAp(activePawn.getAp() - 1);
-                //this.menu.game.signalManager.onActionPlayed.dispatch(activePawn);
-            }
-            return Action;
-        }());
-        UI.Action = Action;
-    })(UI = TacticArena.UI || (TacticArena.UI = {}));
-})(TacticArena || (TacticArena = {}));
-var TacticArena;
-(function (TacticArena) {
-    var UI;
-    (function (UI) {
         var ActionMenu = (function () {
             function ActionMenu(game, pawn) {
+                var self = this;
+                this.isOver = false;
                 this.game = game;
                 this.mainGroup = this.game.add.group();
-                var bmd = this.game.add.bitmapData(this.game.world.width / 2, 96);
+                var bmd = this.game.add.bitmapData(this.game.world.width, 96);
                 bmd.ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
                 bmd.ctx.beginPath();
-                bmd.ctx.rect(0, 0, this.game.world.width / 2, 96);
+                bmd.ctx.rect(0, 0, this.game.world.width, 96);
                 bmd.ctx.fill();
                 bmd.update();
                 var bgSprite = this.game.make.sprite(0, 0, bmd);
                 bgSprite.anchor.set(0);
+                bgSprite.inputEnabled = true;
+                bgSprite.events.onInputOver.add(this.over, this);
+                bgSprite.events.onInputOut.add(this.out, this);
+                var border = this.game.make.sprite(0, 0, 'border');
+                border.anchor.set(0);
+                var verticalBorder = this.game.make.sprite(100, 4, 'vertical-border');
+                verticalBorder.anchor.set(0);
                 var avatar = this.game.make.sprite(0, 0, 'avatar-' + pawn.type);
                 avatar.anchor.set(0);
                 this.mainGroup.add(bgSprite);
+                this.mainGroup.add(border);
+                this.mainGroup.add(verticalBorder);
                 this.mainGroup.add(avatar);
                 this.mainGroup.x = 0;
-                this.mainGroup.y = 608;
-                var text = this.game.add.text(110, 5, pawn._name, {
+                this.mainGroup.y = window.innerHeight / this.game.getScaleRatio() - 96;
+                var text = this.game.add.text(0, 5, pawn._name, {
                     font: '20px Iceland',
                     fill: '#ffffff',
-                    boundsAlignH: 'center',
+                    boundsAlignH: 'right',
                     boundsAlignV: 'top',
                 }, this.mainGroup);
-                var barWidth = this.game.world.width / 2 - 120;
+                text.setTextBounds(0, 8, 90, 20);
+                var barWidth = this.game.world.width / 2 - 64;
                 this.mainGroup.add(new UI.Bar(this.game, {
                     x: 110,
-                    y: 40,
+                    y: 15,
                     width: barWidth,
-                    height: 20,
+                    height: 15,
                     text: true,
                     name: 'hpbar',
                     unit: 'HP',
                     max: pawn._hpMax,
+                    value: pawn.getHp(),
                     textColor: '#ffffff',
                     bg: { color: '#808080' },
                     bar: { color: '#8b0000' },
-                    textStyle: '18px Iceland'
+                    textStyle: '16px Iceland'
                 }));
                 this.mainGroup.add(new UI.Bar(this.game, {
-                    x: 110,
-                    y: 70,
+                    x: 120 + barWidth,
+                    y: 15,
                     width: barWidth,
-                    height: 20,
+                    height: 15,
                     text: true,
                     name: 'apbar',
                     unit: 'AP',
                     max: pawn._apMax,
+                    value: pawn.getAp(),
                     textColor: '#ffffff',
                     bg: { color: '#267ac9' },
                     bar: { color: '#1E90FF' },
-                    textStyle: '18px Iceland'
+                    textStyle: '16px Iceland'
                 }));
+                this.skillsGroup = this.game.add.group();
+                var offsetX = 47;
+                pawn.skills.forEach(function (skill, index) {
+                    console.log(skill);
+                    var buttonX = index > 0 ? index * 83 : 0;
+                    var buttonY = 0;
+                    if (index > 0) {
+                        buttonX += index * 10;
+                    }
+                    if (index >= 2) {
+                        buttonY = 30;
+                        buttonX -= 2 * 10 + 2 * 83;
+                    }
+                    var button = self.game.make.sprite(offsetX + buttonX, buttonY, 'button-bg');
+                    button.anchor.set(0);
+                    button.scale.setTo(1.5, 1.5);
+                    self.skillsGroup.add(button);
+                    var text = self.game.add.text(buttonX, buttonY, skill.name, {
+                        font: '10px Press Start 2P',
+                        fill: '#000000',
+                        boundsAlignH: 'center',
+                        boundsAlignV: 'top',
+                    }, self.skillsGroup);
+                    text.setTextBounds(offsetX, 8, 83, 20);
+                });
+                this.skillsGroup.x = 110;
+                this.skillsGroup.y = 35;
+                var buttonConfirm = self.game.make.sprite(self.game.world.width - 37 - self.skillsGroup.position.x, 5, 'button-confirm');
+                buttonConfirm.anchor.set(0);
+                self.skillsGroup.add(buttonConfirm);
+                var buttonCancel = self.game.make.sprite(-5, 5, 'button-cancel');
+                buttonCancel.anchor.set(0);
+                self.skillsGroup.add(buttonCancel);
+                this.mainGroup.add(this.skillsGroup);
                 this.game.uiGroup.add(this.mainGroup);
             }
+            ActionMenu.prototype.over = function () {
+                console.log('over');
+                this.isOver = true;
+            };
+            ActionMenu.prototype.out = function () {
+                console.log('out');
+                this.isOver = false;
+            };
+            ActionMenu.prototype.initDirection = function (direction) {
+                this.savedDirection = direction;
+                this.selectDirection(direction);
+            };
+            ActionMenu.prototype.selectDirection = function (direction) {
+                //deselect direction icons
+                //select right direction icon
+            };
+            ActionMenu.prototype.clean = function () {
+                this.mainGroup.destroy();
+            };
             return ActionMenu;
         }());
         UI.ActionMenu = ActionMenu;
@@ -5950,7 +5931,7 @@ var TacticArena;
                 _this.game = game;
                 _this.setupConfiguration(providedConfig);
                 _this.setPosition(_this.config.x, _this.config.y);
-                _this.setValue(0);
+                _this.setValue(_this.config.value);
                 _this.drawBackground();
                 _this.drawBar();
                 if (_this.config.text) {
@@ -5988,6 +5969,7 @@ var TacticArena;
                     max: 0,
                     unit: '',
                     textStyle: '12px Iceland',
+                    value: 0
                 };
                 return this.mergeObjects(defaultConfig, newConfig);
             };
@@ -6531,70 +6513,6 @@ var TacticArena;
 (function (TacticArena) {
     var UI;
     (function (UI) {
-        var Direction = (function () {
-            function Direction(menu) {
-                var self = this;
-                this.menu = menu;
-                //this.menu.element.append('<div class="ui-direction"><a class="compass"></a><a class="north"></a><a class="south"></a><a class="east"></a><a class="west"></a></div>');
-                this.element = this.menu.element.find('.ui-direction');
-                this.matching = { 'N': 'north', 'E': 'east', 'S': 'south', 'W': 'west' };
-                $('.compass').on('click', function () {
-                    self.changeDirection(self.savedDirection);
-                });
-                $('.north').on('click', function () {
-                    self.changeDirection('N');
-                });
-                $('.east').on('click', function () {
-                    self.changeDirection('E');
-                });
-                $('.south').on('click', function () {
-                    self.changeDirection('S');
-                });
-                $('.west').on('click', function () {
-                    self.changeDirection('W');
-                });
-            }
-            Direction.prototype.init = function (direction) {
-                this.savedDirection = direction;
-                this.select(this.matching[direction]);
-            };
-            Direction.prototype.select = function (name) {
-                this.deselectAll();
-                this.element.find('.' + name).addClass('selected');
-            };
-            Direction.prototype.deselectAll = function () {
-                this.element.find('a').removeClass('selected');
-            };
-            Direction.prototype.update = function (direction) {
-                this.select(this.matching[direction]);
-            };
-            Direction.prototype.changeDirection = function (direction) {
-                var activePawn = this.menu.game.turnManager.getActivePawn();
-                if (!this.menu.game.process && activePawn.getAp() > 0) {
-                    activePawn.createProjection();
-                    activePawn.getProjectionOrReal().faceDirection(direction);
-                    //let position = activePawn.getProjectionOrReal().getPosition();
-                    //this.menu.game.orderManager.add('stand', activePawn, position.x, position.y, direction);
-                    //activePawn.setAp(activePawn.getAp() - 1);
-                    //this.menu.game.signalManager.onActionPlayed.dispatch(activePawn);
-                    this.select(this.matching[direction]);
-                }
-            };
-            Direction.prototype.clean = function () {
-                this.element.fadeOut();
-            };
-            Direction.prototype.show = function () {
-                this.element.fadeIn();
-            };
-            return Direction;
-        }());
-        UI.Direction = Direction;
-    })(UI = TacticArena.UI || (TacticArena.UI = {}));
-})(TacticArena || (TacticArena = {}));
-var TacticArena;
-(function (TacticArena) {
-    var UI;
-    (function (UI) {
         var FactionSelection = (function () {
             function FactionSelection(menu, menuElement) {
                 this.menu = menu;
@@ -6750,7 +6668,7 @@ var TacticArena;
                     uiManager.timeUI.goBackward();
                 }
                 else if (!uiManager.game.process) {
-                    uiManager.directionUI.changeDirection('W');
+                    TacticArena.Action.ChangeDirection.process(uiManager.game, 'W');
                 }
             };
             KeyManager.prototype.rightKeyPressed = function (self, uiManager) {
@@ -6760,21 +6678,21 @@ var TacticArena;
                     uiManager.timeUI.goForward();
                 }
                 else if (!uiManager.game.process) {
-                    uiManager.directionUI.changeDirection('E');
+                    TacticArena.Action.ChangeDirection.process(uiManager.game, 'E');
                 }
             };
             KeyManager.prototype.upKeyPressed = function (self, uiManager) {
                 if (uiManager.process)
                     return false;
                 if (!uiManager.game.process) {
-                    uiManager.directionUI.changeDirection('N');
+                    TacticArena.Action.ChangeDirection.process(uiManager.game, 'N');
                 }
             };
             KeyManager.prototype.downKeyPressed = function (self, uiManager) {
                 if (uiManager.process)
                     return false;
                 if (!uiManager.game.process) {
-                    uiManager.directionUI.changeDirection('S');
+                    TacticArena.Action.ChangeDirection.process(uiManager.game, 'S');
                 }
             };
             KeyManager.prototype.enterKeyPressed = function (self, uiManager) {
@@ -6788,11 +6706,11 @@ var TacticArena;
                     uiManager.timeUI.goForward();
                 }
                 else if (!uiManager.game.process) {
-                    uiManager.endOrderPhase();
+                    TacticArena.Action.ConfirmOrder.process(uiManager.game);
                 }
             };
             KeyManager.prototype.backKeyPressed = function (self, uiManager) {
-                uiManager.cancelAction();
+                TacticArena.Action.Cancel.process(uiManager.game);
             };
             KeyManager.prototype.pauseResolve = function (self, uiManager) {
                 uiManager.timeUI.togglePause();
@@ -6858,75 +6776,73 @@ var TacticArena;
     (function (UI) {
         var Notifications = (function () {
             function Notifications(menu) {
-                var self = this;
-                this.menu = menu;
-                this.menu.element.append('<div class="ui-notifications ui-steps-notifications"></div>');
-                this.element = this.menu.element.find('.ui-steps-notifications');
-                this.directionMapping = {
-                    'W': "l'Ouest",
-                    'E': "l'Est",
-                    'N': "le Nord",
-                    'S': "le Sud"
-                };
+                //var self = this;
+                //this.menu = menu;
+                //this.menu.element.append('<div class="ui-notifications ui-steps-notifications"></div>');
+                //this.element = this.menu.element.find('.ui-steps-notifications');
+                //this.directionMapping = {
+                //    'W': "l'Ouest",
+                //    'E': "l'Est",
+                //    'N': "le Nord",
+                //    'S': "le Sud"
+                //}
             }
             Notifications.prototype.clean = function () {
-                this.remove(this.element.find('div[class*="item-"]'));
+                //this.remove(this.element.find('div[class*="item-"]'));
             };
             Notifications.prototype.remove = function (elements) {
-                if (elements.length > 0) {
-                    var self_1 = this;
-                    $(elements[elements.length - 1]).animate({ opacity: 0, marginRight: -200 }, 150, function () {
-                        $(this).remove();
-                        self_1.remove(elements.slice(0, -1));
-                    });
-                }
+                //if (elements.length > 0) {
+                //    let self = this;
+                //    $(elements[elements.length - 1]).animate({opacity: 0, marginRight: -200}, 150, function () {
+                //        $(this).remove();
+                //        self.remove(elements.slice(0, -1));
+                //    });
+                //}
             };
             Notifications.prototype.update = function (index) {
-                this.remove(this.element.find('div[class*="item-"]:gt(' + index + ')'));
-                if ($('.item-' + index).length > 0) {
-                    return;
-                }
-                var steps = [];
-                for (var i = index; i > this.element.children().length - 1; i--) {
-                    steps.push($('<div class="item-' + index + '" style="opacity:0; margin-right:-200px;">' + this.getMessage(i) + '</div>'));
-                }
-                this.add(steps);
+                //this.remove(this.element.find('div[class*="item-"]:gt(' + index + ')'));
+                //if ($('.item-' + index).length > 0) {
+                //    return;
+                //}
+                //let steps = [];
+                //for (let i = index; i > this.element.children().length - 1; i--) {
+                //    steps.push($('<div class="item-' + index + '" style="opacity:0; margin-right:-200px;">' + this.getMessage(i) + '</div>'));
+                //}
+                //this.add(steps);
             };
             Notifications.prototype.add = function (elements) {
-                if (elements.length > 0) {
-                    var self_2 = this;
-                    $(elements[elements.length - 1]).appendTo(this.element)
-                        .animate({ opacity: 1, marginRight: 0 }, 150, function () {
-                        self_2.add(elements.slice(0, -1));
-                    });
-                }
+                //if (elements.length > 0) {
+                //    let self = this;
+                //    $(elements[elements.length - 1]).appendTo(this.element)
+                //        .animate({opacity: 1, marginRight: 0}, 150, function () {
+                //            self.add(elements.slice(0, -1));
+                //        });
+                //}
             };
             Notifications.prototype.getMessage = function (index) {
-                var result = [];
-                var step = this.menu.game.logManager.get(this.menu.game.turnManager.currentTurnIndex, index);
-                for (var i = 0; i < step.length; i++) {
-                    var e = step[i].entity;
-                    var o = step[i].order;
-                    var s = step[i].stepUnitData;
-                    var logColor = '#ffffff';
-                    //let logColor = '#78dd77';
-                    // logColor = '#f45d62';
-                    var msg = '<b>' + e._name + '</b>';
-                    if (s.moveHasBeenBlocked) {
-                        msg += ' essaie de se déplacer en ' + s.positionBlocked.x + ', ' + s.positionBlocked.y + ', ' + ' mais se retrouve bloqué en ' + o.x + ', ' + o.y;
-                    }
-                    else if (o.action == 'move') {
-                        msg += ' se déplace en ' + o.x + ', ' + o.y;
-                    }
-                    else if (o.action == 'cast') {
-                        msg += ' lance une boule de feu vers ' + this.directionMapping[o.direction];
-                    }
-                    else if (o.action == 'stand') {
-                        msg += ' reste en position ' + o.x + ', ' + o.y + ' et surveille vers ' + this.directionMapping[o.direction];
-                    }
-                    result.push('<span style="color:' + logColor + ';">' + msg + '</span>');
-                }
-                return result.join('<br/><br/>');
+                //    let result = [];
+                //    let step = this.menu.game.logManager.get(this.menu.game.turnManager.currentTurnIndex, index);
+                //    for(let i = 0; i < step.length; i++) {
+                //        let e = step[i].entity;
+                //        let o = step[i].order;
+                //        let s = step[i].stepUnitData;
+                //        let logColor = '#ffffff';
+                //        //let logColor = '#78dd77';
+                //        // logColor = '#f45d62';
+                //
+                //        let msg = '<b>' + e._name + '</b>';
+                //        if(s.moveHasBeenBlocked) {
+                //            msg += ' essaie de se déplacer en ' + s.positionBlocked.x + ', '+ s.positionBlocked.y + ', ' + ' mais se retrouve bloqué en ' + o.x + ', ' + o.y;
+                //        } else if(o.action == 'move') {
+                //            msg += ' se déplace en ' + o.x + ', ' + o.y;
+                //        } else if (o.action == 'cast') {
+                //            msg += ' lance une boule de feu vers ' + this.directionMapping[o.direction];
+                //        } else if (o.action == 'stand') {
+                //            msg += ' reste en position ' + o.x + ', ' + o.y + ' et surveille vers ' + this.directionMapping[o.direction];
+                //        }
+                //        result.push('<span style="color:' + logColor + ';">' + msg + '</span>');
+                //    }
+                //    return result.join('<br/><br/>');
             };
             return Notifications;
         }());
@@ -6941,8 +6857,8 @@ var TacticArena;
             function OrdersNotifications(menu) {
                 var self = this;
                 this.menu = menu;
-                this.menu.element.append('<div class="ui-notifications ui-orders-notifications"></div>');
-                this.element = this.menu.element.find('.ui-orders-notifications');
+                //this.menu.element.append('<div class="ui-notifications ui-orders-notifications"></div>');
+                //this.element = this.menu.element.find('.ui-orders-notifications');
                 this.directionMapping = {
                     'W': "l'Ouest",
                     'E': "l'Est",
@@ -6952,55 +6868,52 @@ var TacticArena;
             }
             OrdersNotifications.prototype.clean = function () {
                 //this.remove(this.element.find('div[class*="item-"]'));
-                this.element.html('');
-                this.menu.game.stageManager.clearPath(this.menu.game.pathOrdersTilesGroup);
+                //this.element.html('');
+                //this.menu.game.stageManager.clearPath(this.menu.game.pathOrdersTilesGroup);
             };
             OrdersNotifications.prototype.remove = function (elements) {
-                if (elements.length > 0) {
-                    var self_3 = this;
-                    $(elements[elements.length - 1]).animate({ opacity: 0, marginRight: -200 }, 150, function () {
-                        $(this).remove();
-                        self_3.remove(elements.slice(0, -1));
-                    });
-                }
+                //if (elements.length > 0) {
+                //    let self = this;
+                //    $(elements[elements.length - 1]).animate({opacity: 0, marginRight: -200}, 150, function () {
+                //        $(this).remove();
+                //        self.remove(elements.slice(0, -1));
+                //    });
+                //}
             };
             OrdersNotifications.prototype.update = function (orders) {
-                if (orders.length > 0) {
-                    for (var i = 0; i < orders.length; i++) {
-                        if (this.element.find('.item-' + i).length == 0) {
-                            this.add($('<div class="item-' + i + '" style="opacity:0; margin-right:-200px;">' + this.getMessage(orders[i]) + '</div>'));
-                        }
-                    }
-                }
-                else {
-                    this.clean();
-                }
+                //if(orders.length > 0) {
+                //    for(var i = 0; i < orders.length; i++) {
+                //        if(this.element.find('.item-' + i).length == 0) {
+                //            this.add($('<div class="item-' + i + '" style="opacity:0; margin-right:-200px;">' + this.getMessage(orders[i]) + '</div>'));
+                //        }
+                //    }
+                //} else {
+                //    this.clean();
+                //}
             };
             OrdersNotifications.prototype.add = function (elements) {
-                if (elements.length > 0) {
-                    var self_4 = this;
-                    $(elements[elements.length - 1]).appendTo(this.element)
-                        .animate({ opacity: 1, marginRight: 0 }, 150, function () {
-                        self_4.add(elements.slice(0, -1));
-                    });
-                }
+                //if (elements.length > 0) {
+                //    let self = this;
+                //    $(elements[elements.length - 1]).appendTo(this.element)
+                //        .animate({opacity: 1, marginRight: 0}, 150, function () {
+                //            self.add(elements.slice(0, -1));
+                //        });
+                //}
             };
             OrdersNotifications.prototype.getMessage = function (order) {
                 var activePawn = this.menu.game.turnManager.getActivePawn();
                 if (!this.menu.game.stageManager.equalPositions(activePawn.getPosition(), order)) {
                     this.menu.game.stageManager.showPath([order], this.menu.game.pathOrdersTilesGroup, 0xffffff);
                 }
-                var msg = '<b>' + activePawn._name + '</b>';
-                if (order.action == 'move') {
-                    msg += ' se déplacera en ' + order.x + ', ' + order.y + ', orienté vers le ' + this.directionMapping[order.direction];
-                }
-                else if (order.action == 'cast') {
-                    msg += ' lancera une boule de feu vers ' + this.directionMapping[order.direction];
-                }
-                else if (order.action == 'stand') {
-                    msg += ' restera en position ' + order.x + ', ' + order.y + ' et fera preuve de vigilence vers ' + this.directionMapping[order.direction];
-                }
-                return '<span style="color:#ffffff;">' + msg + '</span>';
+                //let msg = '<b>' + activePawn._name + '</b>';
+                //if (order.action == 'move') {
+                //    msg += ' se déplacera en ' + order.x + ', ' + order.y + ', orienté vers le ' + this.directionMapping[order.direction];
+                //} else if (order.action == 'cast') {
+                //    msg += ' lancera une boule de feu vers ' + this.directionMapping[order.direction];
+                //} else if (order.action == 'stand') {
+                //    msg += ' restera en position ' + order.x + ', ' + order.y + ' et fera preuve de vigilence vers ' + this.directionMapping[order.direction];
+                //}
+                //return '<span style="color:#ffffff;">' + msg + '</span>';
             };
             return OrdersNotifications;
         }());
@@ -7175,24 +7088,29 @@ var TacticArena;
                 };
             };
             Pointer.prototype.updateMarker = function () {
+                this.show();
                 var p = this.getPosition();
                 this.marker.x = Math.round(p.x * this.game.tileSize / this.game.worldGroup.scale.x / 32) * 32;
                 this.marker.y = Math.round(p.y * this.game.tileSize / this.game.worldGroup.scale.y / 32) * 32;
             };
             Pointer.prototype.update = function () {
-                if (!this.game.process) {
+                if (!this.game.process && !this.game.uiManager.isOver()) {
                     this.updateMarker();
                     var selectedSkill = this.game.turnManager.getActivePawn().getSelectedSkill();
                     if (selectedSkill && selectedSkill.canOrder()) {
                         selectedSkill.updateUI(this.getTilePositionFromMarkerPosition());
                     }
                 }
+                else {
+                    this.hide();
+                }
             };
             Pointer.prototype.onGridLeftClick = function () {
-                if (!this.game.process) {
+                if (!this.game.process && !this.game.uiManager.isOver()) {
                     var activePawn = this.game.turnManager.getActivePawn();
                     var selectedSkill = activePawn.getSelectedSkill();
                     var target = this.getTilePositionFromMarkerPosition();
+                    console.log(selectedSkill);
                     if (selectedSkill) {
                         if (selectedSkill.canOrder()) {
                             selectedSkill.order(target);
@@ -7218,15 +7136,6 @@ var TacticArena;
                 this.marker.x = -this.game.tileSize;
                 this.marker.y = -this.game.tileSize;
                 this.marker.visible = true;
-            };
-            Pointer.prototype.dealWith = function (element) {
-                var self = this;
-                element.on('mouseover', function () {
-                    self.hide();
-                });
-                element.on('mouseout', function () {
-                    self.show();
-                });
             };
             Pointer.prototype.destroy = function () {
                 console.log('pointer destroy');
@@ -7268,38 +7177,38 @@ var TacticArena;
             };
             PointerExploration.prototype.onGridLeftClick = function () {
                 if (!this.game.process) {
-                    var self_5 = this;
+                    var self_1 = this;
                     var activePawn = this.game.pawns[0];
                     var p = this.getPosition();
                     var targetX = this.marker.x / this.game.tileSize;
                     var targetY = this.marker.y / this.game.tileSize;
-                    self_5.game.process = true;
+                    self_1.game.process = true;
                     console.log(p);
                     if (this.game.stageManager.grid[p.y][p.x] != 0) {
                         this.game.stageManager.canMove(activePawn, targetX, targetY).then(function (path) {
                             console.log(path);
                             activePawn.moveTo(0, 0, path, true, true).then(function (res) {
-                                self_5.game.stageManager.markPawns();
-                                self_5.game.process = false;
+                                self_1.game.stageManager.markPawns();
+                                self_1.game.process = false;
                             }, function (res) {
-                                self_5.game.process = false;
+                                self_1.game.process = false;
                             });
                         }, function (res) {
                             console.log(res);
-                            self_5.game.process = false;
+                            self_1.game.process = false;
                         });
                     }
                     else if (!this.game.stageManager.equalPositions(p, activePawn.getPosition())) {
                         console.log('attack');
-                        var enemy = self_5.game.pawns[1];
-                        self_5.game.process = false;
+                        var enemy = self_1.game.pawns[1];
+                        self_1.game.process = false;
                         var gridWidth = 10;
                         var gridHeight = 16;
                         var startPosition = { x: p.x - Math.floor(gridWidth / 2), y: p.y - Math.floor(gridHeight / 2) };
-                        var layers = self_5.game.stageManager.getLayers();
+                        var layers = self_1.game.stageManager.getLayers();
                         //self.game.stageManager.fillBlack().then(function() {
-                        self_5.game.state.clearCurrentState();
-                        self_5.game.state.start('mainadventurebattle', true, false, {
+                        self_1.game.state.clearCurrentState();
+                        self_1.game.state.start('mainadventurebattle', true, false, {
                             players: [
                                 { name: 'Beez', faction: 'animals', player: false, type: enemy.type, spriteClass: enemy.spriteClass, position: enemy.getPosition(), direction: enemy.getDirection() },
                                 { name: activePawn._name, faction: 'human', player: true, type: activePawn.type, spriteClass: activePawn.spriteClass, position: activePawn.getPosition(), direction: activePawn.getDirection() }
@@ -7313,7 +7222,7 @@ var TacticArena;
                         //});
                     }
                     else {
-                        self_5.game.process = false;
+                        self_1.game.process = false;
                     }
                 }
             };
@@ -7480,10 +7389,10 @@ var TacticArena;
                 var _this = this;
                 return new Promise(function (resolve, reject) {
                     if (elements.length > 0) {
-                        var self_6 = _this;
+                        var self_2 = _this;
                         $(elements[0]).find('.line').animate({ width: '91px' }, 200, function () {
                             $(elements[0]).find('.square').animate({ opacity: 1 }, 100, function () {
-                                self_6.display(elements.slice(1)).then(function () {
+                                self_2.display(elements.slice(1)).then(function () {
                                     resolve(true);
                                 });
                             });
@@ -7499,6 +7408,37 @@ var TacticArena;
             return TimeLine;
         }());
         UI.TimeLine = TimeLine;
+    })(UI = TacticArena.UI || (TacticArena.UI = {}));
+})(TacticArena || (TacticArena = {}));
+var TacticArena;
+(function (TacticArena) {
+    var UI;
+    (function (UI) {
+        var TopMenu = (function () {
+            function TopMenu(game) {
+                this.game = game;
+                this.mainGroup = this.game.add.group();
+                var topUIBackground = this.game.make.graphics();
+                topUIBackground.beginFill(0x333333, 0.6);
+                topUIBackground.drawRect(0, 0, this.game.world.width, 48);
+                topUIBackground.endFill();
+                topUIBackground.inputEnabled = true;
+                topUIBackground.events.onInputOver.add(this.over, this);
+                topUIBackground.events.onInputOut.add(this.out, this);
+                this.mainGroup.add(topUIBackground);
+                this.game.uiGroup.add(this.mainGroup);
+            }
+            TopMenu.prototype.over = function () {
+                console.log('over');
+                this.isOver = true;
+            };
+            TopMenu.prototype.out = function () {
+                console.log('out');
+                this.isOver = false;
+            };
+            return TopMenu;
+        }());
+        UI.TopMenu = TopMenu;
     })(UI = TacticArena.UI || (TacticArena.UI = {}));
 })(TacticArena || (TacticArena = {}));
 var TacticArena;
@@ -7585,26 +7525,16 @@ var TacticArena;
                 var self = this;
                 this.game = game;
                 this.element = $('#content');
-                var topUIGroup = this.game.add.group();
-                var topUIBackground = this.game.make.graphics();
-                topUIBackground.beginFill(0x333333, 0.6);
-                topUIBackground.drawRect(0, 0, this.game.world.width, 64);
-                topUIBackground.endFill();
-                topUIGroup.add(topUIBackground);
-                this.game.uiGroup.add(topUIGroup);
-                this.directionUI = new UI.Direction(this);
+                this.actionMenu = null;
+                this.topMenu = new UI.TopMenu(this.game);
                 this.timeUI = new UI.Time(this);
                 this.timelineUI = new UI.TimeLine(this);
                 this.pawnsinfosUI = new UI.PawnsInfos(this);
                 this.keyManager = new UI.KeyManager(this);
-                this.notificationsUI = new UI.Notifications(this);
                 this.ordersnotificationsUI = new UI.OrdersNotifications(this);
                 this.transitionUI = new UI.Transition(this);
                 this.turnIndicatorUI = new UI.TurnIndicator(this);
                 this.ingamemenuUI = new UI.IngameMenu(this);
-                this.game.pointer.dealWith(this.timeUI.element);
-                this.game.pointer.dealWith(this.timelineUI.element);
-                this.game.pointer.dealWith(this.directionUI.element);
                 this.process = false;
             }
             UIManager.prototype.initOrderPhase = function (pawn, first) {
@@ -7616,49 +7546,15 @@ var TacticArena;
                     if (first) {
                         _this.turnIndicatorUI.write(_this.game.turnManager.currentTurnIndex + 1);
                         _this.transitionUI.show('Phase de commandement').then(function (res) {
-                            _this.directionUI.show();
                             return true;
                         });
                     }
                     _this.game.signalManager.turnInitialized.dispatch(pawn);
                 });
             };
-            UIManager.prototype.endOrderPhase = function () {
-                var _this = this;
-                if (!this.game.process) {
-                    this.game.process = true;
-                    this.game.selecting = false;
-                    this.game.stageManager.clearPossibleMove();
-                    this.game.stageManager.clearPath(this.game.pathTilesGroup);
-                    var activePawn_1 = this.game.turnManager.getActivePawn();
-                    this.game.turnManager.endTurn().then(function (nextPawn) {
-                        _this.game.signalManager.onTurnEnded.dispatch(activePawn_1);
-                        if (_this.game.playMode == 'online' && _this.game.turnManager.getRemainingPawns(_this.game.playerTeam).length == 0) {
-                            // s'il reste plus de pawn à jouer du playerteam
-                            // alors on signale au serveur qu'on a fini la phase de commandement
-                            // en lui envoyant les ordres
-                            _this.game.serverManager.request('VALID_ORDER_PHASE', {
-                                turn: _this.game.turnManager.currentTurnIndex,
-                                orders: _this.game.orderManager.getPlayerOrders(_this.game.playerTeam)
-                            });
-                            _this.ingamemenuUI.show('Waiting for opponent move');
-                        }
-                        else {
-                            if (_this.game.turnManager.getRemainingPawns().length == 0) {
-                                var steps = _this.game.orderManager.getSteps();
-                                _this.initResolvePhase(steps);
-                            }
-                            else {
-                                _this.initOrderPhase(nextPawn, false);
-                            }
-                        }
-                    });
-                }
-            };
             UIManager.prototype.initResolvePhase = function (steps) {
                 var _this = this;
                 this.ingamemenuUI.close();
-                this.directionUI.clean();
                 this.game.resolveManager.init(steps);
                 this.transitionUI.show('Phase de Résolution').then(function (res) {
                     return true;
@@ -7670,42 +7566,156 @@ var TacticArena;
                     });
                 });
             };
-            UIManager.prototype.endResolvePhase = function () {
-                var self = this;
-                for (var i = 0; i < this.game.pawns.length; i++) {
-                    this.game.pawns[i].destroyProjection();
-                }
-                this.game.resolveManager.active = false;
-                setTimeout(function () {
-                    self.notificationsUI.clean();
-                }, 500);
-                this.timelineUI.clean();
-                this.timeUI.updatePauseFromSelected();
-                if (this.game.isOver()) {
-                    var msg = this.game.teams[this.game.playerTeam] ? 'You win' : 'You lose';
-                    this.ingamemenuUI.gameOver(msg);
-                    this.game.battleOver();
-                }
-                else {
-                    this.initOrderPhase(this.game.getFirstAlive(), true);
-                }
-            };
-            UIManager.prototype.cancelAction = function () {
-                if (!this.game.process) {
-                    var activePawn = this.game.turnManager.getActivePawn();
-                    activePawn.show();
-                    activePawn.destroyProjection();
-                    activePawn.setAp(3);
-                    activePawn.getProjectionOrReal().faceDirection(this.directionUI.savedDirection);
-                    this.directionUI.init(this.directionUI.savedDirection);
-                    this.game.orderManager.removeEntityOrder(activePawn);
-                    this.game.signalManager.onActionPlayed.dispatch(activePawn);
-                }
+            UIManager.prototype.isOver = function () {
+                return (this.actionMenu && this.actionMenu.isOver) || this.topMenu.isOver;
             };
             return UIManager;
         }());
         UI.UIManager = UIManager;
     })(UI = TacticArena.UI || (TacticArena.UI = {}));
+})(TacticArena || (TacticArena = {}));
+var TacticArena;
+(function (TacticArena) {
+    var BaseAction = (function () {
+        function BaseAction(name) {
+            this.name = name;
+        }
+        BaseAction.process = function (state) {
+        };
+        return BaseAction;
+    }());
+    TacticArena.BaseAction = BaseAction;
+})(TacticArena || (TacticArena = {}));
+var TacticArena;
+(function (TacticArena) {
+    var Action;
+    (function (Action) {
+        var Cancel = (function (_super) {
+            __extends(Cancel, _super);
+            function Cancel() {
+                return _super.call(this, 'cancel') || this;
+            }
+            Cancel.process = function (state) {
+                if (!state.process) {
+                    var activePawn = state.turnManager.getActivePawn();
+                    activePawn.show();
+                    activePawn.destroyProjection();
+                    activePawn.setAp(3);
+                    activePawn.getProjectionOrReal().faceDirection(state.uiManager.actionMenu.savedDirection);
+                    state.uiManager.actionMenu.initDirection(state.uiManager.actionMenu.savedDirection);
+                    state.orderManager.removeEntityOrder(activePawn);
+                    state.signalManager.onActionPlayed.dispatch(activePawn);
+                }
+            };
+            return Cancel;
+        }(TacticArena.BaseAction));
+        Action.Cancel = Cancel;
+    })(Action = TacticArena.Action || (TacticArena.Action = {}));
+})(TacticArena || (TacticArena = {}));
+var TacticArena;
+(function (TacticArena) {
+    var Action;
+    (function (Action) {
+        var ChangeDirection = (function (_super) {
+            __extends(ChangeDirection, _super);
+            function ChangeDirection() {
+                return _super.call(this, 'change direction') || this;
+            }
+            ChangeDirection.process = function (state, direction) {
+                var matching = { 'N': 'north', 'E': 'east', 'S': 'south', 'W': 'west' };
+                var activePawn = state.turnManager.getActivePawn();
+                if (!state.process && activePawn.getAp() > 0) {
+                    activePawn.createProjection();
+                    activePawn.getProjectionOrReal().faceDirection(direction);
+                    //let position = activePawn.getProjectionOrReal().getPosition();
+                    //this.menu.game.orderManager.add('stand', activePawn, position.x, position.y, direction);
+                    //activePawn.setAp(activePawn.getAp() - 1);
+                    //this.menu.game.signalManager.onActionPlayed.dispatch(activePawn);
+                    //this.select(matching[direction]);
+                }
+            };
+            return ChangeDirection;
+        }(TacticArena.BaseAction));
+        Action.ChangeDirection = ChangeDirection;
+    })(Action = TacticArena.Action || (TacticArena.Action = {}));
+})(TacticArena || (TacticArena = {}));
+var TacticArena;
+(function (TacticArena) {
+    var Action;
+    (function (Action) {
+        var ConfirmOrder = (function (_super) {
+            __extends(ConfirmOrder, _super);
+            function ConfirmOrder() {
+                return _super.call(this, 'confirm order') || this;
+            }
+            ConfirmOrder.process = function (state) {
+                if (!state.process) {
+                    state.process = true;
+                    state.selecting = false;
+                    state.stageManager.clearPossibleMove();
+                    state.stageManager.clearPath(state.pathTilesGroup);
+                    var activePawn_1 = state.turnManager.getActivePawn();
+                    state.turnManager.endTurn().then(function (nextPawn) {
+                        state.signalManager.onTurnEnded.dispatch(activePawn_1);
+                        if (state.playMode == 'online' && state.turnManager.getRemainingPawns(state.playerTeam).length == 0) {
+                            // s'il reste plus de pawn à jouer du playerteam
+                            // alors on signale au serveur qu'on a fini la phase de commandement
+                            // en lui envoyant les ordres
+                            state.serverManager.request('VALID_ORDER_PHASE', {
+                                turn: state.turnManager.currentTurnIndex,
+                                orders: state.orderManager.getPlayerOrders(state.playerTeam)
+                            });
+                            state.uiManager.ingamemenuUI.show('Waiting for opponent move');
+                        }
+                        else {
+                            if (state.turnManager.getRemainingPawns().length == 0) {
+                                var steps = state.orderManager.getSteps();
+                                state.uiManager.initResolvePhase(steps);
+                            }
+                            else {
+                                state.uiManager.initOrderPhase(nextPawn, false);
+                            }
+                        }
+                    });
+                }
+            };
+            return ConfirmOrder;
+        }(TacticArena.BaseAction));
+        Action.ConfirmOrder = ConfirmOrder;
+    })(Action = TacticArena.Action || (TacticArena.Action = {}));
+})(TacticArena || (TacticArena = {}));
+var TacticArena;
+(function (TacticArena) {
+    var Action;
+    (function (Action) {
+        var ConfirmResolve = (function (_super) {
+            __extends(ConfirmResolve, _super);
+            function ConfirmResolve() {
+                return _super.call(this, 'confirm resolve') || this;
+            }
+            ConfirmResolve.process = function (state) {
+                for (var i = 0; i < state.pawns.length; i++) {
+                    state.pawns[i].destroyProjection();
+                }
+                state.resolveManager.active = false;
+                //setTimeout(function() {
+                //state.uiManager.notificationsUI.clean();
+                //}, 500);
+                state.uiManager.timelineUI.clean();
+                state.uiManager.timeUI.updatePauseFromSelected();
+                if (state.isOver()) {
+                    var msg = state.teams[state.playerTeam] ? 'You win' : 'You lose';
+                    state.uiManager.ingamemenuUI.gameOver(msg);
+                    state.battleOver();
+                }
+                else {
+                    state.uiManager.initOrderPhase(state.getFirstAlive(), true);
+                }
+            };
+            return ConfirmResolve;
+        }(TacticArena.BaseAction));
+        Action.ConfirmResolve = ConfirmResolve;
+    })(Action = TacticArena.Action || (TacticArena.Action = {}));
 })(TacticArena || (TacticArena = {}));
 var TacticArena;
 (function (TacticArena) {

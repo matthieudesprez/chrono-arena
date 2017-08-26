@@ -18,7 +18,7 @@ module TacticArena.Order {
                     let direction = previousStep ? previousStep[i].order.direction : pawn.getDirection();
                     result = new Animation.Stand(pawn, this, pawn.getPosition()).get();
                 } else {
-                    result = new Animation.Move(pawn, this, pawn.getPosition(), animate, this.direction).get();
+                    result = new Animation.Move(pawn, this, this.position, animate, this.direction).get();
                 }
             }
             return result;

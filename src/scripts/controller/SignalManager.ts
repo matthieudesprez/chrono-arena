@@ -66,29 +66,32 @@ module TacticArena {
 
             this.stepResolutionFinished.add(function(stepIndex) {
                 self.game.uiManager.process = false;
+                self.game.resolveManager.processing = false; // On repasse process à false pour regagner la main sur le ResolveManager
             });
 
             this.resolvePhaseFinished.add(function() {
                 self.game.isGameReadyPromise().then((res) => {
-                    self.game.uiManager.endResolvePhase();
+                    Action.ConfirmResolve.process(self.game);
                 });
             });
 
             this.stepResolutionIndexChange.add(function(stepIndex) {
-                self.game.uiManager.notificationsUI.update(stepIndex);
+                //self.game.uiManager.notificationsUI.update(stepIndex);
                 self.game.uiManager.timelineUI.update(stepIndex);
             });
 
             this.onTurnEnded.add(function(activePawn) {
                 self.game.uiManager.ordersnotificationsUI.clean();
                 self.game.uiSpritesGroup.removeAll();
+                if(self.game.uiManager.actionMenu) {
+                    self.game.uiManager.actionMenu.clean();
+                }
             });
 
             this.onActivePawnChange.add(function(activePawn) {
                 //self.game.uiManager.ordersnotificationsUI.clean();
                 //self.game.uiManager.ordersnotificationsUI.update(self.game.orderManager.getOrders(activePawn._id));
                 //self.game.uiManager.pawnsinfosUI.select(activePawn._id);
-                //self.game.uiManager.directionUI.init(activePawn.getDirection());
                 //self.game.uiManager.actionUI.update(activePawn.getAp());
                 //self.game.uiManager.actionUI.select('walk');
 
@@ -99,7 +102,9 @@ module TacticArena {
                 s.animations.add('turn', ["selected_circle_01", "selected_circle_02"], 4, true);
                 s.play('turn');
                 //this.consolelogsUI.write('au tour du joueur ' + activePawn._id);
-                let actionMenu = new UI.ActionMenu(self.game, activePawn);
+
+                self.game.uiManager.actionMenu = new UI.ActionMenu(self.game, activePawn);
+                self.game.uiManager.actionMenu.initDirection(activePawn.getDirection());
             });
 
             this.onTeamChange.add(function() {

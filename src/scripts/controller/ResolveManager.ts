@@ -14,71 +14,64 @@ module TacticArena {
             this.active = false;
         }
 
-        init(steps) {
+        init(steps:Entity.Step[]) {
             this.steps = steps;
             this.manageProjectionDislay(steps[0], true);
             this.currentIndex = 0;
         }
 
+        /*
+         * Call processStep
+         */
         processSteps(index, animate:boolean = true, backward:boolean = false) {
             this.processing = true;
             this.active = true;
+            let self = this;
             this.processStep(index, animate, backward).then((res) => {
-                this.game.signalManager.resolvePhaseFinished.dispatch();
-            }, (res) => {
+                if (index >= self.steps.length) { // Si on est après le dernier step, on sort
+                    return this.game.signalManager.resolvePhaseFinished.dispatch();
+                }
 
+                this.game.signalManager.stepResolutionFinished.dispatch(index);
+
+                if (!this.game.isPaused) { // Si le time n'est pas sur pause, on enchaine avec le step suivant
+                    self.processSteps(index + 1, animate, backward); // recursive
+                }
+            }, (res) => {
+                console.log(res, 'something failed during animation');
             });
         }
 
-        processStep(index:number, animate:boolean = true, backward:boolean = false) {
+        /*
+         * Retourne une promesse qui est résolue lorsque toutes les animations de this.steps[index] sont résolues
+         */
+        processStep(index:number, animate:boolean = true, backward:boolean = false):Promise<any> {
+            if (index >= this.steps.length) return Promise.resolve(true);
+
             let self = this;
-            return new Promise((resolve, reject) => {
-                if (index >= this.steps.length) {
-                    resolve(true);
-                    return true;
-                }
-                this.currentIndex = index;
-                this.game.signalManager.stepResolutionIndexChange.dispatch(index);
-                let step = this.steps[index];
-                let previousStep = index > 0 ? this.steps[index - 1] : null;
+            this.setCurrentIndex(index);
+            let previousStep = index > 0 ? this.steps[index - 1] : null;
 
-                var promisesOrders = [];
-                for (var i = 0; i < step.length; i++) {
-                    let pawn = step[i].entity;
-                    let stepUnitData = step[i].data;
-                    pawn.setAp(stepUnitData.ap);
-                    promisesOrders.push(step[i].order.resolve(pawn, stepUnitData, previousStep, animate, backward, i, self.game));
-                }
+            var promisesOrders = [];
+            this.steps[index].stepUnits.forEach( (stepUnit, i) => {
+                stepUnit.pawn.setAp(stepUnit.data.ap); // met à jour le nombre d'AP du pawn
+                promisesOrders.push(stepUnit.order.resolve(stepUnit.pawn, stepUnit.data, previousStep, animate, backward, i, self.game)); //lance l'animation
+            });
+            this.manageProjectionDislay(this.steps[index]);
+            return Promise.all(promisesOrders).then( res => {
+                if (!backward) { self.manageProjectionDislay(self.steps[index]);}
 
-                this.manageProjectionDislay(step);
-
-                Promise.all(promisesOrders).then((res) => {
-                    if(!backward) {
-                        this.manageProjectionDislay(step);
-                    }
-                    step.forEach( s => {
-                        let forceAnimation = typeof s.data.dies !== 'undefined' && s.data.dies;
-                        s.entity.setHp(s.data.hp, forceAnimation);
-                    });
-                    this.game.signalManager.stepResolutionFinished.dispatch(index);
-                    if (this.steps.length > (index + 1) && !this.game.isPaused) {
-                        this.processStep(index + 1).then((res) => {
-                            resolve(res);
-                        }, (res) => {
-
-                        }); // recursive
-                    } else {
-                        this.processing = false;
-                        reject(false);
-                    }
+                self.steps[index].stepUnits.forEach(stepUnit => { // On met à jour la vie et les états
+                    let forceAnimation = typeof stepUnit.data.dies !== 'undefined' && stepUnit.data.dies;
+                    stepUnit.pawn.setHp(stepUnit.data.hp, forceAnimation);
                 });
             });
         }
 
         manageProjectionDislay(step, compareActualEntity = false) {
-            for (var i = 0; i < step.length; i++) {
-                var entityA = step[i].entity;
-                let order = step[i].order;
+            step.stepUnits.forEach( (stepUnit, i) => {
+                var entityA = stepUnit.pawn;
+                let order = stepUnit.order;
                 let position = entityA.getProjectionOrReal().getPosition();
 
                 if (entityA.projection) {
@@ -97,7 +90,12 @@ module TacticArena {
                         //entityA.hide();
                     }
                 }
-            }
+            });
+        }
+
+        setCurrentIndex(index) {
+            this.currentIndex = index;
+            this.game.signalManager.stepResolutionIndexChange.dispatch(index);
         }
     }
 }

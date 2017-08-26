@@ -16,7 +16,7 @@ module TacticArena.UI {
             this.game = game;
             this.setupConfiguration(providedConfig);
             this.setPosition(this.config.x, this.config.y);
-            this.setValue(0);
+            this.setValue(this.config.value);
             this.drawBackground();
             this.drawBar();
             if(this.config.text) {
@@ -57,6 +57,7 @@ module TacticArena.UI {
                 max: 0,
                 unit: '',
                 textStyle: '12px Iceland',
+                value: 0
             };
 
             return this.mergeObjects(defaultConfig, newConfig);

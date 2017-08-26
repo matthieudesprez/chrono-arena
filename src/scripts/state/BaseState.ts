@@ -34,7 +34,7 @@ module TacticArena.State {
         }
 
         getScaleRatio() {
-            console.log(this.game.width / 320, this.game.height / 800, 1, this.game.height);
+            //console.log(this.game.width / 320, this.game.height / 800, 1, this.game.height);
             //return Math.max(this.game.height / 800, 1);
             return Math.max(this.game.width / 384, 1);
         }

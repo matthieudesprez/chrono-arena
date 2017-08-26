@@ -41,27 +41,31 @@ module TacticArena.UI {
         }
 
         updateMarker() {
+            this.show();
             let p = this.getPosition();
             this.marker.x = Math.round(p.x * this.game.tileSize / this.game.worldGroup.scale.x / 32) * 32;
             this.marker.y = Math.round(p.y * this.game.tileSize / this.game.worldGroup.scale.y / 32) * 32;
         }
 
         update() {
-            if(!this.game.process) {
+            if(!this.game.process && !this.game.uiManager.isOver()) {
                 this.updateMarker();
                 let selectedSkill = this.game.turnManager.getActivePawn().getSelectedSkill();
                 if(selectedSkill && selectedSkill.canOrder()) {
                     selectedSkill.updateUI(this.getTilePositionFromMarkerPosition());
                 }
+            } else {
+                this.hide();
             }
         }
 
         onGridLeftClick() {
-            if (!this.game.process) {
+            if (!this.game.process && !this.game.uiManager.isOver()) {
                 let activePawn = this.game.turnManager.getActivePawn();
                 let selectedSkill = activePawn.getSelectedSkill();
                 let target = this.getTilePositionFromMarkerPosition();
 
+                console.log(selectedSkill);
                 if(selectedSkill) {
                     if(selectedSkill.canOrder()) {
                         selectedSkill.order(target);
@@ -90,16 +94,6 @@ module TacticArena.UI {
             this.marker.x = -this.game.tileSize;
             this.marker.y = -this.game.tileSize;
             this.marker.visible = true;
-        }
-
-        dealWith(element) {
-            var self = this;
-            element.on('mouseover', function() {
-                self.hide();
-            });
-            element.on('mouseout', function() {
-                self.show();
-            });
         }
 
         destroy () {

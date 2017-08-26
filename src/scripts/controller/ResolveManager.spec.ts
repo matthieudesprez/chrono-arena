@@ -5,28 +5,20 @@ module TacticArena.Specs {
     describe("ResolveManager", () => {
         var testGame, currentState;
 
-        function getInitialStep() {
-            return [
-                {
-                    entity: currentState.pawns[0],
-                    order: new Order.Stand(new Position(8, 8), 'E'),
-                    data: getStepUnitData(3, 4)
-                },
-                {
-                    entity: currentState.pawns[1],
-                    order: new Order.Stand(new Position(10, 8), 'W'),
-                    data: getStepUnitData(3, 4)
-                }
-            ];
-        }
-
-        function getStepUnitData(ap, hp) {
-            return {
-                ap: ap,
-                hp: hp,
-                moveHasBeenBlocked: false,
-                positionBlocked: false
-            };
+        function getInitialStep():Entity.Step {
+            let result = new Entity.Step([
+                new Entity.StepUnit(
+                    currentState.pawns[0],
+                    new Entity.StepUnitData(3, 4),
+                    new Order.Stand(new Position(8, 8), 'E')
+                ),
+                new Entity.StepUnit(
+                    currentState.pawns[1],
+                    new Entity.StepUnitData(3, 4),
+                    new Order.Stand(new Position(10, 8), 'W')
+                )
+            ]);
+            return result;
         }
 
         function testStepResolution(index, position, ap, hp, direction) {
@@ -66,33 +58,28 @@ module TacticArena.Specs {
             currentState.resolveManager.init(
                 [
                     getInitialStep(),
-                    [
-                        {
-                            entity: currentState.pawns[0],
-                            order: new Order.Move(new Position(9, 8), 'E'),
-                            data: getStepUnitData(2, 4)
-                        },
-                        {
-                            entity: currentState.pawns[1],
-                            order: new Order.Stand(new Position(10, 8), 'W'),
-                            data: getStepUnitData(2, 4)
-                        }
-                    ]
+                    new Entity.Step([
+                        new Entity.StepUnit(
+                            currentState.pawns[0],
+                            new Entity.StepUnitData(2, 4),
+                            new Order.Move(new Position(9, 8), 'E')
+                        ),
+                        new Entity.StepUnit(
+                            currentState.pawns[1],
+                            new Entity.StepUnitData(2, 4),
+                            new Order.Stand(new Position(10, 8), 'W')
+                        )
+                    ])
                 ]
             );
-            currentState.resolveManager.processStep(0).then((res) => {
-            }).then((res) => {
-
-            }, (res) => {
+            currentState.resolveManager.processStep(0).then(() => {
                 testStepResolution(0, {x: 8, y: 8}, 3, 4, 'E');
                 testStepResolution(1, {x: 10, y: 8}, 3, 4, 'W');
-                currentState.resolveManager.processStep(1).then((res) => {
-
-                }, (res) => {
-                    testStepResolution(0, {x: 9, y: 8}, 2, 4, 'E');
-                    testStepResolution(1, {x: 10, y: 8}, 2, 4, 'W');
-                    done();
-                });
+                return currentState.resolveManager.processStep(1);
+            }).then(() => {
+                testStepResolution(0, {x: 9, y: 8}, 2, 4, 'E');
+                testStepResolution(1, {x: 10, y: 8}, 2, 4, 'W');
+                done();
             });
         });
 
@@ -100,51 +87,45 @@ module TacticArena.Specs {
             currentState.resolveManager.init(
                 [
                     getInitialStep(),
-                    [
-                        {
-                            entity: currentState.pawns[0],
-                            order: new Order.Move(new Position(9, 8), 'E'),
-                            data: getStepUnitData(2, 4)
-                        },
-                        {
-                            entity: currentState.pawns[1],
-                            order: new Order.Stand(new Position(10, 8), 'W'),
-                            data: getStepUnitData(2, 4)
-                        }
-                    ],
-                    [
-                        {
-                            entity: currentState.pawns[0],
-                            order: new Order.Attack(new Position(9, 8), 'E', [{ entityId: currentState.pawns[1]._id, dodge: false }]),
-                            data: getStepUnitData(1, 4)
-                        },
-                        {
-                            entity: currentState.pawns[1],
-                            order: new Order.Attack(new Position(10, 8), 'W', [{ entityId: currentState.pawns[0]._id, dodge: true }]),
-                            data: getStepUnitData(1, 3)
-                        }
-                    ]
+                    new Entity.Step([
+                        new Entity.StepUnit(
+                            currentState.pawns[0],
+                            new Entity.StepUnitData(2, 4),
+                            new Order.Move(new Position(9, 8), 'E')
+                        ),
+                        new Entity.StepUnit(
+                            currentState.pawns[1],
+                            new Entity.StepUnitData(2, 4),
+                            new Order.Stand(new Position(10, 8), 'W')
+                        )
+                    ]),
+                    new Entity.Step([
+                        new Entity.StepUnit(
+                            currentState.pawns[0],
+                            new Entity.StepUnitData(1, 4),
+                            new Order.Attack(new Position(9, 8), 'E', [{ entityId: currentState.pawns[1]._id, dodge: false }])
+                        ),
+                        new Entity.StepUnit(
+                            currentState.pawns[1],
+                            new Entity.StepUnitData(1, 3),
+                            new Order.Attack(new Position(10, 8), 'W', [{ entityId: currentState.pawns[0]._id, dodge: true }])
+                        )
+                    ])
                 ]
             );
-            currentState.resolveManager.processStep(0).then((res) => {
-            }).then((res) => {
-
-            }, (res) => {
+            currentState.resolveManager.processStep(0).then(() => {
+            }).then(() => {
                 testStepResolution(0, {x: 8, y: 8}, 3, 4, 'E');
                 testStepResolution(1, {x: 10, y: 8}, 3, 4, 'W');
-                currentState.resolveManager.processStep(1).then((res) => {
-
-                }, (res) => {
-                    testStepResolution(0, {x: 9, y: 8}, 2, 4, 'E');
-                    testStepResolution(1, {x: 10, y: 8}, 2, 4, 'W');
-                    currentState.resolveManager.processStep(2).then((res) => {
-
-                    }, (res) => {
-                        testStepResolution(0, {x: 9, y: 8}, 1, 4, 'E');
-                        testStepResolution(1, {x: 10, y: 8}, 1, 3, 'W');
-                        done();
-                    });
-                });
+                return currentState.resolveManager.processStep(1);
+            }).then(() => {
+                testStepResolution(0, {x: 9, y: 8}, 2, 4, 'E');
+                testStepResolution(1, {x: 10, y: 8}, 2, 4, 'W');
+                return currentState.resolveManager.processStep(2);
+            }).then(() => {
+                testStepResolution(0, {x: 9, y: 8}, 1, 4, 'E');
+                testStepResolution(1, {x: 10, y: 8}, 1, 3, 'W');
+                done();
             });
         });
 
@@ -152,69 +133,61 @@ module TacticArena.Specs {
             currentState.resolveManager.init(
                 [
                     getInitialStep(),
-                    [
-                        {
-                            entity: currentState.pawns[0],
-                            order: new Order.Move(new Position(8, 7), 'E'),
-                            data: getStepUnitData(2, 4)
-                        },
-                        {
-                            entity: currentState.pawns[1],
-                            order: new Order.Move(new Position(10, 7), 'W'),
-                            data: getStepUnitData(2, 4)
-                        }
-                    ],
-                    [
-                        {
-                            entity: currentState.pawns[0],
-                            order: new Order.Fire(new Position(8, 7), 'E', [currentState.pawns[1]._id]),
-                            data: getStepUnitData(0, 4)
-                        },
-                        {
-                            entity: currentState.pawns[1],
-                            order: new Order.Move(new Position(9, 7), 'W'),
-                            data: getStepUnitData(1, 2)
-                        }
-                    ],
-                    [
-                        {
-                            entity: currentState.pawns[0],
-                            order: new Order.Stand(new Position(8, 7), 'E', [currentState.pawns[1]._id]),
-                            data: getStepUnitData(0, 3)
-                        },
-                        {
-                            entity: currentState.pawns[1],
-                            order: new Order.Move(new Position(9, 7), 'W', { entity: currentState.pawns[0]._id, dodge: false }),
-                            data: getStepUnitData(0, 2)
-                        }
-                    ]
+                    new Entity.Step([
+                        new Entity.StepUnit(
+                            currentState.pawns[0],
+                            new Entity.StepUnitData(2, 4),
+                            new Order.Move(new Position(8, 7), 'E')
+                        ),
+                        new Entity.StepUnit(
+                            currentState.pawns[1],
+                            new Entity.StepUnitData(2, 4),
+                            new Order.Move(new Position(10, 7), 'W')
+                        )
+                    ]),
+                    new Entity.Step([
+                        new Entity.StepUnit(
+                            currentState.pawns[0],
+                            new Entity.StepUnitData(0, 4),
+                            new Order.Fire(new Position(8, 7), 'E', [currentState.pawns[1]._id])
+                        ),
+                        new Entity.StepUnit(
+                            currentState.pawns[1],
+                            new Entity.StepUnitData(1, 2),
+                            new Order.Move(new Position(9, 7), 'W')
+                        )
+                    ]),
+                    new Entity.Step([
+                        new Entity.StepUnit(
+                            currentState.pawns[0],
+                            new Entity.StepUnitData(0, 3),
+                            new Order.Stand(new Position(8, 7), 'E', [currentState.pawns[1]._id])
+                        ),
+                        new Entity.StepUnit(
+                            currentState.pawns[1],
+                            new Entity.StepUnitData(0, 2),
+                            new Order.Move(new Position(9, 7), 'W', { entity: currentState.pawns[0]._id, dodge: false })
+                        )
+                    ])
                 ]
             );
-            currentState.resolveManager.processStep(0).then((res) => {
-            }).then((res) => {
-
-            }, (res) => {
+            currentState.resolveManager.processStep(0).then(() => {
+            }).then(() => {
                 testStepResolution(0, {x: 8, y: 8}, 3, 4, 'E');
                 testStepResolution(1, {x: 10, y: 8}, 3, 4, 'W');
-                currentState.resolveManager.processStep(1).then((res) => {
-
-                }, (res) => {
-                    testStepResolution(0, {x: 8, y: 7}, 2, 4, 'E');
-                    testStepResolution(1, {x: 10, y: 7}, 2, 4, 'W');
-                    currentState.resolveManager.processStep(2).then((res) => {
-
-                    }, (res) => {
-                        testStepResolution(0, {x: 8, y: 7}, 0, 4, 'E');
-                        testStepResolution(1, {x: 9, y: 7}, 1, 2, 'W');
-                        currentState.resolveManager.processStep(3).then((res) => {
-
-                        }, (res) => {
-                            testStepResolution(0, {x: 8, y: 7}, 0, 3, 'E');
-                            testStepResolution(1, {x: 9, y: 7}, 0, 2, 'W');
-                            done();
-                        });
-                    });
-                });
+                return currentState.resolveManager.processStep(1);
+            }).then(() => {
+                testStepResolution(0, {x: 8, y: 7}, 2, 4, 'E');
+                testStepResolution(1, {x: 10, y: 7}, 2, 4, 'W');
+                return currentState.resolveManager.processStep(2);
+            }).then(() => {
+                testStepResolution(0, {x: 8, y: 7}, 0, 4, 'E');
+                testStepResolution(1, {x: 9, y: 7}, 1, 2, 'W');
+                return currentState.resolveManager.processStep(3);
+            }).then(() => {
+                testStepResolution(0, {x: 8, y: 7}, 0, 3, 'E');
+                testStepResolution(1, {x: 9, y: 7}, 0, 2, 'W');
+                done();
             });
         });
     });

@@ -74,7 +74,7 @@ module TacticArena {
                                 }
                             }
                         }
-                        //self.game.uiManager.endOrderPhase();
+                        //Action.ConfirmOrder.process();
                     }
                 );
                 this.game.pathfinder.calculate();

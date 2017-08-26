@@ -23,6 +23,13 @@ module TacticArena.State {
             this.load.image('modal-close', 'assets/images/modal-close.png');
             this.load.image('menu-icon', 'assets/images/menu_icon.png');
 
+            this.load.image('icon-wait', 'assets/images/ui/icons/wait.png');
+            this.load.image('button-bg', 'assets/images/ui/button.png');
+            this.load.image('button-confirm', 'assets/images/ui/button-confirm.png');
+            this.load.image('button-cancel', 'assets/images/ui/button-cancel.png');
+            this.load.image('border', 'assets/images/ui/border.png');
+            this.load.image('vertical-border', 'assets/images/ui/vertical-border.png');
+
             let icons = ['arrow-east', 'arrow-north', 'arrow-south', 'arrow-west', 'cancel', 'compass', 'fire', 'next', 'pause', 'play', 'previous', 'slash', 'submit', 'wait', 'walk', 'wind'];
             icons.forEach(function(icon) {
                 self.load.image('icon-' + icon, 'assets/images/icons/icon-' + icon + '.png');

@@ -53,7 +53,7 @@ module TacticArena.State {
             this.worldGroup.add(this.uiGroup);
 
             this.worldGroup.scale.set(this.getScaleRatio());
-            console.log(this.getScaleRatio());
+            //console.log(this.getScaleRatio());
 
             this.pawns = [];
 

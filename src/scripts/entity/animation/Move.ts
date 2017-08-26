@@ -11,10 +11,9 @@ module TacticArena.Animation {
 
         get():Promise<any> {
             return this.pawn.moveTo(this.position.x, this.position.y, null, this.animate).then((res) => {
+                console.log(this.direction);
                 if(this.direction) {
-                    new Animation.Stand(this.pawn, this.order, this.position).get().then((res) => {
-                        return true;
-                    });
+                    return new Animation.Stand(this.pawn, this.order, this.position).get();
                 } else {
                     return res;
                 }

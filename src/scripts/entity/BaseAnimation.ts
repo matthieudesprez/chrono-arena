@@ -17,13 +17,9 @@ module TacticArena {
         handleBackward(animation:Promise<any>):Promise<any> {
             let result;
             if(this.position.x != this.order.position.x || this.position.y != this.order.position.y) {
-                result = this.pawn.moveTo(this.order.position.x, this.order.position.y, null, false).then((res) => {
-                    return true;
-                });
+                result = this.pawn.moveTo(this.order.position.x, this.order.position.y, null, false);
                 result.then((res) => {
-                    animation.then((res) => {
-                        return true;
-                    });
+                    return animation;
                 });
             } else {
                 result = animation;

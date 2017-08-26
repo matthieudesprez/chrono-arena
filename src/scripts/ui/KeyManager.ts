@@ -70,7 +70,7 @@ module TacticArena.UI {
             if(uiManager.game.resolveManager.active && !uiManager.game.resolveManager.processing) {
                 uiManager.timeUI.goBackward();
             } else if (!uiManager.game.process) {
-                uiManager.directionUI.changeDirection('W');
+                Action.ChangeDirection.process(uiManager.game, 'W');
             }
         }
         rightKeyPressed(self, uiManager) {
@@ -78,19 +78,19 @@ module TacticArena.UI {
             if(uiManager.game.resolveManager.active && !uiManager.game.resolveManager.processing) {
                 uiManager.timeUI.goForward();
             } else if (!uiManager.game.process) {
-                uiManager.directionUI.changeDirection('E');
+                Action.ChangeDirection.process(uiManager.game, 'E');
             }
         }
         upKeyPressed(self, uiManager) {
             if(uiManager.process) return false;
             if (!uiManager.game.process) {
-                uiManager.directionUI.changeDirection('N');
+                Action.ChangeDirection.process(uiManager.game, 'N');
             }
         }
         downKeyPressed(self, uiManager) {
             if(uiManager.process) return false;
             if (!uiManager.game.process) {
-                uiManager.directionUI.changeDirection('S');
+                Action.ChangeDirection.process(uiManager.game, 'S');
             }
         }
 
@@ -104,12 +104,12 @@ module TacticArena.UI {
                 uiManager.game.isPaused = false;
                 uiManager.timeUI.goForward();
             } else if (!uiManager.game.process) {
-                uiManager.endOrderPhase();
+                Action.ConfirmOrder.process(uiManager.game);
             }
         }
 
         backKeyPressed(self, uiManager) {
-            uiManager.cancelAction();
+            Action.Cancel.process(uiManager.game);
         }
 
         pauseResolve(self, uiManager) {

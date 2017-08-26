@@ -9,5 +9,12 @@ module TacticArena.Entity.Skill {
             this.icon = this.state.make.sprite(0, 0, 'icon-wait');
             this.minCost = 1;
         }
+
+        order() {
+            let position = this.pawn.getProjectionOrReal().getPosition();
+            this.state.orderManager.add('stand', this.pawn, position.x, position.y, this.pawn.getProjectionOrReal().getDirection());
+            this.pawn.setAp(this.pawn.getAp() - 1);
+            this.state.signalManager.onActionPlayed.dispatch(this.pawn);
+        }
     }
 }
