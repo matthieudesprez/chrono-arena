@@ -2,8 +2,6 @@ module TacticArena.UI {
     export class UIManager {
         game;
         element;
-        timeUI;
-        timelineUI;
         pawnsinfosUI;
         keyManager;
         ordersnotificationsUI;
@@ -13,6 +11,7 @@ module TacticArena.UI {
         process;
         actionMenu;
         topMenu;
+        timelineMenu;
 
         constructor(game) {
             var self = this;
@@ -21,10 +20,9 @@ module TacticArena.UI {
             this.element = $('#content');
 
             this.actionMenu = null;
+            this.timelineMenu = null;
             this.topMenu = new UI.TopMenu(this.game);
 
-            this.timeUI = new UI.Time(this);
-            this.timelineUI = new UI.TimeLine(this);
             this.pawnsinfosUI = new UI.PawnsInfos(this);
             this.keyManager = new UI.KeyManager(this);
             this.ordersnotificationsUI = new UI.OrdersNotifications(this);
@@ -40,33 +38,34 @@ module TacticArena.UI {
             if(first) {
                 this.game.orderManager.orders = [];
             }
-            this.game.turnManager.init(pawn, first).then((data) => {
+            this.game.turnManager.init(pawn, first).then( data => {
                 if(first) {
                     this.turnIndicatorUI.write(this.game.turnManager.currentTurnIndex + 1);
-                    this.transitionUI.show('Phase de commandement').then( (res) => {
-                        return true;
-                    });
+                    return this.transitionUI.show('Phase de commandement');
                 }
+                return true;
+            }).then( res => {
                 this.game.signalManager.turnInitialized.dispatch(pawn);
             });
         }
 
         initResolvePhase(steps) {
-            this.ingamemenuUI.close();
             this.game.resolveManager.init(steps);
             this.transitionUI.show('Phase de Résolution').then((res) => {
                 return true;
-            }).then((res) => {
-                this.pawnsinfosUI.selectAll();
-                this.game.logManager.add(steps);
-                this.timelineUI.build(<any>steps.length).then((res) => {
-                    this.game.resolveManager.processSteps(0);
-                });
+            }).then( res => {
+                this.timelineMenu = new TimelineMenu(this.game);
+                return this.timelineMenu.init(<any>steps.length);
+            }).then( res => {
+                console.log('oki');
+                this.game.resolveManager.processSteps(0);
             });
         }
 
         isOver() {
-            return (this.actionMenu && this.actionMenu.isOver) || this.topMenu.isOver;
+            return (this.actionMenu && this.actionMenu.isOver) ||
+                (this.timelineMenu && this.timelineMenu.isOver) ||
+                this.topMenu.isOver;
         }
     }
 }

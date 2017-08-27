@@ -24,6 +24,7 @@ module TacticArena {
          * Call processStep
          */
         processSteps(index, animate:boolean = true, backward:boolean = false) {
+            console.log('processSteps');
             this.processing = true;
             this.active = true;
             let self = this;
@@ -47,6 +48,8 @@ module TacticArena {
          */
         processStep(index:number, animate:boolean = true, backward:boolean = false):Promise<any> {
             if (index >= this.steps.length) return Promise.resolve(true);
+
+            console.log(index);
 
             let self = this;
             this.setCurrentIndex(index);

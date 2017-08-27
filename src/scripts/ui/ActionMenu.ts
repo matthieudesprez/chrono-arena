@@ -40,7 +40,7 @@ module TacticArena.UI {
             this.mainGroup.add(verticalBorder);
             this.mainGroup.add(avatar);
             this.mainGroup.x = 0;
-            this.mainGroup.y = window.innerHeight / this.game.getScaleRatio()  - 96;
+            this.mainGroup.y = Math.max(512, window.innerHeight / this.game.getScaleRatio()  - 96);
 
             let text = this.game.add.text(0, 5, pawn._name, {
                 font: '20px Iceland',
@@ -54,7 +54,7 @@ module TacticArena.UI {
 
             this.mainGroup.add(new Bar(this.game, {
                 x: 110,
-                y: 15,
+                y: 10,
                 width: barWidth,
                 height: 15,
                 text: true,
@@ -70,7 +70,7 @@ module TacticArena.UI {
 
             this.mainGroup.add(new Bar(this.game, {
                 x: 120 + barWidth,
-                y: 15,
+                y: 10,
                 width: barWidth,
                 height: 15,
                 text: true,
@@ -112,7 +112,7 @@ module TacticArena.UI {
             });
 
             this.skillsGroup.x = 110;
-            this.skillsGroup.y = 35;
+            this.skillsGroup.y = 30;
 
             let buttonConfirm = self.game.make.sprite(self.game.world.width - 37 - self.skillsGroup.position.x, 5, 'button-confirm');
             buttonConfirm.anchor.set(0);

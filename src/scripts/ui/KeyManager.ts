@@ -68,15 +68,16 @@ module TacticArena.UI {
        leftKeyPressed(self, uiManager) {
            if(uiManager.process) return false;
             if(uiManager.game.resolveManager.active && !uiManager.game.resolveManager.processing) {
-                uiManager.timeUI.goBackward();
+                Action.Timeline.GoBackward.process(uiManager.game);
             } else if (!uiManager.game.process) {
                 Action.ChangeDirection.process(uiManager.game, 'W');
             }
         }
         rightKeyPressed(self, uiManager) {
+            console.log(uiManager.process, uiManager.game.resolveManager.processing, uiManager.game.resolveManager.active);
             if(uiManager.process) return false;
             if(uiManager.game.resolveManager.active && !uiManager.game.resolveManager.processing) {
-                uiManager.timeUI.goForward();
+                Action.Timeline.GoForward.process(uiManager.game);
             } else if (!uiManager.game.process) {
                 Action.ChangeDirection.process(uiManager.game, 'E');
             }
@@ -102,7 +103,7 @@ module TacticArena.UI {
             if(uiManager.game.resolveManager.active && !uiManager.game.resolveManager.processing) {
                 uiManager.process = true;
                 uiManager.game.isPaused = false;
-                uiManager.timeUI.goForward();
+                Action.Timeline.GoForward.process(uiManager.game);
             } else if (!uiManager.game.process) {
                 Action.ConfirmOrder.process(uiManager.game);
             }
@@ -113,7 +114,7 @@ module TacticArena.UI {
         }
 
         pauseResolve(self, uiManager) {
-            uiManager.timeUI.togglePause();
+            Action.Timeline.TogglePause.process(uiManager.game);
         }
 
         pKeyPress(self, uiManager) {

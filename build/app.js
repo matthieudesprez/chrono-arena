@@ -915,6 +915,7 @@ var TacticArena;
             var _this = this;
             if (animate === void 0) { animate = true; }
             if (backward === void 0) { backward = false; }
+            console.log('processSteps');
             this.processing = true;
             this.active = true;
             var self = this;
@@ -938,6 +939,7 @@ var TacticArena;
             if (backward === void 0) { backward = false; }
             if (index >= this.steps.length)
                 return Promise.resolve(true);
+            console.log(index);
             var self = this;
             this.setCurrentIndex(index);
             var previousStep = index > 0 ? this.steps[index - 1] : null;
@@ -1202,7 +1204,9 @@ var TacticArena;
             });
             this.stepResolutionIndexChange.add(function (stepIndex) {
                 //self.game.uiManager.notificationsUI.update(stepIndex);
-                self.game.uiManager.timelineUI.update(stepIndex);
+                if (self.game.uiManager.timelineMenu) {
+                    self.game.uiManager.timelineMenu.update(stepIndex);
+                }
             });
             this.onTurnEnded.add(function (activePawn) {
                 self.game.uiManager.ordersnotificationsUI.clean();
@@ -1238,6 +1242,7 @@ var TacticArena;
             });
             this.onProcessedOrders.add(function (steps) {
                 self.game.uiManager.initResolvePhase(steps);
+                self.game.logManager.add(steps);
             });
         };
         return SignalManager;
@@ -3853,8 +3858,16 @@ var TacticArena;
                 this.load.image('button-bg', 'assets/images/ui/button.png');
                 this.load.image('button-confirm', 'assets/images/ui/button-confirm.png');
                 this.load.image('button-cancel', 'assets/images/ui/button-cancel.png');
+                this.load.image('button-next', 'assets/images/ui/button-next.png');
+                this.load.image('button-previous', 'assets/images/ui/button-previous.png');
                 this.load.image('border', 'assets/images/ui/border.png');
                 this.load.image('vertical-border', 'assets/images/ui/vertical-border.png');
+                this.load.image('step', 'assets/images/ui/step.png');
+                this.load.image('step-active', 'assets/images/ui/step-active.png');
+                this.load.image('step-first', 'assets/images/ui/step-first.png');
+                this.load.image('step-join', 'assets/images/ui/step-join.png');
+                this.load.image('step-last', 'assets/images/ui/step-last.png');
+                this.load.image('step-old', 'assets/images/ui/step-old.png');
                 var icons = ['arrow-east', 'arrow-north', 'arrow-south', 'arrow-west', 'cancel', 'compass', 'fire', 'next', 'pause', 'play', 'previous', 'slash', 'submit', 'wait', 'walk', 'wind'];
                 icons.forEach(function (icon) {
                     self.load.image('icon-' + icon, 'assets/images/icons/icon-' + icon + '.png');
@@ -5821,7 +5834,7 @@ var TacticArena;
                 this.mainGroup.add(verticalBorder);
                 this.mainGroup.add(avatar);
                 this.mainGroup.x = 0;
-                this.mainGroup.y = window.innerHeight / this.game.getScaleRatio() - 96;
+                this.mainGroup.y = Math.max(512, window.innerHeight / this.game.getScaleRatio() - 96);
                 var text = this.game.add.text(0, 5, pawn._name, {
                     font: '20px Iceland',
                     fill: '#ffffff',
@@ -5832,7 +5845,7 @@ var TacticArena;
                 var barWidth = this.game.world.width / 2 - 64;
                 this.mainGroup.add(new UI.Bar(this.game, {
                     x: 110,
-                    y: 15,
+                    y: 10,
                     width: barWidth,
                     height: 15,
                     text: true,
@@ -5847,7 +5860,7 @@ var TacticArena;
                 }));
                 this.mainGroup.add(new UI.Bar(this.game, {
                     x: 120 + barWidth,
-                    y: 15,
+                    y: 10,
                     width: barWidth,
                     height: 15,
                     text: true,
@@ -5886,7 +5899,7 @@ var TacticArena;
                     text.setTextBounds(offsetX, 8, 83, 20);
                 });
                 this.skillsGroup.x = 110;
-                this.skillsGroup.y = 35;
+                this.skillsGroup.y = 30;
                 var buttonConfirm = self.game.make.sprite(self.game.world.width - 37 - self.skillsGroup.position.x, 5, 'button-confirm');
                 buttonConfirm.anchor.set(0);
                 self.skillsGroup.add(buttonConfirm);
@@ -6665,17 +6678,18 @@ var TacticArena;
                 if (uiManager.process)
                     return false;
                 if (uiManager.game.resolveManager.active && !uiManager.game.resolveManager.processing) {
-                    uiManager.timeUI.goBackward();
+                    TacticArena.Action.Timeline.GoBackward.process(uiManager.game);
                 }
                 else if (!uiManager.game.process) {
                     TacticArena.Action.ChangeDirection.process(uiManager.game, 'W');
                 }
             };
             KeyManager.prototype.rightKeyPressed = function (self, uiManager) {
+                console.log(uiManager.process, uiManager.game.resolveManager.processing, uiManager.game.resolveManager.active);
                 if (uiManager.process)
                     return false;
                 if (uiManager.game.resolveManager.active && !uiManager.game.resolveManager.processing) {
-                    uiManager.timeUI.goForward();
+                    TacticArena.Action.Timeline.GoForward.process(uiManager.game);
                 }
                 else if (!uiManager.game.process) {
                     TacticArena.Action.ChangeDirection.process(uiManager.game, 'E');
@@ -6703,7 +6717,7 @@ var TacticArena;
                 if (uiManager.game.resolveManager.active && !uiManager.game.resolveManager.processing) {
                     uiManager.process = true;
                     uiManager.game.isPaused = false;
-                    uiManager.timeUI.goForward();
+                    TacticArena.Action.Timeline.GoForward.process(uiManager.game);
                 }
                 else if (!uiManager.game.process) {
                     TacticArena.Action.ConfirmOrder.process(uiManager.game);
@@ -6713,7 +6727,7 @@ var TacticArena;
                 TacticArena.Action.Cancel.process(uiManager.game);
             };
             KeyManager.prototype.pauseResolve = function (self, uiManager) {
-                uiManager.timeUI.togglePause();
+                TacticArena.Action.Timeline.TogglePause.process(uiManager.game);
             };
             KeyManager.prototype.pKeyPress = function (self, uiManager) {
                 if (self.altKey) {
@@ -7235,179 +7249,135 @@ var TacticArena;
 (function (TacticArena) {
     var UI;
     (function (UI) {
-        var Time = (function () {
-            function Time(menu) {
+        var TimelineMenu = (function () {
+            function TimelineMenu(game) {
                 var self = this;
-                this.menu = menu;
-                //this.menu.element.append('<ul class="ui-menu ui-time-menu"><li class="pause"></li><li class="play"></li></ul>');
-                this.element = this.menu.element.find('.ui-time-menu');
-                this.element.find('.pause').on('click', function () {
-                    self.pause();
-                });
-                this.element.find('.play').on('click', function () {
-                    self.deselectAll();
-                    self.select('play');
-                    self.menu.game.isPaused = false;
-                    self.goForward();
-                });
-                this.pause();
+                this.isOver = false;
+                this.game = game;
+                this.mainGroup = this.game.add.group();
+                this.timelineGroup = this.game.add.group();
+                var bmd = this.game.add.bitmapData(this.game.world.width, 96);
+                bmd.ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+                bmd.ctx.beginPath();
+                bmd.ctx.rect(0, 0, this.game.world.width, 96);
+                bmd.ctx.fill();
+                bmd.update();
+                var bgSprite = this.game.make.sprite(0, 0, bmd);
+                bgSprite.anchor.set(0);
+                bgSprite.inputEnabled = true;
+                bgSprite.events.onInputOver.add(this.over, this);
+                bgSprite.events.onInputOut.add(this.out, this);
+                var border = this.game.make.sprite(0, 0, 'border');
+                border.anchor.set(0);
+                this.mainGroup.add(bgSprite);
+                this.mainGroup.add(border);
+                this.mainGroup.x = 0;
+                this.mainGroup.y = Math.max(512, window.innerHeight / this.game.getScaleRatio() - 96);
+                this.game.uiGroup.add(this.mainGroup);
             }
-            Time.prototype.goForward = function () {
-                if (this.menu.game.resolveManager.active && !this.menu.game.resolveManager.processing) {
-                    var nextIndex = this.menu.game.resolveManager.currentIndex + 1;
-                    if (nextIndex >= this.menu.game.resolveManager.steps.length) {
-                        this.menu.game.isPaused = false;
-                    }
-                    this.menu.game.resolveManager.processSteps(nextIndex);
-                }
-            };
-            Time.prototype.pause = function () {
-                this.deselectAll();
-                this.select('pause');
-                this.menu.game.isPaused = true;
-            };
-            Time.prototype.goBackward = function () {
-                if (this.menu.game.resolveManager.active && !this.menu.game.resolveManager.processing) {
-                    this.pause();
-                    var previousIndex = this.menu.game.resolveManager.currentIndex - 1;
-                    if (previousIndex >= 0) {
-                        this.menu.game.resolveManager.processSteps(previousIndex, true, true);
-                    }
-                }
-            };
-            Time.prototype.togglePause = function () {
-                if (this.menu.game.isPaused) {
-                    this.element.find('.play').trigger('click');
-                }
-                else {
-                    this.pause();
-                }
-            };
-            Time.prototype.deselectAll = function () {
-                this.element.find('li').removeClass('selected');
-            };
-            Time.prototype.select = function (name) {
-                this.element.find('.' + name).addClass('selected');
-            };
-            Time.prototype.update = function () {
-                if (this.menu.game.isPaused) {
-                    this.deselectAll();
-                    this.select('pause');
-                }
-                else {
-                    this.deselectAll();
-                    this.select('play');
-                }
-            };
-            Time.prototype.updatePauseFromSelected = function () {
-                this.menu.game.isPaused = this.element.find('.pause').hasClass('selected');
-            };
-            return Time;
-        }());
-        UI.Time = Time;
-    })(UI = TacticArena.UI || (TacticArena.UI = {}));
-})(TacticArena || (TacticArena = {}));
-var TacticArena;
-(function (TacticArena) {
-    var UI;
-    (function (UI) {
-        var TimeLine = (function () {
-            function TimeLine(menu) {
-                var self = this;
-                this.menu = menu;
-                this.menu.element.append('<div class="ui-timeline-container"></div>');
-                this.container = this.menu.element.find('.ui-timeline-container');
-                this.container.append('<ul class="ui-timeline-menu"></ul>');
-                this.container.append('<a class="prev inactive"><</a><a class="next">></a>');
-                this.element = this.menu.element.find('.ui-timeline-menu');
-                //this.build(4);
-                this.container.find('.prev').on('click', function () {
-                    self.menu.timeUI.goBackward();
-                });
-                this.container.find('.next').on('click', function () {
-                    self.menu.timeUI.goForward();
-                });
-            }
-            TimeLine.prototype.deselectAll = function () {
-                this.element.find('li').removeClass('selected').removeClass('previous');
-            };
-            TimeLine.prototype.select = function (query) {
-                this.element.find(query).addClass('selected');
-            };
-            TimeLine.prototype.clean = function () {
-                var self = this;
-                this.container.fadeOut(500, function () {
-                    self.container.find('.prev, .next').css('opacity', '0');
-                    self.element.html('');
-                });
-            };
-            TimeLine.prototype.update = function (index) {
-                this.deselectAll();
-                this.select('[timeline-index=' + index + ']');
-                for (var i = index - 1; i >= 0; i--) {
-                    this.element.find('[timeline-index=' + i + ']').addClass('previous');
-                }
-                if (index == 0) {
-                    this.container.find('.prev').css('opacity', '0.2');
-                }
-                else {
-                    this.container.find('.prev').css('opacity', '1');
-                }
-                if (index == this.menu.game.resolveManager.steps.length - 1) {
-                    this.container.find('.next').html('Confirm');
-                }
-                else {
-                    this.container.find('.next').html('>');
-                }
-            };
-            TimeLine.prototype.build = function (length) {
+            TimelineMenu.prototype.init = function (steps_number) {
                 var _this = this;
+                this.steps_number = steps_number;
                 return new Promise(function (resolve, reject) {
                     var self = _this;
-                    var timeline = '';
-                    for (var i = 0; i < length; i++) {
-                        timeline += '<li timeline-index="' + i + '" class="timeline-item"><div class="line"></div><div class="square">' + i + '</div></li>';
-                    }
-                    _this.element.html(timeline);
-                    _this.element.find('.timeline-item').on('click', function () {
-                        var index = parseInt($(this).attr('timeline-index'));
-                        if (index != self.menu.game.resolveManager.currentIndex) {
-                            self.menu.timeUI.pause();
-                            self.menu.game.resolveManager.processSteps(index, false, index < self.menu.game.resolveManager.currentIndex);
+                    _this.stepsColors = [];
+                    for (var i = 0; i < _this.steps_number; i++) {
+                        var key = 'step';
+                        if (i == 0) {
+                            key = 'step-first';
                         }
-                    });
-                    $('.timeline-item .square').css('opacity', '0');
-                    $('.timeline-item .line').css('width', '0px');
-                    $('.ui-timeline-container .prev, .ui-timeline-container .next').css('opacity', '0');
-                    _this.container.show();
-                    _this.display($('.timeline-item')).then(function () {
-                        resolve(true);
-                    });
+                        else if (i == _this.steps_number - 1) {
+                            key = 'step-last';
+                        }
+                        var stepGroup = _this.game.add.group();
+                        var step = self.game.make.sprite(0, 0, key);
+                        step.anchor.set(0);
+                        step.inputEnabled = true;
+                        step.events.onInputDown.add(_this.goToStep, _this, 0, i);
+                        stepGroup.add(step);
+                        stepGroup.x = i * 36;
+                        stepGroup.y = 0;
+                        _this.stepsColors.push(stepGroup.add(_this.game.add.group())); // pour gérer la couleur au dessus
+                        _this.timelineGroup.add(stepGroup);
+                        if (i < _this.steps_number - 1) {
+                            var join = self.game.make.sprite(i * 36 + 14, 3, 'step-join');
+                            join.anchor.set(0);
+                            _this.timelineGroup.add(join);
+                        }
+                    }
+                    _this.timelineGroup.scale.setTo(1.5, 1.5);
+                    console.log(_this.mainGroup.width, _this.timelineGroup.width);
+                    _this.timelineGroup.x = _this.game.world.width / 2 - _this.timelineGroup.width / 2;
+                    _this.timelineGroup.y = _this.mainGroup.height / 2 - _this.timelineGroup.height / 2;
+                    _this.mainGroup.add(_this.timelineGroup);
+                    var buttonPrevious = self.game.make.sprite(0, _this.mainGroup.height / 2 - 23, 'button-previous');
+                    buttonPrevious.anchor.set(0);
+                    var buttonNext = self.game.make.sprite(_this.game.world.width - 37, _this.mainGroup.height / 2 - 23, 'button-next');
+                    buttonNext.anchor.set(0);
+                    buttonPrevious.inputEnabled = true;
+                    buttonPrevious.events.onInputDown.add(_this.previous, _this);
+                    buttonNext.inputEnabled = true;
+                    buttonNext.events.onInputDown.add(_this.next, _this);
+                    _this.mainGroup.add(buttonPrevious);
+                    _this.mainGroup.add(buttonNext);
+                    resolve(true);
                 });
             };
-            TimeLine.prototype.display = function (elements) {
-                var _this = this;
-                return new Promise(function (resolve, reject) {
-                    if (elements.length > 0) {
-                        var self_2 = _this;
-                        $(elements[0]).find('.line').animate({ width: '91px' }, 200, function () {
-                            $(elements[0]).find('.square').animate({ opacity: 1 }, 100, function () {
-                                self_2.display(elements.slice(1)).then(function () {
-                                    resolve(true);
-                                });
-                            });
-                        });
+            TimelineMenu.prototype.update = function (current) {
+                var self = this;
+                this.stepsColors.forEach(function (stepColor, index) {
+                    console.log(stepColor, current, index);
+                    stepColor.removeAll(true);
+                    if (index > current) {
+                        return;
                     }
-                    else {
-                        $('.ui-timeline-container .prev').css('opacity', '0.2');
-                        $('.ui-timeline-container .next').css('opacity', '1');
-                        resolve(true);
-                    }
+                    var key = (index < current) ? 'step-old' : 'step-active';
+                    var color = self.game.make.sprite(3, 3, key);
+                    color.anchor.set(0);
+                    stepColor.update();
+                    console.log(stepColor.add(color));
                 });
+                //this.deselectAll();
+                //this.select('[timeline-index=' + index + ']');
+                //for(var i = index - 1; i >= 0; i--) {
+                //    this.element.find('[timeline-index=' + i + ']').addClass('previous');
+                //}
+                //
+                //if(index == 0) {
+                //    this.container.find('.prev').css('opacity', '0.2');
+                //} else {
+                //    this.container.find('.prev').css('opacity', '1');
+                //}
+                //if(index == this.menu.game.resolveManager.steps.length - 1) {
+                //    this.container.find('.next').html('Confirm');
+                //} else {
+                //    this.container.find('.next').html('>');
+                //}
             };
-            return TimeLine;
+            TimelineMenu.prototype.clean = function () {
+                this.mainGroup.destroy();
+            };
+            TimelineMenu.prototype.over = function () {
+                this.isOver = true;
+            };
+            TimelineMenu.prototype.out = function () {
+                this.isOver = false;
+            };
+            TimelineMenu.prototype.next = function () {
+                TacticArena.Action.Timeline.GoForward.process(this.game);
+            };
+            TimelineMenu.prototype.previous = function () {
+                TacticArena.Action.Timeline.GoBackward.process(this.game);
+            };
+            TimelineMenu.prototype.goToStep = function (clickedSprite, pointer, index) {
+                if (index != this.game.resolveManager.currentIndex) {
+                    this.game.isPaused = true;
+                    this.game.resolveManager.processSteps(index, false, index < this.game.resolveManager.currentIndex);
+                }
+            };
+            return TimelineMenu;
         }());
-        UI.TimeLine = TimeLine;
+        UI.TimelineMenu = TimelineMenu;
     })(UI = TacticArena.UI || (TacticArena.UI = {}));
 })(TacticArena || (TacticArena = {}));
 var TacticArena;
@@ -7526,9 +7496,8 @@ var TacticArena;
                 this.game = game;
                 this.element = $('#content');
                 this.actionMenu = null;
+                this.timelineMenu = null;
                 this.topMenu = new UI.TopMenu(this.game);
-                this.timeUI = new UI.Time(this);
-                this.timelineUI = new UI.TimeLine(this);
                 this.pawnsinfosUI = new UI.PawnsInfos(this);
                 this.keyManager = new UI.KeyManager(this);
                 this.ordersnotificationsUI = new UI.OrdersNotifications(this);
@@ -7545,29 +7514,30 @@ var TacticArena;
                 this.game.turnManager.init(pawn, first).then(function (data) {
                     if (first) {
                         _this.turnIndicatorUI.write(_this.game.turnManager.currentTurnIndex + 1);
-                        _this.transitionUI.show('Phase de commandement').then(function (res) {
-                            return true;
-                        });
+                        return _this.transitionUI.show('Phase de commandement');
                     }
+                    return true;
+                }).then(function (res) {
                     _this.game.signalManager.turnInitialized.dispatch(pawn);
                 });
             };
             UIManager.prototype.initResolvePhase = function (steps) {
                 var _this = this;
-                this.ingamemenuUI.close();
                 this.game.resolveManager.init(steps);
                 this.transitionUI.show('Phase de Résolution').then(function (res) {
                     return true;
                 }).then(function (res) {
-                    _this.pawnsinfosUI.selectAll();
-                    _this.game.logManager.add(steps);
-                    _this.timelineUI.build(steps.length).then(function (res) {
-                        _this.game.resolveManager.processSteps(0);
-                    });
+                    _this.timelineMenu = new UI.TimelineMenu(_this.game);
+                    return _this.timelineMenu.init(steps.length);
+                }).then(function (res) {
+                    console.log('oki');
+                    _this.game.resolveManager.processSteps(0);
                 });
             };
             UIManager.prototype.isOver = function () {
-                return (this.actionMenu && this.actionMenu.isOver) || this.topMenu.isOver;
+                return (this.actionMenu && this.actionMenu.isOver) ||
+                    (this.timelineMenu && this.timelineMenu.isOver) ||
+                    this.topMenu.isOver;
             };
             return UIManager;
         }());
@@ -7701,8 +7671,7 @@ var TacticArena;
                 //setTimeout(function() {
                 //state.uiManager.notificationsUI.clean();
                 //}, 500);
-                state.uiManager.timelineUI.clean();
-                state.uiManager.timeUI.updatePauseFromSelected();
+                state.uiManager.timelineMenu.clean();
                 if (state.isOver()) {
                     var msg = state.teams[state.playerTeam] ? 'You win' : 'You lose';
                     state.uiManager.ingamemenuUI.gameOver(msg);
@@ -7715,6 +7684,85 @@ var TacticArena;
             return ConfirmResolve;
         }(TacticArena.BaseAction));
         Action.ConfirmResolve = ConfirmResolve;
+    })(Action = TacticArena.Action || (TacticArena.Action = {}));
+})(TacticArena || (TacticArena = {}));
+var TacticArena;
+(function (TacticArena) {
+    var Action;
+    (function (Action) {
+        var Timeline;
+        (function (Timeline) {
+            var GoBackward = (function (_super) {
+                __extends(GoBackward, _super);
+                function GoBackward() {
+                    return _super.call(this, 'go backward') || this;
+                }
+                GoBackward.process = function (state) {
+                    if (state.resolveManager.active && !state.resolveManager.processing) {
+                        state.isPaused = true;
+                        var previousIndex = state.resolveManager.currentIndex - 1;
+                        if (previousIndex >= 0) {
+                            state.resolveManager.processSteps(previousIndex, true, true);
+                        }
+                    }
+                };
+                return GoBackward;
+            }(TacticArena.BaseAction));
+            Timeline.GoBackward = GoBackward;
+        })(Timeline = Action.Timeline || (Action.Timeline = {}));
+    })(Action = TacticArena.Action || (TacticArena.Action = {}));
+})(TacticArena || (TacticArena = {}));
+var TacticArena;
+(function (TacticArena) {
+    var Action;
+    (function (Action) {
+        var Timeline;
+        (function (Timeline) {
+            var GoForward = (function (_super) {
+                __extends(GoForward, _super);
+                function GoForward() {
+                    return _super.call(this, 'go forward') || this;
+                }
+                GoForward.process = function (state) {
+                    console.log('ok');
+                    if (state.resolveManager.active && !state.resolveManager.processing) {
+                        var nextIndex = state.resolveManager.currentIndex + 1;
+                        if (nextIndex >= state.resolveManager.steps.length) {
+                            state.isPaused = false;
+                        }
+                        state.resolveManager.processSteps(nextIndex);
+                    }
+                };
+                return GoForward;
+            }(TacticArena.BaseAction));
+            Timeline.GoForward = GoForward;
+        })(Timeline = Action.Timeline || (Action.Timeline = {}));
+    })(Action = TacticArena.Action || (TacticArena.Action = {}));
+})(TacticArena || (TacticArena = {}));
+var TacticArena;
+(function (TacticArena) {
+    var Action;
+    (function (Action) {
+        var Timeline;
+        (function (Timeline) {
+            var TogglePause = (function (_super) {
+                __extends(TogglePause, _super);
+                function TogglePause() {
+                    return _super.call(this, 'toggle pause') || this;
+                }
+                TogglePause.process = function (state) {
+                    if (state.isPaused) {
+                        state.isPaused = false;
+                        Timeline.GoForward.process(state);
+                    }
+                    else {
+                        state.isPaused = true;
+                    }
+                };
+                return TogglePause;
+            }(TacticArena.BaseAction));
+            Timeline.TogglePause = TogglePause;
+        })(Timeline = Action.Timeline || (Action.Timeline = {}));
     })(Action = TacticArena.Action || (TacticArena.Action = {}));
 })(TacticArena || (TacticArena = {}));
 var TacticArena;

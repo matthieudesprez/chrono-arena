@@ -77,7 +77,9 @@ module TacticArena {
 
             this.stepResolutionIndexChange.add(function(stepIndex) {
                 //self.game.uiManager.notificationsUI.update(stepIndex);
-                self.game.uiManager.timelineUI.update(stepIndex);
+                if (self.game.uiManager.timelineMenu) {
+                    self.game.uiManager.timelineMenu.update(stepIndex);
+                }
             });
 
             this.onTurnEnded.add(function(activePawn) {
@@ -121,6 +123,7 @@ module TacticArena {
 
             this.onProcessedOrders.add(function(steps) {
                 self.game.uiManager.initResolvePhase(steps);
+                self.game.logManager.add(steps);
             });
         }
     }

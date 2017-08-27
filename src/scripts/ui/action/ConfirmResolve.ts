@@ -13,8 +13,7 @@ module TacticArena.Action {
             //setTimeout(function() {
                 //state.uiManager.notificationsUI.clean();
             //}, 500);
-            state.uiManager.timelineUI.clean();
-            state.uiManager.timeUI.updatePauseFromSelected();
+            state.uiManager.timelineMenu.clean();
             if(state.isOver()) {
                 let msg = state.teams[state.playerTeam] ? 'You win' : 'You lose';
                 state.uiManager.ingamemenuUI.gameOver(msg);
