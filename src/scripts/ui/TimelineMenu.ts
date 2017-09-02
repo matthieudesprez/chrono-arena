@@ -72,11 +72,9 @@ module TacticArena.UI {
                 }
 
                 this.timelineGroup.scale.setTo(1.5, 1.5);
-                console.log(this.mainGroup.width, this.timelineGroup.width);
                 this.timelineGroup.x = this.game.world.width / 2 - this.timelineGroup.width / 2;
                 this.timelineGroup.y = this.mainGroup.height / 2 - this.timelineGroup.height / 2;
                 this.mainGroup.add(this.timelineGroup);
-
 
                 let buttonPrevious = self.game.make.sprite(0, this.mainGroup.height / 2 - 23, 'button-previous');
                 buttonPrevious.anchor.set(0);
@@ -108,29 +106,11 @@ module TacticArena.UI {
                 stepColor.update();
                 console.log(stepColor.add(color));
             });
-
-            //this.deselectAll();
-            //this.select('[timeline-index=' + index + ']');
-            //for(var i = index - 1; i >= 0; i--) {
-            //    this.element.find('[timeline-index=' + i + ']').addClass('previous');
-            //}
-            //
-            //if(index == 0) {
-            //    this.container.find('.prev').css('opacity', '0.2');
-            //} else {
-            //    this.container.find('.prev').css('opacity', '1');
-            //}
-            //if(index == this.menu.game.resolveManager.steps.length - 1) {
-            //    this.container.find('.next').html('Confirm');
-            //} else {
-            //    this.container.find('.next').html('>');
-            //}
         }
 
         clean () {
             this.mainGroup.destroy();
         }
-
 
         over() {
             this.isOver = true;

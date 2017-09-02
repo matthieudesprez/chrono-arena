@@ -7,7 +7,7 @@ module TacticArena.Entity {
         description;
         icon;
         minCost;
-        selected;
+        range;
 
         constructor(state, pawn) {
             this.state = state;
@@ -17,18 +17,30 @@ module TacticArena.Entity {
             this.description = '';
             this.icon = null;
             this.minCost = 0;
-            this.selected = false;
+            this.range = 0;
         }
 
         canOrder() {
-            return this.selected && this.pawn.getAp() >= this.minCost;
+            return this.pawn.getAp() >= this.minCost;
         }
 
         updateUI() {
 
         }
 
+        cleanUI() {
+
+        }
+
         order() {
+
+        }
+
+        onDeselect() {
+
+        }
+
+        onSelect() {
 
         }
     }

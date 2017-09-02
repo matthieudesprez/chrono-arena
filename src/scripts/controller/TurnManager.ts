@@ -14,10 +14,10 @@ module TacticArena {
         init(pawn, firstTurnCall = false) {
             return new Promise((resolve, reject) => {
 				if(firstTurnCall) {
-					for (var i = 0; i < this.game.pawns.length; i++) {
-						this.game.pawns[i].setAp(3);
-						this.game.pawns[i].ghost = null;
-					}
+					this.game.pawns.forEach((pawn) => {
+						pawn.setAp(pawn._apMax);
+						pawn.ghost = null;
+					});
 					this.currentTurnIndex++;
 					this.playedPawns = [];
 				}

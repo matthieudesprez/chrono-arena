@@ -106,7 +106,7 @@ module TacticArena {
         }
 
         addDecorations() {
-            this.decorationLayer3 = this.game.mapGroup.add(this.map.createLayer('Decorations3'));
+            this.decorationLayer3 = this.game.mapDecorationGroup.add(this.map.createLayer('Decorations3'));
         }
 
         addDecorationsFromData(data) {
@@ -207,8 +207,13 @@ module TacticArena {
             let p = position ? position : pawn.getPosition();
             let d = direction ? direction : pawn.getDirection();
             let path = [];
-            for (var x = 0; x < this.map.width; x++) {
-                for (var y = 0; y < this.map.height; y++) {
+            let startCornerX = Math.max(0, p.x - distance);
+            let endCornerX = Math.min(this.map.width, p.x + distance);
+            let startCornerY = Math.max(0, p.y - distance);
+            let endCornerY = Math.min(this.map.height, p.y + distance);
+            console.log(startCornerX, endCornerX, startCornerY, endCornerY);
+            for (var x = startCornerX; x <= endCornerX; x++) {
+                for (var y = startCornerY; y <= endCornerY; y++) {
                     if (
                         (d == 'W' && p.x > x && p.y == y ||
                         d == 'E' && p.x < x && p.y == y ||
@@ -221,6 +226,15 @@ module TacticArena {
                 }
             }
             return path;
+        }
+
+        getLinearPathsAllDirections(pawn, distance) {
+            return {
+                W: this.getLinearPath(pawn, distance, 'W'),
+                E: this.getLinearPath(pawn, distance, 'E'),
+                N: this.getLinearPath(pawn, distance, 'N'),
+                S: this.getLinearPath(pawn, distance, 'S')
+            };
         }
 
         getFrontTile(pawn, direction = null, position = null) {
@@ -291,7 +305,6 @@ module TacticArena {
                 group.add(tileSprite);
             }
         }
-
 
         clearPath(group) {
             group.removeAll();

@@ -290,9 +290,5 @@ module TacticArena.Entity {
                 spriteClass: this.spriteClass
             }
         }
-
-        getSelectedSkill() {
-            return this.skills.filter( skill => { return skill.selected; })[0];
-        }
     }
 }

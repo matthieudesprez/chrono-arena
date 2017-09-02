@@ -22,12 +22,10 @@ module TacticArena.UI {
         }
 
         over() {
-            console.log('over');
             this.isOver = true;
         }
 
         out() {
-            console.log('out');
             this.isOver = false;
         }
     }

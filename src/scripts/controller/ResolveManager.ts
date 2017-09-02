@@ -57,6 +57,7 @@ module TacticArena {
 
             var promisesOrders = [];
             this.steps[index].stepUnits.forEach( (stepUnit, i) => {
+                console.log(stepUnit);
                 stepUnit.pawn.setAp(stepUnit.data.ap); // met à jour le nombre d'AP du pawn
                 promisesOrders.push(stepUnit.order.resolve(stepUnit.pawn, stepUnit.data, previousStep, animate, backward, i, self.game)); //lance l'animation
             });

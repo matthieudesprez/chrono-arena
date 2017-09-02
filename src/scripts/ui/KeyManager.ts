@@ -96,10 +96,6 @@ module TacticArena.UI {
         }
 
         enterKeyPressed(self, uiManager) {
-            if(uiManager.process) {
-                uiManager.transitionUI.hide(200);
-                return false;
-            }
             if(uiManager.game.resolveManager.active && !uiManager.game.resolveManager.processing) {
                 uiManager.process = true;
                 uiManager.game.isPaused = false;

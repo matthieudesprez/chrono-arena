@@ -33,6 +33,7 @@ module TacticArena.UI {
         updateValue(value) {
             this.setValue(value);
             this.updateText();
+            this.setPercent((this.value / this.config.max) * 100);
         }
 
         setupConfiguration(providedConfig) {

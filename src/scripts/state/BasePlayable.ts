@@ -4,6 +4,7 @@ module TacticArena.State {
         pawns: Entity.Pawn[];
         worldGroup: Phaser.Group;
         mapGroup: Phaser.Group;
+        mapDecorationGroup: Phaser.Group;
         pathTilesGroup: Phaser.Group;
         pathOrdersTilesGroup: Phaser.Group;
         pawnsSpritesGroup: Phaser.Group;
@@ -49,6 +50,9 @@ module TacticArena.State {
             this.pawnsSpritesGroup = this.add.group();
             this.worldGroup.add(this.pawnsSpritesGroup);
 
+            this.mapDecorationGroup = this.add.group();
+            this.worldGroup.add(this.mapDecorationGroup);
+
             this.uiGroup = this.add.group();
             this.worldGroup.add(this.uiGroup);
 
@@ -75,8 +79,8 @@ module TacticArena.State {
         }
 
         update() {
-            this.pathTilesGroup.sort('y', Phaser.Group.SORT_ASCENDING);
-            this.uiSpritesGroup.sort('y', Phaser.Group.SORT_ASCENDING);
+            //this.pathTilesGroup.sort('y', Phaser.Group.SORT_ASCENDING);
+            //this.uiSpritesGroup.sort('y', Phaser.Group.SORT_ASCENDING);
             this.pawnsSpritesGroup.sort('y', Phaser.Group.SORT_ASCENDING);
         }
 
@@ -86,6 +90,7 @@ module TacticArena.State {
         }
 
         addDecorations() {
+            console.log('adddecorations');
             this.stageManager.addDecorations();
         }
 

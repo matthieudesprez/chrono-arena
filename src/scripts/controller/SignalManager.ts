@@ -37,11 +37,13 @@ module TacticArena {
             var self = this;
 
             this.onApChange.add(function() {
-                self.game.uiManager.pawnsinfosUI.updateInfos();
+                //TODO ui ap en live durant résolution
+                //self.game.uiManager.pawnsinfosUI.updateInfos();
             });
 
             this.onHpChange.add(function(pawn) {
-                self.game.uiManager.pawnsinfosUI.updateInfos();
+                //TODO ui hp en live durant résolution
+                //self.game.uiManager.pawnsinfosUI.updateInfos();
                 self.game.stageManager.handleTile(pawn);
             });
 
@@ -91,8 +93,9 @@ module TacticArena {
             });
 
             this.onActivePawnChange.add(function(activePawn) {
-                //self.game.uiManager.ordersnotificationsUI.clean();
-                //self.game.uiManager.ordersnotificationsUI.update(self.game.orderManager.getOrders(activePawn._id));
+                console.log(activePawn);
+                self.game.uiManager.ordersnotificationsUI.clean();
+                self.game.uiManager.ordersnotificationsUI.update(self.game.orderManager.getOrders(activePawn._id));
                 //self.game.uiManager.pawnsinfosUI.select(activePawn._id);
                 //self.game.uiManager.actionUI.update(activePawn.getAp());
                 //self.game.uiManager.actionUI.select('walk');

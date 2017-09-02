@@ -24,7 +24,7 @@ module TacticArena.Entity.Skill {
                 this.state.stageManager.clearPath(this.state.pathTilesGroup);
                 if (isInPath) {
                     this.state.stageManager.showPath(path, this.state.pathTilesGroup, 0xfc000f);
-                    this.state.uiManager.pawnsinfosUI.showApCost(this.pawn, 1);
+                    this.state.uiManager.actionMenu.showApCost(this.pawn, 1);
                 }
             } else {
                 this.state.stageManager.clearHelp();
@@ -48,7 +48,7 @@ module TacticArena.Entity.Skill {
                     this.pawn.getProjectionOrReal().getSprite().stand();
                     this.pawn.getProjectionOrReal().getSprite().attack();
                     this.pawn.setAp(this.pawn.getAp() - 1);
-                    this.state.uiManager.this.pawnsinfosUI.showApCost(this.pawn, 0);
+                    this.state.uiManager.actionMenu.showApCost(this.pawn, 0);
                     this.state.orderManager.add(this.pawn, new Order.Slash(position, this.pawn.getProjectionOrReal().getDirection()));
                     this.state.stageManager.clearHelp();
                     this.state.signalManager.onActionPlayed.dispatch(this.pawn);

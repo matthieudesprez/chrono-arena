@@ -5,6 +5,10 @@ module TacticArena.UI {
         skillsGroup;
         isOver;
         savedDirection;
+        apBar;
+        cancelButton;
+        confirmButton;
+        skills;
 
         constructor(game, pawn) {
             let self = this;
@@ -26,21 +30,22 @@ module TacticArena.UI {
             bgSprite.events.onInputOver.add(this.over, this);
             bgSprite.events.onInputOut.add(this.out, this);
 
-            let border = this.game.make.sprite(0, 0, 'border');
-            border.anchor.set(0);
+            let frame = this.game.make.sprite(0, 0, 'frame');
+            frame.anchor.set(0);
 
-            let verticalBorder = this.game.make.sprite(100, 4, 'vertical-border');
+            let verticalBorder = this.game.make.sprite(100, 6, 'vertical-border');
             verticalBorder.anchor.set(0);
+            verticalBorder.height = 128;
 
             let avatar = this.game.make.sprite(0, 0, 'avatar-' + pawn.type);
             avatar.anchor.set(0);
 
             this.mainGroup.add(bgSprite);
-            this.mainGroup.add(border);
+            this.mainGroup.add(frame);
             this.mainGroup.add(verticalBorder);
             this.mainGroup.add(avatar);
             this.mainGroup.x = 0;
-            this.mainGroup.y = Math.max(512, window.innerHeight / this.game.getScaleRatio()  - 96);
+            this.mainGroup.y = Math.max(512, window.innerHeight / this.game.getScaleRatio() - 96);
 
             let text = this.game.add.text(0, 5, pawn._name, {
                 font: '20px Iceland',
@@ -63,13 +68,13 @@ module TacticArena.UI {
                 max: pawn._hpMax,
                 value: pawn.getHp(),
                 textColor: '#ffffff',
-                bg: { color: '#808080' },
-                bar: { color: '#8b0000' },
+                bg: {color: '#808080'},
+                bar: {color: '#8b0000'},
                 textStyle: '16px Iceland'
             }));
 
-            this.mainGroup.add(new Bar(this.game, {
-                x: 120 + barWidth,
+            this.apBar = new Bar(this.game, {
+                x: 118 + barWidth,
                 y: 10,
                 width: barWidth,
                 height: 15,
@@ -79,28 +84,39 @@ module TacticArena.UI {
                 max: pawn._apMax,
                 value: pawn.getAp(),
                 textColor: '#ffffff',
-                bg: { color: '#267ac9' },
-                bar: { color: '#1E90FF' },
+                bg: {color: '#267ac9'},
+                bar: {color: '#1E90FF'},
                 textStyle: '16px Iceland'
-            }));
+            });
+            this.mainGroup.add(this.apBar);
 
             this.skillsGroup = this.game.add.group();
             let offsetX = 47;
-            pawn.skills.forEach(function(skill, index) {
-                console.log(skill);
-                let buttonX = index > 0 ? index * 83 : 0;
+            this.skills = [];
+            pawn.skills.forEach(function (skill, index) {
+                let actionMenuSkill = {
+                    selected: false,
+                    sprite: null,
+                    skill: skill
+                };
+
+                let buttonX = index > 0 ? index * 82 : 0;
                 let buttonY = 0;
-                if(index > 0) {
+                if (index > 0) {
                     buttonX += index * 10;
                 }
-                if(index >= 2) {
+                if (index >= 2) {
                     buttonY = 30;
-                    buttonX -= 2 * 10 + 2 * 83;
+                    buttonX -= 2 * 10 + 2 * 82;
                 }
-                let button = self.game.make.sprite(offsetX + buttonX, buttonY, 'button-bg');
-                button.anchor.set(0);
-                button.scale.setTo(1.5, 1.5);
+                let button = self.game.make.sprite(offsetX + buttonX + 41, buttonY + 13, 'button-bg');
+                button.anchor.set(0.5);
                 self.skillsGroup.add(button);
+
+                button.inputEnabled = true;
+                button.events.onInputOver.add(self.buttonOver, self);
+                button.events.onInputOut.add(self.buttonOut, self);
+                button.events.onInputDown.add(self.skillSelect, self, 0, actionMenuSkill);
 
                 let text = self.game.add.text(buttonX, buttonY, skill.name, {
                     font: '10px Press Start 2P',
@@ -109,21 +125,36 @@ module TacticArena.UI {
                     boundsAlignV: 'top',
                 }, self.skillsGroup);
                 text.setTextBounds(offsetX, 8, 83, 20);
+
+                actionMenuSkill.sprite = button;
+                self.skills.push(actionMenuSkill);
             });
 
             this.skillsGroup.x = 110;
             this.skillsGroup.y = 30;
 
-            let buttonConfirm = self.game.make.sprite(self.game.world.width - 37 - self.skillsGroup.position.x, 5, 'button-confirm');
-            buttonConfirm.anchor.set(0);
-            self.skillsGroup.add(buttonConfirm);
+            this.confirmButton = this.game.make.sprite(this.game.world.width - this.skillsGroup.position.x - 6, 28, 'button-confirm');
+            this.confirmButton.anchor.set(1, 0.5);
+            this.skillsGroup.add(this.confirmButton);
 
-            let buttonCancel = self.game.make.sprite(-5, 5, 'button-cancel');
-            buttonCancel.anchor.set(0);
-            self.skillsGroup.add(buttonCancel);
+            this.confirmButton.inputEnabled = true;
+            this.confirmButton.events.onInputOver.add(this.buttonOver, this);
+            this.confirmButton.events.onInputOut.add(this.buttonOut, this);
+            this.confirmButton.events.onInputDown.add(this.confirm, this);
+
+            this.cancelButton = this.game.make.sprite(-3, 28, 'button-cancel');
+            this.cancelButton.anchor.set(0, 0.5);
+            this.skillsGroup.add(this.cancelButton);
+
+            this.cancelButton.inputEnabled = true;
+            this.cancelButton.events.onInputOver.add(this.buttonOver, this);
+            this.cancelButton.events.onInputOut.add(this.buttonOut, this);
+            this.cancelButton.events.onInputDown.add(this.cancel, this);
 
             this.mainGroup.add(this.skillsGroup);
             this.game.uiGroup.add(this.mainGroup);
+
+            this.selectDefaultSkill();
         }
 
         over() {
@@ -146,8 +177,59 @@ module TacticArena.UI {
             //select right direction icon
         }
 
-        clean () {
+        clean() {
             this.mainGroup.destroy();
+        }
+
+        showApCost(pawn, apCost) {
+            let remainingAp = pawn.getAp() - apCost;
+            let currentPercent = (remainingAp / pawn._apMax) * 100;
+
+            this.apBar.updateValue(remainingAp);
+            this.apBar.setPercent(currentPercent);
+        }
+
+        cancel() {
+            Action.Cancel.process(this.game);
+        }
+
+        confirm() {
+            Action.ConfirmOrder.process(this.game);
+        }
+
+        buttonOver(buttonSprite) {
+            this.isOver = true;
+            buttonSprite.scale.setTo(1.1, 1.1);
+        }
+
+        buttonOut(buttonSprite) {
+            this.isOver = false;
+            buttonSprite.scale.setTo(1, 1);
+        }
+
+        skillDeselectAll() {
+            this.skills.forEach(function (actionMenuSkill) {
+                if(actionMenuSkill.selected) {
+                    actionMenuSkill.sprite.loadTexture('button-bg', 0, false);
+                    actionMenuSkill.skill.onDeselect();
+                    actionMenuSkill.selected = false;
+                }
+            });
+        }
+
+        skillSelect(sprite, pointer, actionMenuSkill) {
+            this.skillDeselectAll();
+            actionMenuSkill.sprite.loadTexture('button-selected-bg', 0, false);
+            actionMenuSkill.skill.onSelect();
+            actionMenuSkill.selected = true;
+        }
+
+        getSelectedSkill() {
+            return this.skills.filter(skill => {return skill.selected;})[0].skill;
+        }
+
+        selectDefaultSkill() {
+            this.skillSelect(null, null, this.skills[1]);
         }
     }
 }

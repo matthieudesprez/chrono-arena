@@ -8,8 +8,6 @@ module TacticArena.Entity.Skill {
             this.description = 'Cost: 1 AP / tile; Hit: 50%';
             this.icon = this.state.make.sprite(0, 0, 'icon-walk');
             this.minCost = 1;
-            // TODO remove
-            this.selected = true;
         }
 
         updateUI(position?) {
@@ -17,9 +15,10 @@ module TacticArena.Entity.Skill {
                 this.state.stageManager.clearHelp();
                 this.state.stageManager.showPath(path, this.state.pathTilesGroup);
                 this.state.stageManager.showPossibleMove(this.pawn.getProjectionOrReal().getPosition(), this.pawn.getReal().getAp());
-                this.state.uiManager.pawnsinfosUI.showApCost(this.pawn, (<any>path).length);
+                this.state.uiManager.actionMenu.showApCost(this.pawn, (<any>path).length);
             }, (res) => {
                 this.state.stageManager.clearHelp();
+                this.state.uiManager.actionMenu.showApCost(this.pawn, 0);
             });
         }
         
@@ -38,6 +37,7 @@ module TacticArena.Entity.Skill {
                     }
                     this.state.process = false;
                     this.state.signalManager.onActionPlayed.dispatch(this.pawn);
+                    this.state.stageManager.clearHelp();
                 });
             }, (res) => {
 

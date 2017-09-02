@@ -20,11 +20,10 @@ module TacticArena.State {
                     this.aiManager = new AiManager(this, k);
                 }
                 if (p.faction == 'human') {
-                    let pawn = new Entity.Character.Ruairi(this, startPositions[k][0].x, startPositions[k][0].y, startPositions[k][0].d, this.getUniqueId(), isBot, k);
-                    this.pawns.push(pawn);
+                    this.pawns.push(new Entity.Character.Ruairi(this, startPositions[k][0].x, startPositions[k][0].y, startPositions[k][0].d, this.getUniqueId(), isBot, k));
                     //this.pawns.push(new Entity.Pawn(this, startPositions[k][1].x, startPositions[k][1].y, startPositions[k][1].d, 'amanda', this.getUniqueId(), isBot, k, this.generator.generate(), Entity.Sprite));
                 } else {
-                    this.pawns.push(new Entity.Pawn(this, startPositions[k][0].x, startPositions[k][0].y, startPositions[k][0].d, 'skeleton', this.getUniqueId(), isBot, k, this.generator.generate(), Entity.Sprite));
+                    this.pawns.push(new Entity.Character.Skeleton(this, startPositions[k][0].x, startPositions[k][0].y, startPositions[k][0].d, this.getUniqueId(), isBot, k));
                     //this.pawns.push(new Entity.Pawn(this, startPositions[k][1].x, startPositions[k][1].y, startPositions[k][1].d, 'skeleton', this.getUniqueId(), isBot, k, this.generator.generate(), Entity.Sprite));
                 }
             });

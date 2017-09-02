@@ -25,11 +25,13 @@ module TacticArena.State {
 
             this.load.image('icon-wait', 'assets/images/ui/icons/wait.png');
             this.load.image('button-bg', 'assets/images/ui/button.png');
+            this.load.image('button-selected-bg', 'assets/images/ui/button-selected.png');
             this.load.image('button-confirm', 'assets/images/ui/button-confirm.png');
             this.load.image('button-cancel', 'assets/images/ui/button-cancel.png');
             this.load.image('button-next', 'assets/images/ui/button-next.png');
             this.load.image('button-previous', 'assets/images/ui/button-previous.png');
             this.load.image('border', 'assets/images/ui/border.png');
+            this.load.image('frame', 'assets/images/ui/frame.png');
             this.load.image('vertical-border', 'assets/images/ui/vertical-border.png');
             this.load.image('step', 'assets/images/ui/step.png');
             this.load.image('step-active', 'assets/images/ui/step-active.png');
@@ -37,6 +39,10 @@ module TacticArena.State {
             this.load.image('step-join', 'assets/images/ui/step-join.png');
             this.load.image('step-last', 'assets/images/ui/step-last.png');
             this.load.image('step-old', 'assets/images/ui/step-old.png');
+
+            this.load.script('filter', 'https://cdn.rawgit.com/photonstorm/phaser/master/v2/filters/Pixelate.js');
+            this.load.script('BlurX', 'https://cdn.rawgit.com/photonstorm/phaser/master/v2/filters/BlurX.js');
+            this.load.script('BlurY', 'https://cdn.rawgit.com/photonstorm/phaser/master/v2/filters/BlurY.js');
 
             let icons = ['arrow-east', 'arrow-north', 'arrow-south', 'arrow-west', 'cancel', 'compass', 'fire', 'next', 'pause', 'play', 'previous', 'slash', 'submit', 'wait', 'walk', 'wind'];
             icons.forEach(function(icon) {

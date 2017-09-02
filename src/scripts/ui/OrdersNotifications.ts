@@ -20,7 +20,7 @@ module TacticArena.UI {
         clean() {
             //this.remove(this.element.find('div[class*="item-"]'));
             //this.element.html('');
-            //this.menu.game.stageManager.clearPath(this.menu.game.pathOrdersTilesGroup);
+            this.menu.game.stageManager.clearPath(this.menu.game.pathOrdersTilesGroup);
         }
 
         remove(elements) {
@@ -34,15 +34,20 @@ module TacticArena.UI {
         }
 
         update(orders) {
-            //if(orders.length > 0) {
-            //    for(var i = 0; i < orders.length; i++) {
-            //        if(this.element.find('.item-' + i).length == 0) {
-            //            this.add($('<div class="item-' + i + '" style="opacity:0; margin-right:-200px;">' + this.getMessage(orders[i]) + '</div>'));
-            //        }
-            //    }
-            //} else {
-            //    this.clean();
-            //}
+            if(orders.length > 0) {
+                orders.forEach((order) => {
+                    //if(this.element.find('.item-' + i).length == 0) {
+                    //    this.add($('<div class="item-' + i + '" style="opacity:0; margin-right:-200px;">' + this.getMessage(orders[i]) + '</div>'));
+                    //}
+
+                    let activePawn = this.menu.game.turnManager.getActivePawn();
+                    if(!this.menu.game.stageManager.equalPositions(activePawn.getPosition(), order.position)) {
+                        this.menu.game.stageManager.showPath([order.position], this.menu.game.pathOrdersTilesGroup, 0xffffff);
+                    }
+                });
+            } else {
+                this.clean();
+            }
         }
 
         add(elements) {
@@ -57,9 +62,6 @@ module TacticArena.UI {
 
         getMessage(order) {
             let activePawn = this.menu.game.turnManager.getActivePawn();
-            if(!this.menu.game.stageManager.equalPositions(activePawn.getPosition(), order)) {
-                this.menu.game.stageManager.showPath([order], this.menu.game.pathOrdersTilesGroup, 0xffffff);
-            }
             //let msg = '<b>' + activePawn._name + '</b>';
             //if (order.action == 'move') {
             //    msg += ' se déplacera en ' + order.x + ', ' + order.y + ', orienté vers le ' + this.directionMapping[order.direction];

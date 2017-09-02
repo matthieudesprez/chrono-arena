@@ -10,9 +10,10 @@ module TacticArena.Action {
                 var activePawn = state.turnManager.getActivePawn();
                 activePawn.show();
                 activePawn.destroyProjection();
-                activePawn.setAp(3);
+                activePawn.setAp(activePawn._apMax);
                 activePawn.getProjectionOrReal().faceDirection(state.uiManager.actionMenu.savedDirection);
                 state.uiManager.actionMenu.initDirection(state.uiManager.actionMenu.savedDirection);
+                state.uiManager.actionMenu.selectDefaultSkill();
                 state.orderManager.removeEntityOrder(activePawn);
                 state.signalManager.onActionPlayed.dispatch(activePawn);
             }

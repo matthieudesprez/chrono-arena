@@ -13,9 +13,9 @@ module TacticArena.UI {
             this.game.worldGroup.add(this.marker);
 
             this.game.input.addMoveCallback(this.update, this);
-            this.game.input.mousePointer.leftButton.onDown.add(this.onGridLeftClick, this);
-            this.game.input.mousePointer.rightButton.onDown.add(this.onGridRightClick, this);
-            this.game.input.mouse.capture = true;
+            this.game.input.onDown.add(this.onGridLeftClick, this);
+            //this.game.input.onDown.add(this.onGridRightClick, this);
+            //this.game.input.pointer1.capture = true;
             $('canvas').bind('contextmenu', function(e){ return false; });
         }
 
@@ -50,9 +50,11 @@ module TacticArena.UI {
         update() {
             if(!this.game.process && !this.game.uiManager.isOver()) {
                 this.updateMarker();
-                let selectedSkill = this.game.turnManager.getActivePawn().getSelectedSkill();
-                if(selectedSkill && selectedSkill.canOrder()) {
+                let selectedSkill = this.game.uiManager.actionMenu.getSelectedSkill();
+                if(selectedSkill.canOrder()) {
                     selectedSkill.updateUI(this.getTilePositionFromMarkerPosition());
+                } else {
+                    selectedSkill.cleanUI();
                 }
             } else {
                 this.hide();
@@ -62,7 +64,7 @@ module TacticArena.UI {
         onGridLeftClick() {
             if (!this.game.process && !this.game.uiManager.isOver()) {
                 let activePawn = this.game.turnManager.getActivePawn();
-                let selectedSkill = activePawn.getSelectedSkill();
+                let selectedSkill = this.game.uiManager.actionMenu.getSelectedSkill();
                 let target = this.getTilePositionFromMarkerPosition();
 
                 console.log(selectedSkill);
