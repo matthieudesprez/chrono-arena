@@ -1,11 +1,10 @@
-module TacticArena.Entity {
+module TacticArena.Entity.Skill {
     export class BaseSkill {
         state;
         pawn;
         id;
         name;
         description;
-        icon;
         minCost;
         range;
 
@@ -15,7 +14,6 @@ module TacticArena.Entity {
             this.id = '';
             this.name = '';
             this.description = '';
-            this.icon = null;
             this.minCost = 0;
             this.range = 0;
         }
@@ -24,7 +22,7 @@ module TacticArena.Entity {
             return this.pawn.getAp() >= this.minCost;
         }
 
-        updateUI() {
+        updateUI(position) {
 
         }
 
@@ -32,7 +30,7 @@ module TacticArena.Entity {
 
         }
 
-        order() {
+        order(target) {
 
         }
 

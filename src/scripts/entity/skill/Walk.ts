@@ -1,16 +1,16 @@
+/// <reference path="BaseSkill.ts"/>
 module TacticArena.Entity.Skill {
-    export class Walk extends TacticArena.Entity.BaseSkill {
+    export class Walk extends TacticArena.Entity.Skill.BaseSkill {
 
         constructor(state, pawn) {
             super(state, pawn);
             this.id = 'walk';
             this.name = 'Walk';
             this.description = 'Cost: 1 AP / tile; Hit: 50%';
-            this.icon = this.state.make.sprite(0, 0, 'icon-walk');
             this.minCost = 1;
         }
 
-        updateUI(position?) {
+        updateUI(position) {
             this.state.stageManager.canMove(this.pawn.getProjectionOrReal(), position.x, position.y, this.pawn.getAp()).then((path) => {
                 this.state.stageManager.clearHelp();
                 this.state.stageManager.showPath(path, this.state.pathTilesGroup);
@@ -22,7 +22,7 @@ module TacticArena.Entity.Skill {
             });
         }
         
-        order(target?) {
+        order(target) {
             console.log(this.pawn);
             let distance = this.state.stageManager.getNbTilesBetween(target, this.pawn.getProjectionOrReal().getPosition());
             this.state.stageManager.canMove(this.pawn.getProjectionOrReal(), target.x, target.y, this.pawn.getAp()).then((path) => {

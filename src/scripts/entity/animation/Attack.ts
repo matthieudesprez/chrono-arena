@@ -12,7 +12,7 @@ module TacticArena.Animation {
         }
 
         get():Promise<any> {
-            let animation = this.pawn.attack(this.targets[0]).then((res) => {
+            let animation = this.pawn.attack(this.targets[0], this.order.direction).then((res) => {
                 return res;
             });
             return super.handleBackward(animation);

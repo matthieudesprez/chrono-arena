@@ -36,9 +36,14 @@ module TacticArena {
         init() {
             var self = this;
 
-            this.onApChange.add(function() {
-                //TODO ui ap en live durant résolution
-                //self.game.uiManager.pawnsinfosUI.updateInfos();
+            this.onApChange.add(function(pawn) {
+                if(self.game.resolveManager.active) {
+                    //TODO ui ap en live durant résolution
+                    //self.game.uiManager.pawnsinfosUI.updateInfos();
+                } else if (self.game.uiManager.actionMenu) {
+                    self.game.uiManager.actionMenu.showApCost(pawn, 0);
+                }
+
             });
 
             this.onHpChange.add(function(pawn) {
@@ -89,6 +94,7 @@ module TacticArena {
                 self.game.uiSpritesGroup.removeAll();
                 if(self.game.uiManager.actionMenu) {
                     self.game.uiManager.actionMenu.clean();
+                    self.game.uiManager.actionMenu = null;
                 }
             });
 

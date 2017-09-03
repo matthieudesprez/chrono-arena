@@ -51,10 +51,14 @@ module TacticArena.UI {
             if(!this.game.process && !this.game.uiManager.isOver()) {
                 this.updateMarker();
                 let selectedSkill = this.game.uiManager.actionMenu.getSelectedSkill();
-                if(selectedSkill.canOrder()) {
-                    selectedSkill.updateUI(this.getTilePositionFromMarkerPosition());
-                } else {
-                    selectedSkill.cleanUI();
+                try {
+                    if (selectedSkill.canOrder()) {
+                        selectedSkill.updateUI(this.getTilePositionFromMarkerPosition());
+                    } else {
+                        selectedSkill.cleanUI();
+                    }
+                } catch (TypeError) {
+                    //console.warn('no selected skill');
                 }
             } else {
                 this.hide();
@@ -63,11 +67,8 @@ module TacticArena.UI {
 
         onGridLeftClick() {
             if (!this.game.process && !this.game.uiManager.isOver()) {
-                let activePawn = this.game.turnManager.getActivePawn();
                 let selectedSkill = this.game.uiManager.actionMenu.getSelectedSkill();
                 let target = this.getTilePositionFromMarkerPosition();
-
-                console.log(selectedSkill);
                 if(selectedSkill) {
                     if(selectedSkill.canOrder()) {
                         selectedSkill.order(target);

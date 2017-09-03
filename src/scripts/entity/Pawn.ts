@@ -18,7 +18,7 @@ module TacticArena.Entity {
         spriteClass;
         skills;
 
-        constructor(game, x, y, ext, type, id, bot, team, name = "", spriteClass: typeof Entity.Sprite = Entity.Sprite) {
+        constructor(game, x, y, ext, type, id, bot, team, name = "", spriteClass:typeof Entity.Sprite = Entity.Sprite) {
             this.game = game;
             this._id = id;
             this._name = name;
@@ -28,7 +28,7 @@ module TacticArena.Entity {
             let tint = null; //team != this.game.playerTeam ? this.game.teamColors[team-1] : null;
             //TODO séparer pawn et sprite pour avoir des pawns serializable (sans le game de phaser)
             this.spriteClass = spriteClass;
-            if(type) {
+            if (type) {
                 this.sprite = new spriteClass(game, x, y, ext, type, this, 64, tint);
                 this.game.pawnsSpritesGroup.add(this.sprite);
                 this.sprite.stand();
@@ -46,7 +46,9 @@ module TacticArena.Entity {
         getReal() {
             return this._parent ? this._parent : this;
         }
-        getProjectionOrReal() {
+
+        getProjectionOrReal(createIfNotExists = false) {
+            if(createIfNotExists) { this.createProjection(); }
             return this.projection ? this.projection : this;
         }
 
@@ -57,22 +59,25 @@ module TacticArena.Entity {
             );
         }
 
-        attack(target?) {
+        attack(target?, direction?) {
             var that = this;
             return new Promise((resolve, reject) => {
-                this.sprite.attack(target, function() {
+                if(direction) {
+                    this.faceDirection(direction);
+                }
+                this.sprite.attack(target, function () {
                     resolve(true);
                     that.sprite.stand();
                 });
             });
         }
 
-        hurt(hp=1) {
+        hurt(hp = 1) {
             let self = this;
             self.hurting++;
             let timeOut = self.hurting * 300;
-            setTimeout( function() {
-                if(self.hurting == 1) {
+            setTimeout(function () {
+                if (self.hurting == 1) {
                     self.sprite.hurt();
                 }
                 self.destroyProjection();
@@ -95,19 +100,22 @@ module TacticArena.Entity {
             }, timeOut);
         }
 
-        halfcast() {
+        halfcast(direction?) {
+            if (direction) {
+                this.faceDirection(direction);
+            }
             this.sprite.halfcast();
         }
 
         cast(targets, direction) {
             var that = this;
             return new Promise((resolve, reject) => {
-                if(this.projection) {
+                if (this.projection) {
                     this.projection.hide();
                     this.show();
                 }
                 this.faceDirection(direction);
-                this.sprite.cast(targets, function() {
+                this.sprite.cast(targets, function () {
                     that.sprite.stand();
                     resolve(true);
                 });
@@ -117,12 +125,12 @@ module TacticArena.Entity {
         castTornado(targets, direction) {
             var that = this;
             return new Promise((resolve, reject) => {
-                if(this.projection) {
+                if (this.projection) {
                     this.projection.hide();
                     this.show();
                 }
                 this.faceDirection(direction);
-                this.sprite.castTornado(targets, function() {
+                this.sprite.castTornado(targets, function () {
                     that.sprite.stand();
                     resolve(true);
                 });
@@ -130,16 +138,18 @@ module TacticArena.Entity {
         }
 
         dodge() {
-            let label = this.game.add.text(20, 10, "miss", { font: '8px Press Start 2P', fill: "#ffffff" });
-            let t = this.game.add.tween(label).to({x: 20,y: -20, alpha: 0}, 1000, Phaser.Easing.Linear.None, true);
-            t.onComplete.add(function() { label.destroy(); }, this);
+            let label = this.game.add.text(20, 10, "miss", {font: '8px Press Start 2P', fill: "#ffffff"});
+            let t = this.game.add.tween(label).to({x: 20, y: -20, alpha: 0}, 1000, Phaser.Easing.Linear.None, true);
+            t.onComplete.add(function () {
+                label.destroy();
+            }, this);
             this.sprite.addChild(label);
         }
 
         blocked() {
-            let label = this.game.add.text(20, 10, "block", { font: '8px Press Start 2P', fill: "#ffffff" });
-            let t = this.game.add.tween(label).to({x: 20,y: -20, alpha: 0}, 1000, Phaser.Easing.Linear.None, true);
-            t.onComplete.add(function() {
+            let label = this.game.add.text(20, 10, "block", {font: '8px Press Start 2P', fill: "#ffffff"});
+            let t = this.game.add.tween(label).to({x: 20, y: -20, alpha: 0}, 1000, Phaser.Easing.Linear.None, true);
+            t.onComplete.add(function () {
                 label.destroy();
             }, this);
             this.sprite.addChild(label);
@@ -163,12 +173,17 @@ module TacticArena.Entity {
                 var tile = this.game.stageManager.map.layers[1].data[tile_y][tile_x];
                 var newX = tile.x * this.game.tileSize - this.sprite._size / 4;
                 var newY = tile.y * this.game.tileSize - this.sprite._size / 2;
-                if(animate) {
-                    if(faceDirection) { this.sprite.faceTo(newX, newY); }
-                    if(this.sprite.animations.currentAnim.name != 'walk' + this.sprite._ext) {
+                if (animate) {
+                    if (faceDirection) {
+                        this.sprite.faceTo(newX, newY);
+                    }
+                    if (this.sprite.animations.currentAnim.name != 'walk' + this.sprite._ext) {
                         this.sprite.walk();
                     }
-                    var t = this.game.add.tween(this.sprite).to({x: newX, y: newY}, this.sprite._speed, Phaser.Easing.Linear.None, true);
+                    var t = this.game.add.tween(this.sprite).to({
+                        x: newX,
+                        y: newY
+                    }, this.sprite._speed, Phaser.Easing.Linear.None, true);
                     t.onComplete.add(function () {
                         if (path != undefined && path.length > 0) {
                             this.moveTo(0, 0, path, animate, faceDirection).then((res) => {
@@ -205,17 +220,17 @@ module TacticArena.Entity {
         }
 
         destroyProjectionIfSamePosition() {
-            if(this.projection) {
+            if (this.projection) {
                 let p1 = this.getPosition();
                 let p2 = this.projection.getPosition();
-                if(p1.x == p2.x && p1.y == p2.y) {
+                if (p1.x == p2.x && p1.y == p2.y) {
                     this.destroyProjection();
                 }
             }
         }
 
         destroyProjection() {
-            if(this.projection) {
+            if (this.projection) {
                 this.projection.sprite.kill();
                 this.projection = null;
             }
@@ -225,7 +240,7 @@ module TacticArena.Entity {
         getDirection() {
             return this.sprite._ext;
         }
-        
+
         faceDirection(direction) {
             this.sprite._ext = direction;
             this.sprite.stand();
@@ -235,7 +250,7 @@ module TacticArena.Entity {
             this.sprite.alpha = 0;
         }
 
-        show(alpha=1) {
+        show(alpha = 1) {
             this.sprite.alpha = alpha;
         }
 
@@ -262,7 +277,7 @@ module TacticArena.Entity {
 
         setAp(ap) {
             this._ap = ap;
-            this.game.signalManager.onApChange.dispatch(this._ap);
+            this.game.signalManager.onApChange.dispatch(this);
         }
 
         getHp() {
@@ -270,7 +285,9 @@ module TacticArena.Entity {
         }
 
         setHp(hp, forceAnimation) {
-            if((this.isAlive() || forceAnimation) && hp <= 0) { this.sprite.die(); }
+            if ((this.isAlive() || forceAnimation) && hp <= 0) {
+                this.sprite.die();
+            }
             this._hp = hp;
             this.game.signalManager.onHpChange.dispatch(this);
         }

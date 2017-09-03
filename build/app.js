@@ -1170,9 +1170,14 @@ var TacticArena;
         }
         SignalManager.prototype.init = function () {
             var self = this;
-            this.onApChange.add(function () {
-                //TODO ui ap en live durant résolution
-                //self.game.uiManager.pawnsinfosUI.updateInfos();
+            this.onApChange.add(function (pawn) {
+                if (self.game.resolveManager.active) {
+                    //TODO ui ap en live durant résolution
+                    //self.game.uiManager.pawnsinfosUI.updateInfos();
+                }
+                else if (self.game.uiManager.actionMenu) {
+                    self.game.uiManager.actionMenu.showApCost(pawn, 0);
+                }
             });
             this.onHpChange.add(function (pawn) {
                 //TODO ui hp en live durant résolution
@@ -1216,6 +1221,7 @@ var TacticArena;
                 self.game.uiSpritesGroup.removeAll();
                 if (self.game.uiManager.actionMenu) {
                     self.game.uiManager.actionMenu.clean();
+                    self.game.uiManager.actionMenu = null;
                 }
             });
             this.onActivePawnChange.add(function (activePawn) {
@@ -1694,39 +1700,6 @@ var TacticArena;
 (function (TacticArena) {
     var Entity;
     (function (Entity) {
-        var BaseSkill = (function () {
-            function BaseSkill(state, pawn) {
-                this.state = state;
-                this.pawn = pawn;
-                this.id = '';
-                this.name = '';
-                this.description = '';
-                this.icon = null;
-                this.minCost = 0;
-                this.range = 0;
-            }
-            BaseSkill.prototype.canOrder = function () {
-                return this.pawn.getAp() >= this.minCost;
-            };
-            BaseSkill.prototype.updateUI = function () {
-            };
-            BaseSkill.prototype.cleanUI = function () {
-            };
-            BaseSkill.prototype.order = function () {
-            };
-            BaseSkill.prototype.onDeselect = function () {
-            };
-            BaseSkill.prototype.onSelect = function () {
-            };
-            return BaseSkill;
-        }());
-        Entity.BaseSkill = BaseSkill;
-    })(Entity = TacticArena.Entity || (TacticArena.Entity = {}));
-})(TacticArena || (TacticArena = {}));
-var TacticArena;
-(function (TacticArena) {
-    var Entity;
-    (function (Entity) {
         var Sprite = (function (_super) {
             __extends(Sprite, _super);
             function Sprite(game, x, y, ext, type, parent, size, tint) {
@@ -2149,16 +2122,23 @@ var TacticArena;
             Pawn.prototype.getReal = function () {
                 return this._parent ? this._parent : this;
             };
-            Pawn.prototype.getProjectionOrReal = function () {
+            Pawn.prototype.getProjectionOrReal = function (createIfNotExists) {
+                if (createIfNotExists === void 0) { createIfNotExists = false; }
+                if (createIfNotExists) {
+                    this.createProjection();
+                }
                 return this.projection ? this.projection : this;
             };
             Pawn.prototype.getPosition = function () {
                 return new TacticArena.Position((this.sprite.position.x + this.sprite._size / 4) / this.game.tileSize, (this.sprite.position.y + this.sprite._size / 2) / this.game.tileSize);
             };
-            Pawn.prototype.attack = function (target) {
+            Pawn.prototype.attack = function (target, direction) {
                 var _this = this;
                 var that = this;
                 return new Promise(function (resolve, reject) {
+                    if (direction) {
+                        _this.faceDirection(direction);
+                    }
                     _this.sprite.attack(target, function () {
                         resolve(true);
                         that.sprite.stand();
@@ -2193,7 +2173,10 @@ var TacticArena;
                     self.hurting--;
                 }, timeOut);
             };
-            Pawn.prototype.halfcast = function () {
+            Pawn.prototype.halfcast = function (direction) {
+                if (direction) {
+                    this.faceDirection(direction);
+                }
                 this.sprite.halfcast();
             };
             Pawn.prototype.cast = function (targets, direction) {
@@ -2229,7 +2212,9 @@ var TacticArena;
             Pawn.prototype.dodge = function () {
                 var label = this.game.add.text(20, 10, "miss", { font: '8px Press Start 2P', fill: "#ffffff" });
                 var t = this.game.add.tween(label).to({ x: 20, y: -20, alpha: 0 }, 1000, Phaser.Easing.Linear.None, true);
-                t.onComplete.add(function () { label.destroy(); }, this);
+                t.onComplete.add(function () {
+                    label.destroy();
+                }, this);
                 this.sprite.addChild(label);
             };
             Pawn.prototype.blocked = function () {
@@ -2269,7 +2254,10 @@ var TacticArena;
                         if (_this.sprite.animations.currentAnim.name != 'walk' + _this.sprite._ext) {
                             _this.sprite.walk();
                         }
-                        var t = _this.game.add.tween(_this.sprite).to({ x: newX, y: newY }, _this.sprite._speed, Phaser.Easing.Linear.None, true);
+                        var t = _this.game.add.tween(_this.sprite).to({
+                            x: newX,
+                            y: newY
+                        }, _this.sprite._speed, Phaser.Easing.Linear.None, true);
                         t.onComplete.add(function () {
                             if (path != undefined && path.length > 0) {
                                 this.moveTo(0, 0, path, animate, faceDirection).then(function (res) {
@@ -2340,7 +2328,7 @@ var TacticArena;
             };
             Pawn.prototype.setAp = function (ap) {
                 this._ap = ap;
-                this.game.signalManager.onApChange.dispatch(this._ap);
+                this.game.signalManager.onApChange.dispatch(this);
             };
             Pawn.prototype.getHp = function () {
                 return this._hp;
@@ -2486,7 +2474,7 @@ var TacticArena;
                 return _this;
             }
             Attack.prototype.get = function () {
-                var animation = this.pawn.attack(this.targets[0]).then(function (res) {
+                var animation = this.pawn.attack(this.targets[0], this.order.direction).then(function (res) {
                     return res;
                 });
                 return _super.prototype.handleBackward.call(this, animation);
@@ -2899,6 +2887,10 @@ var TacticArena;
                 }
                 return result;
             };
+            //TODO voir pour factoriser avec Attack
+            Slash.prototype.resolve = function (pawn, stepUnitData, previousStep, animate, backward, i, state) {
+                return new TacticArena.Animation.Attack(pawn, this, pawn.getPosition(), state).get();
+            };
             return Slash;
         }(Order.ReflexOrder));
         Order.Slash = Slash;
@@ -2988,20 +2980,50 @@ var TacticArena;
     (function (Entity) {
         var Skill;
         (function (Skill) {
-            var Fire = (function (_super) {
-                __extends(Fire, _super);
-                function Fire(state, pawn) {
+            var BaseSkill = (function () {
+                function BaseSkill(state, pawn) {
+                    this.state = state;
+                    this.pawn = pawn;
+                    this.id = '';
+                    this.name = '';
+                    this.description = '';
+                    this.minCost = 0;
+                    this.range = 0;
+                }
+                BaseSkill.prototype.canOrder = function () {
+                    return this.pawn.getAp() >= this.minCost;
+                };
+                BaseSkill.prototype.updateUI = function (position) {
+                };
+                BaseSkill.prototype.cleanUI = function () {
+                };
+                BaseSkill.prototype.order = function (target) {
+                };
+                BaseSkill.prototype.onDeselect = function () {
+                };
+                BaseSkill.prototype.onSelect = function () {
+                };
+                return BaseSkill;
+            }());
+            Skill.BaseSkill = BaseSkill;
+        })(Skill = Entity.Skill || (Entity.Skill = {}));
+    })(Entity = TacticArena.Entity || (TacticArena.Entity = {}));
+})(TacticArena || (TacticArena = {}));
+/// <reference path="BaseSkill.ts"/>
+var TacticArena;
+(function (TacticArena) {
+    var Entity;
+    (function (Entity) {
+        var Skill;
+        (function (Skill) {
+            var LinearSkill = (function (_super) {
+                __extends(LinearSkill, _super);
+                function LinearSkill(state, pawn) {
                     var _this = _super.call(this, state, pawn) || this;
-                    _this.id = 'fire';
-                    _this.name = 'Fire';
-                    _this.description = 'Cost: 2 AP; Range 4; Hit: 100%';
-                    _this.icon = _this.state.make.sprite(0, 0, 'icon-fire');
-                    _this.minCost = 2;
-                    _this.range = 4;
                     _this.paths = null;
                     return _this;
                 }
-                Fire.prototype.onSelect = function () {
+                LinearSkill.prototype.onSelect = function () {
                     this.paths = this.state.stageManager.getLinearPathsAllDirections(this.pawn.getProjectionOrReal(), this.range);
                     var joinedPaths = [];
                     Object.entries(this.paths).forEach(function (_a) {
@@ -3010,13 +3032,13 @@ var TacticArena;
                     });
                     this.state.stageManager.showPossibleLinearTrajectories(joinedPaths);
                 };
-                Fire.prototype.onDeselect = function () {
+                LinearSkill.prototype.onDeselect = function () {
+                    this.cleanUI();
+                };
+                LinearSkill.prototype.cleanUI = function () {
                     this.state.stageManager.clearHelp();
                 };
-                Fire.prototype.cleanUI = function () {
-                    this.state.stageManager.clearHelp();
-                };
-                Fire.prototype.updateUI = function (position) {
+                LinearSkill.prototype.updateUI = function (position) {
                     var isInPath = false;
                     var pathDirection = null;
                     Object.entries(this.paths).forEach(function (_a) {
@@ -3030,51 +3052,80 @@ var TacticArena;
                     });
                     this.state.stageManager.clearPath(this.state.pathTilesGroup);
                     if (isInPath) {
-                        console.log('yeah');
                         this.state.stageManager.showPath(this.paths[pathDirection], this.state.pathTilesGroup, 0xfc000f);
-                        this.state.uiManager.actionMenu.showApCost(this.pawn, 2);
+                        this.state.uiManager.actionMenu.showApCost(this.pawn, this.minCost);
+                    }
+                    else {
+                        this.state.uiManager.actionMenu.showApCost(this.pawn, 0);
                     }
                 };
-                Fire.prototype.order = function (target) {
+                LinearSkill.prototype.getPathDirection = function (position, target) {
                     var _this = this;
-                    var position = this.pawn.getProjectionOrReal().getPosition();
-                    var distance = this.state.stageManager.getNbTilesBetween(target, this.pawn.getProjectionOrReal().getPosition());
-                    var isInPath = false;
-                    var pathDirection = null;
-                    if (distance <= this.range) {
-                        Object.entries(this.paths).forEach(function (_a) {
-                            var direction = _a[0], path = _a[1];
-                            //this.state.stageManager.showPossibleLinearTrajectories(path);
-                            var maxX = null;
-                            var maxY = null;
-                            for (var i = 0; i < path.length; i++) {
-                                if (path[i].x == target.x && path[i].y == target.y) {
-                                    isInPath = true;
-                                    pathDirection = direction;
-                                }
-                                if (_this.state.stageManager.getNbTilesBetween({ 'x': path[i].x, 'y': path[i].y }, position) == _this.range) {
-                                    maxX = path[i].x;
-                                    maxY = path[i].y;
-                                }
+                    var result = null;
+                    Object.entries(this.paths).forEach(function (_a) {
+                        var direction = _a[0], path = _a[1];
+                        var maxX = null;
+                        var maxY = null;
+                        for (var i = 0; i < path.length; i++) {
+                            if (path[i].x == target.x && path[i].y == target.y) {
+                                result = direction;
                             }
-                        });
+                            if (_this.state.stageManager.getNbTilesBetween({ 'x': path[i].x, 'y': path[i].y }, position) == _this.range) {
+                                maxX = path[i].x;
+                                maxY = path[i].y;
+                            }
+                        }
+                    });
+                    return result;
+                };
+                LinearSkill.prototype.onOrder = function (position, direction) {
+                };
+                LinearSkill.prototype.order = function (target) {
+                    var position = this.pawn.getProjectionOrReal().getPosition();
+                    if (this.state.stageManager.getNbTilesBetween(target, position) <= this.range) {
+                        var direction = this.getPathDirection(position, target);
+                        if (direction) {
+                            this.onOrder(position, direction);
+                            this.pawn.setAp(this.pawn.getAp() - this.minCost);
+                            this.state.signalManager.onActionPlayed.dispatch(this.pawn);
+                        }
                     }
-                    if (isInPath) {
-                        this.pawn.createProjection();
-                        this.pawn.getProjectionOrReal().faceDirection(pathDirection);
-                        this.pawn.getProjectionOrReal().halfcast();
-                        this.pawn.setAp(this.pawn.getAp() - 2);
-                        this.state.uiManager.actionMenu.showApCost(this.pawn, 0);
-                        this.state.orderManager.add(this.pawn, new TacticArena.Order.Fire(position, this.pawn.getProjectionOrReal().getDirection()));
-                        this.state.signalManager.onActionPlayed.dispatch(this.pawn);
-                    }
+                };
+                return LinearSkill;
+            }(TacticArena.Entity.Skill.BaseSkill));
+            Skill.LinearSkill = LinearSkill;
+        })(Skill = Entity.Skill || (Entity.Skill = {}));
+    })(Entity = TacticArena.Entity || (TacticArena.Entity = {}));
+})(TacticArena || (TacticArena = {}));
+/// <reference path="LinearSkill.ts"/>
+var TacticArena;
+(function (TacticArena) {
+    var Entity;
+    (function (Entity) {
+        var Skill;
+        (function (Skill) {
+            var Fire = (function (_super) {
+                __extends(Fire, _super);
+                function Fire(state, pawn) {
+                    var _this = _super.call(this, state, pawn) || this;
+                    _this.id = 'fire';
+                    _this.name = 'Fire';
+                    _this.description = 'Cost: 2 AP; Range 4; Hit: 100%';
+                    _this.minCost = 2;
+                    _this.range = 4;
+                    return _this;
+                }
+                Fire.prototype.onOrder = function (position, direction) {
+                    this.pawn.getProjectionOrReal(true).halfcast(direction);
+                    this.state.orderManager.add(this.pawn, new TacticArena.Order.Fire(position, direction));
                 };
                 return Fire;
-            }(TacticArena.Entity.BaseSkill));
+            }(TacticArena.Entity.Skill.LinearSkill));
             Skill.Fire = Fire;
         })(Skill = Entity.Skill || (Entity.Skill = {}));
     })(Entity = TacticArena.Entity || (TacticArena.Entity = {}));
 })(TacticArena || (TacticArena = {}));
+/// <reference path="BaseSkill.ts"/>
 var TacticArena;
 (function (TacticArena) {
     var Entity;
@@ -3088,61 +3139,22 @@ var TacticArena;
                     _this.id = 'slash';
                     _this.name = 'Slash';
                     _this.description = 'Cost: 1 AP; Range 1; Hit: 100%';
-                    _this.icon = _this.state.make.sprite(0, 0, 'icon-slash');
                     _this.minCost = 1;
+                    _this.range = 1;
                     return _this;
                 }
-                Slash.prototype.updateUI = function (position) {
-                    var distance = this.state.stageManager.getNbTilesBetween(position, this.pawn.getProjectionOrReal().getPosition());
-                    if (distance <= 2) {
-                        var path = this.state.stageManager.getFrontTile(this.pawn.getProjectionOrReal());
-                        this.state.stageManager.showPossibleLinearTrajectories(path);
-                        var isInPath = false;
-                        for (var i = 0; i < path.length; i++) {
-                            if (path[i].x == position.x && path[i].y == position.y) {
-                                isInPath = true;
-                            }
-                        }
-                        this.state.stageManager.clearPath(this.state.pathTilesGroup);
-                        if (isInPath) {
-                            this.state.stageManager.showPath(path, this.state.pathTilesGroup, 0xfc000f);
-                            this.state.uiManager.actionMenu.showApCost(this.pawn, 1);
-                        }
-                    }
-                    else {
-                        this.state.stageManager.clearHelp();
-                    }
-                };
-                Slash.prototype.order = function (target) {
-                    var position = this.pawn.getProjectionOrReal().getPosition();
-                    var distance = this.state.stageManager.getNbTilesBetween(target, this.pawn.getProjectionOrReal().getPosition());
-                    if (distance <= 1) {
-                        var path = this.state.stageManager.getFrontTile(this.pawn.getProjectionOrReal());
-                        this.state.stageManager.showPossibleLinearTrajectories(path);
-                        var isInPath = false;
-                        for (var i = 0; i < path.length; i++) {
-                            if (path[i].x == target.x && path[i].y == target.y) {
-                                isInPath = true;
-                            }
-                        }
-                        if (isInPath) {
-                            this.pawn.createProjection();
-                            this.pawn.getProjectionOrReal().getSprite().stand();
-                            this.pawn.getProjectionOrReal().getSprite().attack();
-                            this.pawn.setAp(this.pawn.getAp() - 1);
-                            this.state.uiManager.actionMenu.showApCost(this.pawn, 0);
-                            this.state.orderManager.add(this.pawn, new TacticArena.Order.Slash(position, this.pawn.getProjectionOrReal().getDirection()));
-                            this.state.stageManager.clearHelp();
-                            this.state.signalManager.onActionPlayed.dispatch(this.pawn);
-                        }
-                    }
+                Slash.prototype.onOrder = function (position, direction) {
+                    this.pawn.getProjectionOrReal(true).faceDirection(direction);
+                    this.pawn.getProjectionOrReal().getSprite().attack();
+                    this.state.orderManager.add(this.pawn, new TacticArena.Order.Slash(position, direction));
                 };
                 return Slash;
-            }(TacticArena.Entity.BaseSkill));
+            }(TacticArena.Entity.Skill.LinearSkill));
             Skill.Slash = Slash;
         })(Skill = Entity.Skill || (Entity.Skill = {}));
     })(Entity = TacticArena.Entity || (TacticArena.Entity = {}));
 })(TacticArena || (TacticArena = {}));
+/// <reference path="BaseSkill.ts"/>
 var TacticArena;
 (function (TacticArena) {
     var Entity;
@@ -3156,22 +3168,22 @@ var TacticArena;
                     _this.id = 'wait';
                     _this.name = 'Wait';
                     _this.description = 'Cost: 1 AP / tile; Hit: 50%';
-                    _this.icon = _this.state.make.sprite(0, 0, 'icon-wait');
                     _this.minCost = 1;
                     return _this;
                 }
-                Wait.prototype.order = function () {
+                Wait.prototype.order = function (target) {
                     var position = this.pawn.getProjectionOrReal().getPosition();
                     this.state.orderManager.add('stand', this.pawn, position.x, position.y, this.pawn.getProjectionOrReal().getDirection());
                     this.pawn.setAp(this.pawn.getAp() - 1);
                     this.state.signalManager.onActionPlayed.dispatch(this.pawn);
                 };
                 return Wait;
-            }(TacticArena.Entity.BaseSkill));
+            }(TacticArena.Entity.Skill.BaseSkill));
             Skill.Wait = Wait;
         })(Skill = Entity.Skill || (Entity.Skill = {}));
     })(Entity = TacticArena.Entity || (TacticArena.Entity = {}));
 })(TacticArena || (TacticArena = {}));
+/// <reference path="BaseSkill.ts"/>
 var TacticArena;
 (function (TacticArena) {
     var Entity;
@@ -3185,7 +3197,6 @@ var TacticArena;
                     _this.id = 'walk';
                     _this.name = 'Walk';
                     _this.description = 'Cost: 1 AP / tile; Hit: 50%';
-                    _this.icon = _this.state.make.sprite(0, 0, 'icon-walk');
                     _this.minCost = 1;
                     return _this;
                 }
@@ -3223,11 +3234,12 @@ var TacticArena;
                     });
                 };
                 return Walk;
-            }(TacticArena.Entity.BaseSkill));
+            }(TacticArena.Entity.Skill.BaseSkill));
             Skill.Walk = Walk;
         })(Skill = Entity.Skill || (Entity.Skill = {}));
     })(Entity = TacticArena.Entity || (TacticArena.Entity = {}));
 })(TacticArena || (TacticArena = {}));
+/// <reference path="BaseSkill.ts"/>
 var TacticArena;
 (function (TacticArena) {
     var Entity;
@@ -3241,16 +3253,16 @@ var TacticArena;
                     _this.id = 'watch';
                     _this.name = 'Watch';
                     _this.description = 'Cost: 1 AP / tile; Hit: 50%';
-                    _this.icon = _this.state.make.sprite(0, 0, 'icon-wait');
                     _this.minCost = 1;
                     return _this;
                 }
                 return Watch;
-            }(TacticArena.Entity.BaseSkill));
+            }(TacticArena.Entity.Skill.BaseSkill));
             Skill.Watch = Watch;
         })(Skill = Entity.Skill || (Entity.Skill = {}));
     })(Entity = TacticArena.Entity || (TacticArena.Entity = {}));
 })(TacticArena || (TacticArena = {}));
+/// <reference path="BaseSkill.ts"/>
 var TacticArena;
 (function (TacticArena) {
     var Entity;
@@ -3264,7 +3276,6 @@ var TacticArena;
                     _this.id = 'wind';
                     _this.name = 'Wind';
                     _this.description = 'Cost: 2 AP; Range 4; Push 1 tile; Hit: 100%';
-                    _this.icon = _this.state.make.sprite(0, 0, 'icon-wind');
                     _this.minCost = 2;
                     return _this;
                 }
@@ -3319,7 +3330,7 @@ var TacticArena;
                     }
                 };
                 return Wind;
-            }(TacticArena.Entity.BaseSkill));
+            }(TacticArena.Entity.Skill.BaseSkill));
             Skill.Wind = Wind;
         })(Skill = Entity.Skill || (Entity.Skill = {}));
     })(Entity = TacticArena.Entity || (TacticArena.Entity = {}));
@@ -3968,6 +3979,7 @@ var TacticArena;
                 this.load.image('button-previous', 'assets/images/ui/button-previous.png');
                 this.load.image('border', 'assets/images/ui/border.png');
                 this.load.image('frame', 'assets/images/ui/frame.png');
+                this.load.image('skill-frame', 'assets/images/ui/skill-frame.png');
                 this.load.image('vertical-border', 'assets/images/ui/vertical-border.png');
                 this.load.image('step', 'assets/images/ui/step.png');
                 this.load.image('step-active', 'assets/images/ui/step-active.png');
@@ -3975,6 +3987,11 @@ var TacticArena;
                 this.load.image('step-join', 'assets/images/ui/step-join.png');
                 this.load.image('step-last', 'assets/images/ui/step-last.png');
                 this.load.image('step-old', 'assets/images/ui/step-old.png');
+                this.load.image('skill-walk', 'assets/images/skill/walk.jpg');
+                this.load.image('skill-fire', 'assets/images/skill/fire.jpg');
+                this.load.image('skill-wind', 'assets/images/skill/wind.jpg');
+                this.load.image('skill-slash', 'assets/images/skill/slash.jpg');
+                this.load.image('skill-watch', 'assets/images/skill/watch.jpg');
                 this.load.script('filter', 'https://cdn.rawgit.com/photonstorm/phaser/master/v2/filters/Pixelate.js');
                 this.load.script('BlurX', 'https://cdn.rawgit.com/photonstorm/phaser/master/v2/filters/BlurX.js');
                 this.load.script('BlurY', 'https://cdn.rawgit.com/photonstorm/phaser/master/v2/filters/BlurY.js');
@@ -5923,7 +5940,16 @@ var TacticArena;
                 var self = this;
                 this.isOver = false;
                 this.game = game;
+                this.skills = [];
                 this.mainGroup = this.game.add.group();
+                this.mainGroup.x = 0;
+                this.mainGroup.y = Math.max(512, window.innerHeight / this.game.getScaleRatio() - 96);
+                this.actionGroup = this.game.add.group();
+                this.actionGroup.x = 110;
+                this.actionGroup.y = 30;
+                this.skillsGroup = this.game.add.group();
+                this.skillsGroup.x = 60;
+                this.skillsGroup.y = 27;
                 var bmd = this.game.add.bitmapData(this.game.world.width, 96);
                 bmd.ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
                 bmd.ctx.beginPath();
@@ -5942,21 +5968,15 @@ var TacticArena;
                 verticalBorder.height = 128;
                 var avatar = this.game.make.sprite(0, 0, 'avatar-' + pawn.type);
                 avatar.anchor.set(0);
-                this.mainGroup.add(bgSprite);
-                this.mainGroup.add(frame);
-                this.mainGroup.add(verticalBorder);
-                this.mainGroup.add(avatar);
-                this.mainGroup.x = 0;
-                this.mainGroup.y = Math.max(512, window.innerHeight / this.game.getScaleRatio() - 96);
-                var text = this.game.add.text(0, 5, pawn._name, {
+                var name = this.game.add.text(0, 5, pawn._name, {
                     font: '20px Iceland',
                     fill: '#ffffff',
                     boundsAlignH: 'right',
                     boundsAlignV: 'top',
-                }, this.mainGroup);
-                text.setTextBounds(0, 8, 90, 20);
+                });
+                name.setTextBounds(0, 8, 90, 20);
                 var barWidth = this.game.world.width / 2 - 64;
-                this.mainGroup.add(new UI.Bar(this.game, {
+                this.hpBar = new UI.Bar(this.game, {
                     x: 110,
                     y: 10,
                     width: barWidth,
@@ -5970,7 +5990,7 @@ var TacticArena;
                     bg: { color: '#808080' },
                     bar: { color: '#8b0000' },
                     textStyle: '16px Iceland'
-                }));
+                });
                 this.apBar = new UI.Bar(this.game, {
                     x: 118 + barWidth,
                     y: 10,
@@ -5986,61 +6006,46 @@ var TacticArena;
                     bar: { color: '#1E90FF' },
                     textStyle: '16px Iceland'
                 });
-                this.mainGroup.add(this.apBar);
-                this.skillsGroup = this.game.add.group();
-                var offsetX = 47;
-                this.skills = [];
                 pawn.skills.forEach(function (skill, index) {
-                    var actionMenuSkill = {
-                        selected: false,
-                        sprite: null,
-                        skill: skill
-                    };
-                    var buttonX = index > 0 ? index * 82 : 0;
-                    var buttonY = 0;
-                    if (index > 0) {
-                        buttonX += index * 10;
-                    }
-                    if (index >= 2) {
-                        buttonY = 30;
-                        buttonX -= 2 * 10 + 2 * 82;
-                    }
-                    var button = self.game.make.sprite(offsetX + buttonX + 41, buttonY + 13, 'button-bg');
-                    button.anchor.set(0.5);
-                    self.skillsGroup.add(button);
-                    button.inputEnabled = true;
-                    button.events.onInputOver.add(self.buttonOver, self);
-                    button.events.onInputOut.add(self.buttonOut, self);
-                    button.events.onInputDown.add(self.skillSelect, self, 0, actionMenuSkill);
-                    var text = self.game.add.text(buttonX, buttonY, skill.name, {
-                        font: '10px Press Start 2P',
-                        fill: '#000000',
-                        boundsAlignH: 'center',
-                        boundsAlignV: 'top',
-                    }, self.skillsGroup);
-                    text.setTextBounds(offsetX, 8, 83, 20);
-                    actionMenuSkill.sprite = button;
-                    self.skills.push(actionMenuSkill);
+                    var buttonGroup = new UI.skillButton(self.game);
+                    buttonGroup.x = index * 48;
+                    var icon = self.game.make.sprite(0, 0, 'skill-' + skill.id);
+                    icon.anchor.set(0.5);
+                    var frame = self.game.make.sprite(0, 0, 'skill-frame');
+                    frame.anchor.set(0.5);
+                    buttonGroup.add(icon);
+                    buttonGroup.add(frame);
+                    frame.inputEnabled = true;
+                    frame.events.onInputOver.add(self.buttonOver, self);
+                    frame.events.onInputOut.add(self.buttonOut, self);
+                    frame.events.onInputDown.add(self.skillSelect, self, 0, index);
+                    self.skillsGroup.add(buttonGroup);
+                    self.skills.push({ selected: false, group: buttonGroup, skill: skill });
                 });
-                this.skillsGroup.x = 110;
-                this.skillsGroup.y = 30;
-                this.confirmButton = this.game.make.sprite(this.game.world.width - this.skillsGroup.position.x - 6, 28, 'button-confirm');
+                this.confirmButton = this.game.make.sprite(this.game.world.width - this.actionGroup.position.x - 6, 28, 'button-confirm');
                 this.confirmButton.anchor.set(1, 0.5);
-                this.skillsGroup.add(this.confirmButton);
                 this.confirmButton.inputEnabled = true;
                 this.confirmButton.events.onInputOver.add(this.buttonOver, this);
                 this.confirmButton.events.onInputOut.add(this.buttonOut, this);
                 this.confirmButton.events.onInputDown.add(this.confirm, this);
                 this.cancelButton = this.game.make.sprite(-3, 28, 'button-cancel');
                 this.cancelButton.anchor.set(0, 0.5);
-                this.skillsGroup.add(this.cancelButton);
                 this.cancelButton.inputEnabled = true;
                 this.cancelButton.events.onInputOver.add(this.buttonOver, this);
                 this.cancelButton.events.onInputOut.add(this.buttonOut, this);
                 this.cancelButton.events.onInputDown.add(this.cancel, this);
-                this.mainGroup.add(this.skillsGroup);
+                this.mainGroup.add(bgSprite);
+                this.mainGroup.add(frame);
+                this.mainGroup.add(verticalBorder);
+                this.mainGroup.add(avatar);
+                this.mainGroup.add(name);
+                this.mainGroup.add(this.hpBar);
+                this.mainGroup.add(this.apBar);
+                this.actionGroup.add(this.skillsGroup);
+                this.actionGroup.add(this.cancelButton);
+                this.actionGroup.add(this.confirmButton);
+                this.mainGroup.add(this.actionGroup);
                 this.game.uiGroup.add(this.mainGroup);
-                this.selectDefaultSkill();
             }
             ActionMenu.prototype.over = function () {
                 console.log('over');
@@ -6081,26 +6086,37 @@ var TacticArena;
                 this.isOver = false;
                 buttonSprite.scale.setTo(1, 1);
             };
-            ActionMenu.prototype.skillDeselectAll = function () {
+            ActionMenu.prototype.skillDeselectAll = function (oneIsSelected) {
+                if (oneIsSelected === void 0) { oneIsSelected = false; }
                 this.skills.forEach(function (actionMenuSkill) {
+                    actionMenuSkill.group.alpha = 1;
+                    if (oneIsSelected) {
+                        actionMenuSkill.group.alpha = 0.7;
+                    }
                     if (actionMenuSkill.selected) {
-                        actionMenuSkill.sprite.loadTexture('button-bg', 0, false);
                         actionMenuSkill.skill.onDeselect();
                         actionMenuSkill.selected = false;
                     }
                 });
             };
-            ActionMenu.prototype.skillSelect = function (sprite, pointer, actionMenuSkill) {
-                this.skillDeselectAll();
-                actionMenuSkill.sprite.loadTexture('button-selected-bg', 0, false);
-                actionMenuSkill.skill.onSelect();
-                actionMenuSkill.selected = true;
+            ActionMenu.prototype.skillSelect = function (sprite, pointer, index) {
+                this.skillDeselectAll(true);
+                this.skills[index].skill.onSelect();
+                this.skills[index].selected = true;
+                this.skills[index].group.alpha = 1;
             };
             ActionMenu.prototype.getSelectedSkill = function () {
-                return this.skills.filter(function (skill) { return skill.selected; })[0].skill;
+                var result = null;
+                try {
+                    result = this.skills.filter(function (skill) { return skill.selected; })[0].skill;
+                }
+                catch (TypeError) {
+                    //console.warn('no selected skill');
+                }
+                return result;
             };
             ActionMenu.prototype.selectDefaultSkill = function () {
-                this.skillSelect(null, null, this.skills[1]);
+                this.skillSelect(null, null, 1);
             };
             return ActionMenu;
         }());
@@ -7156,11 +7172,16 @@ var TacticArena;
                 if (!this.game.process && !this.game.uiManager.isOver()) {
                     this.updateMarker();
                     var selectedSkill = this.game.uiManager.actionMenu.getSelectedSkill();
-                    if (selectedSkill.canOrder()) {
-                        selectedSkill.updateUI(this.getTilePositionFromMarkerPosition());
+                    try {
+                        if (selectedSkill.canOrder()) {
+                            selectedSkill.updateUI(this.getTilePositionFromMarkerPosition());
+                        }
+                        else {
+                            selectedSkill.cleanUI();
+                        }
                     }
-                    else {
-                        selectedSkill.cleanUI();
+                    catch (TypeError) {
+                        //console.warn('no selected skill');
                     }
                 }
                 else {
@@ -7169,10 +7190,8 @@ var TacticArena;
             };
             Pointer.prototype.onGridLeftClick = function () {
                 if (!this.game.process && !this.game.uiManager.isOver()) {
-                    var activePawn = this.game.turnManager.getActivePawn();
                     var selectedSkill = this.game.uiManager.actionMenu.getSelectedSkill();
                     var target = this.getTilePositionFromMarkerPosition();
-                    console.log(selectedSkill);
                     if (selectedSkill) {
                         if (selectedSkill.canOrder()) {
                             selectedSkill.order(target);
@@ -7291,6 +7310,20 @@ var TacticArena;
             return PointerExploration;
         }(TacticArena.UI.Pointer));
         UI.PointerExploration = PointerExploration;
+    })(UI = TacticArena.UI || (TacticArena.UI = {}));
+})(TacticArena || (TacticArena = {}));
+var TacticArena;
+(function (TacticArena) {
+    var UI;
+    (function (UI) {
+        var skillButton = (function (_super) {
+            __extends(skillButton, _super);
+            function skillButton(game) {
+                return _super.call(this, game) || this;
+            }
+            return skillButton;
+        }(Phaser.Group));
+        UI.skillButton = skillButton;
     })(UI = TacticArena.UI || (TacticArena.UI = {}));
 })(TacticArena || (TacticArena = {}));
 var TacticArena;
@@ -7623,7 +7656,7 @@ var TacticArena;
                     activePawn.setAp(activePawn._apMax);
                     activePawn.getProjectionOrReal().faceDirection(state.uiManager.actionMenu.savedDirection);
                     state.uiManager.actionMenu.initDirection(state.uiManager.actionMenu.savedDirection);
-                    state.uiManager.actionMenu.selectDefaultSkill();
+                    state.uiManager.actionMenu.skillDeselectAll();
                     state.orderManager.removeEntityOrder(activePawn);
                     state.signalManager.onActionPlayed.dispatch(activePawn);
                 }

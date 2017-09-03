@@ -1,16 +1,16 @@
+/// <reference path="BaseSkill.ts"/>
 module TacticArena.Entity.Skill {
-    export class Wind extends TacticArena.Entity.BaseSkill {
+    export class Wind extends TacticArena.Entity.Skill.BaseSkill {
 
         constructor(state, pawn) {
             super(state, pawn);
             this.id = 'wind';
             this.name = 'Wind';
             this.description = 'Cost: 2 AP; Range 4; Push 1 tile; Hit: 100%';
-            this.icon = this.state.make.sprite(0, 0, 'icon-wind');
             this.minCost = 2;
         }
 
-        updateUI(position?) {
+        updateUI(position) {
             let distance = this.state.stageManager.getNbTilesBetween(position, this.pawn.getProjectionOrReal().getPosition());
             if (distance <= 4) {
                 let path = this.state.stageManager.getLinearPath(this.pawn.getProjectionOrReal(), 4);
@@ -31,7 +31,7 @@ module TacticArena.Entity.Skill {
             }
         }
 
-        order(target?) {
+        order(target) {
             let position = this.pawn.getProjectionOrReal().getPosition();
             let distance = this.state.stageManager.getNbTilesBetween(target, this.pawn.getProjectionOrReal().getPosition());
             if (distance <= 4) {

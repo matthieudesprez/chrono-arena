@@ -13,7 +13,7 @@ module TacticArena.Action {
                 activePawn.setAp(activePawn._apMax);
                 activePawn.getProjectionOrReal().faceDirection(state.uiManager.actionMenu.savedDirection);
                 state.uiManager.actionMenu.initDirection(state.uiManager.actionMenu.savedDirection);
-                state.uiManager.actionMenu.selectDefaultSkill();
+                state.uiManager.actionMenu.skillDeselectAll();
                 state.orderManager.removeEntityOrder(activePawn);
                 state.signalManager.onActionPlayed.dispatch(activePawn);
             }

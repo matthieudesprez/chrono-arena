@@ -32,6 +32,7 @@ module TacticArena.State {
             this.load.image('button-previous', 'assets/images/ui/button-previous.png');
             this.load.image('border', 'assets/images/ui/border.png');
             this.load.image('frame', 'assets/images/ui/frame.png');
+            this.load.image('skill-frame', 'assets/images/ui/skill-frame.png');
             this.load.image('vertical-border', 'assets/images/ui/vertical-border.png');
             this.load.image('step', 'assets/images/ui/step.png');
             this.load.image('step-active', 'assets/images/ui/step-active.png');
@@ -39,6 +40,12 @@ module TacticArena.State {
             this.load.image('step-join', 'assets/images/ui/step-join.png');
             this.load.image('step-last', 'assets/images/ui/step-last.png');
             this.load.image('step-old', 'assets/images/ui/step-old.png');
+
+            this.load.image('skill-walk', 'assets/images/skill/walk.jpg');
+            this.load.image('skill-fire', 'assets/images/skill/fire.jpg');
+            this.load.image('skill-wind', 'assets/images/skill/wind.jpg');
+            this.load.image('skill-slash', 'assets/images/skill/slash.jpg');
+            this.load.image('skill-watch', 'assets/images/skill/watch.jpg');
 
             this.load.script('filter', 'https://cdn.rawgit.com/photonstorm/phaser/master/v2/filters/Pixelate.js');
             this.load.script('BlurX', 'https://cdn.rawgit.com/photonstorm/phaser/master/v2/filters/BlurX.js');

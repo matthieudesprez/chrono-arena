@@ -1,12 +1,12 @@
+/// <reference path="BaseSkill.ts"/>
 module TacticArena.Entity.Skill {
-    export class Watch extends TacticArena.Entity.BaseSkill {
+    export class Watch extends TacticArena.Entity.Skill.BaseSkill {
 
         constructor(state, pawn) {
             super(state, pawn);
             this.id = 'watch';
             this.name = 'Watch';
             this.description = 'Cost: 1 AP / tile; Hit: 50%';
-            this.icon = this.state.make.sprite(0, 0, 'icon-wait');
             this.minCost = 1;
         }
 
