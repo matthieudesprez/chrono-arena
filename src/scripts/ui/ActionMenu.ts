@@ -19,7 +19,8 @@ module TacticArena.UI {
             this.skills = [];
             this.mainGroup = this.game.add.group();
             this.mainGroup.x = 0;
-            this.mainGroup.y = Math.max(512, window.innerHeight / this.game.getScaleRatio() - 96);
+            this.mainGroup.y = Math.min(512, window.innerHeight / this.game.getScaleRatio() - 96);
+            //this.mainGroup.y = 512;
             this.actionGroup = this.game.add.group();
             this.actionGroup.x = 110;
             this.actionGroup.y = 30;
@@ -45,10 +46,11 @@ module TacticArena.UI {
 
             let verticalBorder = this.game.make.sprite(100, 6, 'vertical-border');
             verticalBorder.anchor.set(0);
-            verticalBorder.height = 128;
+            verticalBorder.height = 120;
 
-            let avatar = this.game.make.sprite(0, 0, 'avatar-' + pawn.type);
+            let avatar = this.game.make.sprite(10, 2, 'avatar-' + pawn.type);
             avatar.anchor.set(0);
+            avatar.scale.set(0.9);
 
             let name = this.game.add.text(0, 5, pawn._name, {
                 font: '20px Iceland',
@@ -124,9 +126,9 @@ module TacticArena.UI {
             this.cancelButton.events.onInputDown.add(this.cancel, this);
 
             this.mainGroup.add(bgSprite);
+            this.mainGroup.add(avatar);
             this.mainGroup.add(frame);
             this.mainGroup.add(verticalBorder);
-            this.mainGroup.add(avatar);
             this.mainGroup.add(name);
             this.mainGroup.add(this.hpBar);
             this.mainGroup.add(this.apBar);
@@ -138,12 +140,10 @@ module TacticArena.UI {
         }
 
         over() {
-            console.log('over');
             this.isOver = true;
         }
 
         out() {
-            console.log('out');
             this.isOver = false;
         }
 
@@ -179,7 +179,7 @@ module TacticArena.UI {
 
         buttonOver(buttonSprite) {
             this.isOver = true;
-            buttonSprite.scale.setTo(1.1, 1.1);
+            buttonSprite.scale.setTo(0.9, 0.9);
         }
 
         buttonOut(buttonSprite) {

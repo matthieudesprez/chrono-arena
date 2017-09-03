@@ -1,6 +1,6 @@
 /// <reference path="BaseSkill.ts"/>
 module TacticArena.Entity.Skill {
-    export class Watch extends TacticArena.Entity.Skill.BaseSkill {
+    export class Watch extends TacticArena.Entity.Skill.LinearSkill {
 
         constructor(state, pawn) {
             super(state, pawn);
@@ -8,25 +8,13 @@ module TacticArena.Entity.Skill {
             this.name = 'Watch';
             this.description = 'Cost: 1 AP / tile; Hit: 50%';
             this.minCost = 1;
+            this.range = 1;
         }
 
-        //updateUI(position?) {
-        //    this.state.stageManager.canMove(this.pawn.getProjectionOrReal(), position.x, position.y, this.pawn.getAp()).then((path) => {
-        //        this.state.stageManager.clearHelp();
-        //        this.state.stageManager.showPath(path, this.state.pathTilesGroup);
-        //        this.state.stageManager.showPossibleMove(this.pawn.getProjectionOrReal().getPosition(), this.pawn.getReal().getAp());
-        //        this.state.uiManager.actionMenu.showApCost(this.pawn, (<any>path).length);
-        //    }, (res) => {
-        //        this.state.stageManager.clearHelp();
-        //        this.state.uiManager.actionMenu.showApCost(this.pawn, 0);
-        //    });
-        //}
-        //
-        //order() {
-        //    let position = this.pawn.getProjectionOrReal().getPosition();
-        //    this.state.orderManager.add('stand', this.pawn, position.x, position.y, this.pawn.getProjectionOrReal().getDirection());
-        //    this.pawn.setAp(this.pawn.getAp() - 1);
-        //    this.state.signalManager.onActionPlayed.dispatch(this.pawn);
-        //}
+        onOrder(position, direction) {
+            this.pawn.getProjectionOrReal(true).faceDirection(direction);
+            //this.pawn.getProjectionOrReal().getSprite().attack();
+            //this.state.orderManager.add(this.pawn, new Order.Watch(position, direction));
+        }
     }
 }
