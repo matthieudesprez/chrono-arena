@@ -3,20 +3,75 @@ module TacticArena.UI {
         game;
         mainGroup;
         isOver;
+        pawns;
 
         constructor(game) {
+            let self = this;
             this.game = game;
+            this.pawns = [];
             this.mainGroup = this.game.add.group();
-            var topUIBackground = this.game.make.graphics();
-            topUIBackground.beginFill(0x333333, 0.6);
-            topUIBackground.drawRect(0, 0, this.game.world.width, 48);
-            topUIBackground.endFill();
+            this.mainGroup.x = 40;
+            this.mainGroup.y = 37;
 
-            topUIBackground.inputEnabled = true;
-            topUIBackground.events.onInputOver.add(this.over, this);
-            topUIBackground.events.onInputOut.add(this.out, this);
+            let avatarsGroup = this.game.add.group();
+            this.game.pawns.forEach(function (pawn, index) {
+                let pawnGroup = self.game.add.group();
+                pawnGroup.x = index * 70;
+                let frame = self.game.make.sprite(0, 0, 'avatar-frame');
+                frame.anchor.set(0.5);
+                let avatar = self.game.make.sprite(0, 0, 'avatar-' + pawn.type);
+                avatar.anchor.set(0.5);
+                avatar.scale.set(0.45);
+                let heart = self.game.make.sprite(-13, 25, 'icon-heart');
+                heart.anchor.set(0.5);
+                let hpText = self.game.add.text(0, 0, pawn.getHp(), {
+                    font: '15px Iceland',
+                    fill: '#FFFFFF',
+                    align: 'center',
+                    boundsAlignH: 'center',
+                    boundsAlignV: 'center',
+                    strokeThickness: 3,
+                    stroke: '#000000',
+                    wordWrap: true
+                });
+                hpText.setTextBounds(heart.x - 13, heart.y - 10, 26, 21);
 
-            this.mainGroup.add(topUIBackground);
+                let energy = self.game.make.sprite(1, 11, 'icon-power');
+                energy.scale.set(0.2);
+                energy.anchor.set(0);
+                let apText = self.game.add.text(0, 0, pawn.getAp(), {
+                    font: '15px Iceland',
+                    fill: '#FFFFFF',
+                    align: 'center',
+                    boundsAlignH: 'center',
+                    boundsAlignV: 'center',
+                    strokeThickness: 3,
+                    stroke: '#000000',
+                    wordWrap: true
+                });
+                apText.setTextBounds(energy.x, energy.y + 4, energy.width, energy.height);
+
+                pawnGroup.add(frame);
+                pawnGroup.add(avatar);
+                pawnGroup.add(heart);
+                pawnGroup.add(hpText);
+                pawnGroup.add(energy);
+                pawnGroup.add(apText);
+
+                avatarsGroup.add(pawnGroup);
+
+                self.pawns.push({hpText: hpText, apText: apText, });
+
+                //frame.inputEnabled = true;
+                //frame.events.onInputOver.add(self.buttonOver, self);
+                //frame.events.onInputOut.add(self.buttonOut, self);
+                //frame.events.onInputDown.add(self.skillSelect, self, 0, index);
+                //
+                //self.skillsGroup.add(buttonGroup);
+                //self.skills.push({ selected: false, group: buttonGroup, skill: skill});
+            });
+
+            this.mainGroup.add(avatarsGroup);
             this.game.uiGroup.add(this.mainGroup);
 
         }

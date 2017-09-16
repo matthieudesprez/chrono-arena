@@ -6,19 +6,12 @@ module TacticArena.State {
         }
 
         init() {
-            this.game.stage.backgroundColor = 0x333333;
-            $('[class*="ui-"]').remove();
-            $('#game-menu').remove();
+            this.game.stage.backgroundColor = 0x000000;
             super.init();
         }
 
         createMenu() {
-            $('#game-container').append('' +
-                '<div id="game-menu">' +
-                '<div class="logo"></div>' +
-                ' <div class="ui"></div>' +
-                '</div>'
-            );
+
         }
 
         getScaleRatio() {

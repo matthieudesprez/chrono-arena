@@ -14,32 +14,37 @@ module TacticArena.State {
             this.preloadBar.anchor.setTo(0.5);
             this.load.setPreloadSprite(this.preloadBar);
 
+            /* MAPS */
             this.load.tilemap('mapmobile', 'assets/json/mapmobile.json', null, Phaser.Tilemap.TILED_JSON);
             this.load.tilemap('map', 'assets/json/map.json', null, Phaser.Tilemap.TILED_JSON);
             this.load.tilemap('area02', 'assets/json/area02.json', null, Phaser.Tilemap.TILED_JSON);
             this.load.image('tiles-collection', 'assets/images/maptiles.png');
             this.load.image('path-tile', 'assets/images/path_tile.png');
-            this.load.image('modal-bg', 'assets/images/modal-bg.png');
-            this.load.image('modal-close', 'assets/images/modal-close.png');
-            this.load.image('menu-icon', 'assets/images/menu_icon.png');
 
-            this.load.image('icon-wait', 'assets/images/ui/icons/wait.png');
+            /* UI */
             this.load.image('button-bg', 'assets/images/ui/button.png');
             this.load.image('button-selected-bg', 'assets/images/ui/button-selected.png');
-            this.load.image('button-confirm', 'assets/images/ui/button-confirm.png');
-            this.load.image('button-cancel', 'assets/images/ui/button-cancel.png');
-            this.load.image('button-next', 'assets/images/ui/button-next.png');
-            this.load.image('button-previous', 'assets/images/ui/button-previous.png');
-            this.load.image('border', 'assets/images/ui/border.png');
-            this.load.image('frame', 'assets/images/ui/frame.png');
-            this.load.image('skill-frame', 'assets/images/ui/skill-frame.png');
-            this.load.image('vertical-border', 'assets/images/ui/vertical-border.png');
+            this.load.image('button-square-next', 'assets/images/ui/button-square-next.png');
+            this.load.image('button-square-previous', 'assets/images/ui/button-square-previous.png');
+            this.load.image('avatar-frame', 'assets/images/ui/avatar-frame.png');
+            this.load.image('skill-frame2', 'assets/images/ui/skill-frame2.png');
+            this.load.image('frame-bottom', 'assets/images/ui/frame-bottom.png');
+            this.load.image('background-bar', 'assets/images/ui/background-bar.png');
+
             this.load.image('step', 'assets/images/ui/step.png');
             this.load.image('step-active', 'assets/images/ui/step-active.png');
             this.load.image('step-first', 'assets/images/ui/step-first.png');
             this.load.image('step-join', 'assets/images/ui/step-join.png');
             this.load.image('step-last', 'assets/images/ui/step-last.png');
             this.load.image('step-old', 'assets/images/ui/step-old.png');
+
+            this.load.image('icon-heart', 'assets/images/ui/icon-heart.png');
+            this.load.image('icon-menu4', 'assets/images/ui/icon-menu4.png');
+            this.load.image('icon-cancel', 'assets/images/ui/icon-cancel.png');
+            this.load.image('icon-confirm', 'assets/images/ui/icon-confirm.png');
+            this.load.image('icon-health', 'assets/images/ui/icon-health.png');
+            this.load.image('icon-power', 'assets/images/ui/icon-power.png');
+            this.load.image('icon-power-empty', 'assets/images/ui/icon-power-empty.png');
 
             this.load.image('skill-walk', 'assets/images/skill/walk.jpg');
             this.load.image('skill-fire', 'assets/images/skill/fire.jpg');
@@ -48,14 +53,8 @@ module TacticArena.State {
             this.load.image('skill-watch', 'assets/images/skill/watch.jpg');
 
             this.load.script('filter', 'https://cdn.rawgit.com/photonstorm/phaser/master/v2/filters/Pixelate.js');
-            this.load.script('BlurX', 'https://cdn.rawgit.com/photonstorm/phaser/master/v2/filters/BlurX.js');
-            this.load.script('BlurY', 'https://cdn.rawgit.com/photonstorm/phaser/master/v2/filters/BlurY.js');
-
-            let icons = ['arrow-east', 'arrow-north', 'arrow-south', 'arrow-west', 'cancel', 'compass', 'fire', 'next', 'pause', 'play', 'previous', 'slash', 'submit', 'wait', 'walk', 'wind'];
-            icons.forEach(function(icon) {
-                self.load.image('icon-' + icon, 'assets/images/icons/icon-' + icon + '.png');
-            });
-
+            //this.load.script('BlurX', 'https://cdn.rawgit.com/photonstorm/phaser/master/v2/filters/BlurX.js');
+            //this.load.script('BlurY', 'https://cdn.rawgit.com/photonstorm/phaser/master/v2/filters/BlurY.js');
 
             this.load.image('avatar-blondy', 'assets/images/blondy_avatar.png');
             this.load.image('avatar-redhead', 'assets/images/redhead_avatar.png');

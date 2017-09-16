@@ -354,5 +354,12 @@ module TacticArena {
                 this.grid[p.y][p.x] = 0;
             }
         }
+
+        getPosition(absolutePosition:Phaser.Point):Position {
+            return new Position(
+                Math.floor(absolutePosition.x / this.game.worldGroup.scale.x / this.game.tileSize),
+                Math.floor(absolutePosition.y / this.game.worldGroup.scale.y / this.game.tileSize)
+            );
+        }
     }
 }

@@ -34,6 +34,7 @@ module TacticArena.Entity {
                 this.sprite.stand();
             }
             this._hp = 4;
+            this._ap = 0;
             this._hpMax = 4;
             this._apMax = 3;
             this.selected = false;

@@ -16,14 +16,11 @@ module TacticArena.UI {
             this.game.input.onDown.add(this.onGridLeftClick, this);
             //this.game.input.onDown.add(this.onGridRightClick, this);
             //this.game.input.pointer1.capture = true;
-            $('canvas').bind('contextmenu', function(e){ return false; });
+            //$('canvas').bind('contextmenu', function(e){ return false; });
         }
 
         getPosition() {
-            return {
-                x: this.game.stageManager.collisionLayer.getTileX(this.game.input.activePointer.worldX),
-                y: this.game.stageManager.collisionLayer.getTileY(this.game.input.activePointer.worldY)
-            }
+            return this.game.stageManager.getPosition(this.game.input.activePointer.position);
         }
 
         getTilePosition() {
@@ -33,32 +30,38 @@ module TacticArena.UI {
             }
         }
 
-        getTilePositionFromMarkerPosition() {
-            return {
-                x: this.marker.x / this.game.tileSize,
-                y: this.marker.y / this.game.tileSize
-            };
+        getTilePositionFromMarkerPosition():Position {
+            return new Position(
+                this.marker.x / this.game.tileSize,
+                this.marker.y / this.game.tileSize
+            );
         }
 
         updateMarker() {
             this.show();
             let p = this.getPosition();
-            this.marker.x = Math.round(p.x * this.game.tileSize / this.game.worldGroup.scale.x / 32) * 32;
-            this.marker.y = Math.round(p.y * this.game.tileSize / this.game.worldGroup.scale.y / 32) * 32;
+            this.marker.x = p.x * this.game.tileSize;
+            this.marker.y = p.y * this.game.tileSize;
         }
 
         update() {
             if(!this.game.process && !this.game.uiManager.isOver()) {
                 this.updateMarker();
                 let selectedSkill = this.game.uiManager.actionMenu.getSelectedSkill();
-                try {
+                let target = this.getTilePositionFromMarkerPosition();
+                if(selectedSkill) {
                     if (selectedSkill.canOrder()) {
-                        selectedSkill.updateUI(this.getTilePositionFromMarkerPosition());
+                        selectedSkill.updateUI(target);
                     } else {
                         selectedSkill.cleanUI();
                     }
-                } catch (TypeError) {
-                    //console.warn('no selected skill');
+                } else {
+                    this.game.pawns.forEach( (p, k) => {
+                        if (p.getPosition().equals(target)) {
+                            console.log(p);
+                            //let actionMenu = new UI.ActionMenu(self.game, p.type);
+                        }
+                    });
                 }
             } else {
                 this.hide();
@@ -76,11 +79,12 @@ module TacticArena.UI {
                 } else {
                     //TODO SELECT CHARACTER
                     console.log(target);
-                    //this.game.pawns.forEach( (p, k) => {
-                    //    if (self.game.stageManager.equalPositions(p.getPosition(), {x: targetX, y: targetY})) {
-                    //        //let actionMenu = new UI.ActionMenu(self.game, p.type);
-                    //    }
-                    //});
+                    this.game.pawns.forEach( (p, k) => {
+                        if (p.getPosition().equals(target)) {
+                            console.log(p);
+                            //let actionMenu = new UI.ActionMenu(self.game, p.type);
+                        }
+                    });
                 }
             }
         }

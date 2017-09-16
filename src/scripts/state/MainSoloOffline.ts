@@ -32,5 +32,9 @@ module TacticArena.State {
         create() {
             super.create();
         }
+
+        //render() {
+        //    this.game.debug.spriteBounds(this.uiManager.topMenu.pawns[0].apText, 'rgba(255,0,0,0.5)');
+        //}
     }
 }

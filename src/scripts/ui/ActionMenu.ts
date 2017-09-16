@@ -4,6 +4,7 @@ module TacticArena.UI {
         mainGroup;
         actionGroup;
         skillsGroup;
+        energyGroup;
         isOver;
         savedDirection;
         hpBar;
@@ -19,122 +20,132 @@ module TacticArena.UI {
             this.skills = [];
             this.mainGroup = this.game.add.group();
             this.mainGroup.x = 0;
-            this.mainGroup.y = Math.min(512, window.innerHeight / this.game.getScaleRatio() - 96);
+            this.mainGroup.y = Math.min(512, window.innerHeight / this.game.getScaleRatio() - 100);
             //this.mainGroup.y = 512;
             this.actionGroup = this.game.add.group();
-            this.actionGroup.x = 110;
-            this.actionGroup.y = 30;
+            this.actionGroup.x = 178;
+            this.actionGroup.y = 63;
             this.skillsGroup = this.game.add.group();
-            this.skillsGroup.x = 60;
-            this.skillsGroup.y = 27;
+            this.skillsGroup.x = 0;
+            this.skillsGroup.y = 0;
+            this.energyGroup = this.game.add.group();
+            this.energyGroup.x = 160;
+            this.energyGroup.y = 14;
 
-            var bmd = this.game.add.bitmapData(this.game.world.width, 96);
-            bmd.ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
-            bmd.ctx.beginPath();
-            bmd.ctx.rect(0, 0, this.game.world.width, 96);
-            bmd.ctx.fill();
-            bmd.update();
-
-            let bgSprite = this.game.make.sprite(0, 0, bmd);
-            bgSprite.anchor.set(0);
-            bgSprite.inputEnabled = true;
-            bgSprite.events.onInputOver.add(this.over, this);
-            bgSprite.events.onInputOut.add(this.out, this);
-
-            let frame = this.game.make.sprite(0, 0, 'frame');
+            let frame = this.game.make.sprite(5, 0, 'frame-bottom');
             frame.anchor.set(0);
 
-            let verticalBorder = this.game.make.sprite(100, 6, 'vertical-border');
-            verticalBorder.anchor.set(0);
-            verticalBorder.height = 120;
+            var filter = this.game.add.filter('Pixelate');
+            frame.filters = [filter];
+            filter.sizeX = 2;
+            filter.sizeY = 2;
 
-            let avatar = this.game.make.sprite(10, 2, 'avatar-' + pawn.type);
+            frame.inputEnabled = true;
+            frame.events.onInputOver.add(this.over, this);
+            frame.events.onInputOut.add(this.out, this);
+
+            let avatar = this.game.make.sprite(37, 8, 'avatar-' + pawn.type);
             avatar.anchor.set(0);
-            avatar.scale.set(0.9);
+            avatar.scale.set(0.8);
 
-            let name = this.game.add.text(0, 5, pawn._name, {
+            let name = this.game.add.text(54, 5, pawn._name, {
                 font: '20px Iceland',
                 fill: '#ffffff',
                 boundsAlignH: 'right',
                 boundsAlignV: 'top',
             });
+            name.anchor.set(0);
             name.setTextBounds(0, 8, 90, 20);
 
-            let barWidth = this.game.world.width / 2 - 64;
-            this.hpBar = new Bar(this.game, {
-                x: 110,
-                y: 10,
-                width: barWidth,
-                height: 15,
-                text: true,
-                name: 'hpbar',
-                unit: 'HP',
-                max: pawn._hpMax,
-                value: pawn.getHp(),
-                textColor: '#ffffff',
-                bg: {color: '#808080'},
-                bar: {color: '#8b0000'},
-                textStyle: '16px Iceland'
+            let heart = self.game.make.sprite(110, 44, 'icon-heart');
+            heart.scale.set(1.5);
+            heart.anchor.set(0);
+
+            let hpText = self.game.add.text(0, 0, pawn.getHp(), {
+                font: '18px Iceland',
+                fill: '#FFFFFF',
+                align: 'center',
+                boundsAlignH: 'center',
+                boundsAlignV: 'center',
+                strokeThickness: 3,
+                stroke: '#000000',
+                wordWrap: true
             });
-            this.apBar = new Bar(this.game, {
-                x: 118 + barWidth,
-                y: 10,
-                width: barWidth,
-                height: 15,
-                text: true,
-                name: 'apbar',
-                unit: 'AP',
-                max: pawn._apMax,
-                value: pawn.getAp(),
-                textColor: '#ffffff',
-                bg: {color: '#267ac9'},
-                bar: {color: '#1E90FF'},
-                textStyle: '16px Iceland'
-            });
+            hpText.setTextBounds(heart.x - 1, heart.y + 2, 40, 35);
+
+            for(var i = 0; i < pawn._apMax; i++) {
+                let energy = self.game.make.sprite(i * 30, 0, 'icon-power');
+                energy.scale.set(0.2);
+                energy.anchor.set(0);
+                this.energyGroup.add(energy);
+
+                energy.inputEnabled = true;
+                energy.events.onInputOver.add(this.buttonOver, this, 0);
+                energy.events.onInputOut.add(this.buttonOut, this, 0);
+                energy.events.onInputDown.add(this.cancel, this);
+            }
 
             pawn.skills.forEach(function (skill, index) {
                 let buttonGroup = new skillButton(self.game);
-                buttonGroup.x = index * 48;
+                buttonGroup.x = index * 35;
                 let icon = self.game.make.sprite(0, 0, 'skill-' + skill.id);
                 icon.anchor.set(0.5);
-                let frame = self.game.make.sprite(0, 0, 'skill-frame');
+                let frame = self.game.make.sprite(0, 0, 'skill-frame2');
                 frame.anchor.set(0.5);
                 buttonGroup.add(icon);
                 buttonGroup.add(frame);
 
                 frame.inputEnabled = true;
-                frame.events.onInputOver.add(self.buttonOver, self);
-                frame.events.onInputOut.add(self.buttonOut, self);
+                frame.events.onInputOver.add(self.buttonOver, self, 0, buttonGroup);
+                frame.events.onInputOut.add(self.buttonOut, self, 0, buttonGroup);
                 frame.events.onInputDown.add(self.skillSelect, self, 0, index);
 
                 self.skillsGroup.add(buttonGroup);
                 self.skills.push({ selected: false, group: buttonGroup, skill: skill});
             });
 
-            this.confirmButton = this.game.make.sprite(this.game.world.width - this.actionGroup.position.x - 6, 28, 'button-confirm');
-            this.confirmButton.anchor.set(1, 0.5);
-            this.confirmButton.inputEnabled = true;
-            this.confirmButton.events.onInputOver.add(this.buttonOver, this);
-            this.confirmButton.events.onInputOut.add(this.buttonOut, this);
-            this.confirmButton.events.onInputDown.add(this.confirm, this);
+            let buttonConfirmGroup = this.game.add.group();
+            buttonConfirmGroup.x = pawn.skills.length * 35;
+            buttonConfirmGroup.y = 0;
+            let iconConfirm = self.game.make.sprite(0, 0, 'icon-confirm');
+            iconConfirm.anchor.set(0.5);
+            let frameConfirm = self.game.make.sprite(0, 0, 'skill-frame2');
+            frameConfirm.anchor.set(0.5);
+            buttonConfirmGroup.add(iconConfirm);
+            buttonConfirmGroup.add(frameConfirm);
 
-            this.cancelButton = this.game.make.sprite(-3, 28, 'button-cancel');
-            this.cancelButton.anchor.set(0, 0.5);
-            this.cancelButton.inputEnabled = true;
-            this.cancelButton.events.onInputOver.add(this.buttonOver, this);
-            this.cancelButton.events.onInputOut.add(this.buttonOut, this);
-            this.cancelButton.events.onInputDown.add(this.cancel, this);
+            iconConfirm.inputEnabled = true;
+            iconConfirm.events.onInputOver.add(this.buttonOver, this, 0, buttonConfirmGroup);
+            iconConfirm.events.onInputOut.add(this.buttonOut, this, 0, buttonConfirmGroup);
+            iconConfirm.events.onInputDown.add(this.confirm, this);
 
-            this.mainGroup.add(bgSprite);
-            this.mainGroup.add(avatar);
+            //let buttonCancelGroup = this.game.add.group();
+            //buttonCancelGroup.x = pawn.skills.length * 35;
+            //buttonCancelGroup.y = -35;
+            //let iconCancel = self.game.make.sprite(0, 0, 'icon-cancel');
+            //iconCancel.anchor.set(0.5);
+            //let frameCancel = self.game.make.sprite(0, 0, 'skill-frame2');
+            //frameCancel.anchor.set(0.5);
+            //buttonCancelGroup.add(iconCancel);
+            //buttonCancelGroup.add(frameCancel);
+            //
+            //frameCancel.inputEnabled = true;
+            //frameCancel.events.onInputOver.add(this.buttonOver, this, 0, buttonCancelGroup);
+            //frameCancel.events.onInputOut.add(this.buttonOut, this, 0, buttonCancelGroup);
+            //frameCancel.events.onInputDown.add(this.cancel, this);
+
             this.mainGroup.add(frame);
-            this.mainGroup.add(verticalBorder);
+            this.mainGroup.add(avatar);
             this.mainGroup.add(name);
-            this.mainGroup.add(this.hpBar);
-            this.mainGroup.add(this.apBar);
+            this.mainGroup.add(heart);
+            this.mainGroup.add(hpText);
+            this.mainGroup.add(this.energyGroup);
+            //this.mainGroup.add(this.hpBar);
+            //this.mainGroup.add(this.apBar);
+
             this.actionGroup.add(this.skillsGroup);
-            this.actionGroup.add(this.cancelButton);
-            this.actionGroup.add(this.confirmButton);
+            //this.actionGroup.add(buttonCancelGroup);
+            this.actionGroup.add(buttonConfirmGroup);
             this.mainGroup.add(this.actionGroup);
             this.game.uiGroup.add(this.mainGroup);
         }
@@ -163,10 +174,13 @@ module TacticArena.UI {
 
         showApCost(pawn, apCost) {
             let remainingAp = pawn.getAp() - apCost;
-            let currentPercent = (remainingAp / pawn._apMax) * 100;
-
-            this.apBar.updateValue(remainingAp);
-            this.apBar.setPercent(currentPercent);
+            this.energyGroup.children.forEach( (child, index) => {
+                if(index >= remainingAp) {
+                    child.loadTexture('icon-power-empty');
+                } else {
+                    child.loadTexture('icon-power');
+                }
+            });
         }
 
         cancel() {
@@ -177,14 +191,19 @@ module TacticArena.UI {
             Action.ConfirmOrder.process(this.game);
         }
 
-        buttonOver(buttonSprite) {
+        buttonOver(buttonSprite, pointer, buttonGroup) {
+            console.log(this.buttonOver.arguments);
             this.isOver = true;
-            buttonSprite.scale.setTo(0.9, 0.9);
+            if(buttonGroup) {
+                buttonGroup.scale.setTo(buttonGroup.scale.x - 0.1, buttonGroup.scale.y - 0.1);
+            }
         }
 
-        buttonOut(buttonSprite) {
+        buttonOut(buttonSprite, pointer, buttonGroup) {
             this.isOver = false;
-            buttonSprite.scale.setTo(1, 1);
+            if(buttonGroup) {
+                buttonGroup.scale.setTo(buttonGroup.scale.x + 0.1, buttonGroup.scale.y + 0.1);
+            }
         }
 
         skillDeselectAll(oneIsSelected=false) {

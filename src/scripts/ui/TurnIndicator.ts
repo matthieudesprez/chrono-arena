@@ -1,27 +1,34 @@
 module TacticArena.UI {
     export class TurnIndicator {
         menu;
-        element;
+        mainGroup;
         text;
 
         constructor(menu) {
-            var self = this;
             this.menu = menu;
-            //this.menu.element.append('<div class="ui-turn-indicator"></div>');
-            //this.element = this.menu.element.find('.ui-turn-indicator');
 
-            this.text = this.menu.game.add.text(0, 0, '', {
-                font: '35px Iceland',
-                fill: '#AB9352',
+            this.mainGroup = this.menu.game.add.group();
+            this.mainGroup.x = 0;
+            this.mainGroup.y = 80;
+
+            let background = this.menu.game.make.sprite(-10, 0, 'background-bar');
+            background.anchor.set(0);
+
+            this.text = this.menu.game.add.text(0, -1, '', {
+                font: '19px Iceland',
+                fill: '#FFFFFF',
                 boundsAlignH: 'center',
-                stroke: '#FFFFFF',
-                strokeThickness: 3
-            }, this.menu.game.uiGroup);
-            this.text.setTextBounds(0, 0, this.menu.game.world.width, 32);
+                strokeThickness: 3,
+                stroke: '#000000',
+            });
+
+            this.mainGroup.add(background);
+            this.mainGroup.add(this.text);
+            this.text.setTextBounds(0, 0, this.mainGroup.width, 32);
+            this.menu.game.uiGroup.add(this.mainGroup);
         }
 
         write(turn) {
-            //this.element.html('Tour ' + ("0" + Number(turn)).slice(-2));
             this.text.text = 'Tour ' + ('0' + Number(turn)).slice(-2);
         }
 

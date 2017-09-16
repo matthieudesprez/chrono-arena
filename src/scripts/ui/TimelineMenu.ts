@@ -14,28 +14,22 @@ module TacticArena.UI {
             this.mainGroup = this.game.add.group();
             this.timelineGroup = this.game.add.group();
 
-            var bmd = this.game.add.bitmapData(this.game.world.width, 96);
-            bmd.ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
-            bmd.ctx.beginPath();
-            bmd.ctx.rect(0, 0, this.game.world.width, 96);
-            bmd.ctx.fill();
-            bmd.update();
+            let frame = this.game.make.sprite(5, 0, 'frame-bottom');
+            frame.anchor.set(0);
 
-            let bgSprite = this.game.make.sprite(0, 0, bmd);
-            bgSprite.anchor.set(0);
+            var filter = this.game.add.filter('Pixelate');
+            frame.filters = [filter];
+            filter.sizeX = 2;
+            filter.sizeY = 2;
 
-            bgSprite.inputEnabled = true;
-            bgSprite.events.onInputOver.add(this.over, this);
-            bgSprite.events.onInputOut.add(this.out, this);
+            frame.inputEnabled = true;
+            frame.events.onInputOver.add(this.over, this);
+            frame.events.onInputOut.add(this.out, this);
 
-            let border = this.game.make.sprite(0, 0, 'border');
-            border.anchor.set(0);
-
-            this.mainGroup.add(bgSprite);
-            this.mainGroup.add(border);
+            this.mainGroup.add(frame);
 
             this.mainGroup.x = 0;
-            this.mainGroup.y = Math.max(512, window.innerHeight / this.game.getScaleRatio()  - 96);
+            this.mainGroup.y = Math.min(512, window.innerHeight / this.game.getScaleRatio() - 100);
 
             this.game.uiGroup.add(this.mainGroup);
         }
@@ -73,13 +67,24 @@ module TacticArena.UI {
 
                 this.timelineGroup.scale.setTo(1.5, 1.5);
                 this.timelineGroup.x = this.game.world.width / 2 - this.timelineGroup.width / 2;
-                this.timelineGroup.y = this.mainGroup.height / 2 - this.timelineGroup.height / 2;
+                this.timelineGroup.y = this.mainGroup.height / 2 - this.timelineGroup.height / 2 + 18;
                 this.mainGroup.add(this.timelineGroup);
 
-                let buttonPrevious = self.game.make.sprite(0, this.mainGroup.height / 2 - 23, 'button-previous');
+                let buttonPrevious = self.game.make.sprite(50, 15, 'button-square-previous');
                 buttonPrevious.anchor.set(0);
-                let buttonNext = self.game.make.sprite(this.game.world.width - 37, this.mainGroup.height / 2 - 23, 'button-next');
+                buttonPrevious.scale.set(0.2);
+
+                var filter = this.game.add.filter('Pixelate');
+                filter.sizeX = 2;
+                filter.sizeY = 2;
+
+                buttonPrevious.filters = [filter];
+
+                let buttonNext = self.game.make.sprite(this.game.world.width - 85, 15, 'button-square-next');
                 buttonNext.anchor.set(0);
+                buttonNext.scale.set(0.2);
+
+                buttonNext.filters = [filter];
 
                 buttonPrevious.inputEnabled = true;
                 buttonPrevious.events.onInputDown.add(this.previous, this);

@@ -7,19 +7,16 @@ module TacticArena.UI {
             var self = this;
             this.menu = menu;
 
-            let icon = this.menu.game.make.image(this.menu.game.world.width - 33, 5, 'menu-icon');
+            let icon = this.menu.game.make.image(this.menu.game.world.width - 43, 8, 'icon-menu4');
+            icon.scale.set(0.2);
             this.menu.game.uiGroup.add(icon);
-            //this.menu.element.append('<div class="ui-ingame-menu"><a class="menu-icon"></a></div>');
-            //this.element = this.menu.element.find('.ui-ingame-menu');
 
-            //this.element.find('.menu-icon').on('click', function () {
-            //    self.showOverlay();
-            //    self.menu.element.append(
-            //        '<div class="ui-popin">' +
-            //            '<a class="close">x</a>' +
-            //            '<a class="button quit">Quit</a>' +
-            //        '</div>'
-            //    );
+            var filter = this.menu.game.add.filter('Pixelate');
+            icon.filters = [filter];
+            filter.sizeX = 2;
+            filter.sizeY = 2;
+
+
             //    self.menu.element.find('.close').on('click', function() {
             //        self.menu.element.find('.ui-overlay').remove();
             //        self.menu.element.find('.ui-popin').remove();
