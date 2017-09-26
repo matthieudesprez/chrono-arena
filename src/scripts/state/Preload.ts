@@ -30,6 +30,10 @@ module TacticArena.State {
             this.load.image('skill-frame2', 'assets/images/ui/skill-frame2.png');
             this.load.image('frame-bottom', 'assets/images/ui/frame-bottom.png');
             this.load.image('background-bar', 'assets/images/ui/background-bar.png');
+            this.load.image('background-modal', 'assets/images/ui/background-modal.png');
+            this.load.image('background-menu', 'assets/images/ui/background-menu.jpg');
+            this.load.image('bg', 'assets/images/ui/bg3.png');
+            this.load.atlasJSONArray('big-button', 'assets/images/ui/big-button.png', 'assets/images/ui/big-button.json');
 
             this.load.image('step', 'assets/images/ui/step.png');
             this.load.image('step-active', 'assets/images/ui/step-active.png');
@@ -38,6 +42,7 @@ module TacticArena.State {
             this.load.image('step-last', 'assets/images/ui/step-last.png');
             this.load.image('step-old', 'assets/images/ui/step-old.png');
 
+            this.load.image('icon-dead', 'assets/images/ui/icon-dead.png');
             this.load.image('icon-heart', 'assets/images/ui/icon-heart.png');
             this.load.image('icon-menu4', 'assets/images/ui/icon-menu4.png');
             this.load.image('icon-cancel', 'assets/images/ui/icon-cancel.png');
@@ -52,7 +57,7 @@ module TacticArena.State {
             this.load.image('skill-slash', 'assets/images/skill/slash.jpg');
             this.load.image('skill-watch', 'assets/images/skill/watch.jpg');
 
-            this.load.script('filter', 'https://cdn.rawgit.com/photonstorm/phaser/master/v2/filters/Pixelate.js');
+            //this.load.script('filter', 'https://cdn.rawgit.com/photonstorm/phaser/master/v2/filters/Pixelate.js');
             //this.load.script('BlurX', 'https://cdn.rawgit.com/photonstorm/phaser/master/v2/filters/BlurX.js');
             //this.load.script('BlurY', 'https://cdn.rawgit.com/photonstorm/phaser/master/v2/filters/BlurY.js');
 
@@ -87,25 +92,8 @@ module TacticArena.State {
         }
 
         create() {
-            var that = this;
-            //$(document).ready(function() {
-            //  that.game.state.start('main');
-            //});
-            //
             this.status.setText('Ready!');
-
-            //setTimeout(function () {
-            //    that.game.state.start("menu");
-            //}, 1000);
-            //that.game.state.start("menu");
-            //that.game.state.start("mainadventure");
-            that.game.state.start('mainsolooffline', true, false, {
-                players: [
-                    {name: 'BOT 01', faction: 'evil', player: false},
-                    {name: 'Matt', faction: 'human', player: true}
-                ]
-            }, null);
-            //that.game.state.start("lobby");
+            this.game.state.start("menu");
         }
     }
 }

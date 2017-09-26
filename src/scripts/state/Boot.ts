@@ -6,32 +6,11 @@ module TacticArena.State {
         }
 
         create() {
-            //this.game.scale.fullScreenTarget = this.parentElement;
-            //this.scale.maxHeight = window.innerHeight;
-            //this.scale.maxWidth = Math.floor( this.scale.maxHeight / 1.333 );
-            //var aspectRatio = this.game.width / this.game.height;
-            //console.log(aspectRatio);
-            //var scaleRatio = this.game.width / 512;
-            //console.log(scaleRatio);
-            //if(aspectRatio < 1) {
-            //    scaleRatio = this.game.height / 640;
-            //}
-            //console.log(this.game.height, this.game.width, this.game.height / 640, this.game.width / 608);
-            //this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
-            //this.scale.scaleMode = Phaser.ScaleManager.RESIZE;
-
             this.scale.pageAlignHorizontally = true;
             this.scale.pageAlignVertically = true;
 
             this.game.scale.fullScreenScaleMode = Phaser.ScaleManager.SHOW_ALL;
             this.game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
-            //var scale = 1 / Math.min(window.innerWidth / this.game.width, window.innerHeight / this.game.height);
-            //console.log(scale);
-            //console.log(scaleRatio);
-            //scaleRatio = 1.01;
-            //this.scale.scaleMode = Phaser.ScaleManager.USER_SCALE;
-            //scale = 1.3;
-            //this.scale.setUserScale(scale, scale);
             //this.game.renderer.renderSession.roundPixels = true;
             Phaser.Canvas.setImageRenderingCrisp(this.game.canvas);
 
@@ -55,8 +34,6 @@ module TacticArena.State {
             this.input.maxPointers = 1;
             this.stage.disableVisibilityChange = true;
             this.stage.backgroundColor = '#000000';
-
-            //this.game.scaleRatio = scaleRatio > 1 ? scaleRatio : 1;
 
             this.game.state.start('preload');
         }

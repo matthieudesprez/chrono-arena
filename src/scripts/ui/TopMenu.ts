@@ -8,12 +8,13 @@ module TacticArena.UI {
         constructor(game) {
             let self = this;
             this.game = game;
-            this.pawns = [];
+            this.pawns = {};
             this.mainGroup = this.game.add.group();
             this.mainGroup.x = 40;
             this.mainGroup.y = 37;
 
             let avatarsGroup = this.game.add.group();
+            console.log('init');
             this.game.pawns.forEach(function (pawn, index) {
                 let pawnGroup = self.game.add.group();
                 pawnGroup.x = index * 70;
@@ -22,6 +23,11 @@ module TacticArena.UI {
                 let avatar = self.game.make.sprite(0, 0, 'avatar-' + pawn.type);
                 avatar.anchor.set(0.5);
                 avatar.scale.set(0.45);
+
+                let dead = self.game.make.sprite(0, 0, 'icon-dead');
+                dead.anchor.set(0.5);
+                dead.alpha = 0;
+
                 let heart = self.game.make.sprite(-13, 25, 'icon-heart');
                 heart.anchor.set(0.5);
                 let hpText = self.game.add.text(0, 0, pawn.getHp(), {
@@ -53,6 +59,7 @@ module TacticArena.UI {
 
                 pawnGroup.add(frame);
                 pawnGroup.add(avatar);
+                pawnGroup.add(dead);
                 pawnGroup.add(heart);
                 pawnGroup.add(hpText);
                 pawnGroup.add(energy);
@@ -60,15 +67,12 @@ module TacticArena.UI {
 
                 avatarsGroup.add(pawnGroup);
 
-                self.pawns.push({hpText: hpText, apText: apText, });
-
-                //frame.inputEnabled = true;
-                //frame.events.onInputOver.add(self.buttonOver, self);
-                //frame.events.onInputOut.add(self.buttonOut, self);
-                //frame.events.onInputDown.add(self.skillSelect, self, 0, index);
-                //
-                //self.skillsGroup.add(buttonGroup);
-                //self.skills.push({ selected: false, group: buttonGroup, skill: skill});
+                self.pawns[pawn._id] = {
+                    hpText: hpText,
+                    apText: apText,
+                    dead: dead,
+                    avatar: avatar
+                };
             });
 
             this.mainGroup.add(avatarsGroup);
@@ -82,6 +86,22 @@ module TacticArena.UI {
 
         out() {
             this.isOver = false;
+        }
+
+        updateAp(pawn) {
+            this.pawns[pawn._id].apText.setText(pawn.getAp());
+        }
+
+        updateHp(pawn) {
+            let hp = pawn.getHp();
+            this.pawns[pawn._id].hpText.setText(hp);
+            if(hp <= 0) {
+                this.pawns[pawn._id].dead.alpha = 1;
+                this.pawns[pawn._id].avatar.alpha = 0.5;
+            } else {
+                this.pawns[pawn._id].dead.alpha = 0;
+                this.pawns[pawn._id].avatar.alpha = 1;
+            }
         }
     }
 }

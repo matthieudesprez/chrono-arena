@@ -186,7 +186,6 @@ module TacticArena {
 
         canMove(entity, x, y, ap = Infinity) {
             return new Promise((resolve, reject) => {
-                //this.equalPositions(entity.getPosition(), {x: x, y: y});
                 this.game.pathfinder.findPath(entity.getPosition().x, entity.getPosition().y, x, y, function (path) {
                     if (path && path.length > 0) {
                         path.shift();
@@ -211,7 +210,6 @@ module TacticArena {
             let endCornerX = Math.min(this.map.width, p.x + distance);
             let startCornerY = Math.max(0, p.y - distance);
             let endCornerY = Math.min(this.map.height, p.y + distance);
-            console.log(startCornerX, endCornerX, startCornerY, endCornerY);
             for (var x = startCornerX; x <= endCornerX; x++) {
                 for (var y = startCornerY; y <= endCornerY; y++) {
                     if (

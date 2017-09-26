@@ -59,14 +59,14 @@ module TacticArena.UI {
             return new Promise((resolve, reject) => {
                 //var filter = this.menu.game.add.filter('BlurX');
                 //var filter = this.menu.game.add.filter('BlurY');
-                var filter = this.menu.game.add.filter('Pixelate');
+                //var filter = this.menu.game.add.filter('Pixelate');
                 //filter.blur = 0;
-                this.menu.game.worldGroup.filters = [filter];
+                //this.menu.game.worldGroup.filters = [filter];
 
-                let t = this.menu.game.add.tween(filter).to( { sizeX: 100, sizeY: 100, blur: 100 }, 2000, "Quad.easeInOut", true, 0, 0, true);
-                t.onComplete.add(function () {
+                //let t = this.menu.game.add.tween(filter).to( { sizeX: 100, sizeY: 100, blur: 100 }, 2000, "Quad.easeInOut", true, 0, 0, true);
+                //t.onComplete.add(function () {
                     resolve(true);
-                }, self);
+                //}, self);
             });
         }
     }

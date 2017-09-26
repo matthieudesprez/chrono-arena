@@ -17,10 +17,10 @@ module TacticArena.UI {
             let frame = this.game.make.sprite(5, 0, 'frame-bottom');
             frame.anchor.set(0);
 
-            var filter = this.game.add.filter('Pixelate');
-            frame.filters = [filter];
-            filter.sizeX = 2;
-            filter.sizeY = 2;
+            //var filter = this.game.add.filter('Pixelate');
+            //frame.filters = [filter];
+            //filter.sizeX = 2;
+            //filter.sizeY = 2;
 
             frame.inputEnabled = true;
             frame.events.onInputOver.add(this.over, this);
@@ -29,7 +29,8 @@ module TacticArena.UI {
             this.mainGroup.add(frame);
 
             this.mainGroup.x = 0;
-            this.mainGroup.y = Math.min(512, window.innerHeight / this.game.getScaleRatio() - 100);
+            this.mainGroup.y = window.innerHeight / this.game.getScaleRatio() - 100;
+            //this.mainGroup.y = Math.min(512, window.innerHeight / this.game.getScaleRatio() - 100);
 
             this.game.uiGroup.add(this.mainGroup);
         }
@@ -74,17 +75,17 @@ module TacticArena.UI {
                 buttonPrevious.anchor.set(0);
                 buttonPrevious.scale.set(0.2);
 
-                var filter = this.game.add.filter('Pixelate');
-                filter.sizeX = 2;
-                filter.sizeY = 2;
+                //var filter = this.game.add.filter('Pixelate');
+                //filter.sizeX = 2;
+                //filter.sizeY = 2;
 
-                buttonPrevious.filters = [filter];
+                //buttonPrevious.filters = [filter];
 
                 let buttonNext = self.game.make.sprite(this.game.world.width - 85, 15, 'button-square-next');
                 buttonNext.anchor.set(0);
                 buttonNext.scale.set(0.2);
 
-                buttonNext.filters = [filter];
+                //buttonNext.filters = [filter];
 
                 buttonPrevious.inputEnabled = true;
                 buttonPrevious.events.onInputDown.add(this.previous, this);
@@ -101,7 +102,6 @@ module TacticArena.UI {
         update(current) {
             let self = this;
             this.stepsColors.forEach((stepColor:Phaser.Group, index) => {
-                console.log(stepColor, current, index);
                 stepColor.removeAll(true);
                 if(index > current) { return; }
 
@@ -109,7 +109,6 @@ module TacticArena.UI {
                 let color = self.game.make.sprite(3, 3, key);
                 color.anchor.set(0);
                 stepColor.update();
-                console.log(stepColor.add(color));
             });
         }
 

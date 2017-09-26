@@ -90,12 +90,10 @@ module TacticArena.State {
         }
 
         addDecorations() {
-            console.log('adddecorations');
             this.stageManager.addDecorations();
         }
 
         shutdown () {
-            console.log('switch');
             if(this.pointer) {
                 this.pointer.destroy();
             }

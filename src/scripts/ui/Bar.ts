@@ -22,7 +22,6 @@ module TacticArena.UI {
             if(this.config.text) {
                 this.drawText();
             }
-            console.log(this.config);
             //this.setFixedToCamera(this.config.isFixedToCamera);
         }
 

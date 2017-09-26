@@ -8,6 +8,7 @@ module TacticArena.State {
         init() {
             this.game.stage.backgroundColor = 0x000000;
             super.init();
+            this.game.world.resize(this.game.initialWidth, this.game.initialHeight);
         }
 
         createMenu() {

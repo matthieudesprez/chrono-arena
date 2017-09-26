@@ -15,7 +15,7 @@ module TacticArena.Order {
                 result = new Animation.Block(pawn, this, pawn.getPosition(), stepUnitData.positionBlocked, animate).get();
             } else {
                 if (backward && pawn.getPosition().equals(this.position)) {
-                    let direction = previousStep ? previousStep[i].order.direction : pawn.getDirection();
+                    //let direction = previousStep ? previousStep[i].order.direction : pawn.getDirection();
                     result = new Animation.Stand(pawn, this, pawn.getPosition()).get();
                 } else {
                     result = new Animation.Move(pawn, this, this.position, animate, this.direction).get();

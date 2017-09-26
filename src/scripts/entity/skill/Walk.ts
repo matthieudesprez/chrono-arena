@@ -1,6 +1,7 @@
 /// <reference path="BaseSkill.ts"/>
 module TacticArena.Entity.Skill {
     export class Walk extends TacticArena.Entity.Skill.BaseSkill {
+        uiLastPosition:Position;
 
         constructor(state, pawn) {
             super(state, pawn);
@@ -8,6 +9,7 @@ module TacticArena.Entity.Skill {
             this.name = 'Walk';
             this.description = 'Cost: 1 AP / tile; Hit: 50%';
             this.minCost = 1;
+            this.uiLastPosition = new Position(-1, -1);
         }
 
         onSelect() {
@@ -20,18 +22,22 @@ module TacticArena.Entity.Skill {
 
         cleanUI() {
             this.state.stageManager.clearHelp();
+            this.uiLastPosition = new Position(-1, -1);
         }
 
         updateUI(position) {
-            this.state.stageManager.showPossibleMove(this.pawn.getProjectionOrReal().getPosition(), this.pawn.getReal().getAp());
-            this.state.stageManager.canMove(this.pawn.getProjectionOrReal(), position.x, position.y, this.pawn.getAp()).then((path) => {
-                this.state.stageManager.clearPath(this.state.pathTilesGroup);
-                this.state.stageManager.showPath(path, this.state.pathTilesGroup);
-                this.state.uiManager.actionMenu.showApCost(this.pawn, (<any>path).length);
-            }, () => {
-                this.state.stageManager.clearPath(this.state.pathTilesGroup);
-                this.state.uiManager.actionMenu.showApCost(this.pawn, 0);
-            });
+            if(!this.uiLastPosition.equals(position)) {
+                this.uiLastPosition = position;
+                this.state.stageManager.showPossibleMove(this.pawn.getProjectionOrReal().getPosition(), this.pawn.getAp());
+                this.state.stageManager.canMove(this.pawn.getProjectionOrReal(), position.x, position.y, this.pawn.getAp()).then((path) => {
+                    this.state.stageManager.clearPath(this.state.pathTilesGroup);
+                    this.state.stageManager.showPath(path, this.state.pathTilesGroup);
+                    this.state.uiManager.actionMenu.showApCost(this.pawn, (<any>path).length);
+                }, () => {
+                    this.state.stageManager.clearPath(this.state.pathTilesGroup);
+                    this.state.uiManager.actionMenu.showApCost(this.pawn, 0);
+                });
+            }
         }
         
         order(target) {

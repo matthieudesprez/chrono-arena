@@ -39,10 +39,11 @@ var TacticArena;
             //console.log(window.screen.availHeight * window.devicePixelRatio);
             //Math.round((window.screen.availHeight * window.devicePixelRatio / 1.667) / 32) * 32
             //let height = Math.min(window.screen.availHeight * window.devicePixelRatio, 832);
-            var height = window.screen.availHeight * window.devicePixelRatio;
+            _this.initialHeight = window.screen.availHeight * window.devicePixelRatio;
+            _this.initialWidth = _this.initialHeight / 1.667;
             _this = _super.call(this, {
-                width: height / 1.667,
-                height: height,
+                width: _this.initialWidth,
+                height: _this.initialHeight,
                 renderer: headless ? Phaser.HEADLESS : Phaser.AUTO,
                 parent: 'game-container'
             }) || this;
@@ -943,7 +944,6 @@ var TacticArena;
             var previousStep = index > 0 ? this.steps[index - 1] : null;
             var promisesOrders = [];
             this.steps[index].stepUnits.forEach(function (stepUnit, i) {
-                console.log(stepUnit);
                 stepUnit.pawn.setAp(stepUnit.data.ap); // met à jour le nombre d'AP du pawn
                 promisesOrders.push(stepUnit.order.resolve(stepUnit.pawn, stepUnit.data, previousStep, animate, backward, i, self.game)); //lance l'animation
             });
@@ -1169,18 +1169,14 @@ var TacticArena;
         SignalManager.prototype.init = function () {
             var self = this;
             this.onApChange.add(function (pawn) {
-                if (self.game.resolveManager.active) {
-                    //TODO ui ap en live durant résolution
-                    //self.game.uiManager.pawnsinfosUI.updateInfos();
-                }
-                else if (self.game.uiManager.actionMenu) {
+                if (self.game.uiManager.actionMenu) {
                     self.game.uiManager.actionMenu.showApCost(pawn, 0);
                 }
+                self.game.uiManager.topMenu.updateAp(pawn);
             });
             this.onHpChange.add(function (pawn) {
-                //TODO ui hp en live durant résolution
-                //self.game.uiManager.pawnsinfosUI.updateInfos();
                 self.game.stageManager.handleTile(pawn);
+                self.game.uiManager.topMenu.updateHp(pawn);
             });
             this.onOrderChange.add(function (pawn) {
                 self.game.uiManager.ordersnotificationsUI.update(self.game.orderManager.getOrders(pawn._id));
@@ -1422,7 +1418,6 @@ var TacticArena;
             var _this = this;
             if (ap === void 0) { ap = Infinity; }
             return new Promise(function (resolve, reject) {
-                //this.equalPositions(entity.getPosition(), {x: x, y: y});
                 _this.game.pathfinder.findPath(entity.getPosition().x, entity.getPosition().y, x, y, function (path) {
                     if (path && path.length > 0) {
                         path.shift();
@@ -1450,7 +1445,6 @@ var TacticArena;
             var endCornerX = Math.min(this.map.width, p.x + distance);
             var startCornerY = Math.max(0, p.y - distance);
             var endCornerY = Math.min(this.map.height, p.y + distance);
-            console.log(startCornerX, endCornerX, startCornerY, endCornerY);
             for (var x = startCornerX; x <= endCornerX; x++) {
                 for (var y = startCornerY; y <= endCornerY; y++) {
                     if ((d == 'W' && p.x > x && p.y == y ||
@@ -2626,7 +2620,6 @@ var TacticArena;
             Move.prototype.get = function () {
                 var _this = this;
                 return this.pawn.moveTo(this.position.x, this.position.y, null, this.animate).then(function (res) {
-                    console.log(_this.direction);
                     if (_this.direction) {
                         return new Animation.Stand(_this.pawn, _this.order, _this.position).get();
                     }
@@ -2857,7 +2850,7 @@ var TacticArena;
                 }
                 else {
                     if (backward && pawn.getPosition().equals(this.position)) {
-                        var direction = previousStep ? previousStep[i].order.direction : pawn.getDirection();
+                        //let direction = previousStep ? previousStep[i].order.direction : pawn.getDirection();
                         result = new TacticArena.Animation.Stand(pawn, this, pawn.getPosition()).get();
                     }
                     else {
@@ -3203,6 +3196,7 @@ var TacticArena;
                     _this.name = 'Walk';
                     _this.description = 'Cost: 1 AP / tile; Hit: 50%';
                     _this.minCost = 1;
+                    _this.uiLastPosition = new TacticArena.Position(-1, -1);
                     return _this;
                 }
                 Walk.prototype.onSelect = function () {
@@ -3213,18 +3207,22 @@ var TacticArena;
                 };
                 Walk.prototype.cleanUI = function () {
                     this.state.stageManager.clearHelp();
+                    this.uiLastPosition = new TacticArena.Position(-1, -1);
                 };
                 Walk.prototype.updateUI = function (position) {
                     var _this = this;
-                    this.state.stageManager.showPossibleMove(this.pawn.getProjectionOrReal().getPosition(), this.pawn.getReal().getAp());
-                    this.state.stageManager.canMove(this.pawn.getProjectionOrReal(), position.x, position.y, this.pawn.getAp()).then(function (path) {
-                        _this.state.stageManager.clearPath(_this.state.pathTilesGroup);
-                        _this.state.stageManager.showPath(path, _this.state.pathTilesGroup);
-                        _this.state.uiManager.actionMenu.showApCost(_this.pawn, path.length);
-                    }, function () {
-                        _this.state.stageManager.clearPath(_this.state.pathTilesGroup);
-                        _this.state.uiManager.actionMenu.showApCost(_this.pawn, 0);
-                    });
+                    if (!this.uiLastPosition.equals(position)) {
+                        this.uiLastPosition = position;
+                        this.state.stageManager.showPossibleMove(this.pawn.getProjectionOrReal().getPosition(), this.pawn.getAp());
+                        this.state.stageManager.canMove(this.pawn.getProjectionOrReal(), position.x, position.y, this.pawn.getAp()).then(function (path) {
+                            _this.state.stageManager.clearPath(_this.state.pathTilesGroup);
+                            _this.state.stageManager.showPath(path, _this.state.pathTilesGroup);
+                            _this.state.uiManager.actionMenu.showApCost(_this.pawn, path.length);
+                        }, function () {
+                            _this.state.stageManager.clearPath(_this.state.pathTilesGroup);
+                            _this.state.uiManager.actionMenu.showApCost(_this.pawn, 0);
+                        });
+                    }
                 };
                 Walk.prototype.order = function (target) {
                     var _this = this;
@@ -3322,6 +3320,7 @@ var TacticArena;
             BaseState.prototype.init = function () {
                 this.game.stage.backgroundColor = 0x000000;
                 _super.prototype.init.call(this);
+                this.game.world.resize(this.game.initialWidth, this.game.initialHeight);
             };
             BaseState.prototype.createMenu = function () {
             };
@@ -3393,11 +3392,9 @@ var TacticArena;
                 this.stageManager.init(this.mapName);
             };
             BasePlayable.prototype.addDecorations = function () {
-                console.log('adddecorations');
                 this.stageManager.addDecorations();
             };
             BasePlayable.prototype.shutdown = function () {
-                console.log('switch');
                 if (this.pointer) {
                     this.pointer.destroy();
                 }
@@ -3538,30 +3535,10 @@ var TacticArena;
                 this.load.image('loading', 'assets/images/loading.png');
             };
             Boot.prototype.create = function () {
-                //this.game.scale.fullScreenTarget = this.parentElement;
-                //this.scale.maxHeight = window.innerHeight;
-                //this.scale.maxWidth = Math.floor( this.scale.maxHeight / 1.333 );
-                //var aspectRatio = this.game.width / this.game.height;
-                //console.log(aspectRatio);
-                //var scaleRatio = this.game.width / 512;
-                //console.log(scaleRatio);
-                //if(aspectRatio < 1) {
-                //    scaleRatio = this.game.height / 640;
-                //}
-                //console.log(this.game.height, this.game.width, this.game.height / 640, this.game.width / 608);
-                //this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
-                //this.scale.scaleMode = Phaser.ScaleManager.RESIZE;
                 this.scale.pageAlignHorizontally = true;
                 this.scale.pageAlignVertically = true;
                 this.game.scale.fullScreenScaleMode = Phaser.ScaleManager.SHOW_ALL;
                 this.game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
-                //var scale = 1 / Math.min(window.innerWidth / this.game.width, window.innerHeight / this.game.height);
-                //console.log(scale);
-                //console.log(scaleRatio);
-                //scaleRatio = 1.01;
-                //this.scale.scaleMode = Phaser.ScaleManager.USER_SCALE;
-                //scale = 1.3;
-                //this.scale.setUserScale(scale, scale);
                 //this.game.renderer.renderSession.roundPixels = true;
                 Phaser.Canvas.setImageRenderingCrisp(this.game.canvas);
                 //this.game.scale.setResizeCallback(function (scale, parentBounds) {
@@ -3582,7 +3559,6 @@ var TacticArena;
                 this.input.maxPointers = 1;
                 this.stage.disableVisibilityChange = true;
                 this.stage.backgroundColor = '#000000';
-                //this.game.scaleRatio = scaleRatio > 1 ? scaleRatio : 1;
                 this.game.state.start('preload');
             };
             return Boot;
@@ -3860,29 +3836,72 @@ var TacticArena;
                 return _super !== null && _super.apply(this, arguments) || this;
             }
             Menu.prototype.create = function () {
-                var that = this;
-                _super.prototype.createMenu.call(this);
-                $('#game-menu .ui').html('<div class="button singleplayer"><a>Single Player</a></div>' +
-                    //'<div class="button multiplayerlocal"><a>Multi Player Local</a></div>' +
-                    '<div class="button multiplayeronline"><a>Multi Player Online</a></div>' +
-                    '<div class="button options"><a>Options</a></div>' +
-                    '<div class="button"><br/><br/></div>' +
-                    '<div class="button">' +
-                    '<a class="fa fa-envelope" href="mailto:matthieu.desprez@gmail.com" title="Contact me"></a>' +
-                    '&nbsp;&nbsp;&nbsp;&nbsp;<a class="fa fa-github" href="https://github.com/Edistra" target="_blank"></a>' +
-                    '</div>');
-                $('.singleplayer').click(function () {
-                    that.game.state.start('mainadventure');
-                    //that.game.state.start('mainsolooffline', true, false, {
-                    //    players: [
-                    //        {name: 'Player', faction: 'human', player: true},
-                    //        {name: 'BOT 01', faction: 'evil', player: false}
-                    //    ]
-                    //}, null);
+                this.menuGroup = this.game.add.group();
+                this.menuGroup.x = 0;
+                this.menuGroup.y = 0;
+                var background = this.game.add.image(this.game.world.centerX, 0, 'bg');
+                background.anchor.set(0.5, 0);
+                background.scale.set(0.9);
+                var buttonsGroup = this.game.add.group();
+                buttonsGroup.x = this.game.world.centerX;
+                buttonsGroup.y = this.game.world.centerY / 3;
+                var singleplayerButton = this.game.make.button(0, 0, 'big-button', function () { }, this, 'background-button-hover', 'background-button');
+                singleplayerButton.anchor.set(0.5, 0);
+                singleplayerButton.scale.set(0.7);
+                singleplayerButton.inputEnabled = true;
+                singleplayerButton.events.onInputDown.add(this.startSinglePlayer, this, 0);
+                var singleplayerButtonLabel = this.game.add.text(0, 42, 'Training', {
+                    font: '20px Press Start 2P',
+                    fill: '#ffffff',
+                    boundsAlignH: 'right',
+                    boundsAlignV: 'top',
                 });
-                $('.multiplayerlocal').click(function () { that.game.state.start('main'); });
-                $('.multiplayeronline').click(function () { that.game.state.start('lobby'); });
-                $('.options').click(function () { that.game.state.start('options'); });
+                singleplayerButtonLabel.anchor.set(0.5, 0);
+                var versusonlineButton = this.game.make.button(0, 140, 'big-button', function () { }, this, 'background-button-hover', 'background-button');
+                versusonlineButton.anchor.set(0.5, 0);
+                versusonlineButton.scale.set(0.7);
+                versusonlineButton.inputEnabled = true;
+                versusonlineButton.events.onInputDown.add(this.startMultiPlayer, this, 0);
+                var versusonlineButtonLabel = this.game.add.text(0, 182, '1v1 Online', {
+                    font: '20px Press Start 2P',
+                    fill: '#ffffff',
+                    boundsAlignH: 'right',
+                    boundsAlignV: 'top',
+                });
+                versusonlineButtonLabel.anchor.set(0.5, 0);
+                var optionButton = this.game.make.button(0, 280, 'big-button', function () { }, this, 'background-button-hover', 'background-button');
+                optionButton.anchor.set(0.5, 0);
+                optionButton.scale.set(0.7);
+                optionButton.inputEnabled = true;
+                optionButton.events.onInputDown.add(this.startOptions, this, 0);
+                var optionButtonLabel = this.game.add.text(0, 322, 'Options', {
+                    font: '20px Press Start 2P',
+                    fill: '#ffffff',
+                    boundsAlignH: 'right',
+                    boundsAlignV: 'top',
+                });
+                optionButtonLabel.anchor.set(0.5, 0);
+                buttonsGroup.add(singleplayerButton);
+                buttonsGroup.add(singleplayerButtonLabel);
+                buttonsGroup.add(versusonlineButton);
+                buttonsGroup.add(versusonlineButtonLabel);
+                buttonsGroup.add(optionButton);
+                buttonsGroup.add(optionButtonLabel);
+                //this.menuGroup.add(buttonsGroup);
+            };
+            Menu.prototype.startSinglePlayer = function () {
+                this.game.state.start('mainsolooffline', true, false, {
+                    players: [
+                        { name: 'BOT 01', faction: 'evil', player: false },
+                        { name: 'Matt', faction: 'human', player: true }
+                    ]
+                }, null);
+            };
+            Menu.prototype.startMultiPlayer = function () {
+                //$('.multiplayeronline').click(function () { that.game.state.start('lobby'); });
+            };
+            Menu.prototype.startOptions = function () {
+                //this.game.state.start('options');
             };
             return Menu;
         }(TacticArena.State.BaseState));
@@ -3899,12 +3918,33 @@ var TacticArena;
                 return _super !== null && _super.apply(this, arguments) || this;
             }
             Options.prototype.create = function () {
-                var that = this;
-                _super.prototype.createMenu.call(this);
-                $('#game-menu .ui').html('<div class="button back"><a>Back</a></div>');
-                $('.back').click(function () {
-                    that.game.state.start('menu');
+                this.menuGroup = this.game.add.group();
+                this.menuGroup.x = 0;
+                this.menuGroup.y = 0;
+                console.log(this.game.world);
+                var background = this.game.add.image(this.game.world.centerX, this.game.world.centerY, 'bg');
+                background.anchor.set(0.5);
+                background.scale.set(2);
+                var buttonsGroup = this.game.add.group();
+                buttonsGroup.x = this.game.world.centerX;
+                buttonsGroup.y = this.game.world.centerY / 2;
+                var returnButton = this.game.make.button(0, 280, 'big-button', function () { }, this, 'background-button-hover', 'background-button');
+                returnButton.anchor.set(0.5, 0);
+                returnButton.scale.set(0.7);
+                returnButton.inputEnabled = true;
+                returnButton.events.onInputDown.add(this.startMenu, this, 0);
+                var returnButtonLabel = this.game.add.text(0, 322, 'Return', {
+                    font: '20px Press Start 2P',
+                    fill: '#ffffff',
+                    boundsAlignH: 'right',
+                    boundsAlignV: 'top',
                 });
+                returnButtonLabel.anchor.set(0.5, 0);
+                buttonsGroup.add(returnButton);
+                buttonsGroup.add(returnButtonLabel);
+            };
+            Options.prototype.startMenu = function () {
+                this.game.state.start("menu");
             };
             return Options;
         }(TacticArena.State.BaseState));
@@ -3945,12 +3985,17 @@ var TacticArena;
                 this.load.image('skill-frame2', 'assets/images/ui/skill-frame2.png');
                 this.load.image('frame-bottom', 'assets/images/ui/frame-bottom.png');
                 this.load.image('background-bar', 'assets/images/ui/background-bar.png');
+                this.load.image('background-modal', 'assets/images/ui/background-modal.png');
+                this.load.image('background-menu', 'assets/images/ui/background-menu.jpg');
+                this.load.image('bg', 'assets/images/ui/bg3.png');
+                this.load.atlasJSONArray('big-button', 'assets/images/ui/big-button.png', 'assets/images/ui/big-button.json');
                 this.load.image('step', 'assets/images/ui/step.png');
                 this.load.image('step-active', 'assets/images/ui/step-active.png');
                 this.load.image('step-first', 'assets/images/ui/step-first.png');
                 this.load.image('step-join', 'assets/images/ui/step-join.png');
                 this.load.image('step-last', 'assets/images/ui/step-last.png');
                 this.load.image('step-old', 'assets/images/ui/step-old.png');
+                this.load.image('icon-dead', 'assets/images/ui/icon-dead.png');
                 this.load.image('icon-heart', 'assets/images/ui/icon-heart.png');
                 this.load.image('icon-menu4', 'assets/images/ui/icon-menu4.png');
                 this.load.image('icon-cancel', 'assets/images/ui/icon-cancel.png');
@@ -3963,7 +4008,7 @@ var TacticArena;
                 this.load.image('skill-wind', 'assets/images/skill/wind.jpg');
                 this.load.image('skill-slash', 'assets/images/skill/slash.jpg');
                 this.load.image('skill-watch', 'assets/images/skill/watch.jpg');
-                this.load.script('filter', 'https://cdn.rawgit.com/photonstorm/phaser/master/v2/filters/Pixelate.js');
+                //this.load.script('filter', 'https://cdn.rawgit.com/photonstorm/phaser/master/v2/filters/Pixelate.js');
                 //this.load.script('BlurX', 'https://cdn.rawgit.com/photonstorm/phaser/master/v2/filters/BlurX.js');
                 //this.load.script('BlurY', 'https://cdn.rawgit.com/photonstorm/phaser/master/v2/filters/BlurY.js');
                 this.load.image('avatar-blondy', 'assets/images/blondy_avatar.png');
@@ -3990,24 +4035,8 @@ var TacticArena;
                 this.load.start();
             };
             Preload.prototype.create = function () {
-                var that = this;
-                //$(document).ready(function() {
-                //  that.game.state.start('main');
-                //});
-                //
                 this.status.setText('Ready!');
-                //setTimeout(function () {
-                //    that.game.state.start("menu");
-                //}, 1000);
-                //that.game.state.start("menu");
-                //that.game.state.start("mainadventure");
-                that.game.state.start('mainsolooffline', true, false, {
-                    players: [
-                        { name: 'BOT 01', faction: 'evil', player: false },
-                        { name: 'Matt', faction: 'human', player: true }
-                    ]
-                }, null);
-                //that.game.state.start("lobby");
+                this.game.state.start("menu");
             };
             return Preload;
         }(TacticArena.State.BaseState));
@@ -5910,7 +5939,8 @@ var TacticArena;
                 this.skills = [];
                 this.mainGroup = this.game.add.group();
                 this.mainGroup.x = 0;
-                this.mainGroup.y = Math.min(512, window.innerHeight / this.game.getScaleRatio() - 100);
+                this.mainGroup.y = window.innerHeight / this.game.getScaleRatio() - 100;
+                //this.mainGroup.y = Math.min(512, window.innerHeight / this.game.getScaleRatio() - 100);
                 //this.mainGroup.y = 512;
                 this.actionGroup = this.game.add.group();
                 this.actionGroup.x = 178;
@@ -5923,10 +5953,10 @@ var TacticArena;
                 this.energyGroup.y = 14;
                 var frame = this.game.make.sprite(5, 0, 'frame-bottom');
                 frame.anchor.set(0);
-                var filter = this.game.add.filter('Pixelate');
-                frame.filters = [filter];
-                filter.sizeX = 2;
-                filter.sizeY = 2;
+                //var filter = this.game.add.filter('Pixelate');
+                //frame.filters = [filter];
+                //filter.sizeX = 2;
+                //filter.sizeY = 2;
                 frame.inputEnabled = true;
                 frame.events.onInputOver.add(this.over, this);
                 frame.events.onInputOut.add(this.out, this);
@@ -6123,7 +6153,6 @@ var TacticArena;
                 if (_this.config.text) {
                     _this.drawText();
                 }
-                console.log(_this.config);
                 return _this;
                 //this.setFixedToCamera(this.config.isFixedToCamera);
             }
@@ -6359,8 +6388,6 @@ var TacticArena;
                 var self = this;
                 this.state = state;
                 this.game = state.game;
-                //$('body').append('<div id="dialog-confirm" class="ui-dialog" title=""><p></p></div>');
-                //this.element = $('#dialog-confirm');
                 this.game.modals = {};
                 this.createModal({
                     type: "modal1",
@@ -6368,60 +6395,61 @@ var TacticArena;
                     //modalCloseOnInput: true,
                     fixedToCamera: true,
                     itemsArr: [
-                        //    {
-                        //    type: "graphics",
-                        //    graphicColor: "0xffffff",
-                        //    graphicWidth: 300,
-                        //    graphicHeight: 300,
-                        //    graphicRadius: 40
-                        //},
                         {
                             type: "image",
-                            content: "modal-bg",
-                            offsetY: -20,
+                            content: "background-modal",
+                            offsetY: -100,
                             contentScale: 1
                         },
                         {
-                            type: "image",
-                            content: "modal-close",
-                            offsetY: -150,
-                            offsetX: 210,
-                            contentScale: 1,
+                            type: "text",
+                            content: "Pause",
+                            fontFamily: "Press Start 2P",
+                            fontSize: 25,
+                            color: "0x000000",
+                            offsetY: -420
+                        },
+                        {
+                            type: "button",
+                            atlasParent: "big-button",
+                            content: "background-button",
+                            buttonHover: "background-button-hover",
+                            offsetY: -280,
+                            contentScale: 0.7,
                             callback: function () {
-                                self.hideModal("modal1");
+                                self.hideModal('modal1');
                             }
                         },
                         {
                             type: "text",
-                            content: "The white {behind} me\n{is} a {[Phaser.Graphic]}",
+                            content: "Resume",
                             fontFamily: "Press Start 2P",
-                            fontSize: 12,
-                            color: "0xffffff",
-                            offsetY: -50
+                            fontSize: 25,
+                            color: "0x000000",
+                            offsetY: -280
+                        },
+                        {
+                            type: "button",
+                            atlasParent: "big-button",
+                            content: "background-button",
+                            buttonHover: "background-button-hover",
+                            offsetY: -140,
+                            contentScale: 0.7,
+                            callback: function () {
+                                self.game.state.start('menu');
+                            }
+                        },
+                        {
+                            type: "text",
+                            content: "Quit",
+                            fontFamily: "Press Start 2P",
+                            fontSize: 25,
+                            color: "0x000000",
+                            offsetY: -140
                         },
                     ]
                 });
             }
-            Dialog.prototype.show = function (title, message, confirmTitle, cancelTitle, confirmFunction, cancelFunction) {
-                $("#dialog-confirm").attr('title', title);
-                $("#dialog-confirm p").html(message);
-                $("#dialog-confirm").dialog({
-                    resizable: false,
-                    height: "auto",
-                    width: 400,
-                    modal: true,
-                    buttons: [
-                        {
-                            text: confirmTitle,
-                            click: confirmFunction
-                        },
-                        {
-                            text: cancelTitle,
-                            click: cancelFunction
-                        }
-                    ]
-                });
-            };
             Dialog.prototype.createModal = function (options) {
                 var self = this;
                 var type = options.type || ''; // must be unique
@@ -6728,56 +6756,28 @@ var TacticArena;
     (function (UI) {
         var IngameMenu = (function () {
             function IngameMenu(menu) {
-                var self = this;
                 this.menu = menu;
+                this.active = false;
+                this.dialogUI = new UI.Dialog(this.menu.game);
                 var icon = this.menu.game.make.image(this.menu.game.world.width - 43, 8, 'icon-menu4');
                 icon.scale.set(0.2);
                 this.menu.game.uiGroup.add(icon);
-                var filter = this.menu.game.add.filter('Pixelate');
-                icon.filters = [filter];
-                filter.sizeX = 2;
-                filter.sizeY = 2;
-                //    self.menu.element.find('.close').on('click', function() {
-                //        self.menu.element.find('.ui-overlay').remove();
-                //        self.menu.element.find('.ui-popin').remove();
-                //    });
-                //    self.menu.element.find('.button.quit').on('click', function() {
-                //        self.menu.game.state.start('menu');
-                //    });
-                //});
+                icon.inputEnabled = true;
+                icon.events.onInputDown.add(this.open, this);
+                //this.open();
             }
-            //showOverlay() {
-            //    this.menu.element.append('<div class="ui-overlay"></div>');
-            //}
+            IngameMenu.prototype.showOverlay = function () {
+            };
             IngameMenu.prototype.gameOver = function (msg) {
-                //let self = this;
-                //this.showOverlay();
-                //this.menu.element.append(
-                //    '<div class="ui-popin">' +
-                //    '<a class="button">' + msg + '</a>' +
-                //    '<a class="button">-</a>' +
-                //    '<a class="button quit">Quit</a>' +
-                //    '</div>'
-                //);
-                //this.menu.element.find('.button.quit').on('click', function() {
-                //    self.menu.game.state.start('menu');
-                //});
             };
             IngameMenu.prototype.show = function (msg) {
-                //let self = this;
-                //this.showOverlay();
-                //this.menu.element.append(
-                //    '<div class="ui-popin">' +
-                //    '<a class="button">' + msg + '</a>' +
-                //    '</div>'
-                //);
-                //this.menu.element.find('.button.quit').on('click', function() {
-                //    self.menu.game.state.start('menu');
-                //});
             };
             IngameMenu.prototype.close = function () {
-                //this.menu.element.find('.ui-overlay').remove();
-                //this.menu.element.find('.ui-popin').remove();
+                this.active = false;
+            };
+            IngameMenu.prototype.open = function () {
+                this.active = true;
+                this.dialogUI.showModal("modal1");
             };
             return IngameMenu;
         }());
@@ -6822,6 +6822,8 @@ var TacticArena;
                 this.fiveKey.onDown.add(this.fiveKeyPress, this, 0, this.menu);
                 this.wKey = this.menu.game.input.keyboard.addKey(Phaser.KeyCode.W);
                 this.wKey.onDown.add(this.wKeyPress, this, 0, this.menu);
+                this.escapeKey = this.menu.game.input.keyboard.addKey(Phaser.KeyCode.ESC);
+                this.escapeKey.onDown.add(this.escapeKeyPress, this, 0, this.menu);
             };
             KeyManager.prototype.leftKeyPressed = function (self, uiManager) {
                 if (uiManager.process)
@@ -6834,7 +6836,6 @@ var TacticArena;
                 }
             };
             KeyManager.prototype.rightKeyPressed = function (self, uiManager) {
-                console.log(uiManager.process, uiManager.game.resolveManager.processing, uiManager.game.resolveManager.active);
                 if (uiManager.process)
                     return false;
                 if (uiManager.game.resolveManager.active && !uiManager.game.resolveManager.processing) {
@@ -6869,6 +6870,9 @@ var TacticArena;
                 }
             };
             KeyManager.prototype.backKeyPressed = function (self, uiManager) {
+                TacticArena.Action.Cancel.process(uiManager.game);
+            };
+            KeyManager.prototype.escapeKeyPress = function (self, uiManager) {
                 TacticArena.Action.Cancel.process(uiManager.game);
             };
             KeyManager.prototype.pauseResolve = function (self, uiManager) {
@@ -7118,21 +7122,10 @@ var TacticArena;
                 this.game.worldGroup.add(this.marker);
                 this.game.input.addMoveCallback(this.update, this);
                 this.game.input.onDown.add(this.onGridLeftClick, this);
-                //this.game.input.onDown.add(this.onGridRightClick, this);
-                //this.game.input.pointer1.capture = true;
-                //$('canvas').bind('contextmenu', function(e){ return false; });
+                document.addEventListener('contextmenu', function (e) { e.preventDefault(); });
             }
             Pointer.prototype.getPosition = function () {
                 return this.game.stageManager.getPosition(this.game.input.activePointer.position);
-            };
-            Pointer.prototype.getTilePosition = function () {
-                return {
-                    x: this.game.stageManager.collisionLayer.getTileX(this.game.input.activePointer.worldX / this.game.worldGroup.scale.x),
-                    y: this.game.stageManager.collisionLayer.getTileY(this.game.input.activePointer.worldY / this.game.worldGroup.scale.y)
-                };
-            };
-            Pointer.prototype.getTilePositionFromMarkerPosition = function () {
-                return new TacticArena.Position(this.marker.x / this.game.tileSize, this.marker.y / this.game.tileSize);
             };
             Pointer.prototype.updateMarker = function () {
                 this.show();
@@ -7140,11 +7133,16 @@ var TacticArena;
                 this.marker.x = p.x * this.game.tileSize;
                 this.marker.y = p.y * this.game.tileSize;
             };
-            Pointer.prototype.update = function () {
+            Pointer.prototype.update = function (pointer, x, y, clicked) {
                 if (!this.game.process && !this.game.uiManager.isOver()) {
-                    this.updateMarker();
+                    var target_1 = this.getPosition();
+                    if (this.game.stageManager.isObstacle(target_1)) {
+                        this.hide();
+                    }
+                    else {
+                        this.updateMarker();
+                    }
                     var selectedSkill = this.game.uiManager.actionMenu.getSelectedSkill();
-                    var target_1 = this.getTilePositionFromMarkerPosition();
                     if (selectedSkill) {
                         if (selectedSkill.canOrder()) {
                             selectedSkill.updateUI(target_1);
@@ -7169,7 +7167,7 @@ var TacticArena;
             Pointer.prototype.onGridLeftClick = function () {
                 if (!this.game.process && !this.game.uiManager.isOver()) {
                     var selectedSkill = this.game.uiManager.actionMenu.getSelectedSkill();
-                    var target_2 = this.getTilePositionFromMarkerPosition();
+                    var target_2 = this.getPosition();
                     if (selectedSkill) {
                         if (selectedSkill.canOrder()) {
                             selectedSkill.order(target_2);
@@ -7204,7 +7202,7 @@ var TacticArena;
                 this.game.input.mousePointer.leftButton.onDown.removeAll();
                 this.game.input.mousePointer.rightButton.onDown.removeAll();
                 this.game.input.mouse.capture = false;
-                $('canvas').off('contextmenu');
+                //$('canvas').off('contextmenu');
             };
             return Pointer;
         }());
@@ -7318,16 +7316,17 @@ var TacticArena;
                 this.timelineGroup = this.game.add.group();
                 var frame = this.game.make.sprite(5, 0, 'frame-bottom');
                 frame.anchor.set(0);
-                var filter = this.game.add.filter('Pixelate');
-                frame.filters = [filter];
-                filter.sizeX = 2;
-                filter.sizeY = 2;
+                //var filter = this.game.add.filter('Pixelate');
+                //frame.filters = [filter];
+                //filter.sizeX = 2;
+                //filter.sizeY = 2;
                 frame.inputEnabled = true;
                 frame.events.onInputOver.add(this.over, this);
                 frame.events.onInputOut.add(this.out, this);
                 this.mainGroup.add(frame);
                 this.mainGroup.x = 0;
-                this.mainGroup.y = Math.min(512, window.innerHeight / this.game.getScaleRatio() - 100);
+                this.mainGroup.y = window.innerHeight / this.game.getScaleRatio() - 100;
+                //this.mainGroup.y = Math.min(512, window.innerHeight / this.game.getScaleRatio() - 100);
                 this.game.uiGroup.add(this.mainGroup);
             }
             TimelineMenu.prototype.init = function (steps_number) {
@@ -7367,14 +7366,14 @@ var TacticArena;
                     var buttonPrevious = self.game.make.sprite(50, 15, 'button-square-previous');
                     buttonPrevious.anchor.set(0);
                     buttonPrevious.scale.set(0.2);
-                    var filter = _this.game.add.filter('Pixelate');
-                    filter.sizeX = 2;
-                    filter.sizeY = 2;
-                    buttonPrevious.filters = [filter];
+                    //var filter = this.game.add.filter('Pixelate');
+                    //filter.sizeX = 2;
+                    //filter.sizeY = 2;
+                    //buttonPrevious.filters = [filter];
                     var buttonNext = self.game.make.sprite(_this.game.world.width - 85, 15, 'button-square-next');
                     buttonNext.anchor.set(0);
                     buttonNext.scale.set(0.2);
-                    buttonNext.filters = [filter];
+                    //buttonNext.filters = [filter];
                     buttonPrevious.inputEnabled = true;
                     buttonPrevious.events.onInputDown.add(_this.previous, _this);
                     buttonNext.inputEnabled = true;
@@ -7387,7 +7386,6 @@ var TacticArena;
             TimelineMenu.prototype.update = function (current) {
                 var self = this;
                 this.stepsColors.forEach(function (stepColor, index) {
-                    console.log(stepColor, current, index);
                     stepColor.removeAll(true);
                     if (index > current) {
                         return;
@@ -7396,7 +7394,6 @@ var TacticArena;
                     var color = self.game.make.sprite(3, 3, key);
                     color.anchor.set(0);
                     stepColor.update();
-                    console.log(stepColor.add(color));
                 });
             };
             TimelineMenu.prototype.clean = function () {
@@ -7433,11 +7430,12 @@ var TacticArena;
             function TopMenu(game) {
                 var self = this;
                 this.game = game;
-                this.pawns = [];
+                this.pawns = {};
                 this.mainGroup = this.game.add.group();
                 this.mainGroup.x = 40;
                 this.mainGroup.y = 37;
                 var avatarsGroup = this.game.add.group();
+                console.log('init');
                 this.game.pawns.forEach(function (pawn, index) {
                     var pawnGroup = self.game.add.group();
                     pawnGroup.x = index * 70;
@@ -7446,6 +7444,9 @@ var TacticArena;
                     var avatar = self.game.make.sprite(0, 0, 'avatar-' + pawn.type);
                     avatar.anchor.set(0.5);
                     avatar.scale.set(0.45);
+                    var dead = self.game.make.sprite(0, 0, 'icon-dead');
+                    dead.anchor.set(0.5);
+                    dead.alpha = 0;
                     var heart = self.game.make.sprite(-13, 25, 'icon-heart');
                     heart.anchor.set(0.5);
                     var hpText = self.game.add.text(0, 0, pawn.getHp(), {
@@ -7475,19 +7476,18 @@ var TacticArena;
                     apText.setTextBounds(energy.x, energy.y + 4, energy.width, energy.height);
                     pawnGroup.add(frame);
                     pawnGroup.add(avatar);
+                    pawnGroup.add(dead);
                     pawnGroup.add(heart);
                     pawnGroup.add(hpText);
                     pawnGroup.add(energy);
                     pawnGroup.add(apText);
                     avatarsGroup.add(pawnGroup);
-                    self.pawns.push({ hpText: hpText, apText: apText, });
-                    //frame.inputEnabled = true;
-                    //frame.events.onInputOver.add(self.buttonOver, self);
-                    //frame.events.onInputOut.add(self.buttonOut, self);
-                    //frame.events.onInputDown.add(self.skillSelect, self, 0, index);
-                    //
-                    //self.skillsGroup.add(buttonGroup);
-                    //self.skills.push({ selected: false, group: buttonGroup, skill: skill});
+                    self.pawns[pawn._id] = {
+                        hpText: hpText,
+                        apText: apText,
+                        dead: dead,
+                        avatar: avatar
+                    };
                 });
                 this.mainGroup.add(avatarsGroup);
                 this.game.uiGroup.add(this.mainGroup);
@@ -7497,6 +7497,21 @@ var TacticArena;
             };
             TopMenu.prototype.out = function () {
                 this.isOver = false;
+            };
+            TopMenu.prototype.updateAp = function (pawn) {
+                this.pawns[pawn._id].apText.setText(pawn.getAp());
+            };
+            TopMenu.prototype.updateHp = function (pawn) {
+                var hp = pawn.getHp();
+                this.pawns[pawn._id].hpText.setText(hp);
+                if (hp <= 0) {
+                    this.pawns[pawn._id].dead.alpha = 1;
+                    this.pawns[pawn._id].avatar.alpha = 0.5;
+                }
+                else {
+                    this.pawns[pawn._id].dead.alpha = 0;
+                    this.pawns[pawn._id].avatar.alpha = 1;
+                }
             };
             return TopMenu;
         }());
@@ -7556,17 +7571,16 @@ var TacticArena;
                 });
             };
             Transition.prototype.filterAnimation = function () {
-                var _this = this;
                 return new Promise(function (resolve, reject) {
                     //var filter = this.menu.game.add.filter('BlurX');
                     //var filter = this.menu.game.add.filter('BlurY');
-                    var filter = _this.menu.game.add.filter('Pixelate');
+                    //var filter = this.menu.game.add.filter('Pixelate');
                     //filter.blur = 0;
-                    _this.menu.game.worldGroup.filters = [filter];
-                    var t = _this.menu.game.add.tween(filter).to({ sizeX: 100, sizeY: 100, blur: 100 }, 2000, "Quad.easeInOut", true, 0, 0, true);
-                    t.onComplete.add(function () {
-                        resolve(true);
-                    }, self);
+                    //this.menu.game.worldGroup.filters = [filter];
+                    //let t = this.menu.game.add.tween(filter).to( { sizeX: 100, sizeY: 100, blur: 100 }, 2000, "Quad.easeInOut", true, 0, 0, true);
+                    //t.onComplete.add(function () {
+                    resolve(true);
+                    //}, self);
                 });
             };
             return Transition;
@@ -7654,7 +7668,8 @@ var TacticArena;
             UIManager.prototype.isOver = function () {
                 return (this.actionMenu && this.actionMenu.isOver) ||
                     (this.timelineMenu && this.timelineMenu.isOver) ||
-                    this.topMenu.isOver;
+                    this.topMenu.isOver ||
+                    this.ingamemenuUI.active;
             };
             return UIManager;
         }());
@@ -7842,7 +7857,6 @@ var TacticArena;
                     return _super.call(this, 'go forward') || this;
                 }
                 GoForward.process = function (state) {
-                    console.log('ok');
                     if (state.resolveManager.active && !state.resolveManager.processing) {
                         var nextIndex = state.resolveManager.currentIndex + 1;
                         if (nextIndex >= state.resolveManager.steps.length) {

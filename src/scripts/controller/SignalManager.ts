@@ -37,19 +37,15 @@ module TacticArena {
             var self = this;
 
             this.onApChange.add(function(pawn) {
-                if(self.game.resolveManager.active) {
-                    //TODO ui ap en live durant résolution
-                    //self.game.uiManager.pawnsinfosUI.updateInfos();
-                } else if (self.game.uiManager.actionMenu) {
+                if (self.game.uiManager.actionMenu) {
                     self.game.uiManager.actionMenu.showApCost(pawn, 0);
                 }
-
+                self.game.uiManager.topMenu.updateAp(pawn);
             });
 
             this.onHpChange.add(function(pawn) {
-                //TODO ui hp en live durant résolution
-                //self.game.uiManager.pawnsinfosUI.updateInfos();
                 self.game.stageManager.handleTile(pawn);
+                self.game.uiManager.topMenu.updateHp(pawn);
             });
 
             this.onOrderChange.add(function(pawn) {

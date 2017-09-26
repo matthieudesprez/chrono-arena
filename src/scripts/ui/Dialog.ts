@@ -9,8 +9,6 @@ module TacticArena.UI {
             var self = this;
             this.state = state;
             this.game = state.game;
-            //$('body').append('<div id="dialog-confirm" class="ui-dialog" title=""><p></p></div>');
-            //this.element = $('#dialog-confirm');
             this.game.modals = {};
 
             this.createModal({
@@ -19,59 +17,58 @@ module TacticArena.UI {
                 //modalCloseOnInput: true,
                 fixedToCamera: true,
                 itemsArr: [
-                //    {
-                //    type: "graphics",
-                //    graphicColor: "0xffffff",
-                //    graphicWidth: 300,
-                //    graphicHeight: 300,
-                //    graphicRadius: 40
-                //},
                     {
                         type: "image",
-                        content: "modal-bg",
-                        offsetY: -20,
+                        content: "background-modal",
+                        offsetY: -100,
                         contentScale: 1
                     },
                     {
-                        type: "image",
-                        content: "modal-close",
-                        offsetY: -150,
-                        offsetX: 210,
-                        contentScale: 1,
-                        callback: function(){
-                            self.hideModal("modal1");
+                        type: "text",
+                        content: "Pause",
+                        fontFamily: "Press Start 2P",
+                        fontSize: 25,
+                        color: "0x000000",
+                        offsetY: -420
+                    },
+                    {
+                        type: "button",
+                        atlasParent: "big-button",
+                        content: "background-button",
+                        buttonHover: "background-button-hover",
+                        offsetY: -280,
+                        contentScale: 0.7,
+                        callback: function () {
+                            self.hideModal('modal1');
                         }
                     },
-
                     {
                         type: "text",
-                        content: "The white {behind} me\n{is} a {[Phaser.Graphic]}",
+                        content: "Resume",
                         fontFamily: "Press Start 2P",
-                        fontSize: 12,
-                        color: "0xffffff",
-                        offsetY: -50
-                    },
-                ]
-            });
-        }
-
-        show(title, message, confirmTitle, cancelTitle, confirmFunction, cancelFunction) {
-            $("#dialog-confirm").attr('title', title);
-            $("#dialog-confirm p").html(message);
-            $("#dialog-confirm").dialog({
-                resizable: false,
-                height: "auto",
-                width: 400,
-                modal: true,
-                buttons: [
-                    {
-                        text: confirmTitle,
-                        click: confirmFunction
+                        fontSize: 25,
+                        color: "0x000000",
+                        offsetY: -280
                     },
                     {
-                        text: cancelTitle,
-                        click: cancelFunction
-                    }
+                        type: "button",
+                        atlasParent: "big-button",
+                        content: "background-button",
+                        buttonHover: "background-button-hover",
+                        offsetY: -140,
+                        contentScale: 0.7,
+                        callback: function () {
+                            self.game.state.start('menu');
+                        }
+                    },
+                    {
+                        type: "text",
+                        content: "Quit",
+                        fontFamily: "Press Start 2P",
+                        fontSize: 25,
+                        color: "0x000000",
+                        offsetY: -140
+                    },
                 ]
             });
         }

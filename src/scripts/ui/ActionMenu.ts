@@ -20,7 +20,8 @@ module TacticArena.UI {
             this.skills = [];
             this.mainGroup = this.game.add.group();
             this.mainGroup.x = 0;
-            this.mainGroup.y = Math.min(512, window.innerHeight / this.game.getScaleRatio() - 100);
+            this.mainGroup.y = window.innerHeight / this.game.getScaleRatio() - 100;
+            //this.mainGroup.y = Math.min(512, window.innerHeight / this.game.getScaleRatio() - 100);
             //this.mainGroup.y = 512;
             this.actionGroup = this.game.add.group();
             this.actionGroup.x = 178;
@@ -35,10 +36,10 @@ module TacticArena.UI {
             let frame = this.game.make.sprite(5, 0, 'frame-bottom');
             frame.anchor.set(0);
 
-            var filter = this.game.add.filter('Pixelate');
-            frame.filters = [filter];
-            filter.sizeX = 2;
-            filter.sizeY = 2;
+            //var filter = this.game.add.filter('Pixelate');
+            //frame.filters = [filter];
+            //filter.sizeX = 2;
+            //filter.sizeY = 2;
 
             frame.inputEnabled = true;
             frame.events.onInputOver.add(this.over, this);

@@ -15,6 +15,7 @@ module TacticArena.UI {
         fourKey;
         fiveKey;
         wKey;
+        escapeKey;
 
         constructor(menu) {
             this.menu = menu;
@@ -63,6 +64,9 @@ module TacticArena.UI {
 
             this.wKey = this.menu.game.input.keyboard.addKey(Phaser.KeyCode.W);
             this.wKey.onDown.add(this.wKeyPress, this, 0, this.menu);
+
+            this.escapeKey = this.menu.game.input.keyboard.addKey(Phaser.KeyCode.ESC);
+            this.escapeKey.onDown.add(this.escapeKeyPress, this, 0, this.menu);
         }
 
        leftKeyPressed(self, uiManager) {
@@ -74,7 +78,6 @@ module TacticArena.UI {
             }
         }
         rightKeyPressed(self, uiManager) {
-            console.log(uiManager.process, uiManager.game.resolveManager.processing, uiManager.game.resolveManager.active);
             if(uiManager.process) return false;
             if(uiManager.game.resolveManager.active && !uiManager.game.resolveManager.processing) {
                 Action.Timeline.GoForward.process(uiManager.game);
@@ -106,6 +109,9 @@ module TacticArena.UI {
         }
 
         backKeyPressed(self, uiManager) {
+            Action.Cancel.process(uiManager.game);
+        }
+        escapeKeyPress(self, uiManager) {
             Action.Cancel.process(uiManager.game);
         }
 

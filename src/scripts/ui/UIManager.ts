@@ -61,7 +61,8 @@ module TacticArena.UI {
         isOver() {
             return (this.actionMenu && this.actionMenu.isOver) ||
                 (this.timelineMenu && this.timelineMenu.isOver) ||
-                this.topMenu.isOver;
+                this.topMenu.isOver ||
+                this.ingamemenuUI.active;
         }
     }
 }
