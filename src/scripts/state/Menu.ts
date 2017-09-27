@@ -11,9 +11,12 @@ module TacticArena.State {
             background.anchor.set(0.5, 0);
             background.scale.set(0.9);
 
+            let logo = this.game.add.image(this.game.world.centerX, 150, 'logo2');
+            logo.anchor.set(0.5);
+
             let buttonsGroup = this.game.add.group();
             buttonsGroup.x = this.game.world.centerX;
-            buttonsGroup.y = this.game.world.centerY / 3;
+            buttonsGroup.y = 250;
 
             let singleplayerButton = this.game.make.button(0, 0, 'big-button', function() {}, this, 'background-button-hover', 'background-button');
             singleplayerButton.anchor.set(0.5, 0);
@@ -66,6 +69,7 @@ module TacticArena.State {
 
             //this.menuGroup.add(buttonsGroup);
 
+            this.startSinglePlayer();
         }
 
         startSinglePlayer() {

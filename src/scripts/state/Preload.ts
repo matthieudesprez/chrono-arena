@@ -4,15 +4,18 @@ module TacticArena.State {
         private status;
 
         preload() {
-            let self = this;
+            let logo = this.game.add.image(this.game.world.centerX, 150, 'logo2');
+            logo.anchor.set(0.5);
             this.game.add.text(0, 0, "f", {font: '1px Press Start 2P', fill: "#333333"});
             this.game.add.text(0, 0, "f", {font: '1px Iceland', fill: "#333333"});
-            super.createMenu();
-            this.status = this.add.text(640 / 2, this.game.world.centerY / 2 + 200, 'Loading...', {fill: 'white'});
+            this.status = this.add.text(640 / 2, this.game.world.centerY / 2 + 200, '', {fill: 'white'});
             this.status.anchor.setTo(0.5);
             this.preloadBar = this.add.image(640 / 2, this.game.world.centerY / 2 + 150, "loading");
             this.preloadBar.anchor.setTo(0.5);
             this.load.setPreloadSprite(this.preloadBar);
+            this.game.load.onLoadStart.add(this.loadStart, this);
+            this.game.load.onFileComplete.add(this.fileComplete, this);
+            this.game.load.onLoadComplete.add(this.loadComplete, this);
 
             /* MAPS */
             this.load.tilemap('mapmobile', 'assets/json/mapmobile.json', null, Phaser.Tilemap.TILED_JSON);
@@ -91,8 +94,15 @@ module TacticArena.State {
             this.load.start();
         }
 
-        create() {
-            this.status.setText('Ready!');
+        loadStart () {
+            this.status.setText('');
+        }
+
+        fileComplete (progress) {
+            this.status.setText(progress + '%');
+        }
+
+        loadComplete () {
             this.game.state.start("menu");
         }
     }

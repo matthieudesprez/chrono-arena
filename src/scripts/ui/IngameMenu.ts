@@ -12,7 +12,6 @@ module TacticArena.UI {
             this.dialogUI = new UI.Dialog(this.menu.game);
 
             let icon = this.menu.game.make.image(this.menu.game.world.width - 43, 8, 'icon-menu4');
-            icon.scale.set(0.2);
             this.menu.game.uiGroup.add(icon);
 
             icon.inputEnabled = true;

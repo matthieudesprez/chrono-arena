@@ -43,7 +43,6 @@ module TacticArena.UI {
                 hpText.setTextBounds(heart.x - 13, heart.y - 10, 26, 21);
 
                 let energy = self.game.make.sprite(1, 11, 'icon-power');
-                energy.scale.set(0.2);
                 energy.anchor.set(0);
                 let apText = self.game.add.text(0, 0, pawn.getAp(), {
                     font: '15px Iceland',

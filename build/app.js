@@ -45,7 +45,8 @@ var TacticArena;
                 width: _this.initialWidth,
                 height: _this.initialHeight,
                 renderer: headless ? Phaser.HEADLESS : Phaser.AUTO,
-                parent: 'game-container'
+                parent: 'game-container',
+                antialias: false
             }) || this;
             _this.state.add('boot', TacticArena.State.Boot);
             _this.state.add('preload', TacticArena.State.Preload);
@@ -3533,13 +3534,14 @@ var TacticArena;
             }
             Boot.prototype.preload = function () {
                 this.load.image('loading', 'assets/images/loading.png');
+                this.load.image('logo2', 'assets/images/logo2.png');
             };
             Boot.prototype.create = function () {
                 this.scale.pageAlignHorizontally = true;
                 this.scale.pageAlignVertically = true;
                 this.game.scale.fullScreenScaleMode = Phaser.ScaleManager.SHOW_ALL;
                 this.game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
-                //this.game.renderer.renderSession.roundPixels = true;
+                this.game.renderer.renderSession.roundPixels = false;
                 Phaser.Canvas.setImageRenderingCrisp(this.game.canvas);
                 //this.game.scale.setResizeCallback(function (scale, parentBounds) {
                 //    var _this = scale;
@@ -3842,9 +3844,11 @@ var TacticArena;
                 var background = this.game.add.image(this.game.world.centerX, 0, 'bg');
                 background.anchor.set(0.5, 0);
                 background.scale.set(0.9);
+                var logo = this.game.add.image(this.game.world.centerX, 150, 'logo2');
+                logo.anchor.set(0.5);
                 var buttonsGroup = this.game.add.group();
                 buttonsGroup.x = this.game.world.centerX;
-                buttonsGroup.y = this.game.world.centerY / 3;
+                buttonsGroup.y = 250;
                 var singleplayerButton = this.game.make.button(0, 0, 'big-button', function () { }, this, 'background-button-hover', 'background-button');
                 singleplayerButton.anchor.set(0.5, 0);
                 singleplayerButton.scale.set(0.7);
@@ -3888,6 +3892,7 @@ var TacticArena;
                 buttonsGroup.add(optionButton);
                 buttonsGroup.add(optionButtonLabel);
                 //this.menuGroup.add(buttonsGroup);
+                this.startSinglePlayer();
             };
             Menu.prototype.startSinglePlayer = function () {
                 this.game.state.start('mainsolooffline', true, false, {
@@ -3961,15 +3966,18 @@ var TacticArena;
                 return _super !== null && _super.apply(this, arguments) || this;
             }
             Preload.prototype.preload = function () {
-                var self = this;
+                var logo = this.game.add.image(this.game.world.centerX, 150, 'logo2');
+                logo.anchor.set(0.5);
                 this.game.add.text(0, 0, "f", { font: '1px Press Start 2P', fill: "#333333" });
                 this.game.add.text(0, 0, "f", { font: '1px Iceland', fill: "#333333" });
-                _super.prototype.createMenu.call(this);
-                this.status = this.add.text(640 / 2, this.game.world.centerY / 2 + 200, 'Loading...', { fill: 'white' });
+                this.status = this.add.text(640 / 2, this.game.world.centerY / 2 + 200, '', { fill: 'white' });
                 this.status.anchor.setTo(0.5);
                 this.preloadBar = this.add.image(640 / 2, this.game.world.centerY / 2 + 150, "loading");
                 this.preloadBar.anchor.setTo(0.5);
                 this.load.setPreloadSprite(this.preloadBar);
+                this.game.load.onLoadStart.add(this.loadStart, this);
+                this.game.load.onFileComplete.add(this.fileComplete, this);
+                this.game.load.onLoadComplete.add(this.loadComplete, this);
                 /* MAPS */
                 this.load.tilemap('mapmobile', 'assets/json/mapmobile.json', null, Phaser.Tilemap.TILED_JSON);
                 this.load.tilemap('map', 'assets/json/map.json', null, Phaser.Tilemap.TILED_JSON);
@@ -4034,8 +4042,13 @@ var TacticArena;
                 this.load.image('cursor_pointer', 'assets/images/cursor_pointer.png');
                 this.load.start();
             };
-            Preload.prototype.create = function () {
-                this.status.setText('Ready!');
+            Preload.prototype.loadStart = function () {
+                this.status.setText('');
+            };
+            Preload.prototype.fileComplete = function (progress) {
+                this.status.setText(progress + '%');
+            };
+            Preload.prototype.loadComplete = function () {
                 this.game.state.start("menu");
             };
             return Preload;
@@ -5987,7 +6000,6 @@ var TacticArena;
                 hpText.setTextBounds(heart.x - 1, heart.y + 2, 40, 35);
                 for (var i = 0; i < pawn._apMax; i++) {
                     var energy = self.game.make.sprite(i * 30, 0, 'icon-power');
-                    energy.scale.set(0.2);
                     energy.anchor.set(0);
                     this.energyGroup.add(energy);
                     energy.inputEnabled = true;
@@ -6760,7 +6772,6 @@ var TacticArena;
                 this.active = false;
                 this.dialogUI = new UI.Dialog(this.menu.game);
                 var icon = this.menu.game.make.image(this.menu.game.world.width - 43, 8, 'icon-menu4');
-                icon.scale.set(0.2);
                 this.menu.game.uiGroup.add(icon);
                 icon.inputEnabled = true;
                 icon.events.onInputDown.add(this.open, this);
@@ -7461,7 +7472,6 @@ var TacticArena;
                     });
                     hpText.setTextBounds(heart.x - 13, heart.y - 10, 26, 21);
                     var energy = self.game.make.sprite(1, 11, 'icon-power');
-                    energy.scale.set(0.2);
                     energy.anchor.set(0);
                     var apText = self.game.add.text(0, 0, pawn.getAp(), {
                         font: '15px Iceland',

@@ -3,6 +3,7 @@ module TacticArena.State {
 
         preload() {
             this.load.image('loading', 'assets/images/loading.png');
+            this.load.image('logo2', 'assets/images/logo2.png');
         }
 
         create() {
@@ -11,7 +12,7 @@ module TacticArena.State {
 
             this.game.scale.fullScreenScaleMode = Phaser.ScaleManager.SHOW_ALL;
             this.game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
-            //this.game.renderer.renderSession.roundPixels = true;
+            this.game.renderer.renderSession.roundPixels = false;
             Phaser.Canvas.setImageRenderingCrisp(this.game.canvas);
 
             //this.game.scale.setResizeCallback(function (scale, parentBounds) {

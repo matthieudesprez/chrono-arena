@@ -76,7 +76,6 @@ module TacticArena.UI {
 
             for(var i = 0; i < pawn._apMax; i++) {
                 let energy = self.game.make.sprite(i * 30, 0, 'icon-power');
-                energy.scale.set(0.2);
                 energy.anchor.set(0);
                 this.energyGroup.add(energy);
 
