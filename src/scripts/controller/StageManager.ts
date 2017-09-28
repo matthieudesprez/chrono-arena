@@ -311,6 +311,7 @@ module TacticArena {
         clearHelp() {
             this.clearPossibleMove();
             this.clearPath(this.game.pathTilesGroup);
+            this.game.pointer.uiLastPosition = new Position(-1, -1);
         }
 
         getNbTilesBetween(coordsA, coordsB) {

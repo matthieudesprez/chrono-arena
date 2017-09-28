@@ -3,10 +3,11 @@ module TacticArena.UI {
         game;
         marker:Phaser.Graphics;
         cursor_pointer:Phaser.Sprite;
+        uiLastPosition:Position;
 
         constructor(game) {
             this.game = game;
-
+            this.uiLastPosition = new Position(-1, -1);
             this.marker =  this.game.make.graphics(-1 * this.game.tileSize, -1 * this.game.tileSize);
             this.marker.lineStyle(2, 0xffffff, 1);
             this.marker.drawRect(0, 0, this.game.tileSize, this.game.tileSize);
@@ -30,27 +31,30 @@ module TacticArena.UI {
         }
 
         update(pointer, x, y, clicked) {
-            if(!this.game.process && !this.game.uiManager.isOver()) {
+            if (!this.game.process && !this.game.uiManager.isOver()) {
                 let target = this.getPosition();
-                if(this.game.stageManager.isObstacle(target)) {
-                    this.hide();
-                } else {
-                    this.updateMarker();
-                }
-                let selectedSkill = this.game.uiManager.actionMenu.getSelectedSkill();
-                if(selectedSkill) {
-                    if (selectedSkill.canOrder()) {
-                        selectedSkill.updateUI(target);
+                if(!this.uiLastPosition.equals(target)) {
+                    this.uiLastPosition = target;
+                    if (this.game.stageManager.isObstacle(target)) {
+                        this.hide();
                     } else {
-                        selectedSkill.cleanUI();
+                        this.updateMarker();
                     }
-                } else {
-                    this.game.pawns.forEach( (p, k) => {
-                        if (p.getPosition().equals(target)) {
-                             console.log(p);
-                            //let actionMenu = new UI.ActionMenu(self.game, p.type);
+                    let selectedSkill = this.game.uiManager.actionMenu.getSelectedSkill();
+                    if (selectedSkill) {
+                        if (selectedSkill.canOrder()) {
+                            selectedSkill.updateUI(target);
+                        } else {
+                            selectedSkill.cleanUI();
                         }
-                    });
+                    } else {
+                        this.game.pawns.forEach((p, k) => {
+                            if (p.getPosition().equals(target)) {
+                                //console.log(p);
+                                //let actionMenu = new UI.ActionMenu(self.game, p.type);
+                            }
+                        });
+                    }
                 }
             } else {
                 this.hide();
@@ -67,10 +71,10 @@ module TacticArena.UI {
                     }
                 } else {
                     //TODO SELECT CHARACTER
-                    console.log(target);
+                    //console.log(target);
                     this.game.pawns.forEach( (p, k) => {
                         if (p.getPosition().equals(target)) {
-                            console.log(p);
+                            //console.log(p);
                             //let actionMenu = new UI.ActionMenu(self.game, p.type);
                         }
                     });
@@ -93,7 +97,7 @@ module TacticArena.UI {
         }
 
         destroy () {
-            console.log('pointer destroy');
+            //console.log('pointer destroy');
             this.marker.destroy();
 
             this.game.input.deleteMoveCallback(this.update, this);

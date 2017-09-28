@@ -11,6 +11,8 @@ module TacticArena.Entity.Character {
                 new TacticArena.Entity.Skill.Watch(this.game, this)
             ]);
             this._apMax = 4;
+            this._hpMax = 5;
+            this._hp = 4;
         }
     }
 }

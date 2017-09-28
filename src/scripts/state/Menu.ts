@@ -16,7 +16,7 @@ module TacticArena.State {
 
             let buttonsGroup = this.game.add.group();
             buttonsGroup.x = this.game.world.centerX;
-            buttonsGroup.y = 250;
+            buttonsGroup.y = 280;
 
             let singleplayerButton = this.game.make.button(0, 0, 'big-button', function() {}, this, 'background-button-hover', 'background-button');
             singleplayerButton.anchor.set(0.5, 0);

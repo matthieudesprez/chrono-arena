@@ -5,6 +5,7 @@ module TacticArena.UI {
         actionGroup;
         skillsGroup;
         energyGroup;
+        healthGroup;
         isOver;
         savedDirection;
         hpBar;
@@ -20,59 +21,47 @@ module TacticArena.UI {
             this.skills = [];
             this.mainGroup = this.game.add.group();
             this.mainGroup.x = 0;
-            this.mainGroup.y = window.innerHeight / this.game.getScaleRatio() - 100;
+            this.mainGroup.y = window.innerHeight / this.game.getScaleRatio() - 132;
             //this.mainGroup.y = Math.min(512, window.innerHeight / this.game.getScaleRatio() - 100);
             //this.mainGroup.y = 512;
             this.actionGroup = this.game.add.group();
-            this.actionGroup.x = 178;
-            this.actionGroup.y = 63;
+            this.actionGroup.x = 155;
+            this.actionGroup.y = 95;
             this.skillsGroup = this.game.add.group();
             this.skillsGroup.x = 0;
             this.skillsGroup.y = 0;
+            this.healthGroup = this.game.add.group();
+            this.healthGroup.x = 140;
+            this.healthGroup.y = 14;
             this.energyGroup = this.game.add.group();
-            this.energyGroup.x = 160;
-            this.energyGroup.y = 14;
+            this.energyGroup.x = 140;
+            this.energyGroup.y = 44;
 
-            let frame = this.game.make.sprite(5, 0, 'frame-bottom');
+            let frame = this.game.make.sprite(5, 0, 'frame-bottom-big');
             frame.anchor.set(0);
-
-            //var filter = this.game.add.filter('Pixelate');
-            //frame.filters = [filter];
-            //filter.sizeX = 2;
-            //filter.sizeY = 2;
 
             frame.inputEnabled = true;
             frame.events.onInputOver.add(this.over, this);
             frame.events.onInputOut.add(this.out, this);
 
-            let avatar = this.game.make.sprite(37, 8, 'avatar-' + pawn.type);
-            avatar.anchor.set(0);
-            avatar.scale.set(0.8);
+            let avatar = this.game.make.sprite(37, 116, 'avatar-' + pawn.type);
+            avatar.anchor.set(0, 1);
 
-            let name = this.game.add.text(54, 5, pawn._name, {
+            let name = this.game.add.text(40, 5, pawn._name, {
                 font: '20px Iceland',
                 fill: '#ffffff',
-                boundsAlignH: 'right',
+                boundsAlignH: 'left',
                 boundsAlignV: 'top',
             });
             name.anchor.set(0);
-            name.setTextBounds(0, 8, 90, 20);
+            name.setTextBounds(0, 8, 96, 20);
 
-            let heart = self.game.make.sprite(110, 44, 'icon-heart');
-            heart.scale.set(1.5);
-            heart.anchor.set(0);
-
-            let hpText = self.game.add.text(0, 0, pawn.getHp(), {
-                font: '18px Iceland',
-                fill: '#FFFFFF',
-                align: 'center',
-                boundsAlignH: 'center',
-                boundsAlignV: 'center',
-                strokeThickness: 3,
-                stroke: '#000000',
-                wordWrap: true
-            });
-            hpText.setTextBounds(heart.x - 1, heart.y + 2, 40, 35);
+            for(var i = 0; i < pawn._hpMax; i++) {
+                let key = i < pawn.getHp() ? 'icon-heart' : 'icon-heart-empty';
+                let health = self.game.make.sprite(i * 30, 0, key);
+                health.anchor.set(0);
+                this.healthGroup.add(health);
+            }
 
             for(var i = 0; i < pawn._apMax; i++) {
                 let energy = self.game.make.sprite(i * 30, 0, 'icon-power');
@@ -137,11 +126,8 @@ module TacticArena.UI {
             this.mainGroup.add(frame);
             this.mainGroup.add(avatar);
             this.mainGroup.add(name);
-            this.mainGroup.add(heart);
-            this.mainGroup.add(hpText);
+            this.mainGroup.add(this.healthGroup);
             this.mainGroup.add(this.energyGroup);
-            //this.mainGroup.add(this.hpBar);
-            //this.mainGroup.add(this.apBar);
 
             this.actionGroup.add(this.skillsGroup);
             //this.actionGroup.add(buttonCancelGroup);
@@ -194,16 +180,16 @@ module TacticArena.UI {
         buttonOver(buttonSprite, pointer, buttonGroup) {
             console.log(this.buttonOver.arguments);
             this.isOver = true;
-            if(buttonGroup) {
-                buttonGroup.scale.setTo(buttonGroup.scale.x - 0.1, buttonGroup.scale.y - 0.1);
-            }
+            //if(buttonGroup) {
+                //buttonGroup.scale.setTo(buttonGroup.scale.x - 0.1, buttonGroup.scale.y - 0.1);
+            //}
         }
 
         buttonOut(buttonSprite, pointer, buttonGroup) {
             this.isOver = false;
-            if(buttonGroup) {
-                buttonGroup.scale.setTo(buttonGroup.scale.x + 0.1, buttonGroup.scale.y + 0.1);
-            }
+            //if(buttonGroup) {
+            //    buttonGroup.scale.setTo(buttonGroup.scale.x + 0.1, buttonGroup.scale.y + 0.1);
+            //}
         }
 
         skillDeselectAll(oneIsSelected=false) {
