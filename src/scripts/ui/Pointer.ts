@@ -62,9 +62,11 @@ module TacticArena.UI {
         }
 
         onGridLeftClick() {
+            console.log('clic', this.game.process, this.game.uiManager.isOver());
             if (!this.game.process && !this.game.uiManager.isOver()) {
                 let selectedSkill = this.game.uiManager.actionMenu.getSelectedSkill();
                 let target = this.getPosition();
+                console.log(target);
                 if(selectedSkill) {
                     if(selectedSkill.canOrder()) {
                         selectedSkill.order(target);

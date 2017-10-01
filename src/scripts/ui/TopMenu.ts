@@ -14,15 +14,13 @@ module TacticArena.UI {
             this.mainGroup.y = 37;
 
             let avatarsGroup = this.game.add.group();
-            console.log('init');
             this.game.pawns.forEach(function (pawn, index) {
                 let pawnGroup = self.game.add.group();
                 pawnGroup.x = index * 70;
                 let frame = self.game.make.sprite(0, 0, 'avatar-frame');
                 frame.anchor.set(0.5);
-                let avatar = self.game.make.sprite(0, 0, 'avatar-' + pawn.type);
+                let avatar = self.game.make.sprite(0, 0, 'avatar-' + pawn.type + '-small');
                 avatar.anchor.set(0.5);
-                avatar.scale.set(0.45);
 
                 let dead = self.game.make.sprite(0, 0, 'icon-dead');
                 dead.anchor.set(0.5);
@@ -42,33 +40,33 @@ module TacticArena.UI {
                 });
                 hpText.setTextBounds(heart.x - 13, heart.y - 10, 26, 21);
 
-                let energy = self.game.make.sprite(1, 11, 'icon-power');
-                energy.anchor.set(0);
-                let apText = self.game.add.text(0, 0, pawn.getAp(), {
-                    font: '15px Iceland',
-                    fill: '#FFFFFF',
-                    align: 'center',
-                    boundsAlignH: 'center',
-                    boundsAlignV: 'center',
-                    strokeThickness: 3,
-                    stroke: '#000000',
-                    wordWrap: true
-                });
-                apText.setTextBounds(energy.x, energy.y + 4, energy.width, energy.height);
+                //let energy = self.game.make.sprite(1, 11, 'icon-power');
+                //energy.anchor.set(0);
+                //let apText = self.game.add.text(0, 0, pawn.getAp(), {
+                //    font: '15px Iceland',
+                //    fill: '#FFFFFF',
+                //    align: 'center',
+                //    boundsAlignH: 'center',
+                //    boundsAlignV: 'center',
+                //    strokeThickness: 3,
+                //    stroke: '#000000',
+                //    wordWrap: true
+                //});
+                //apText.setTextBounds(energy.x, energy.y + 4, energy.width, energy.height);
 
                 pawnGroup.add(frame);
                 pawnGroup.add(avatar);
                 pawnGroup.add(dead);
                 pawnGroup.add(heart);
                 pawnGroup.add(hpText);
-                pawnGroup.add(energy);
-                pawnGroup.add(apText);
+                //pawnGroup.add(energy);
+                //pawnGroup.add(apText);
 
                 avatarsGroup.add(pawnGroup);
 
                 self.pawns[pawn._id] = {
                     hpText: hpText,
-                    apText: apText,
+                    //apText: apText,
                     dead: dead,
                     avatar: avatar
                 };
@@ -88,7 +86,7 @@ module TacticArena.UI {
         }
 
         updateAp(pawn) {
-            this.pawns[pawn._id].apText.setText(pawn.getAp());
+            //this.pawns[pawn._id].apText.setText(pawn.getAp());
         }
 
         updateHp(pawn) {

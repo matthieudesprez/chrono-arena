@@ -59,10 +59,12 @@ module TacticArena.UI {
         }
 
         isOver() {
-            return (this.actionMenu && this.actionMenu.isOver) ||
-                (this.timelineMenu && this.timelineMenu.isOver) ||
-                this.topMenu.isOver ||
-                this.ingamemenuUI.active;
+            console.log(this.ingamemenuUI.active);
+            //return (this.actionMenu && this.actionMenu.isOver) ||
+            //    (this.timelineMenu && this.timelineMenu.isOver) ||
+            //    this.topMenu.isOver ||
+            //    this.ingamemenuUI.active;
+            return this.ingamemenuUI.active;
         }
     }
 }

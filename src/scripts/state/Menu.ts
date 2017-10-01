@@ -1,22 +1,17 @@
 module TacticArena.State {
     export class Menu extends TacticArena.State.BaseState {
-        menuGroup;
 
         create() {
-            this.menuGroup = this.game.add.group();
-            this.menuGroup.x = 0;
-            this.menuGroup.y = 0;
-
-            let background = this.game.add.image(this.game.world.centerX, 0, 'bg');
+            let background = this.game.make.image(this.centerX, 0, 'bg');
             background.anchor.set(0.5, 0);
             background.scale.set(0.9);
 
-            let logo = this.game.add.image(this.game.world.centerX, 150, 'logo2');
+            let logo = this.game.make.image(this.centerX, 150, 'logo3');
             logo.anchor.set(0.5);
 
             let buttonsGroup = this.game.add.group();
-            buttonsGroup.x = this.game.world.centerX;
-            buttonsGroup.y = 280;
+            buttonsGroup.x = this.centerX;
+            buttonsGroup.y = 300;
 
             let singleplayerButton = this.game.make.button(0, 0, 'big-button', function() {}, this, 'background-button-hover', 'background-button');
             singleplayerButton.anchor.set(0.5, 0);
@@ -64,10 +59,12 @@ module TacticArena.State {
             buttonsGroup.add(singleplayerButtonLabel);
             buttonsGroup.add(versusonlineButton);
             buttonsGroup.add(versusonlineButtonLabel);
-            buttonsGroup.add(optionButton);
-            buttonsGroup.add(optionButtonLabel);
+            //buttonsGroup.add(optionButton);
+            //buttonsGroup.add(optionButtonLabel);
 
-            //this.menuGroup.add(buttonsGroup);
+            this.worldGroup.add(background);
+            this.worldGroup.add(logo);
+            this.worldGroup.add(buttonsGroup);
 
             this.startSinglePlayer();
         }

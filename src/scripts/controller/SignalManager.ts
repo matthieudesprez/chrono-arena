@@ -50,6 +50,13 @@ module TacticArena {
 
             this.onOrderChange.add(function(pawn) {
                 self.game.uiManager.ordersnotificationsUI.update(self.game.orderManager.getOrders(pawn._id));
+                self.game.uiManager.actionMenu.enableConfirm();
+                if(self.game.orderManager.getOrders(pawn._id).length > 0) {
+                    self.game.uiManager.actionMenu.enableCancel();
+                } else {
+                    self.game.uiManager.actionMenu.disableCancel();
+                }
+                self.game.uiManager.actionMenu.update();
             });
 
             this.onActionPlayed.add(function(pawn) {

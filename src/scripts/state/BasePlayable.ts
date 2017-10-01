@@ -2,7 +2,6 @@
 module TacticArena.State {
     export class BasePlayable extends TacticArena.State.BaseState {
         pawns: Entity.Pawn[];
-        worldGroup: Phaser.Group;
         mapGroup: Phaser.Group;
         mapDecorationGroup: Phaser.Group;
         pathTilesGroup: Phaser.Group;
@@ -33,8 +32,6 @@ module TacticArena.State {
             this.tileSize = 32;
             this.isPaused = false;
 
-            this.worldGroup = this.add.group();
-
             this.mapGroup = this.add.group();
             this.worldGroup.add(this.mapGroup);
 
@@ -56,7 +53,6 @@ module TacticArena.State {
             this.uiGroup = this.add.group();
             this.worldGroup.add(this.uiGroup);
 
-            this.worldGroup.scale.set(this.getScaleRatio());
             //console.log(this.getScaleRatio());
 
             this.pawns = [];

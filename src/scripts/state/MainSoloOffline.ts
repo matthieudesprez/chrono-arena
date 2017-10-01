@@ -6,7 +6,6 @@ module TacticArena.State {
 
         init(data, chatUI) {
             super.init();
-            console.log(data);
             this.playMode = 'offline';
             this.chatUI = chatUI;
             this.players = data.players;

@@ -34,6 +34,7 @@ module TacticArena.UI {
 
         close() {
             this.active = false;
+            this.dialogUI.hideModal("modal1");
         }
 
         open() {

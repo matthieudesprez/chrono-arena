@@ -4,18 +4,22 @@ module TacticArena.State {
         private status;
 
         preload() {
-            let logo = this.game.add.image(this.game.world.centerX, 150, 'logo2');
+            let logo = this.game.make.image(this.centerX, 150, 'logo3');
             logo.anchor.set(0.5);
             this.game.add.text(0, 0, "f", {font: '1px Press Start 2P', fill: "#333333"});
             this.game.add.text(0, 0, "f", {font: '1px Iceland', fill: "#333333"});
-            this.status = this.add.text(640 / 2, this.game.world.centerY / 2 + 200, '', {fill: 'white'});
+            this.status = this.make.text(this.centerX, this.centerY + 200, '', {font: '25px Press Start 2P', fill: 'white'});
             this.status.anchor.setTo(0.5);
-            this.preloadBar = this.add.image(640 / 2, this.game.world.centerY / 2 + 150, "loading");
+            this.preloadBar = this.make.image(this.centerX, this.centerY + 150, "loading");
             this.preloadBar.anchor.setTo(0.5);
             this.load.setPreloadSprite(this.preloadBar);
             this.game.load.onLoadStart.add(this.loadStart, this);
             this.game.load.onFileComplete.add(this.fileComplete, this);
             this.game.load.onLoadComplete.add(this.loadComplete, this);
+
+            this.worldGroup.add(this.status);
+            this.worldGroup.add(this.preloadBar);
+            this.worldGroup.add(logo);
 
             /* MAPS */
             this.load.tilemap('mapmobile', 'assets/json/mapmobile.json', null, Phaser.Tilemap.TILED_JSON);
@@ -24,7 +28,7 @@ module TacticArena.State {
             this.load.image('tiles-collection', 'assets/images/maptiles.png');
             this.load.image('path-tile', 'assets/images/path_tile.png');
 
-            /* UI */
+            /* UI **/
             this.load.image('button-bg', 'assets/images/ui/button.png');
             this.load.image('button-selected-bg', 'assets/images/ui/button-selected.png');
             this.load.image('button-square-next', 'assets/images/ui/button-square-next.png');
@@ -36,8 +40,9 @@ module TacticArena.State {
             this.load.image('background-bar', 'assets/images/ui/background-bar.png');
             this.load.image('background-modal', 'assets/images/ui/background-modal.png');
             this.load.image('background-menu', 'assets/images/ui/background-menu.jpg');
-            this.load.image('bg', 'assets/images/ui/bg3.png');
+            this.load.image('bg', 'assets/images/ui/bg4.jpg');
             this.load.atlasJSONArray('big-button', 'assets/images/ui/big-button.png', 'assets/images/ui/big-button.json');
+            this.load.atlasJSONArray('small-button', 'assets/images/ui/small-button.png', 'assets/images/ui/small-button.json');
 
             this.load.image('step', 'assets/images/ui/step.png');
             this.load.image('step-active', 'assets/images/ui/step-active.png');
@@ -72,8 +77,10 @@ module TacticArena.State {
 
             this.load.image('avatar-blondy', 'assets/images/blondy_avatar.png');
             this.load.image('avatar-redhead', 'assets/images/redhead_avatar.png');
+            this.load.image('avatar-redhead-small', 'assets/images/redhead_avatar_small.png');
             this.load.image('avatar-evil', 'assets/images/evil_avatar.png');
             this.load.image('avatar-skeleton', 'assets/images/skeleton_avatar.png');
+            this.load.image('avatar-skeleton-small', 'assets/images/skeleton_avatar_small.png');
 
             this.load.atlasJSONArray('player', 'assets/images/character.png', 'assets/images/character.json');
             this.load.atlasJSONArray('orc', 'assets/images/orc.png', 'assets/images/orc.json');

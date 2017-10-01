@@ -20,42 +20,42 @@ module TacticArena.UI {
                     {
                         type: "image",
                         content: "background-modal",
-                        offsetY: -100,
+                        offsetY: -50,
                         contentScale: 1
                     },
                     {
                         type: "text",
                         content: "Pause",
                         fontFamily: "Press Start 2P",
-                        fontSize: 25,
+                        fontSize: 21,
                         color: "0x000000",
-                        offsetY: -420
+                        offsetY: -225
                     },
                     {
                         type: "button",
-                        atlasParent: "big-button",
+                        atlasParent: "small-button",
                         content: "background-button",
                         buttonHover: "background-button-hover",
-                        offsetY: -280,
+                        offsetY: -90,
                         contentScale: 0.7,
                         callback: function () {
-                            self.hideModal('modal1');
+                            self.state.uiManager.ingamemenuUI.close();
                         }
                     },
                     {
                         type: "text",
                         content: "Resume",
                         fontFamily: "Press Start 2P",
-                        fontSize: 25,
+                        fontSize: 18,
                         color: "0x000000",
-                        offsetY: -280
+                        offsetY: -90
                     },
                     {
                         type: "button",
-                        atlasParent: "big-button",
+                        atlasParent: "small-button",
                         content: "background-button",
                         buttonHover: "background-button-hover",
-                        offsetY: -140,
+                        offsetY: 0,
                         contentScale: 0.7,
                         callback: function () {
                             self.game.state.start('menu');
@@ -65,9 +65,9 @@ module TacticArena.UI {
                         type: "text",
                         content: "Quit",
                         fontFamily: "Press Start 2P",
-                        fontSize: 25,
+                        fontSize: 18,
                         color: "0x000000",
-                        offsetY: -140
+                        offsetY: 0
                     },
                 ]
             });
@@ -88,6 +88,7 @@ module TacticArena.UI {
 
             var modal;
             var modalGroup = this.game.add.group();
+            this.state.worldGroup.add(modalGroup);
             if (fixedToCamera === true) {
                 modalGroup.fixedToCamera = true;
                 modalGroup.cameraOffset.x = 0;
@@ -150,8 +151,6 @@ module TacticArena.UI {
                 var offsetY = item.offsetY || 0;
                 var contentScale = item.contentScale || 1;
                 var content = item.content || "";
-                var centerX = this.game.width / 2;
-                var centerY = this.game.height / 2;
                 var callback = item.callback || false;
                 var textAlign = item.textAlign || "left";
                 var atlasParent = item.atlasParent || "";
@@ -193,7 +192,7 @@ module TacticArena.UI {
                             }
                             content = content.replace(re, "");
                         }
-                        modalLabel = this.game.add.text(0, 0, content, {
+                        modalLabel = this.game.make.text(0, 0, content, {
                             font: itemFontSize + 'px ' + itemFontfamily,
                             fill: "#" + String(itemColor).replace("0x", ""),
                             stroke: "#" + String(itemStroke).replace("0x", ""),
@@ -208,45 +207,45 @@ module TacticArena.UI {
                             modalLabel.addFontWeight("normal", arrOfBold[j + 1] - indexMissing);
                             indexMissing += 2;
                         }
-                        modalLabel.x = ((this.game.width / 2) - (modalLabel.width / 2)) + offsetX;
-                        modalLabel.y = ((this.game.height / 2) - (modalLabel.height / 2)) + offsetY;
+                        modalLabel.x = (this.state.centerX - (modalLabel.width / 2)) + offsetX;
+                        modalLabel.y = (this.state.centerY - (modalLabel.height / 2)) + offsetY;
                     } else {
-                        modalLabel = this.game.add.bitmapText(0, 0, itemFontfamily, String(content), itemFontSize);
+                        modalLabel = this.game.make.bitmapText(0, 0, itemFontfamily, String(content), itemFontSize);
                         modalLabel.contentType = 'bitmapText';
                         modalLabel.align = textAlign;
                         modalLabel.updateText();
-                        modalLabel.x = (centerX - (modalLabel.width / 2)) + offsetX;
-                        modalLabel.y = (centerY - (modalLabel.height / 2)) + offsetY;
+                        modalLabel.x = (this.state.centerX - (modalLabel.width / 2)) + offsetX;
+                        modalLabel.y = (this.state.centerY - (modalLabel.height / 2)) + offsetY;
                     }
 
                 } else if (itemType === "image") {
-                    modalLabel = this.game.add.image(0, 0, content);
+                    modalLabel = this.game.make.image(0, 0, content);
                     modalLabel.scale.setTo(contentScale, contentScale);
                     modalLabel.contentType = 'image';
-                    modalLabel.x = (centerX - ((modalLabel.width) / 2)) + offsetX;
-                    modalLabel.y = (centerY - ((modalLabel.height) / 2)) + offsetY;
+                    modalLabel.x = (this.state.centerX - ((modalLabel.width) / 2)) + offsetX;
+                    modalLabel.y = (this.state.centerY - ((modalLabel.height) / 2)) + offsetY;
                 } else if (itemType === "tileSprite") {
-                    modalLabel = this.game.add.tileSprite(itemX, itemY,
+                    modalLabel = this.game.make.tileSprite(itemX, itemY,
                         tileSpriteWidth, tileSpriteHeight, content, imageFrame);
                     modalLabel.scale.setTo(contentScale, contentScale);
                     modalLabel.anchor.setTo(itemAnchor.x, itemAnchor.y);
                     modalLabel.angle = itemAngle;
                     modalLabel.contentType = 'tileSprite';
                 } else if (itemType === "sprite") {
-                    modalLabel = this.game.add.sprite(0, 0, atlasParent, content);
+                    modalLabel = this.game.make.sprite(0, 0, atlasParent, content);
                     modalLabel.scale.setTo(contentScale, contentScale);
                     modalLabel.contentType = 'sprite';
-                    modalLabel.x = (centerX - ((modalLabel.width) / 2)) + offsetX;
-                    modalLabel.y = (centerY - ((modalLabel.height) / 2)) + offsetY;
+                    modalLabel.x = (this.state.centerX - ((modalLabel.width) / 2)) + offsetX;
+                    modalLabel.y = (this.state.centerY - ((modalLabel.height) / 2)) + offsetY;
                 } else if (itemType === "button") {
-                    modalLabel = this.game.add.button(0, 0, atlasParent, callback,
+                    modalLabel = this.game.make.button(0, 0, atlasParent, callback,
                         this, buttonHover, content, buttonActive, content);
                     modalLabel.scale.setTo(contentScale, contentScale);
                     modalLabel.contentType = 'button';
-                    modalLabel.x = (centerX - ((modalLabel.width) / 2)) + offsetX;
-                    modalLabel.y = (centerY - ((modalLabel.height) / 2)) + offsetY;
+                    modalLabel.x = (this.state.centerX - ((modalLabel.width) / 2)) + offsetX;
+                    modalLabel.y = (this.state.centerY - ((modalLabel.height) / 2)) + offsetY;
                 } else if (itemType === "graphics") {
-                    modalLabel = this.game.add.graphics(graphicW, graphicH);
+                    modalLabel = this.game.make.graphics(graphicW, graphicH);
                     modalLabel.beginFill(graphicColor, graphicOpacity);
                     if (graphicRadius <= 0) {
                         modalLabel.drawRect(0, 0, graphicW, graphicH);
@@ -254,8 +253,8 @@ module TacticArena.UI {
                         modalLabel.drawRoundedRect(0, 0, graphicW, graphicH, graphicRadius);
                     }
                     modalLabel.endFill();
-                    modalLabel.x = (centerX - ((modalLabel.width) / 2)) + offsetX;
-                    modalLabel.y = (centerY - ((modalLabel.height) / 2)) + offsetY;
+                    modalLabel.x = (this.state.centerX - ((modalLabel.width) / 2)) + offsetX;
+                    modalLabel.y = (this.state.centerY - ((modalLabel.height) / 2)) + offsetY;
                 }
 
                 modalLabel["_offsetX"] = 0;
@@ -300,8 +299,8 @@ module TacticArena.UI {
                 if (item.lockPosition === true) {
 
                 } else {
-                    item.x = ((this.game.width / 2) - (item.width / 2)) + item._offsetX;
-                    item.y = ((this.game.height / 2) - (item.height / 2)) + item._offsetY;
+                    item.x = (this.state.centerX - (item.width / 2)) + item._offsetX;
+                    item.y = (this.state.centerY - (item.height / 2)) + item._offsetY;
                 }
             } else if (item.contentType === "bitmapText") {
                 item.text = value;
@@ -309,8 +308,8 @@ module TacticArena.UI {
                 if (item.lockPosition === true) {
 
                 } else {
-                    item.x = ((this.game.width / 2) - (item.width / 2)) + item._offsetX;
-                    item.y = ((this.game.height / 2) - (item.height / 2)) + item._offsetY;
+                    item.x = (this.state.centerX - (item.width / 2)) + item._offsetX;
+                    item.y = (this.state.centerY - (item.height / 2)) + item._offsetY;
                 }
             } else if (item.contentType === "image") {
                 item.loadTexture(value);

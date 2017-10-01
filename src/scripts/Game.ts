@@ -9,20 +9,27 @@ module TacticArena {
     export class Game extends Phaser.Game {
         initialWidth;
         initialHeight;
+        referenceWidth;
 
         constructor(headless:boolean = false) {
             //console.log(window.screen.availHeight * window.devicePixelRatio);
             //Math.round((window.screen.availHeight * window.devicePixelRatio / 1.667) / 32) * 32
             //let height = Math.min(window.screen.availHeight * window.devicePixelRatio, 832);
-            this.initialHeight = window.screen.availHeight * window.devicePixelRatio;
-            this.initialWidth = this.initialHeight / 1.667
+            let initialHeight = window.screen.availHeight * window.devicePixelRatio;
+            console.log(initialHeight);
+            let initialWidth = initialHeight / 1.667;
             super({
-                width: this.initialWidth, //Math.round((height / 1.667) / 32) * 32, //(window.innerHeight * window.devicePixelRatio) / 1.333, //320, //window.innerWidth * window.devicePixelRatio * 0.8,
-                height: this.initialHeight, //window.innerHeight * window.devicePixelRatio, //608, //512, //window.innerHeight * window.devicePixelRatio * 0.8,
+                width: initialWidth, //Math.round((height / 1.667) / 32) * 32, //(window.innerHeight * window.devicePixelRatio) / 1.333, //320, //window.innerWidth * window.devicePixelRatio * 0.8,
+                height: initialHeight, //window.innerHeight * window.devicePixelRatio, //608, //512, //window.innerHeight * window.devicePixelRatio * 0.8,
                 renderer: headless ? Phaser.HEADLESS : Phaser.AUTO,
                 parent: 'game-container',
                 antialias: false
             });
+
+
+            this.initialHeight = initialHeight;
+            this.initialWidth = initialWidth;
+            this.referenceWidth = 320;
 
             this.state.add('boot', State.Boot);
             this.state.add('preload', State.Preload);

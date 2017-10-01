@@ -1,0 +1,48 @@
+{"frames": [
+
+{
+	"filename": "background-button-clicked",
+	"frame": {"x":0,"y":0,"w":197,"h":97},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":197,"h":97},
+	"sourceSize": {"w":197,"h":97},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
+	"filename": "background-button-hover",
+	"frame": {"x":197,"y":0,"w":197,"h":96},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":197,"h":96},
+	"sourceSize": {"w":197,"h":96},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
+	"filename": "background-button-locked",
+	"frame": {"x":394,"y":0,"w":197,"h":97},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":197,"h":97},
+	"sourceSize": {"w":197,"h":97},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
+	"filename": "background-button",
+	"frame": {"x":591,"y":0,"w":197,"h":97},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":197,"h":97},
+	"sourceSize": {"w":197,"h":97},
+	"pivot": {"x":0.5,"y":0.5}
+}],
+"meta": {
+	"app": "http://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "small-button.png",
+	"format": "RGBA8888",
+	"size": {"w":788,"h":97},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:32fc30ddca9ea49d2711a19f42b778ca:e4b00a64d27b662990f588a1063093c8:631350981c11f1aa7431dae33e3165e7$"
+}
+}
