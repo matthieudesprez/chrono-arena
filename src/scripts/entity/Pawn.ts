@@ -8,8 +8,10 @@ module TacticArena.Entity {
         _name;
         _ap;
         _hp;
+        _mp;
         _apMax;
         _hpMax;
+        _mpMax;
         type;
         selected;
         isBot;
@@ -35,8 +37,10 @@ module TacticArena.Entity {
             }
             this._hp = 4;
             this._ap = 0;
+            this._mp = 0;
             this._hpMax = 4;
             this._apMax = 3;
+            this._mpMax = 2;
             this.selected = false;
             this.isBot = bot;
             this.team = team;
@@ -279,6 +283,15 @@ module TacticArena.Entity {
         setAp(ap) {
             this._ap = ap;
             this.game.signalManager.onApChange.dispatch(this);
+        }
+
+        getMp() {
+            return this._mp;
+        }
+
+        setMp(mp) {
+            this._mp = mp;
+            this.game.signalManager.onMpChange.dispatch(this);
         }
 
         getHp() {

@@ -1,6 +1,7 @@
 module TacticArena {
     export class SignalManager {
         game;
+        onMpChange:Phaser.Signal;
         onApChange:Phaser.Signal;
         onHpChange:Phaser.Signal;
         onOrderChange:Phaser.Signal;
@@ -18,6 +19,7 @@ module TacticArena {
         constructor(game) {
             this.game = game;
 
+            this.onMpChange = new Phaser.Signal();
             this.onApChange = new Phaser.Signal();
             this.onHpChange = new Phaser.Signal();
             this.onOrderChange = new Phaser.Signal();
@@ -36,6 +38,12 @@ module TacticArena {
         init() {
             var self = this;
 
+            this.onMpChange.add(function(pawn) {
+                if (self.game.uiManager.actionMenu) {
+                    self.game.uiManager.actionMenu.showMpCost(pawn, 0);
+                }
+                self.game.uiManager.topMenu.updateMp(pawn);
+            });
             this.onApChange.add(function(pawn) {
                 if (self.game.uiManager.actionMenu) {
                     self.game.uiManager.actionMenu.showApCost(pawn, 0);

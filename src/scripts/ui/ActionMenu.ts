@@ -4,8 +4,12 @@ module TacticArena.UI {
         mainGroup;
         actionGroup;
         skillsGroup;
-        //energyGroup;
-        healthGroup;
+        mpGroup;
+        mpText;
+        apGroup;
+        apText;
+        hpGroup;
+        hpText;
         isOver;
         savedDirection;
         buttonCancelGroup;
@@ -24,21 +28,22 @@ module TacticArena.UI {
             this.mainGroup = this.game.add.group();
             this.mainGroup.x = 0;
             console.log(this.game.height);
-            this.mainGroup.y = this.game.height - 140; //460; //window.innerHeight / this.game.getScaleRatio() - 132;
-            //this.mainGroup.y = Math.min(512, window.innerHeight / this.game.getScaleRatio() - 100);
-            //this.mainGroup.y = 512;
+            this.mainGroup.y = this.game.height - 110;
             this.actionGroup = this.game.add.group();
-            this.actionGroup.x = 140;
+            this.actionGroup.x = 143;
             this.actionGroup.y = 60;
             this.skillsGroup = this.game.add.group();
             this.skillsGroup.x = 0;
             this.skillsGroup.y = 0;
-            this.healthGroup = this.game.add.group();
-            this.healthGroup.x = 125;
-            this.healthGroup.y = 14;
-            //this.energyGroup = this.game.add.group();
-            //this.energyGroup.x = 140;
-            //this.energyGroup.y = 44;
+            this.hpGroup = this.game.add.group();
+            this.hpGroup.x = 130;
+            this.hpGroup.y = 14;
+            this.apGroup = this.game.add.group();
+            this.apGroup.x = 205;
+            this.apGroup.y = 14;
+            this.mpGroup = this.game.add.group();
+            this.mpGroup.x = 273;
+            this.mpGroup.y = 14;
 
             let frame = this.game.make.sprite(this.game.centerX, 0, 'frame-bottom');
             frame.anchor.set(0.5, 0);
@@ -59,17 +64,52 @@ module TacticArena.UI {
             name.anchor.set(0);
             name.setTextBounds(0, 8, 96, 20);
 
-            for(var i = 0; i < pawn._hpMax; i++) {
-                let key = i < pawn.getHp() ? 'icon-heart' : 'icon-heart-empty';
-                let health = self.game.make.sprite(i * 30, 0, key);
-                health.anchor.set(0);
-                this.healthGroup.add(health);
-            }
+            //for(var i = 0; i < pawn._hpMax; i++) {
+            //    let key = i < pawn.getHp() ? 'icon-heart' : 'icon-heart-empty';
+            //    let health = self.game.make.sprite(i * 30, 0, key);
+            //    health.anchor.set(0);
+            //    this.hpGroup.add(health);
+            //}
+            let hpIcon = self.game.make.sprite(0, 0, 'icon-heart');
+            hpIcon.anchor.set(0);
+            this.hpGroup.add(hpIcon);
+            this.hpText = this.game.add.text(32, 0, pawn.getHp() + ' / ' + pawn._hpMax, {
+                font: '20px Iceland',
+                fill: '#ffffff',
+                boundsAlignH: 'left',
+                boundsAlignV: 'center',
+            }, this.hpGroup);
+            this.hpText.anchor.set(0);
+            this.hpText.setTextBounds(0, 0, 70, 25);
+
+            let apIcon = self.game.make.sprite(0, -2, 'icon-power4');
+            apIcon.anchor.set(0);
+            this.apGroup.add(apIcon);
+            this.apText = this.game.add.text(28, 0, pawn.getAp() + ' / ' + pawn._apMax, {
+                font: '20px Iceland',
+                fill: '#ffffff',
+                boundsAlignH: 'left',
+                boundsAlignV: 'center',
+            }, this.apGroup);
+            this.apText.anchor.set(0);
+            this.apText.setTextBounds(0, 0, 70, 25);
+
+            let mpIcon = self.game.make.sprite(0, -3, 'icon-mp');
+            mpIcon.anchor.set(0);
+            this.mpGroup.add(mpIcon);
+            this.mpText = this.game.add.text(28, 0, pawn.getMp() + ' / ' + pawn._mpMax, {
+                font: '20px Iceland',
+                fill: '#ffffff',
+                boundsAlignH: 'left',
+                boundsAlignV: 'center',
+            }, this.mpGroup);
+            this.mpText.anchor.set(0);
+            this.mpText.setTextBounds(0, 0, 70, 25);
 
             //for(var i = 0; i < pawn._apMax; i++) {
             //    let energy = self.game.make.sprite(i * 30, 0, 'icon-power');
             //    energy.anchor.set(0);
-            //    this.energyGroup.add(energy);
+            //    this.apGroup.add(energy);
             //
             //    energy.inputEnabled = true;
             //    energy.events.onInputOver.add(this.buttonOver, this, 0);
@@ -130,8 +170,9 @@ module TacticArena.UI {
             this.mainGroup.add(frame);
             this.mainGroup.add(avatar);
             this.mainGroup.add(name);
-            this.mainGroup.add(this.healthGroup);
-            //this.mainGroup.add(this.energyGroup);
+            this.mainGroup.add(this.hpGroup);
+            this.mainGroup.add(this.apGroup);
+            this.mainGroup.add(this.mpGroup);
 
             this.actionGroup.add(this.skillsGroup);
             this.actionGroup.add(this.buttonCancelGroup);
@@ -165,14 +206,19 @@ module TacticArena.UI {
         }
 
         showApCost(pawn, apCost) {
-            //let remainingAp = pawn.getAp() - apCost;
-            //this.energyGroup.children.forEach( (child, index) => {
+            let remainingAp = pawn.getAp() - apCost;
+            this.apText.text = remainingAp;
+
+            //this.apGroup.children.forEach( (child, index) => {
             //    if(index >= remainingAp) {
             //        child.loadTexture('icon-power-empty');
             //    } else {
             //        child.loadTexture('icon-power');
             //    }
             //});
+        }
+        showMpCost(pawn, mpCost) {
+
         }
 
         cancel() {

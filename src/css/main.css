@@ -13,16 +13,10 @@ html, body {
     text-align: center;
 }
 
-#content {
+#game-container {
     margin: 0 auto 0 auto;
-    display: table;
     position: relative;
     text-align: center;
-}
-
-#content #game-container {
-    margin: auto;
-    position: relative;
 }
 
 #content #game-container canvas {

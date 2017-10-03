@@ -64,6 +64,8 @@ module TacticArena.State {
             this.load.image('icon-power-empty2', 'assets/images/ui/icon-power-empty2.png');
             this.load.image('icon-power3', 'assets/images/ui/icon-power3.png');
             this.load.image('icon-power-empty3', 'assets/images/ui/icon-power-empty3.png');
+            this.load.image('icon-power4', 'assets/images/ui/icon-power4.png');
+            this.load.image('icon-mp', 'assets/images/ui/icon-mp.png');
 
             this.load.image('skill-walk', 'assets/images/skill/walk.jpg');
             this.load.image('skill-fire', 'assets/images/skill/fire.jpg');

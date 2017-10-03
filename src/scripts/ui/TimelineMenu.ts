@@ -29,7 +29,7 @@ module TacticArena.UI {
             this.mainGroup.add(frame);
 
             this.mainGroup.x = 0;
-            this.mainGroup.y = this.game.height - 140; //460; //window.innerHeight / this.game.getScaleRatio() - 132;
+            this.mainGroup.y = this.game.height - 110; //460; //window.innerHeight / this.game.getScaleRatio() - 132;
             //this.mainGroup.y = Math.min(512, window.innerHeight / this.game.getScaleRatio() - 100);
 
             this.game.uiGroup.add(this.mainGroup);

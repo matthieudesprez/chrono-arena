@@ -12,14 +12,14 @@ module TacticArena.State {
 
         init() {
             this.worldGroup = this.add.group();
-            this.worldGroup.scale.set(this.getScaleRatio());
-            this.width = this.game.world.width / this.getScaleRatio();
-            this.height = this.game.world.height / this.getScaleRatio();
+            //this.worldGroup.scale.set(this.getScaleRatio());
+            this.width = this.game.world.width; // / this.getScaleRatio();
+            this.height = this.game.world.height; // / this.getScaleRatio();
             this.centerX = this.width / 2;
             this.centerY = this.height / 2;
             this.game.stage.backgroundColor = 0x333333;
             super.init();
-            this.game.world.resize(this.game.initialWidth, this.game.initialHeight);
+            //this.game.world.resize(this.game.initialWidth, this.game.initialHeight);
 
         }
 

@@ -41,19 +41,19 @@ module TacticArena.State {
             });
             versusonlineButtonLabel.anchor.set(0.5, 0);
 
-            let optionButton = this.game.make.button(0, 280, 'big-button', function() {}, this, 'background-button-hover', 'background-button');
-            optionButton.anchor.set(0.5, 0);
-            optionButton.scale.set(0.7);
-            optionButton.inputEnabled = true;
-            optionButton.events.onInputDown.add(this.startOptions, this, 0);
-
-            let optionButtonLabel = this.game.add.text(0, 322, 'Options', {
-                font: '20px Press Start 2P',
-                fill: '#ffffff',
-                boundsAlignH: 'right',
-                boundsAlignV: 'top',
-            });
-            optionButtonLabel.anchor.set(0.5, 0);
+            //let optionButton = this.game.make.button(0, 280, 'big-button', function() {}, this, 'background-button-hover', 'background-button');
+            //optionButton.anchor.set(0.5, 0);
+            //optionButton.scale.set(0.7);
+            //optionButton.inputEnabled = true;
+            //optionButton.events.onInputDown.add(this.startOptions, this, 0);
+            //
+            //let optionButtonLabel = this.game.add.text(0, 322, 'Options', {
+            //    font: '20px Press Start 2P',
+            //    fill: '#ffffff',
+            //    boundsAlignH: 'right',
+            //    boundsAlignV: 'top',
+            //});
+            //optionButtonLabel.anchor.set(0.5, 0);
 
             buttonsGroup.add(singleplayerButton);
             buttonsGroup.add(singleplayerButtonLabel);

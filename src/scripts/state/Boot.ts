@@ -13,6 +13,10 @@ module TacticArena.State {
 
             this.game.scale.fullScreenScaleMode = Phaser.ScaleManager.SHOW_ALL;
             this.game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+            console.log(window);
+            this.game.scale.maxHeight = window.innerHeight * window.devicePixelRatio;
+            console.log(this.game.scale.maxHeight);
+            this.game.scale.maxWidth = this.game.scale.maxHeight / (640 / 380); //1.667;
             this.game.renderer.renderSession.roundPixels = false;
             Phaser.Canvas.setImageRenderingCrisp(this.game.canvas);
 
@@ -31,7 +35,7 @@ module TacticArena.State {
             //    //console.info("The game has just been resized to: " + Math.floor(_this.game.width * scale) + " x " + Math.floor(_this.game.height * scale));
             //}, this);
 
-            this.scale.refresh();
+            //this.scale.refresh();
 
             this.input.maxPointers = 1;
             this.stage.disableVisibilityChange = true;
