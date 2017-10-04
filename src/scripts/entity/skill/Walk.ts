@@ -28,10 +28,10 @@ module TacticArena.Entity.Skill {
             this.state.stageManager.canMove(this.pawn.getProjectionOrReal(), position.x, position.y, this.pawn.getAp()).then((path) => {
                 this.state.stageManager.clearPath(this.state.pathTilesGroup);
                 this.state.stageManager.showPath(path, this.state.pathTilesGroup);
-                this.state.uiManager.actionMenu.showApCost(this.pawn, (<any>path).length);
+                this.state.uiManager.actionMenu.showCost(this.pawn, 'ap', (<any>path).length);
             }, () => {
                 this.state.stageManager.clearPath(this.state.pathTilesGroup);
-                this.state.uiManager.actionMenu.showApCost(this.pawn, 0);
+                this.state.uiManager.actionMenu.showCost(this.pawn, 'ap', 0);
             });
         }
         

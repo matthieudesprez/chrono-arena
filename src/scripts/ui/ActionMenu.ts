@@ -30,16 +30,16 @@ module TacticArena.UI {
             console.log(this.game.height);
             this.mainGroup.y = this.game.height - 110;
             this.actionGroup = this.game.add.group();
-            this.actionGroup.x = 143;
+            this.actionGroup.x = 120;
             this.actionGroup.y = 60;
             this.skillsGroup = this.game.add.group();
             this.skillsGroup.x = 0;
             this.skillsGroup.y = 0;
             this.hpGroup = this.game.add.group();
-            this.hpGroup.x = 130;
+            this.hpGroup.x = 107;
             this.hpGroup.y = 14;
             this.apGroup = this.game.add.group();
-            this.apGroup.x = 205;
+            this.apGroup.x = 192;
             this.apGroup.y = 14;
             this.mpGroup = this.game.add.group();
             this.mpGroup.x = 273;
@@ -94,7 +94,7 @@ module TacticArena.UI {
             this.apText.anchor.set(0);
             this.apText.setTextBounds(0, 0, 70, 25);
 
-            let mpIcon = self.game.make.sprite(0, -3, 'icon-mp');
+            let mpIcon = self.game.make.sprite(0, -2, 'icon-mp2');
             mpIcon.anchor.set(0);
             this.mpGroup.add(mpIcon);
             this.mpText = this.game.add.text(28, 0, pawn.getMp() + ' / ' + pawn._mpMax, {
@@ -117,9 +117,10 @@ module TacticArena.UI {
             //    energy.events.onInputDown.add(this.cancel, this);
             //}
 
+            let skillSpacing = 40
             pawn.skills.forEach(function (skill, index) {
                 let buttonGroup = new skillButton(self.game);
-                buttonGroup.x = 35 + index * 35;
+                buttonGroup.x = skillSpacing + index * skillSpacing;
                 let icon = self.game.make.sprite(0, 0, 'skill-' + skill.id);
                 icon.anchor.set(0.5);
                 let frame = self.game.make.sprite(0, 0, 'skill-frame2');
@@ -133,11 +134,11 @@ module TacticArena.UI {
                 frame.events.onInputDown.add(self.skillSelect, self, 0, index);
 
                 self.skillsGroup.add(buttonGroup);
-                self.skills.push({ selected: false, group: buttonGroup, skill: skill});
+                self.skills.push({selected: false, group: buttonGroup, skill: skill});
             });
 
             this.buttonConfirmGroup = this.game.add.group();
-            this.buttonConfirmGroup.x = 35 + pawn.skills.length * 35;
+            this.buttonConfirmGroup.x = skillSpacing + pawn.skills.length * skillSpacing;
             this.buttonConfirmGroup.y = 0;
             let iconConfirm = self.game.make.sprite(0, 0, 'icon-confirm');
             iconConfirm.anchor.set(0.5);
@@ -205,20 +206,14 @@ module TacticArena.UI {
             this.mainGroup.destroy();
         }
 
-        showApCost(pawn, apCost) {
-            let remainingAp = pawn.getAp() - apCost;
-            this.apText.text = remainingAp;
-
-            //this.apGroup.children.forEach( (child, index) => {
-            //    if(index >= remainingAp) {
-            //        child.loadTexture('icon-power-empty');
-            //    } else {
-            //        child.loadTexture('icon-power');
-            //    }
-            //});
-        }
-        showMpCost(pawn, mpCost) {
-
+        showCost(pawn, type, cost) {
+            if (type === 'hp') {
+                this.hpText.text = (pawn.getHp() - cost) + ' / ' + pawn._hpMax;
+            } else if (type === 'ap') {
+                this.apText.text = (pawn.getAp() - cost) + ' / ' + pawn._apMax;
+            } else if (type === 'mp') {
+                this.mpText.text = (pawn.getMp() - cost) + ' / ' + pawn._mpMax;
+            }
         }
 
         cancel() {
@@ -226,7 +221,7 @@ module TacticArena.UI {
         }
 
         confirm() {
-            if(this.confirmEnabled) {
+            if (this.confirmEnabled) {
                 Action.ConfirmOrder.process(this.game);
             }
         }
@@ -234,7 +229,7 @@ module TacticArena.UI {
         buttonOver(buttonSprite, pointer, buttonGroup) {
             this.isOver = true;
             //if(buttonGroup) {
-                //buttonGroup.scale.setTo(buttonGroup.scale.x - 0.1, buttonGroup.scale.y - 0.1);
+            //buttonGroup.scale.setTo(buttonGroup.scale.x - 0.1, buttonGroup.scale.y - 0.1);
             //}
         }
 
@@ -249,30 +244,35 @@ module TacticArena.UI {
             this.confirmEnabled = true;
             this.buttonConfirmGroup.alpha = 1;
         }
+
         disableConfirm() {
             this.confirmEnabled = false;
             this.buttonConfirmGroup.alpha = 0.5;
         }
+
         enableCancel() {
             this.buttonCancelGroup.alpha = 1;
         }
+
         disableCancel() {
             this.buttonCancelGroup.alpha = 0.5;
         }
 
-        skillDeselectAll(oneIsSelected=false) {
+        skillDeselectAll(oneIsSelected = false) {
             this.skills.forEach(function (actionMenuSkill) {
                 actionMenuSkill.group.alpha = 1;
-                if (oneIsSelected) { actionMenuSkill.group.alpha = 0.5; }
-                if(actionMenuSkill.selected) {
+                if (oneIsSelected) {
+                    actionMenuSkill.group.alpha = 0.5;
+                }
+                if (actionMenuSkill.selected) {
                     actionMenuSkill.skill.onDeselect();
                     actionMenuSkill.selected = false;
                 }
             });
         }
 
-        skillSelect(sprite, pointer, index){
-            if(this.skills[index].skill.minCost <= this.pawn.getAp()) {
+        skillSelect(sprite, pointer, index) {
+            if (this.skills[index].skill.minCost <= this.pawn.getAp()) {
                 this.skillDeselectAll(true);
                 this.skills[index].skill.onSelect();
                 this.skills[index].selected = true;
@@ -285,7 +285,9 @@ module TacticArena.UI {
         getSelectedSkill() {
             let result = null;
             try {
-                result = this.skills.filter(skill => { return skill.selected;})[0].skill;
+                result = this.skills.filter(skill => {
+                    return skill.selected;
+                })[0].skill;
             } catch (TypeError) {
                 //console.warn('no selected skill');
             }
@@ -300,7 +302,9 @@ module TacticArena.UI {
             let self = this;
             this.skills.forEach(function (actionMenuSkill) {
                 actionMenuSkill.group.alpha = 1;
-                if (actionMenuSkill.skill.minCost > self.pawn.getAp()) { actionMenuSkill.group.alpha = 0.5; }
+                if (actionMenuSkill.skill.minCost > self.pawn.getAp()) {
+                    actionMenuSkill.group.alpha = 0.5;
+                }
             });
         }
     }

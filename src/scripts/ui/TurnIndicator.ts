@@ -8,11 +8,11 @@ module TacticArena.UI {
             this.menu = menu;
 
             this.mainGroup = this.menu.game.add.group();
-            this.mainGroup.x = 0;
+            this.mainGroup.x = this.menu.game.world.width;
             this.mainGroup.y = 80;
 
-            let background = this.menu.game.make.sprite(-10, 0, 'background-bar');
-            background.anchor.set(0);
+            let background = this.menu.game.make.sprite(5, 0, 'background-bar');
+            background.anchor.set(1, 0);
 
             this.text = this.menu.game.add.text(0, -1, '', {
                 font: '19px Iceland',
@@ -24,7 +24,7 @@ module TacticArena.UI {
 
             this.mainGroup.add(background);
             this.mainGroup.add(this.text);
-            this.text.setTextBounds(0, 0, this.mainGroup.width, 32);
+            this.text.setTextBounds(background.position.x - this.mainGroup.width, background.position.y, this.mainGroup.width, 32);
             this.menu.game.uiGroup.add(this.mainGroup);
         }
 

@@ -40,13 +40,13 @@ module TacticArena {
 
             this.onMpChange.add(function(pawn) {
                 if (self.game.uiManager.actionMenu) {
-                    self.game.uiManager.actionMenu.showMpCost(pawn, 0);
+                    self.game.uiManager.actionMenu.showCost(pawn, 'mp', 0);
                 }
                 self.game.uiManager.topMenu.updateMp(pawn);
             });
             this.onApChange.add(function(pawn) {
                 if (self.game.uiManager.actionMenu) {
-                    self.game.uiManager.actionMenu.showApCost(pawn, 0);
+                    self.game.uiManager.actionMenu.showCost(pawn, 'ap', 0);
                 }
                 self.game.uiManager.topMenu.updateAp(pawn);
             });

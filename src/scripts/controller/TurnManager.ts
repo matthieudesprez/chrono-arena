@@ -16,6 +16,7 @@ module TacticArena {
 				if(firstTurnCall) {
 					this.game.pawns.forEach((pawn) => {
 						pawn.setAp(pawn._apMax);
+						pawn.setMp(pawn._mpMax);
 						pawn.ghost = null;
 					});
 					this.currentTurnIndex++;

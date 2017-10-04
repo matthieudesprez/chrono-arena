@@ -39,9 +39,9 @@ module TacticArena.Entity.Skill {
             this.state.stageManager.clearPath(this.state.pathTilesGroup);
             if (isInPath) {
                 this.state.stageManager.showPath(this.paths[pathDirection], this.state.pathTilesGroup, 0xfc000f);
-                this.state.uiManager.actionMenu.showApCost(this.pawn, this.minCost);
+                this.state.uiManager.actionMenu.showCost(this.pawn, 'ap', this.minCost);
             } else {
-                this.state.uiManager.actionMenu.showApCost(this.pawn, 0);
+                this.state.uiManager.actionMenu.showCost(this.pawn, 'ap', 0);
             }
         }
 

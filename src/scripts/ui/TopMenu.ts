@@ -26,47 +26,70 @@ module TacticArena.UI {
                 dead.anchor.set(0.5);
                 dead.alpha = 0;
 
-                let heart = self.game.make.sprite(-13, 25, 'icon-heart');
-                heart.anchor.set(0.5);
-                let hpText = self.game.add.text(0, 0, pawn.getHp(), {
-                    font: '15px Iceland',
-                    fill: '#FFFFFF',
-                    align: 'center',
-                    boundsAlignH: 'center',
-                    boundsAlignV: 'center',
-                    strokeThickness: 3,
-                    stroke: '#000000',
-                    wordWrap: true
+                let barWidth = 52;
+                let hpBar = new Bar(self.game, {
+                    x: -28 + 2,
+                    y: 28 + 2,
+                    width: barWidth,
+                    height: 4,
+                    text: false,
+                    name: 'hpbar',
+                    unit: 'HP',
+                    max: pawn._hpMax,
+                    textColor: '#ffffff',
+                    bg: { color: '#962b36' },
+                    bar: { color: '#d54445' },
+                    textStyle: '10px Iceland',
+                    frame: 'bar-frame',
+                    frameOffsetX: -2,
+                    frameOffsetY: -2,
                 });
-                hpText.setTextBounds(heart.x - 13, heart.y - 10, 26, 21);
-
-                //let energy = self.game.make.sprite(1, 11, 'icon-power');
-                //energy.anchor.set(0);
-                //let apText = self.game.add.text(0, 0, pawn.getAp(), {
-                //    font: '15px Iceland',
-                //    fill: '#FFFFFF',
-                //    align: 'center',
-                //    boundsAlignH: 'center',
-                //    boundsAlignV: 'center',
-                //    strokeThickness: 3,
-                //    stroke: '#000000',
-                //    wordWrap: true
-                //});
-                //apText.setTextBounds(energy.x, energy.y + 4, energy.width, energy.height);
+                let apBar = new Bar(self.game, {
+                    x: -28 + 2,
+                    y: 28 + 6 + 2,
+                    width: barWidth,
+                    height: 4,
+                    text: false,
+                    name: 'apbar',
+                    unit: 'AP',
+                    max: pawn._apMax,
+                    textColor: '#ffffff',
+                    bg: { color: '#0096ff' },
+                    bar: { color: '#4bbbff' },
+                    textStyle: '10px Iceland',
+                    frame: 'bar-frame',
+                    frameOffsetX: -2,
+                    frameOffsetY: -2,
+                });
+                let mpBar = new Bar(self.game, {
+                    x: -28 + 2,
+                    y: 28 + 12 + 2,
+                    width: barWidth,
+                    height: 4,
+                    text: false,
+                    name: 'mpbar',
+                    unit: 'MP',
+                    max: pawn._mpMax,
+                    textColor: '#ffffff',
+                    bg: { color: '#2e632c' },
+                    bar: { color: '#64c55f' },
+                    textStyle: '10px Iceland',
+                    frame: 'bar-frame',
+                    frameOffsetX: -2,
+                    frameOffsetY: -2,
+                });
 
                 pawnGroup.add(frame);
                 pawnGroup.add(avatar);
                 pawnGroup.add(dead);
-                pawnGroup.add(heart);
-                pawnGroup.add(hpText);
-                //pawnGroup.add(energy);
-                //pawnGroup.add(apText);
+                pawnGroup.add(hpBar);
+                pawnGroup.add(apBar);
+                pawnGroup.add(mpBar);
 
                 avatarsGroup.add(pawnGroup);
 
                 self.pawns[pawn._id] = {
-                    hpText: hpText,
-                    //apText: apText,
+                    hpBar: hpBar,
                     dead: dead,
                     avatar: avatar
                 };
@@ -85,10 +108,6 @@ module TacticArena.UI {
             this.isOver = false;
         }
 
-        updateAp(pawn) {
-            //this.pawns[pawn._id].apText.setText(pawn.getAp());
-        }
-
         updateHp(pawn) {
             let hp = pawn.getHp();
             this.pawns[pawn._id].hpText.setText(hp);
@@ -99,6 +118,14 @@ module TacticArena.UI {
                 this.pawns[pawn._id].dead.alpha = 0;
                 this.pawns[pawn._id].avatar.alpha = 1;
             }
+        }
+
+        updateAp(pawn) {
+            //this.pawns[pawn._id].apText.setText(pawn.getAp());
+        }
+
+        updateMp(pawn) {
+            //this.pawns[pawn._id].apText.setText(pawn.getAp());
         }
     }
 }

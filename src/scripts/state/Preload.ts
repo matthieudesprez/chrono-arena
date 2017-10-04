@@ -34,6 +34,7 @@ module TacticArena.State {
             this.load.image('button-square-next', 'assets/images/ui/button-square-next.png');
             this.load.image('button-square-previous', 'assets/images/ui/button-square-previous.png');
             this.load.image('avatar-frame', 'assets/images/ui/avatar-frame.png');
+            this.load.image('bar-frame', 'assets/images/ui/bar-frame.png');
             this.load.image('skill-frame2', 'assets/images/ui/skill-frame2.png');
             this.load.image('frame-bottom', 'assets/images/ui/frame-bottom.png');
             this.load.image('frame-bottom-big', 'assets/images/ui/frame-bottom-big.png');
@@ -66,6 +67,7 @@ module TacticArena.State {
             this.load.image('icon-power-empty3', 'assets/images/ui/icon-power-empty3.png');
             this.load.image('icon-power4', 'assets/images/ui/icon-power4.png');
             this.load.image('icon-mp', 'assets/images/ui/icon-mp.png');
+            this.load.image('icon-mp2', 'assets/images/ui/icon-mp2.png');
 
             this.load.image('skill-walk', 'assets/images/skill/walk.jpg');
             this.load.image('skill-fire', 'assets/images/skill/fire.jpg');

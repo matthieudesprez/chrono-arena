@@ -10,11 +10,17 @@ module TacticArena.UI {
         x;
         y;
         value;
+        frameSprite;
 
         constructor(game, providedConfig) {
             super(game);
             this.game = game;
             this.setupConfiguration(providedConfig);
+            if(this.config.frame) {
+                this.frameSprite = this.game.make.sprite(this.config.frameOffsetX, this.config.frameOffsetY, this.config.frame);
+                this.frameSprite.anchor.set(0);
+                this.add(this.frameSprite);
+            }
             this.setPosition(this.config.x, this.config.y);
             this.setValue(this.config.value);
             this.drawBackground();

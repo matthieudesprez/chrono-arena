@@ -1175,13 +1175,13 @@ var TacticArena;
             var self = this;
             this.onMpChange.add(function (pawn) {
                 if (self.game.uiManager.actionMenu) {
-                    self.game.uiManager.actionMenu.showMpCost(pawn, 0);
+                    self.game.uiManager.actionMenu.showCost(pawn, 'mp', 0);
                 }
                 self.game.uiManager.topMenu.updateMp(pawn);
             });
             this.onApChange.add(function (pawn) {
                 if (self.game.uiManager.actionMenu) {
-                    self.game.uiManager.actionMenu.showApCost(pawn, 0);
+                    self.game.uiManager.actionMenu.showCost(pawn, 'ap', 0);
                 }
                 self.game.uiManager.topMenu.updateAp(pawn);
             });
@@ -1606,6 +1606,7 @@ var TacticArena;
                 if (firstTurnCall) {
                     _this.game.pawns.forEach(function (pawn) {
                         pawn.setAp(pawn._apMax);
+                        pawn.setMp(pawn._mpMax);
                         pawn.ghost = null;
                     });
                     _this.currentTurnIndex++;
@@ -2703,7 +2704,7 @@ var TacticArena;
                         new TacticArena.Entity.Skill.Walk(_this.game, _this),
                         new TacticArena.Entity.Skill.Watch(_this.game, _this)
                     ]);
-                    _this._apMax = 1;
+                    _this._apMax = 4;
                     _this._hpMax = 5;
                     _this._hp = 4;
                     return _this;
@@ -3082,10 +3083,10 @@ var TacticArena;
                     this.state.stageManager.clearPath(this.state.pathTilesGroup);
                     if (isInPath) {
                         this.state.stageManager.showPath(this.paths[pathDirection], this.state.pathTilesGroup, 0xfc000f);
-                        this.state.uiManager.actionMenu.showApCost(this.pawn, this.minCost);
+                        this.state.uiManager.actionMenu.showCost(this.pawn, 'ap', this.minCost);
                     }
                     else {
-                        this.state.uiManager.actionMenu.showApCost(this.pawn, 0);
+                        this.state.uiManager.actionMenu.showCost(this.pawn, 'ap', 0);
                     }
                 };
                 LinearSkill.prototype.getPathDirection = function (position, target) {
@@ -3245,10 +3246,10 @@ var TacticArena;
                     this.state.stageManager.canMove(this.pawn.getProjectionOrReal(), position.x, position.y, this.pawn.getAp()).then(function (path) {
                         _this.state.stageManager.clearPath(_this.state.pathTilesGroup);
                         _this.state.stageManager.showPath(path, _this.state.pathTilesGroup);
-                        _this.state.uiManager.actionMenu.showApCost(_this.pawn, path.length);
+                        _this.state.uiManager.actionMenu.showCost(_this.pawn, 'ap', path.length);
                     }, function () {
                         _this.state.stageManager.clearPath(_this.state.pathTilesGroup);
-                        _this.state.uiManager.actionMenu.showApCost(_this.pawn, 0);
+                        _this.state.uiManager.actionMenu.showCost(_this.pawn, 'ap', 0);
                     });
                 };
                 Walk.prototype.order = function (target) {
@@ -4027,6 +4028,7 @@ var TacticArena;
                 this.load.image('button-square-next', 'assets/images/ui/button-square-next.png');
                 this.load.image('button-square-previous', 'assets/images/ui/button-square-previous.png');
                 this.load.image('avatar-frame', 'assets/images/ui/avatar-frame.png');
+                this.load.image('bar-frame', 'assets/images/ui/bar-frame.png');
                 this.load.image('skill-frame2', 'assets/images/ui/skill-frame2.png');
                 this.load.image('frame-bottom', 'assets/images/ui/frame-bottom.png');
                 this.load.image('frame-bottom-big', 'assets/images/ui/frame-bottom-big.png');
@@ -4057,6 +4059,7 @@ var TacticArena;
                 this.load.image('icon-power-empty3', 'assets/images/ui/icon-power-empty3.png');
                 this.load.image('icon-power4', 'assets/images/ui/icon-power4.png');
                 this.load.image('icon-mp', 'assets/images/ui/icon-mp.png');
+                this.load.image('icon-mp2', 'assets/images/ui/icon-mp2.png');
                 this.load.image('skill-walk', 'assets/images/skill/walk.jpg');
                 this.load.image('skill-fire', 'assets/images/skill/fire.jpg');
                 this.load.image('skill-wind', 'assets/images/skill/wind.jpg');
@@ -6005,16 +6008,16 @@ var TacticArena;
                 console.log(this.game.height);
                 this.mainGroup.y = this.game.height - 110;
                 this.actionGroup = this.game.add.group();
-                this.actionGroup.x = 143;
+                this.actionGroup.x = 120;
                 this.actionGroup.y = 60;
                 this.skillsGroup = this.game.add.group();
                 this.skillsGroup.x = 0;
                 this.skillsGroup.y = 0;
                 this.hpGroup = this.game.add.group();
-                this.hpGroup.x = 130;
+                this.hpGroup.x = 107;
                 this.hpGroup.y = 14;
                 this.apGroup = this.game.add.group();
-                this.apGroup.x = 205;
+                this.apGroup.x = 192;
                 this.apGroup.y = 14;
                 this.mpGroup = this.game.add.group();
                 this.mpGroup.x = 273;
@@ -6062,7 +6065,7 @@ var TacticArena;
                 }, this.apGroup);
                 this.apText.anchor.set(0);
                 this.apText.setTextBounds(0, 0, 70, 25);
-                var mpIcon = self.game.make.sprite(0, -3, 'icon-mp');
+                var mpIcon = self.game.make.sprite(0, -2, 'icon-mp2');
                 mpIcon.anchor.set(0);
                 this.mpGroup.add(mpIcon);
                 this.mpText = this.game.add.text(28, 0, pawn.getMp() + ' / ' + pawn._mpMax, {
@@ -6083,9 +6086,10 @@ var TacticArena;
                 //    energy.events.onInputOut.add(this.buttonOut, this, 0);
                 //    energy.events.onInputDown.add(this.cancel, this);
                 //}
+                var skillSpacing = 40;
                 pawn.skills.forEach(function (skill, index) {
                     var buttonGroup = new UI.skillButton(self.game);
-                    buttonGroup.x = 35 + index * 35;
+                    buttonGroup.x = skillSpacing + index * skillSpacing;
                     var icon = self.game.make.sprite(0, 0, 'skill-' + skill.id);
                     icon.anchor.set(0.5);
                     var frame = self.game.make.sprite(0, 0, 'skill-frame2');
@@ -6100,7 +6104,7 @@ var TacticArena;
                     self.skills.push({ selected: false, group: buttonGroup, skill: skill });
                 });
                 this.buttonConfirmGroup = this.game.add.group();
-                this.buttonConfirmGroup.x = 35 + pawn.skills.length * 35;
+                this.buttonConfirmGroup.x = skillSpacing + pawn.skills.length * skillSpacing;
                 this.buttonConfirmGroup.y = 0;
                 var iconConfirm = self.game.make.sprite(0, 0, 'icon-confirm');
                 iconConfirm.anchor.set(0.5);
@@ -6156,18 +6160,16 @@ var TacticArena;
             ActionMenu.prototype.clean = function () {
                 this.mainGroup.destroy();
             };
-            ActionMenu.prototype.showApCost = function (pawn, apCost) {
-                var remainingAp = pawn.getAp() - apCost;
-                this.apText.text = remainingAp;
-                //this.apGroup.children.forEach( (child, index) => {
-                //    if(index >= remainingAp) {
-                //        child.loadTexture('icon-power-empty');
-                //    } else {
-                //        child.loadTexture('icon-power');
-                //    }
-                //});
-            };
-            ActionMenu.prototype.showMpCost = function (pawn, mpCost) {
+            ActionMenu.prototype.showCost = function (pawn, type, cost) {
+                if (type === 'hp') {
+                    this.hpText.text = (pawn.getHp() - cost) + ' / ' + pawn._hpMax;
+                }
+                else if (type === 'ap') {
+                    this.apText.text = (pawn.getAp() - cost) + ' / ' + pawn._apMax;
+                }
+                else if (type === 'mp') {
+                    this.mpText.text = (pawn.getMp() - cost) + ' / ' + pawn._mpMax;
+                }
             };
             ActionMenu.prototype.cancel = function () {
                 TacticArena.Action.Cancel.process(this.game);
@@ -6229,7 +6231,9 @@ var TacticArena;
             ActionMenu.prototype.getSelectedSkill = function () {
                 var result = null;
                 try {
-                    result = this.skills.filter(function (skill) { return skill.selected; })[0].skill;
+                    result = this.skills.filter(function (skill) {
+                        return skill.selected;
+                    })[0].skill;
                 }
                 catch (TypeError) {
                     //console.warn('no selected skill');
@@ -6263,6 +6267,11 @@ var TacticArena;
                 var _this = _super.call(this, game) || this;
                 _this.game = game;
                 _this.setupConfiguration(providedConfig);
+                if (_this.config.frame) {
+                    _this.frameSprite = _this.game.make.sprite(_this.config.frameOffsetX, _this.config.frameOffsetY, _this.config.frame);
+                    _this.frameSprite.anchor.set(0);
+                    _this.add(_this.frameSprite);
+                }
                 _this.setPosition(_this.config.x, _this.config.y);
                 _this.setValue(_this.config.value);
                 _this.drawBackground();
@@ -7569,43 +7578,67 @@ var TacticArena;
                     var dead = self.game.make.sprite(0, 0, 'icon-dead');
                     dead.anchor.set(0.5);
                     dead.alpha = 0;
-                    var heart = self.game.make.sprite(-13, 25, 'icon-heart');
-                    heart.anchor.set(0.5);
-                    var hpText = self.game.add.text(0, 0, pawn.getHp(), {
-                        font: '15px Iceland',
-                        fill: '#FFFFFF',
-                        align: 'center',
-                        boundsAlignH: 'center',
-                        boundsAlignV: 'center',
-                        strokeThickness: 3,
-                        stroke: '#000000',
-                        wordWrap: true
+                    var barWidth = 52;
+                    var hpBar = new UI.Bar(self.game, {
+                        x: -28 + 2,
+                        y: 28 + 2,
+                        width: barWidth,
+                        height: 4,
+                        text: false,
+                        name: 'hpbar',
+                        unit: 'HP',
+                        max: pawn._hpMax,
+                        textColor: '#ffffff',
+                        bg: { color: '#962b36' },
+                        bar: { color: '#d54445' },
+                        textStyle: '10px Iceland',
+                        frame: 'bar-frame',
+                        frameOffsetX: -2,
+                        frameOffsetY: -2,
                     });
-                    hpText.setTextBounds(heart.x - 13, heart.y - 10, 26, 21);
-                    //let energy = self.game.make.sprite(1, 11, 'icon-power');
-                    //energy.anchor.set(0);
-                    //let apText = self.game.add.text(0, 0, pawn.getAp(), {
-                    //    font: '15px Iceland',
-                    //    fill: '#FFFFFF',
-                    //    align: 'center',
-                    //    boundsAlignH: 'center',
-                    //    boundsAlignV: 'center',
-                    //    strokeThickness: 3,
-                    //    stroke: '#000000',
-                    //    wordWrap: true
-                    //});
-                    //apText.setTextBounds(energy.x, energy.y + 4, energy.width, energy.height);
+                    var apBar = new UI.Bar(self.game, {
+                        x: -28 + 2,
+                        y: 28 + 6 + 2,
+                        width: barWidth,
+                        height: 4,
+                        text: false,
+                        name: 'apbar',
+                        unit: 'AP',
+                        max: pawn._apMax,
+                        textColor: '#ffffff',
+                        bg: { color: '#0096ff' },
+                        bar: { color: '#4bbbff' },
+                        textStyle: '10px Iceland',
+                        frame: 'bar-frame',
+                        frameOffsetX: -2,
+                        frameOffsetY: -2,
+                    });
+                    var mpBar = new UI.Bar(self.game, {
+                        x: -28 + 2,
+                        y: 28 + 12 + 2,
+                        width: barWidth,
+                        height: 4,
+                        text: false,
+                        name: 'mpbar',
+                        unit: 'MP',
+                        max: pawn._mpMax,
+                        textColor: '#ffffff',
+                        bg: { color: '#2e632c' },
+                        bar: { color: '#64c55f' },
+                        textStyle: '10px Iceland',
+                        frame: 'bar-frame',
+                        frameOffsetX: -2,
+                        frameOffsetY: -2,
+                    });
                     pawnGroup.add(frame);
                     pawnGroup.add(avatar);
                     pawnGroup.add(dead);
-                    pawnGroup.add(heart);
-                    pawnGroup.add(hpText);
-                    //pawnGroup.add(energy);
-                    //pawnGroup.add(apText);
+                    pawnGroup.add(hpBar);
+                    pawnGroup.add(apBar);
+                    pawnGroup.add(mpBar);
                     avatarsGroup.add(pawnGroup);
                     self.pawns[pawn._id] = {
-                        hpText: hpText,
-                        //apText: apText,
+                        hpBar: hpBar,
                         dead: dead,
                         avatar: avatar
                     };
@@ -7619,9 +7652,6 @@ var TacticArena;
             TopMenu.prototype.out = function () {
                 this.isOver = false;
             };
-            TopMenu.prototype.updateAp = function (pawn) {
-                //this.pawns[pawn._id].apText.setText(pawn.getAp());
-            };
             TopMenu.prototype.updateHp = function (pawn) {
                 var hp = pawn.getHp();
                 this.pawns[pawn._id].hpText.setText(hp);
@@ -7633,6 +7663,12 @@ var TacticArena;
                     this.pawns[pawn._id].dead.alpha = 0;
                     this.pawns[pawn._id].avatar.alpha = 1;
                 }
+            };
+            TopMenu.prototype.updateAp = function (pawn) {
+                //this.pawns[pawn._id].apText.setText(pawn.getAp());
+            };
+            TopMenu.prototype.updateMp = function (pawn) {
+                //this.pawns[pawn._id].apText.setText(pawn.getAp());
             };
             return TopMenu;
         }());
@@ -7717,10 +7753,10 @@ var TacticArena;
             function TurnIndicator(menu) {
                 this.menu = menu;
                 this.mainGroup = this.menu.game.add.group();
-                this.mainGroup.x = 0;
+                this.mainGroup.x = this.menu.game.world.width;
                 this.mainGroup.y = 80;
-                var background = this.menu.game.make.sprite(-10, 0, 'background-bar');
-                background.anchor.set(0);
+                var background = this.menu.game.make.sprite(5, 0, 'background-bar');
+                background.anchor.set(1, 0);
                 this.text = this.menu.game.add.text(0, -1, '', {
                     font: '19px Iceland',
                     fill: '#FFFFFF',
@@ -7730,7 +7766,7 @@ var TacticArena;
                 });
                 this.mainGroup.add(background);
                 this.mainGroup.add(this.text);
-                this.text.setTextBounds(0, 0, this.mainGroup.width, 32);
+                this.text.setTextBounds(background.position.x - this.mainGroup.width, background.position.y, this.mainGroup.width, 32);
                 this.menu.game.uiGroup.add(this.mainGroup);
             }
             TurnIndicator.prototype.write = function (turn) {
