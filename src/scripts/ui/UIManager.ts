@@ -11,12 +11,15 @@ module TacticArena.UI {
         actionMenu;
         topMenu;
         timelineMenu;
+        dialogUI;
 
         constructor(game) {
             this.game = game;
 
             this.actionMenu = null;
             this.timelineMenu = null;
+
+            this.dialogUI = new UI.Dialog(this.game);
 
             this.topMenu = new UI.TopMenu(this.game);
             this.turnIndicatorUI = new UI.TurnIndicator(this);
@@ -59,7 +62,6 @@ module TacticArena.UI {
         }
 
         isOver() {
-            console.log(this.ingamemenuUI.active);
             //return (this.actionMenu && this.actionMenu.isOver) ||
             //    (this.timelineMenu && this.timelineMenu.isOver) ||
             //    this.topMenu.isOver ||

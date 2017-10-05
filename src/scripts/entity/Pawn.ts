@@ -298,7 +298,7 @@ module TacticArena.Entity {
             return this._hp;
         }
 
-        setHp(hp, forceAnimation) {
+        setHp(hp, forceAnimation=false) {
             if ((this.isAlive() || forceAnimation) && hp <= 0) {
                 this.sprite.die();
             }

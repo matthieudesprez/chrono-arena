@@ -27,7 +27,6 @@ module TacticArena.UI {
             this.confirmEnabled = true;
             this.mainGroup = this.game.add.group();
             this.mainGroup.x = 0;
-            console.log(this.game.height);
             this.mainGroup.y = this.game.height - 110;
             this.actionGroup = this.game.add.group();
             this.actionGroup.x = 120;

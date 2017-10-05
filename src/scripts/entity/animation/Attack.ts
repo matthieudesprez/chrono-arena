@@ -8,7 +8,10 @@ module TacticArena.Animation {
             this.targets = [];
             // TODO voué à disparaître
             this.state = state;
-            this.order.targets.forEach( t => {this.targets.push(this.state.orderManager.getPawn(t)); });
+            this.order.targets.forEach( t => {
+                t.entity = this.state.orderManager.getPawn(t.entityId);
+                this.targets.push(t);
+            });
         }
 
         get():Promise<any> {

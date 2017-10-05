@@ -76,7 +76,6 @@ module TacticArena.State {
                     if(pawn.isAlive()) { allyPawnAlive = true; }
                 }
             });
-            console.log(ennemyPawnAlive, allyPawnAlive);
             if(!allyPawnAlive) { this.teams[this.playerTeam] = false; }
             return (!allyPawnAlive || !ennemyPawnAlive);
         }
@@ -109,6 +108,7 @@ module TacticArena.State {
 
         battleOver () {
             console.log('battle is over');
+            this.uiManager.dialogUI.showModal('battleOver');
         }
     }
 }

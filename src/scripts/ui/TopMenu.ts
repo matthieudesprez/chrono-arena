@@ -4,11 +4,13 @@ module TacticArena.UI {
         mainGroup;
         isOver;
         pawns;
+        barWidth;
 
         constructor(game) {
             let self = this;
             this.game = game;
             this.pawns = {};
+            this.barWidth = 52;
             this.mainGroup = this.game.add.group();
             this.mainGroup.x = 40;
             this.mainGroup.y = 37;
@@ -26,70 +28,23 @@ module TacticArena.UI {
                 dead.anchor.set(0.5);
                 dead.alpha = 0;
 
-                let barWidth = 52;
-                let hpBar = new Bar(self.game, {
-                    x: -28 + 2,
-                    y: 28 + 2,
-                    width: barWidth,
-                    height: 4,
-                    text: false,
-                    name: 'hpbar',
-                    unit: 'HP',
-                    max: pawn._hpMax,
-                    textColor: '#ffffff',
-                    bg: { color: '#962b36' },
-                    bar: { color: '#d54445' },
-                    textStyle: '10px Iceland',
-                    frame: 'bar-frame',
-                    frameOffsetX: -2,
-                    frameOffsetY: -2,
-                });
-                let apBar = new Bar(self.game, {
-                    x: -28 + 2,
-                    y: 28 + 6 + 2,
-                    width: barWidth,
-                    height: 4,
-                    text: false,
-                    name: 'apbar',
-                    unit: 'AP',
-                    max: pawn._apMax,
-                    textColor: '#ffffff',
-                    bg: { color: '#0096ff' },
-                    bar: { color: '#4bbbff' },
-                    textStyle: '10px Iceland',
-                    frame: 'bar-frame',
-                    frameOffsetX: -2,
-                    frameOffsetY: -2,
-                });
-                let mpBar = new Bar(self.game, {
-                    x: -28 + 2,
-                    y: 28 + 12 + 2,
-                    width: barWidth,
-                    height: 4,
-                    text: false,
-                    name: 'mpbar',
-                    unit: 'MP',
-                    max: pawn._mpMax,
-                    textColor: '#ffffff',
-                    bg: { color: '#2e632c' },
-                    bar: { color: '#64c55f' },
-                    textStyle: '10px Iceland',
-                    frame: 'bar-frame',
-                    frameOffsetX: -2,
-                    frameOffsetY: -2,
-                });
+                let hpBarGroup = self.createBar(-28, 28, pawn._hpMax, '#962b36', '#d54445');
+                let apBarGroup = self.createBar(-28, 36, pawn._apMax, '#225572', '#4bbbff');
+                let mpBarGroup = self.createBar(-28, 44, pawn._mpMax, '#2e632c', '#64c55f');
 
                 pawnGroup.add(frame);
                 pawnGroup.add(avatar);
                 pawnGroup.add(dead);
-                pawnGroup.add(hpBar);
-                pawnGroup.add(apBar);
-                pawnGroup.add(mpBar);
+                pawnGroup.add(hpBarGroup);
+                pawnGroup.add(apBarGroup);
+                pawnGroup.add(mpBarGroup);
 
                 avatarsGroup.add(pawnGroup);
 
                 self.pawns[pawn._id] = {
-                    hpBar: hpBar,
+                    hpBarGroup: hpBarGroup,
+                    apBarGroup: apBarGroup,
+                    mpBarGroup: mpBarGroup,
                     dead: dead,
                     avatar: avatar
                 };
@@ -110,7 +65,8 @@ module TacticArena.UI {
 
         updateHp(pawn) {
             let hp = pawn.getHp();
-            this.pawns[pawn._id].hpText.setText(hp);
+            let percent = (hp / pawn._hpMax) * 100;
+            this.pawns[pawn._id].hpBarGroup.getByName('bar').setPercent(percent);
             if(hp <= 0) {
                 this.pawns[pawn._id].dead.alpha = 1;
                 this.pawns[pawn._id].avatar.alpha = 0.5;
@@ -121,11 +77,40 @@ module TacticArena.UI {
         }
 
         updateAp(pawn) {
-            //this.pawns[pawn._id].apText.setText(pawn.getAp());
+            this.pawns[pawn._id].apBarGroup.getByName('bar').setPercent((pawn.getAp() / pawn._apMax) * 100);
         }
 
         updateMp(pawn) {
-            //this.pawns[pawn._id].apText.setText(pawn.getAp());
+            this.pawns[pawn._id].mpBarGroup.getByName('bar').setPercent((pawn.getMp() / pawn._mpMax) * 100);
+        }
+
+        createBar(x, y, max, bgColor, barColor):Phaser.Group {
+            let group = this.game.add.group();
+            group.x = x;
+            group.y = y;
+            let bar = new Bar(this.game, {
+                x: 2,
+                y: 2,
+                width: this.barWidth,
+                height: 4,
+                text: false,
+                name: 'bar',
+                max: max,
+                textColor: '#ffffff',
+                bg: { color: bgColor },
+                bar: { color: barColor },
+                frame: 'bar-frame',
+                frameOffsetX: -2,
+                frameOffsetY: -2,
+            });
+            group.add(bar);
+            for(var i = 0; i < max - 1; i++) {
+                let line =  this.game.make.graphics((this.barWidth / max) * (i + 1) + 1, 1);
+                line.lineStyle(1, 0x140c1c, 1);
+                line.drawRect(0, 0, 1, 6);
+                group.add(line);
+            }
+            return group;
         }
     }
 }

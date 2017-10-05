@@ -31,7 +31,7 @@ module TacticArena.Order {
                     }
                 }
                 result = new Attack(this.position, this.direction, [{
-                    entityId: stepUnitB._id,
+                    entityId: stepUnitB.pawn._id,
                     dodge: entityBIsDodging,
                     damages: stepUnitA.data.entityBHpLost
                 }]);

@@ -44,6 +44,7 @@ module TacticArena {
                 }
                 self.game.uiManager.topMenu.updateMp(pawn);
             });
+
             this.onApChange.add(function(pawn) {
                 if (self.game.uiManager.actionMenu) {
                     self.game.uiManager.actionMenu.showCost(pawn, 'ap', 0);

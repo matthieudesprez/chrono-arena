@@ -71,6 +71,72 @@ module TacticArena.UI {
                     },
                 ]
             });
+
+            this.createModal({
+                type: "battleOver",
+                includeBackground: true,
+                //modalCloseOnInput: true,
+                fixedToCamera: true,
+                itemsArr: [
+                    {
+                        type: "image",
+                        content: "background-modal",
+                        offsetY: -50,
+                        contentScale: 1
+                    },
+                    {
+                        type: "text",
+                        content: "[t]",
+                        fontFamily: "Press Start 2P",
+                        fontSize: 21,
+                        color: "0x000000",
+                        offsetY: -225
+                    },
+                    {
+                        type: "button",
+                        atlasParent: "small-button",
+                        content: "background-button",
+                        buttonHover: "background-button-hover",
+                        offsetY: -90,
+                        contentScale: 0.7,
+                        callback: function () {
+                            this.game.state.start('mainsolooffline', true, false, {
+                                players: [
+                                    {name: 'BOT 01', faction: 'evil', player: false},
+                                    {name: 'Matt', faction: 'human', player: true}
+                                ]
+                            }, null);
+                        }
+                    },
+                    {
+                        type: "text",
+                        content: "Replay",
+                        fontFamily: "Press Start 2P",
+                        fontSize: 18,
+                        color: "0x000000",
+                        offsetY: -90
+                    },
+                    {
+                        type: "button",
+                        atlasParent: "small-button",
+                        content: "background-button",
+                        buttonHover: "background-button-hover",
+                        offsetY: 0,
+                        contentScale: 0.7,
+                        callback: function () {
+                            self.game.state.start('menu');
+                        }
+                    },
+                    {
+                        type: "text",
+                        content: "Quit",
+                        fontFamily: "Press Start 2P",
+                        fontSize: 18,
+                        color: "0x000000",
+                        offsetY: 0
+                    },
+                ]
+            });
         }
 
         createModal(options) {

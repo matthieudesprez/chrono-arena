@@ -11,23 +11,16 @@ module TacticArena {
         initialHeight;
 
         constructor(headless:boolean = false) {
-            //console.log(window.screen.availHeight * window.devicePixelRatio);
-            //Math.round((window.screen.availHeight * window.devicePixelRatio / 1.667) / 32) * 32
-            //let height = Math.min(window.screen.availHeight * window.devicePixelRatio, 832);
-            let initialHeight = window.screen.availHeight * window.devicePixelRatio;
-            console.log(initialHeight);
-            let initialWidth = initialHeight / 1.667;
             super({
-                width: 380, //Math.round((height / 1.667) / 32) * 32, //(window.innerHeight * window.devicePixelRatio) / 1.333, //320, //window.innerWidth * window.devicePixelRatio * 0.8,
-                height: 640, //window.innerHeight * window.devicePixelRatio, //608, //512, //window.innerHeight * window.devicePixelRatio * 0.8,
+                width: 380,
+                height: 640,
                 renderer: headless ? Phaser.HEADLESS : Phaser.AUTO,
                 parent: 'game-container',
                 antialias: false
             });
 
-
-            this.initialWidth = 380; //initialWidth;
-            this.initialHeight = 640;//initialHeight;
+            this.initialWidth = 380;
+            this.initialHeight = 640;
 
             this.state.add('boot', State.Boot);
             this.state.add('preload', State.Preload);

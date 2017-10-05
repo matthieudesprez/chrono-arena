@@ -12,7 +12,6 @@ module TacticArena.Entity.Character {
             ]);
             this._apMax = 4;
             this._hpMax = 5;
-            this._hp = 4;
         }
     }
 }

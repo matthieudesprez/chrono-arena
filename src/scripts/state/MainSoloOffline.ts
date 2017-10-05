@@ -30,6 +30,8 @@ module TacticArena.State {
 
         create() {
             super.create();
+
+            this.pawns[1].setHp(4);
         }
 
         //render() {

@@ -13,10 +13,8 @@ module TacticArena.State {
 
             this.game.scale.fullScreenScaleMode = Phaser.ScaleManager.SHOW_ALL;
             this.game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
-            console.log(window);
-            this.game.scale.maxHeight = window.innerHeight * window.devicePixelRatio;
-            console.log(this.game.scale.maxHeight);
-            this.game.scale.maxWidth = this.game.scale.maxHeight / (640 / 380); //1.667;
+            this.game.scale.maxHeight = window.innerHeight;
+            this.game.scale.maxWidth = this.game.scale.maxHeight / (640 / 380);
             this.game.renderer.renderSession.roundPixels = false;
             Phaser.Canvas.setImageRenderingCrisp(this.game.canvas);
 
