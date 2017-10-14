@@ -17,12 +17,14 @@ module TacticArena.UI {
         skills;
         confirmEnabled;
         pawn;
+        playable;
 
         constructor(game, pawn) {
             let self = this;
             this.isOver = false;
             this.game = game;
             this.pawn = pawn;
+            this.playable = this.pawn._id == this.game.turnManager.getActivePawn()._id;
             this.skills = [];
             this.confirmEnabled = true;
             this.mainGroup = this.game.add.group();
@@ -44,7 +46,7 @@ module TacticArena.UI {
             this.mpGroup.x = 273;
             this.mpGroup.y = 14;
 
-            let frame = this.game.make.sprite(this.game.centerX, 0, 'frame-bottom');
+            let frame = this.game.make.sprite(this.game.world.centerX - 2, 0, 'frame-bottom');
             frame.anchor.set(0.5, 0);
 
             frame.inputEnabled = true;
@@ -63,12 +65,6 @@ module TacticArena.UI {
             name.anchor.set(0);
             name.setTextBounds(0, 8, 96, 20);
 
-            //for(var i = 0; i < pawn._hpMax; i++) {
-            //    let key = i < pawn.getHp() ? 'icon-heart' : 'icon-heart-empty';
-            //    let health = self.game.make.sprite(i * 30, 0, key);
-            //    health.anchor.set(0);
-            //    this.hpGroup.add(health);
-            //}
             let hpIcon = self.game.make.sprite(0, 0, 'icon-heart');
             hpIcon.anchor.set(0);
             this.hpGroup.add(hpIcon);
@@ -105,18 +101,7 @@ module TacticArena.UI {
             this.mpText.anchor.set(0);
             this.mpText.setTextBounds(0, 0, 70, 25);
 
-            //for(var i = 0; i < pawn._apMax; i++) {
-            //    let energy = self.game.make.sprite(i * 30, 0, 'icon-power');
-            //    energy.anchor.set(0);
-            //    this.apGroup.add(energy);
-            //
-            //    energy.inputEnabled = true;
-            //    energy.events.onInputOver.add(this.buttonOver, this, 0);
-            //    energy.events.onInputOut.add(this.buttonOut, this, 0);
-            //    energy.events.onInputDown.add(this.cancel, this);
-            //}
-
-            let skillSpacing = 40
+            let skillSpacing = 40;
             pawn.skills.forEach(function (skill, index) {
                 let buttonGroup = new skillButton(self.game);
                 buttonGroup.x = skillSpacing + index * skillSpacing;
@@ -137,35 +122,35 @@ module TacticArena.UI {
             });
 
             this.buttonConfirmGroup = this.game.add.group();
-            this.buttonConfirmGroup.x = skillSpacing + pawn.skills.length * skillSpacing;
-            this.buttonConfirmGroup.y = 0;
-            let iconConfirm = self.game.make.sprite(0, 0, 'icon-confirm');
-            iconConfirm.anchor.set(0.5);
-            let frameConfirm = self.game.make.sprite(0, 0, 'skill-frame2');
-            frameConfirm.anchor.set(0.5);
-            this.buttonConfirmGroup.add(iconConfirm);
-            this.buttonConfirmGroup.add(frameConfirm);
-
-            iconConfirm.inputEnabled = true;
-            iconConfirm.events.onInputOver.add(this.buttonOver, this, 0, this.buttonConfirmGroup);
-            iconConfirm.events.onInputOut.add(this.buttonOut, this, 0, this.buttonConfirmGroup);
-            iconConfirm.events.onInputDown.add(this.confirm, this);
-
             this.buttonCancelGroup = this.game.add.group();
-            this.buttonCancelGroup.x = 0;
-            this.buttonCancelGroup.y = 0;
-            let iconCancel = self.game.make.sprite(0, 0, 'icon-cancel');
-            iconCancel.anchor.set(0.5);
-            let frameCancel = self.game.make.sprite(0, 0, 'skill-frame2');
-            frameCancel.anchor.set(0.5);
-            this.buttonCancelGroup.add(iconCancel);
-            this.buttonCancelGroup.add(frameCancel);
+            if(this.playable) {
+                this.buttonConfirmGroup.x = skillSpacing + pawn.skills.length * skillSpacing;
+                this.buttonConfirmGroup.y = 0;
+                let iconConfirm = self.game.make.sprite(0, 0, 'icon-confirm');
+                iconConfirm.anchor.set(0.5);
+                let frameConfirm = self.game.make.sprite(0, 0, 'skill-frame2');
+                frameConfirm.anchor.set(0.5);
+                this.buttonConfirmGroup.add(iconConfirm);
+                this.buttonConfirmGroup.add(frameConfirm);
+                iconConfirm.inputEnabled = true;
+                iconConfirm.events.onInputOver.add(this.buttonOver, this, 0, this.buttonConfirmGroup);
+                iconConfirm.events.onInputOut.add(this.buttonOut, this, 0, this.buttonConfirmGroup);
+                iconConfirm.events.onInputDown.add(this.confirm, this);
 
-            frameCancel.inputEnabled = true;
-            frameCancel.events.onInputOver.add(this.buttonOver, this, 0, this.buttonCancelGroup);
-            frameCancel.events.onInputOut.add(this.buttonOut, this, 0, this.buttonCancelGroup);
-            frameCancel.events.onInputDown.add(this.cancel, this);
-            this.disableCancel();
+                this.buttonCancelGroup.x = 0;
+                this.buttonCancelGroup.y = 0;
+                let iconCancel = self.game.make.sprite(0, 0, 'icon-cancel');
+                iconCancel.anchor.set(0.5);
+                let frameCancel = self.game.make.sprite(0, 0, 'skill-frame2');
+                frameCancel.anchor.set(0.5);
+                this.buttonCancelGroup.add(iconCancel);
+                this.buttonCancelGroup.add(frameCancel);
+                frameCancel.inputEnabled = true;
+                frameCancel.events.onInputOver.add(this.buttonOver, this, 0, this.buttonCancelGroup);
+                frameCancel.events.onInputOut.add(this.buttonOut, this, 0, this.buttonCancelGroup);
+                frameCancel.events.onInputDown.add(this.cancel, this);
+                this.disableCancel();
+            }
 
             this.mainGroup.add(frame);
             this.mainGroup.add(avatar);
@@ -180,6 +165,7 @@ module TacticArena.UI {
             this.mainGroup.add(this.actionGroup);
             this.game.uiGroup.add(this.mainGroup);
 
+            this.initDirection(pawn.getDirection());
             this.update();
         }
 
@@ -216,27 +202,23 @@ module TacticArena.UI {
         }
 
         cancel() {
-            Action.Cancel.process(this.game);
+            if(this.playable) {
+                Action.Cancel.process(this.game);
+            }
         }
 
         confirm() {
-            if (this.confirmEnabled) {
+            if (this.playable && this.confirmEnabled) {
                 Action.ConfirmOrder.process(this.game);
             }
         }
 
         buttonOver(buttonSprite, pointer, buttonGroup) {
             this.isOver = true;
-            //if(buttonGroup) {
-            //buttonGroup.scale.setTo(buttonGroup.scale.x - 0.1, buttonGroup.scale.y - 0.1);
-            //}
         }
 
         buttonOut(buttonSprite, pointer, buttonGroup) {
             this.isOver = false;
-            //if(buttonGroup) {
-            //    buttonGroup.scale.setTo(buttonGroup.scale.x + 0.1, buttonGroup.scale.y + 0.1);
-            //}
         }
 
         enableConfirm() {
@@ -271,7 +253,7 @@ module TacticArena.UI {
         }
 
         skillSelect(sprite, pointer, index) {
-            if (this.skills[index].skill.minCost <= this.pawn.getAp()) {
+            if (this.playable && this.skills[index].skill.minCost <= this.pawn.getAp()) {
                 this.skillDeselectAll(true);
                 this.skills[index].skill.onSelect();
                 this.skills[index].selected = true;
@@ -291,10 +273,6 @@ module TacticArena.UI {
                 //console.warn('no selected skill');
             }
             return result;
-        }
-
-        selectDefaultSkill() {
-            this.skillSelect(null, null, 1);
         }
 
         update() {

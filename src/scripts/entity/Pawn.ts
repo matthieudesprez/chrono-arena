@@ -32,7 +32,9 @@ module TacticArena.Entity {
             this.spriteClass = spriteClass;
             if (type) {
                 this.sprite = new spriteClass(game, x, y, ext, type, this, 64, tint);
-                this.game.pawnsSpritesGroup.add(this.sprite);
+                if(this.game.pawnsSpritesGroup) {
+                    this.game.pawnsSpritesGroup.add(this.sprite);
+                }
                 this.sprite.stand();
             }
             this._hp = 4;

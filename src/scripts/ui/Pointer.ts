@@ -75,8 +75,12 @@ module TacticArena.UI {
                     //console.log(target);
                     this.game.pawns.forEach( (p, k) => {
                         if (p.getPosition().equals(target)) {
-                            //console.log(p);
-                            //let actionMenu = new UI.ActionMenu(self.game, p.type);
+                            if(p.team == this.game.playerTeam) {
+                                this.game.turnManager.setActivePawn(p);
+                            } else {
+                                this.game.uiManager.actionMenu.clean();
+                                this.game.uiManager.actionMenu = new UI.ActionMenu(this.game, p);
+                            }
                         }
                     });
                 }

@@ -4,7 +4,7 @@ module TacticArena.State {
         preload() {
             this.load.image('loading', 'assets/images/loading.png');
             this.load.image('logo3', 'assets/images/ui/logo3.png');
-            this.load.image('logo3invert', 'assets/images/ui/logo3invert.png');
+            this.load.image('bg', 'assets/images/ui/bg4.jpg');
         }
 
         create() {

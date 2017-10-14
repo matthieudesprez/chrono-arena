@@ -127,7 +127,6 @@ module TacticArena {
                 //this.consolelogsUI.write('au tour du joueur ' + activePawn._id);
 
                 self.game.uiManager.actionMenu = new UI.ActionMenu(self.game, activePawn);
-                self.game.uiManager.actionMenu.initDirection(activePawn.getDirection());
             });
 
             this.onTeamChange.add(function() {

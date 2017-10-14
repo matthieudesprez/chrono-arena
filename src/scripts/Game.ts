@@ -9,6 +9,7 @@ module TacticArena {
     export class Game extends Phaser.Game {
         initialWidth;
         initialHeight;
+        player;
 
         constructor(headless:boolean = false) {
             super({
@@ -21,6 +22,8 @@ module TacticArena {
 
             this.initialWidth = 380;
             this.initialHeight = 640;
+
+            this.player = new Player('Jean Neige');
 
             this.state.add('boot', State.Boot);
             this.state.add('preload', State.Preload);

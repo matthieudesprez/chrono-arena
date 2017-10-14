@@ -4,6 +4,9 @@ module TacticArena.State {
         private status;
 
         preload() {
+            let background = this.game.make.image(this.centerX, 0, 'bg');
+            background.anchor.set(0.5, 0);
+            background.scale.set(0.9);
             let logo = this.game.make.image(this.centerX, 150, 'logo3');
             logo.anchor.set(0.5);
             this.game.add.text(0, 0, "f", {font: '1px Press Start 2P', fill: "#333333"});
@@ -17,6 +20,7 @@ module TacticArena.State {
             this.game.load.onFileComplete.add(this.fileComplete, this);
             this.game.load.onLoadComplete.add(this.loadComplete, this);
 
+            this.worldGroup.add(background);
             this.worldGroup.add(this.status);
             this.worldGroup.add(this.preloadBar);
             this.worldGroup.add(logo);
@@ -29,6 +33,9 @@ module TacticArena.State {
             this.load.image('path-tile', 'assets/images/path_tile.png');
 
             /* UI **/
+            this.load.image('selected-party-background', 'assets/images/ui/selected-party-background.png');
+            this.load.image('ribbon', 'assets/images/ui/ribbon.png');
+            this.load.image('team-background', 'assets/images/ui/team-background.png');
             this.load.image('button-bg', 'assets/images/ui/button.png');
             this.load.image('button-selected-bg', 'assets/images/ui/button-selected.png');
             this.load.image('button-square-next', 'assets/images/ui/button-square-next.png');
@@ -41,9 +48,11 @@ module TacticArena.State {
             this.load.image('background-bar', 'assets/images/ui/background-bar.png');
             this.load.image('background-modal', 'assets/images/ui/background-modal.png');
             this.load.image('background-menu', 'assets/images/ui/background-menu.jpg');
-            this.load.image('bg', 'assets/images/ui/bg4.jpg');
             this.load.atlasJSONArray('big-button', 'assets/images/ui/big-button.png', 'assets/images/ui/big-button.json');
             this.load.atlasJSONArray('small-button', 'assets/images/ui/small-button.png', 'assets/images/ui/small-button.json');
+            this.load.atlasJSONArray('home-button', 'assets/images/ui/home-button.png', 'assets/images/ui/home-button.json');
+            this.load.atlasJSONArray('team-button', 'assets/images/ui/group-button.png', 'assets/images/ui/group-button.json');
+            this.load.atlasJSONArray('settings-button', 'assets/images/ui/settings-button.png', 'assets/images/ui/settings-button.json');
 
             this.load.image('step', 'assets/images/ui/step.png');
             this.load.image('step-active', 'assets/images/ui/step-active.png');
@@ -54,59 +63,26 @@ module TacticArena.State {
 
             this.load.image('icon-dead', 'assets/images/ui/icon-dead.png');
             this.load.image('icon-heart', 'assets/images/ui/icon-heart.png');
-            this.load.image('icon-heart-empty', 'assets/images/ui/icon-heart-empty.png');
             this.load.image('icon-menu4', 'assets/images/ui/icon-menu4.png');
             this.load.image('icon-cancel', 'assets/images/ui/icon-cancel.png');
             this.load.image('icon-confirm', 'assets/images/ui/icon-confirm.png');
             this.load.image('icon-health', 'assets/images/ui/icon-health.png');
-            this.load.image('icon-power', 'assets/images/ui/icon-power.png');
-            this.load.image('icon-power-empty', 'assets/images/ui/icon-power-empty.png');
-            this.load.image('icon-power2', 'assets/images/ui/icon-power2.png');
-            this.load.image('icon-power-empty2', 'assets/images/ui/icon-power-empty2.png');
-            this.load.image('icon-power3', 'assets/images/ui/icon-power3.png');
-            this.load.image('icon-power-empty3', 'assets/images/ui/icon-power-empty3.png');
             this.load.image('icon-power4', 'assets/images/ui/icon-power4.png');
-            this.load.image('icon-mp', 'assets/images/ui/icon-mp.png');
             this.load.image('icon-mp2', 'assets/images/ui/icon-mp2.png');
+            this.load.atlasJSONArray('circle', 'assets/images/circle.png', 'assets/images/circle.json');
 
-            this.load.image('skill-walk', 'assets/images/skill/walk.jpg');
-            this.load.image('skill-fire', 'assets/images/skill/fire.jpg');
-            this.load.image('skill-wind', 'assets/images/skill/wind.jpg');
-            this.load.image('skill-slash', 'assets/images/skill/slash.jpg');
-            this.load.image('skill-watch', 'assets/images/skill/watch.jpg');
-
-            //this.load.script('filter', 'https://cdn.rawgit.com/photonstorm/phaser/master/v2/filters/Pixelate.js');
-            //this.load.script('BlurX', 'https://cdn.rawgit.com/photonstorm/phaser/master/v2/filters/BlurX.js');
-            //this.load.script('BlurY', 'https://cdn.rawgit.com/photonstorm/phaser/master/v2/filters/BlurY.js');
-
-            this.load.image('avatar-blondy', 'assets/images/blondy_avatar.png');
-            this.load.image('avatar-redhead', 'assets/images/redhead_avatar.png');
-            this.load.image('avatar-redhead-small', 'assets/images/redhead_avatar_small.png');
-            this.load.image('avatar-evil', 'assets/images/evil_avatar.png');
-            this.load.image('avatar-skeleton', 'assets/images/skeleton_avatar.png');
-            this.load.image('avatar-skeleton-small', 'assets/images/skeleton_avatar_small.png');
-
-            this.load.atlasJSONArray('player', 'assets/images/character.png', 'assets/images/character.json');
-            this.load.atlasJSONArray('orc', 'assets/images/orc.png', 'assets/images/orc.json');
-            this.load.atlasJSONArray('redhead', 'assets/images/redhead.png', 'assets/images/redhead.json');
-            this.load.atlasJSONArray('skeleton', 'assets/images/skeleton.png', 'assets/images/skeleton.json');
-            this.load.atlasJSONArray('blondy', 'assets/images/blondy.png', 'assets/images/blondy.json');
-            this.load.atlasJSONArray('amanda', 'assets/images/amanda.png', 'assets/images/amanda.json');
-            this.load.atlasJSONArray('evil', 'assets/images/evil.png', 'assets/images/evil.json');
-
-            this.load.atlasJSONArray('snake', 'assets/images/snake.png', 'assets/images/snake.json');
-            this.load.atlasJSONArray('poring', 'assets/images/poring.png', 'assets/images/poring.json');
-            this.load.atlasJSONArray('roguefemale', 'assets/images/roguefemale.png', 'assets/images/roguefemale.json');
-
-            this.load.atlasJSONArray('bee', 'assets/images/bee.png', 'assets/images/bee.json');
-            this.load.atlasJSONArray('rabbit', 'assets/images/rabbit.png', 'assets/images/rabbit.json');
-
+            ['walk', 'fire', 'wind', 'slash', 'watch'].forEach(skillName => {
+                this.load.image('skill-' + skillName, 'assets/images/skill/' + skillName + '.jpg');
+            });
             this.load.atlasJSONArray('fireball', 'assets/images/fireball.png', 'assets/images/fireball.json');
             this.load.atlasJSONArray('wind', 'assets/images/wind.png', 'assets/images/wind.json');
 
-            this.load.atlasJSONArray('circle', 'assets/images/circle.png', 'assets/images/circle.json');
-            this.load.image('cursor_attack', 'assets/images/cursor_attack.png');
-            this.load.image('cursor_pointer', 'assets/images/cursor_pointer.png');
+            ['ruairi', 'skeleton', 'evil', 'blondy'].forEach(characterName => {
+                this.load.atlasJSONArray(characterName, 'assets/images/characters/' + characterName + '/spritesheet.png', 'assets/images/characters/' + characterName + '/spritesheet.json');
+                this.load.image('avatar-' + characterName, 'assets/images/characters/' + characterName + '/avatar.png');
+                this.load.image('avatar-' + characterName + '-small', 'assets/images/characters/' + characterName + '/avatar-small.png');
+                this.load.image('frame-' + characterName, 'assets/images/characters/' + characterName + '/frame.png');
+            });
 
             this.load.start();
         }

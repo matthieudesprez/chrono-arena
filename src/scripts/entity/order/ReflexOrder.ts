@@ -16,7 +16,8 @@ module TacticArena.Order {
         // AND IF A keeps its direction (aIsFacingB) (et ne va donc pas pas se détourner de B)
         // AND IF A stays next to B OR IF A moves toward B (equalPositions) (en lui faisant face)
         process(ordermanager:OrderManager, steps:Entity.Step[], stepIndex:number, aIndex:number, bIndex:number):BaseOrder {
-            let result = this;
+            let result: ReflexOrder|Attack;
+            result = this;
             let stepUnits = steps[stepIndex].stepUnits;
             let stepUnitA = stepUnits[aIndex];
             let stepUnitB = stepUnits[bIndex];

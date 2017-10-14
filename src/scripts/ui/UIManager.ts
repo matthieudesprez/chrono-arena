@@ -12,12 +12,15 @@ module TacticArena.UI {
         topMenu;
         timelineMenu;
         dialogUI;
+        bitmapManager;
 
         constructor(game) {
             this.game = game;
 
             this.actionMenu = null;
             this.timelineMenu = null;
+
+            this.bitmapManager = new UI.BitmapManager(this.game);
 
             this.dialogUI = new UI.Dialog(this.game);
 

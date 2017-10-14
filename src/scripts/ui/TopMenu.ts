@@ -29,8 +29,8 @@ module TacticArena.UI {
                 dead.alpha = 0;
 
                 let hpBarGroup = self.createBar(-28, 28, pawn._hpMax, '#962b36', '#d54445');
-                let apBarGroup = self.createBar(-28, 36, pawn._apMax, '#225572', '#4bbbff');
-                let mpBarGroup = self.createBar(-28, 44, pawn._mpMax, '#2e632c', '#64c55f');
+                let apBarGroup = self.createBar(-28, 35, pawn._apMax, '#225572', '#4bbbff');
+                let mpBarGroup = self.createBar(-28, 42, pawn._mpMax, '#2e632c', '#64c55f');
 
                 pawnGroup.add(frame);
                 pawnGroup.add(avatar);

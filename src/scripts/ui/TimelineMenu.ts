@@ -14,8 +14,8 @@ module TacticArena.UI {
             this.mainGroup = this.game.add.group();
             this.timelineGroup = this.game.add.group();
 
-            let frame = this.game.make.sprite(5, 0, 'frame-bottom');
-            frame.anchor.set(0);
+            let frame = this.game.make.sprite(this.game.world.centerX - 2, 0, 'frame-bottom');
+            frame.anchor.set(0.5, 0);
 
             //var filter = this.game.add.filter('Pixelate');
             //frame.filters = [filter];

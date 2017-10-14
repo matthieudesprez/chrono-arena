@@ -14,7 +14,6 @@ module TacticArena.UI {
             this.createModal({
                 type: "modal1",
                 includeBackground: true,
-                //modalCloseOnInput: true,
                 fixedToCamera: true,
                 itemsArr: [
                     {
@@ -75,7 +74,6 @@ module TacticArena.UI {
             this.createModal({
                 type: "battleOver",
                 includeBackground: true,
-                //modalCloseOnInput: true,
                 fixedToCamera: true,
                 itemsArr: [
                     {
@@ -93,11 +91,19 @@ module TacticArena.UI {
                         offsetY: -225
                     },
                     {
+                        type: "text",
+                        content: "Game Over",
+                        fontFamily: "Press Start 2P",
+                        fontSize: 18,
+                        color: "0x000000",
+                        offsetY: -150
+                    },
+                    {
                         type: "button",
                         atlasParent: "small-button",
                         content: "background-button",
                         buttonHover: "background-button-hover",
-                        offsetY: -90,
+                        offsetY: -60,
                         contentScale: 0.7,
                         callback: function () {
                             this.game.state.start('mainsolooffline', true, false, {
@@ -114,14 +120,14 @@ module TacticArena.UI {
                         fontFamily: "Press Start 2P",
                         fontSize: 18,
                         color: "0x000000",
-                        offsetY: -90
+                        offsetY: -60
                     },
                     {
                         type: "button",
                         atlasParent: "small-button",
                         content: "background-button",
                         buttonHover: "background-button-hover",
-                        offsetY: 0,
+                        offsetY: 20,
                         contentScale: 0.7,
                         callback: function () {
                             self.game.state.start('menu');
@@ -133,7 +139,7 @@ module TacticArena.UI {
                         fontFamily: "Press Start 2P",
                         fontSize: 18,
                         color: "0x000000",
-                        offsetY: 0
+                        offsetY: 20
                     },
                 ]
             });

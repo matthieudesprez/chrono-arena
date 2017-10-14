@@ -19,7 +19,7 @@ module TacticArena.State {
             this.centerY = this.height / 2;
             this.game.stage.backgroundColor = 0x333333;
             super.init();
-            this.game.world.resize(this.game.initialWidth, this.game.initialHeight);
+            this.game.world.resize((this.game as Game).initialWidth, (this.game as Game).initialHeight);
 
         }
 

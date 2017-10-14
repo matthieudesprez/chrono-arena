@@ -17,7 +17,7 @@ module TacticArena.State {
                     this.playerTeam = k;
                 }
                 if (p.faction == 'human') {
-                    this.pawns.push(new Entity.Pawn(this, startPositions[k][0].x, startPositions[k][0].y, startPositions[k][0].d, 'redhead', this.getUniqueId(), false, k, this.generator.generate()));
+                    this.pawns.push(new Entity.Pawn(this, startPositions[k][0].x, startPositions[k][0].y, startPositions[k][0].d, 'ruairi', this.getUniqueId(), false, k, this.generator.generate()));
                     this.pawns.push(new Entity.Pawn(this, startPositions[k][1].x, startPositions[k][1].y, startPositions[k][1].d, 'blondy', this.getUniqueId(), false, k, this.generator.generate()));
                 } else {
                     this.pawns.push(new Entity.Pawn(this, startPositions[k][0].x, startPositions[k][0].y, startPositions[k][0].d, 'evil', this.getUniqueId(), false, k, this.generator.generate()));

@@ -13,7 +13,7 @@ module TacticArena.State {
             let position = (data && data.mainPawn.position) ? data.mainPawn.position : {x: 25, y: 15};
             let direction = (data && data.mainPawn.direction) ? data.mainPawn.direction : 'N';
             let name = (data && data.mainPawn.name) ? data.mainPawn.name : 'Red';
-            let type = (data && data.mainPawn.type) ? data.mainPawn.type : 'redhead';
+            let type = (data && data.mainPawn.type) ? data.mainPawn.type : 'ruairi';
             let spriteClass = (data && data.mainPawn.spriteClass) ? data.mainPawn.spriteClass : Entity.Sprite;
             this.pawns.push(new Entity.Pawn(this, position.x, position.y, direction, type, 1, false, 1, name, spriteClass)); //
 

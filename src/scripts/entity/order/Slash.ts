@@ -7,11 +7,11 @@ module TacticArena.Order {
         }
 
         process(ordermanager:OrderManager, steps:Entity.Step[], stepIndex:number, aIndex:number, bIndex:number):BaseOrder {
-            let result = super.process(ordermanager, steps, stepIndex, aIndex, bIndex);
             let stepUnits = steps[stepIndex].stepUnits;
             let stepUnitA = stepUnits[aIndex];
             let stepUnitB = stepUnits[bIndex];
             stepUnitA.data.fleeRate = 0;
+            let result = super.process(ordermanager, steps, stepIndex, aIndex, bIndex);
             if (result instanceof Attack) {
                 //entityBHpLost += 1;
             }
