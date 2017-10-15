@@ -36,15 +36,16 @@ var TacticArena;
         function Game(headless) {
             if (headless === void 0) { headless = false; }
             var _this = _super.call(this, {
-                width: 380,
+                width: 384,
                 height: 640,
                 renderer: headless ? Phaser.HEADLESS : Phaser.AUTO,
                 parent: 'game-container',
                 antialias: false
             }) || this;
-            _this.initialWidth = 380;
+            _this.initialWidth = 384;
             _this.initialHeight = 640;
             _this.player = new TacticArena.Player('Jean Neige');
+            _this.debugMode = false;
             _this.state.add('boot', TacticArena.State.Boot);
             _this.state.add('preload', TacticArena.State.Preload);
             _this.state.add('menu', TacticArena.State.Menu);
@@ -158,7 +159,9 @@ var TacticArena;
                             }
                         }
                     }
-                    //Action.ConfirmOrder.process();
+                    if (!self.game.debugMode) {
+                        TacticArena.Action.ConfirmOrder.process(self.game);
+                    }
                 });
                 this.game.pathfinder.calculate();
             }
@@ -1282,12 +1285,11 @@ var TacticArena;
             this.grid = [];
             this.initialGrid = [];
         }
-        StageManager.prototype.init = function (name) {
-            if (name === void 0) { name = 'mapmobile'; }
-            this.map = this.game.make.tilemap(name);
+        StageManager.prototype.init = function (map) {
+            this.map = this.game.make.tilemap(map.name);
             this.map.addTilesetImage('tiles-collection', 'tiles-collection', this.game.tileSize, this.game.tileSize, 0, 0);
-            //this.parallaxLayer = this.game.mapGroup.add(this.map.createLayer('Parallax'));
-            if (this.parallaxLayer) {
+            if (map.hasParallaxLayer) {
+                this.parallaxLayer = this.game.mapGroup.add(this.map.createLayer('Parallax'));
                 this.parallaxLayer.scrollFactorX = 0.5;
                 this.parallaxLayer.scrollFactorY = 0.5;
             }
@@ -1601,6 +1603,7 @@ var TacticArena;
                         pawn.setAp(pawn._apMax);
                         pawn.setMp(pawn._mpMax);
                         pawn.ghost = null;
+                        pawn.active = false;
                     });
                     _this.currentTurnIndex++;
                     _this.playedPawns = [];
@@ -1645,7 +1648,9 @@ var TacticArena;
         };
         TurnManager.prototype.setActivePawn = function (pawn) {
             var activePawn = this.getActivePawn();
+            console.log(pawn, activePawn);
             if (pawn.isAlive() && (!activePawn || pawn._id != activePawn._id)) {
+                console.log('ok');
                 for (var i = 0; i < this.game.pawns.length; i++) {
                     this.game.pawns[i].active = (this.game.pawns[i]._id == pawn._id);
                 }
@@ -2387,20 +2392,46 @@ var TacticArena;
         function Player(name) {
             this.name = name;
             this.faction = 'human';
-            this.player = true;
+            this.isMainPlayer = true;
+            this.isBot = false;
             this.battleParty = [TacticArena.Entity.Character.Ruairi];
         }
         Player.prototype.getCharacters = function () {
             return [TacticArena.Entity.Character.Ruairi, TacticArena.Entity.Character.Skeleton, TacticArena.Entity.Character.Evil, TacticArena.Entity.Character.Blondy];
+        };
+        Player.prototype.getMaps = function () {
+            return [TacticArena.Map.Arena, TacticArena.Map.Volcano, TacticArena.Map.SkyGarden];
         };
         Player.prototype.isInBattleParty = function (name) {
             return this.battleParty.find(function (character) {
                 return character.name === name;
             });
         };
+        Player.prototype.addCharacterToParty = function (character) {
+            this.battleParty.push(character);
+        };
+        Player.prototype.removeCharacterFromParty = function (character) {
+            this.battleParty.splice(this.battleParty.indexOf(character), 1);
+        };
         return Player;
     }());
     TacticArena.Player = Player;
+})(TacticArena || (TacticArena = {}));
+var TacticArena;
+(function (TacticArena) {
+    var PlayerBot = (function (_super) {
+        __extends(PlayerBot, _super);
+        function PlayerBot(name) {
+            var _this = _super.call(this, name) || this;
+            _this.faction = 'bot';
+            _this.isMainPlayer = false;
+            _this.isBot = true;
+            _this.battleParty = [TacticArena.Entity.Character.Skeleton, TacticArena.Entity.Character.Evil];
+            return _this;
+        }
+        return PlayerBot;
+    }(TacticArena.Player));
+    TacticArena.PlayerBot = PlayerBot;
 })(TacticArena || (TacticArena = {}));
 var TacticArena;
 (function (TacticArena) {
@@ -2811,6 +2842,88 @@ var TacticArena;
             Character.Skeleton = Skeleton;
         })(Character = Entity.Character || (Entity.Character = {}));
     })(Entity = TacticArena.Entity || (TacticArena.Entity = {}));
+})(TacticArena || (TacticArena = {}));
+var TacticArena;
+(function (TacticArena) {
+    var Map;
+    (function (Map) {
+        var BaseMap = (function () {
+            function BaseMap(name, label, startPositions, backgroundColor, hasParallaxLayer) {
+                if (backgroundColor === void 0) { backgroundColor = 0x000000; }
+                if (hasParallaxLayer === void 0) { hasParallaxLayer = false; }
+                this.name = name;
+                this.label = label;
+                this.startPositions = startPositions;
+                this.backgroundColor = backgroundColor;
+                this.hasParallaxLayer = hasParallaxLayer;
+            }
+            return BaseMap;
+        }());
+        Map.BaseMap = BaseMap;
+    })(Map = TacticArena.Map || (TacticArena.Map = {}));
+})(TacticArena || (TacticArena = {}));
+/// <reference path="BaseMap.ts"/>
+var TacticArena;
+(function (TacticArena) {
+    var Map;
+    (function (Map) {
+        var Arena = (function (_super) {
+            __extends(Arena, _super);
+            function Arena() {
+                var _this = this;
+                var startPositions = [
+                    [{ x: 4, y: 9, d: 'E' }, { x: 3, y: 8, d: 'E' }],
+                    [{ x: 7, y: 9, d: 'W' }, { x: 8, y: 8, d: 'W' }]
+                ];
+                _this = _super.call(this, 'arena', 'The Pit', startPositions) || this;
+                return _this;
+            }
+            return Arena;
+        }(Map.BaseMap));
+        Map.Arena = Arena;
+    })(Map = TacticArena.Map || (TacticArena.Map = {}));
+})(TacticArena || (TacticArena = {}));
+/// <reference path="BaseMap.ts"/>
+var TacticArena;
+(function (TacticArena) {
+    var Map;
+    (function (Map) {
+        var SkyGarden = (function (_super) {
+            __extends(SkyGarden, _super);
+            function SkyGarden() {
+                var _this = this;
+                var startPositions = [
+                    [{ x: 4, y: 9, d: 'E' }, { x: 3, y: 10, d: 'E' }],
+                    [{ x: 7, y: 9, d: 'W' }, { x: 8, y: 10, d: 'W' }]
+                ];
+                _this = _super.call(this, 'sky-garden', 'Skyland', startPositions, 0x67AEE4, true) || this;
+                return _this;
+            }
+            return SkyGarden;
+        }(Map.BaseMap));
+        Map.SkyGarden = SkyGarden;
+    })(Map = TacticArena.Map || (TacticArena.Map = {}));
+})(TacticArena || (TacticArena = {}));
+/// <reference path="BaseMap.ts"/>
+var TacticArena;
+(function (TacticArena) {
+    var Map;
+    (function (Map) {
+        var Volcano = (function (_super) {
+            __extends(Volcano, _super);
+            function Volcano() {
+                var _this = this;
+                var startPositions = [
+                    [{ x: 4, y: 9, d: 'E' }, { x: 3, y: 10, d: 'E' }],
+                    [{ x: 7, y: 9, d: 'W' }, { x: 8, y: 10, d: 'W' }]
+                ];
+                _this = _super.call(this, 'volcano', 'Volcano', startPositions) || this;
+                return _this;
+            }
+            return Volcano;
+        }(Map.BaseMap));
+        Map.Volcano = Volcano;
+    })(Map = TacticArena.Map || (TacticArena.Map = {}));
 })(TacticArena || (TacticArena = {}));
 var TacticArena;
 (function (TacticArena) {
@@ -3451,11 +3564,12 @@ var TacticArena;
             }
             BasePlayable.prototype.init = function (data) {
                 _super.prototype.init.call(this);
-                this.game.stage.backgroundColor = 0x000000;
                 this.process = true;
                 this.modalVisible = false;
                 this.tileSize = 32;
                 this.isPaused = false;
+                this.map = new data.map();
+                this.game.stage.backgroundColor = this.map.backgroundColor;
                 this.mapGroup = this.add.group();
                 this.worldGroup.add(this.mapGroup);
                 this.pathTilesGroup = this.add.group();
@@ -3470,7 +3584,6 @@ var TacticArena;
                 this.worldGroup.add(this.mapDecorationGroup);
                 this.uiGroup = this.add.group();
                 this.worldGroup.add(this.uiGroup);
-                //console.log(this.getScaleRatio());
                 this.pawns = [];
                 this.generator = new TacticArena.Utils.Generator();
                 this.initMap();
@@ -3492,7 +3605,7 @@ var TacticArena;
             };
             BasePlayable.prototype.initMap = function () {
                 this.stageManager = new TacticArena.StageManager(this);
-                this.stageManager.init(this.mapName);
+                this.stageManager.init(this.map);
             };
             BasePlayable.prototype.addDecorations = function () {
                 this.stageManager.addDecorations();
@@ -3532,7 +3645,7 @@ var TacticArena;
                 return _super.call(this) || this;
             }
             BaseBattle.prototype.init = function (data, chat, server) {
-                _super.prototype.init.call(this);
+                _super.prototype.init.call(this, data);
                 this.selecting = false;
                 this.hideProjections = false;
                 this.teamColors = ['0x8ad886', '0xd68686', '0x87bfdb', '0xcdd385'];
@@ -3900,28 +4013,20 @@ var TacticArena;
             }
             MainSoloOffline.prototype.init = function (data, chatUI) {
                 var _this = this;
-                _super.prototype.init.call(this);
+                _super.prototype.init.call(this, data);
                 this.playMode = 'offline';
                 this.chatUI = chatUI;
                 this.players = data.players;
-                var startPositions = [[{ x: 4, y: 9, d: 'E' }, { x: 3, y: 8, d: 'E' }], [{ x: 7, y: 9, d: 'W' }, { x: 8, y: 8, d: 'W' }]];
-                this.players.forEach(function (p, k) {
-                    var isBot = true;
-                    if (p.player) {
-                        _this.playerTeam = k;
-                        isBot = false;
+                this.players.forEach(function (player, teamIndex) {
+                    if (player.isMainPlayer) {
+                        _this.playerTeam = teamIndex;
                     }
                     else {
-                        _this.aiManager = new AiManager(_this, k);
+                        _this.aiManager = new AiManager(_this, teamIndex);
                     }
-                    if (p.faction == 'human') {
-                        _this.pawns.push(new TacticArena.Entity.Character.Ruairi(_this, startPositions[k][0].x, startPositions[k][0].y, startPositions[k][0].d, _this.getUniqueId(), isBot, k));
-                        //this.pawns.push(new Entity.Pawn(this, startPositions[k][1].x, startPositions[k][1].y, startPositions[k][1].d, 'amanda', this.getUniqueId(), isBot, k, this.generator.generate(), Entity.Sprite));
-                    }
-                    else {
-                        _this.pawns.push(new TacticArena.Entity.Character.Skeleton(_this, startPositions[k][0].x, startPositions[k][0].y, startPositions[k][0].d, _this.getUniqueId(), isBot, k));
-                        //this.pawns.push(new Entity.Pawn(this, startPositions[k][1].x, startPositions[k][1].y, startPositions[k][1].d, 'skeleton', this.getUniqueId(), isBot, k, this.generator.generate(), Entity.Sprite));
-                    }
+                    player.battleParty.forEach(function (character, characterIndex) {
+                        _this.pawns.push(new character(_this, _this.map.startPositions[teamIndex][characterIndex].x, _this.map.startPositions[teamIndex][characterIndex].y, _this.map.startPositions[teamIndex][characterIndex].d, _this.getUniqueId(), player.isBot, teamIndex));
+                    });
                 });
             };
             MainSoloOffline.prototype.create = function () {
@@ -3957,12 +4062,13 @@ var TacticArena;
                     _this.slideGroup.add(_this.slides[slideName]);
                 });
                 //HOME
-                var logo = this.game.make.image(this.centerX, 150, 'logo3');
-                logo.anchor.set(0.5);
+                var logo = this.game.make.image(this.centerX, 10, 'logo-image');
+                logo.anchor.set(0.5, 0);
                 var buttonsGroup = this.game.add.group();
                 buttonsGroup.x = this.centerX;
-                buttonsGroup.y = 300;
-                var singleplayerButton = this.game.make.button(0, 0, 'big-button', function () { }, this, 'background-button', 'background-button-clicked');
+                buttonsGroup.y = this.game.height - 260;
+                var singleplayerButton = this.game.make.button(0, 0, 'big-button', function () {
+                }, this, 'background-button', 'background-button-clicked');
                 singleplayerButton.anchor.set(0.5, 0);
                 singleplayerButton.scale.set(0.7);
                 singleplayerButton.inputEnabled = true;
@@ -3976,7 +4082,40 @@ var TacticArena;
                 singleplayerButtonLabel.anchor.set(0.5, 0);
                 buttonsGroup.add(singleplayerButton);
                 buttonsGroup.add(singleplayerButtonLabel);
+                this.currentMapIndex = 0;
+                this.selectedMapTextGroup = new Phaser.Group(this.game);
+                this.mapPreviewGroup = new Phaser.Group(this.game);
+                var mapSelectorGroup = new Phaser.Group(this.game);
+                mapSelectorGroup.x = this.game.world.centerX - 189 / 2;
+                mapSelectorGroup.y = 200;
+                mapSelectorGroup.width = this.game.world.width;
+                var mapSelectorBackground = new Phaser.Image(this.game, 0, 0, 'grey-plank');
+                mapSelectorGroup.add(mapSelectorBackground);
+                var buttonPrevious = new Phaser.Button(this.game, -80, 0, 'left-button', function () {
+                    this.selectMap(-1);
+                }, this, 'normal', 'disabled');
+                var buttonNext = new Phaser.Button(this.game, 199, 0, 'right-button', function () {
+                    this.selectMap(1);
+                }, this, 'normal', 'disabled');
+                mapSelectorGroup.add(buttonPrevious);
+                mapSelectorGroup.add(buttonNext);
+                this.game.player.getMaps().forEach(function (mapClass, index) {
+                    var map = new mapClass();
+                    var mapPreview = new Phaser.Image(_this.game, 0, 0, map.name + '-preview');
+                    _this.mapPreviewGroup.add(mapPreview);
+                    var mapText = new Phaser.Text(_this.game, 0, 0, map.label, {
+                        font: '20px Press Start 2P',
+                        fill: '#333333',
+                        boundsAlignH: 'center',
+                        boundsAlignV: 'middle'
+                    });
+                    mapText.setTextBounds(0, 0, 189, 64);
+                    mapText.visible = false;
+                    _this.selectedMapTextGroup.add(mapText);
+                });
+                mapSelectorGroup.add(this.selectedMapTextGroup);
                 this.slides['home'].add(logo);
+                this.slides['home'].add(mapSelectorGroup);
                 this.slides['home'].add(buttonsGroup);
                 //TEAM
                 var teamBackground = new Phaser.Image(this.game, this.centerX, 20, 'team-background');
@@ -4014,7 +4153,7 @@ var TacticArena;
                     partyFrame.inputEnabled = true;
                     partyFrame.events.onInputOver.add(_this.overCharacter, _this, 0, pawn.sprite);
                     partyFrame.events.onInputOut.add(_this.outCharacter, _this, 0, pawn.sprite);
-                    partyFrame.events.onInputDown.add(_this.selectCharacter, _this, 0, frameGroup);
+                    partyFrame.events.onInputDown.add(_this.selectCharacter, _this, 0, frameGroup, character);
                     frameGroup.add(partyFrame);
                     frameGroup.add(pawn.sprite);
                     _this.charactersGroup.add(frameGroup);
@@ -4024,9 +4163,6 @@ var TacticArena;
                 });
                 this.charactersGroup.align(4, 2, 90, 120);
                 //GENERAL
-                var background = this.game.make.image(this.centerX, 0, 'bg');
-                background.anchor.set(0.5, 0);
-                background.scale.set(0.9);
                 var bottomGroup = this.game.add.group();
                 bottomGroup.y = this.game.height - 110;
                 var frame = this.game.make.sprite(this.game.world.centerX, 0, 'frame-bottom');
@@ -4038,25 +4174,36 @@ var TacticArena;
                 };
                 this.slideButtons = {};
                 Object.keys(this.slides).forEach(function (slideName) {
-                    _this.slideButtons[slideName] = _this.game.make.button(slideButtonsX[slideName], 12, slideName + '-button', function () { }, _this, 'normal', 'disabled');
+                    _this.slideButtons[slideName] = _this.game.make.button(slideButtonsX[slideName], 12, slideName + '-button', function () {
+                    }, _this, 'normal', 'disabled');
                     _this.slideButtons[slideName].anchor.set(0.5, 0);
                     _this.slideButtons[slideName].inputEnabled = true;
                     _this.slideButtons[slideName].events.onInputDown.add(_this.slide, _this, 0, slideName);
                 });
                 bottomGroup.add(frame);
-                Object.values(this.slideButtons).forEach(function (button) { bottomGroup.add(button); });
-                this.worldGroup.add(background);
+                Object.values(this.slideButtons).forEach(function (button) {
+                    bottomGroup.add(button);
+                });
+                var overlay = new Phaser.Graphics(this.game, this.game.world.width, this.game.world.height);
+                overlay.beginFill(0x000000, 0.5);
+                overlay.drawRect(0, 0, this.game.world.width, this.game.world.height);
+                overlay.x = 0;
+                overlay.y = 0;
+                this.worldGroup.add(this.mapPreviewGroup);
+                this.worldGroup.add(overlay);
                 this.worldGroup.add(this.slideGroup);
                 this.worldGroup.add(bottomGroup);
-                this.slide(null, null, 'team');
+                this.slide(null, null, 'home');
+                this.selectMap(0);
                 //this.startSinglePlayer();
             };
             Menu.prototype.startSinglePlayer = function () {
                 this.game.state.start('mainsolooffline', true, false, {
                     players: [
-                        { name: 'BOT 01', faction: 'evil', player: false },
+                        new TacticArena.PlayerBot('BOT01'),
                         this.game.player
-                    ]
+                    ],
+                    map: this.selectedMap
                 }, null);
             };
             Menu.prototype.slide = function (buttonSprite, pointer, slideName) {
@@ -4075,19 +4222,49 @@ var TacticArena;
             Menu.prototype.outCharacter = function (buttonSprite, pointer, sprite) {
                 sprite.stand();
             };
-            Menu.prototype.selectCharacter = function (frame, pointer, group) {
+            Menu.prototype.selectCharacter = function (frame, pointer, group, character) {
+                if (character === void 0) { character = null; }
                 if (group.parent.name == 'characters') {
                     if (this.selectedCharactersGroup.countLiving() < 2) {
                         this.selectedCharactersGroup.add(group);
+                        if (character) {
+                            this.game.player.addCharacterToParty(character);
+                        }
                     }
                 }
                 else {
                     if (this.selectedCharactersGroup.countLiving() > 1) {
                         this.charactersGroup.add(group);
+                        if (character) {
+                            this.game.player.removeCharacterFromParty(character);
+                        }
                     }
                 }
                 this.selectedCharactersGroup.align(3, 1, 95, 124);
                 this.charactersGroup.align(4, 2, 90, 120);
+                console.log(this.game.player.battleParty);
+            };
+            Menu.prototype.selectMap = function (step) {
+                var maps = this.game.player.getMaps();
+                var newIndex = this.currentMapIndex + step;
+                if (newIndex >= maps.length) {
+                    newIndex = 0;
+                }
+                else if (newIndex < 0) {
+                    newIndex = maps.length - 1;
+                }
+                this.selectedMap = maps[newIndex];
+                var index = 0;
+                this.selectedMapTextGroup.forEach(function (text) {
+                    text.visible = (index == newIndex);
+                    index++;
+                });
+                index = 0;
+                this.mapPreviewGroup.forEach(function (preview) {
+                    preview.visible = (index == newIndex);
+                    index++;
+                });
+                this.currentMapIndex = newIndex;
             };
             return Menu;
         }(TacticArena.State.BaseState));
@@ -4167,13 +4344,9 @@ var TacticArena;
                 this.worldGroup.add(this.status);
                 this.worldGroup.add(this.preloadBar);
                 this.worldGroup.add(logo);
-                /* MAPS */
-                this.load.tilemap('mapmobile', 'assets/json/mapmobile.json', null, Phaser.Tilemap.TILED_JSON);
-                this.load.tilemap('map', 'assets/json/map.json', null, Phaser.Tilemap.TILED_JSON);
-                this.load.tilemap('area02', 'assets/json/area02.json', null, Phaser.Tilemap.TILED_JSON);
-                this.load.image('tiles-collection', 'assets/images/maptiles.png');
-                this.load.image('path-tile', 'assets/images/path_tile.png');
                 /* UI **/
+                this.load.image('grey-plank', 'assets/images/ui/grey-plank.png');
+                this.load.image('logo-image', 'assets/images/ui/logo-image.png');
                 this.load.image('selected-party-background', 'assets/images/ui/selected-party-background.png');
                 this.load.image('ribbon', 'assets/images/ui/ribbon.png');
                 this.load.image('team-background', 'assets/images/ui/team-background.png');
@@ -4193,6 +4366,8 @@ var TacticArena;
                 this.load.atlasJSONArray('small-button', 'assets/images/ui/small-button.png', 'assets/images/ui/small-button.json');
                 this.load.atlasJSONArray('home-button', 'assets/images/ui/home-button.png', 'assets/images/ui/home-button.json');
                 this.load.atlasJSONArray('team-button', 'assets/images/ui/group-button.png', 'assets/images/ui/group-button.json');
+                this.load.atlasJSONArray('left-button', 'assets/images/ui/left-button.png', 'assets/images/ui/left-button.json');
+                this.load.atlasJSONArray('right-button', 'assets/images/ui/right-button.png', 'assets/images/ui/right-button.json');
                 this.load.atlasJSONArray('settings-button', 'assets/images/ui/settings-button.png', 'assets/images/ui/settings-button.json');
                 this.load.image('step', 'assets/images/ui/step.png');
                 this.load.image('step-active', 'assets/images/ui/step-active.png');
@@ -4220,6 +4395,15 @@ var TacticArena;
                     _this.load.image('avatar-' + characterName + '-small', 'assets/images/characters/' + characterName + '/avatar-small.png');
                     _this.load.image('frame-' + characterName, 'assets/images/characters/' + characterName + '/frame.png');
                 });
+                /* MAPS */
+                this.load.image('tiles-collection', 'assets/images/maptiles.png');
+                this.load.image('path-tile', 'assets/images/path_tile.png');
+                //this.load.tilemap('area02', 'assets/json/area02.json', null, Phaser.Tilemap.TILED_JSON);
+                ['arena', 'volcano', 'sky-garden'].forEach(function (mapName) {
+                    _this.load.tilemap(mapName, 'assets/maps/' + mapName + '.json', null, Phaser.Tilemap.TILED_JSON);
+                    _this.load.image(mapName + '-preview', 'assets/maps/' + mapName + '.png');
+                });
+                this.load.script('filter', 'https://cdn.rawgit.com/photonstorm/phaser/master/v2/filters/Pixelate.js');
                 this.load.start();
             };
             Preload.prototype.loadStart = function () {
@@ -7136,6 +7320,8 @@ var TacticArena;
                 this.upKey.onDown.add(this.upKeyPressed, this, 0, this.menu);
                 this.backKey = this.menu.game.input.keyboard.addKey(Phaser.KeyCode.BACKSPACE);
                 this.backKey.onDown.add(this.backKeyPressed, this, 0, this.menu);
+                this.dKey = this.menu.game.input.keyboard.addKey(Phaser.KeyCode.D);
+                this.dKey.onDown.add(this.dKeyPress, this, 0, this.menu);
                 this.pKey = this.menu.game.input.keyboard.addKey(Phaser.KeyCode.P);
                 this.pKey.onDown.add(this.pKeyPress, this, 0, this.menu);
                 this.oneKey = this.menu.game.input.keyboard.addKey(Phaser.KeyCode.ONE);
@@ -7211,45 +7397,45 @@ var TacticArena;
                     uiManager.game.hideProjections = !uiManager.game.hideProjections;
                 }
             };
-            KeyManager.prototype.oneKeyPress = function (self, uiManager) {
+            KeyManager.prototype.dKeyPress = function (self, uiManager) {
                 if (self.altKey) {
-                    $('.pawn:nth-child(1)').trigger('click');
+                    uiManager.game.debugMode = !uiManager.game.debugMode;
                 }
-                else {
-                    uiManager.actionUI.wait();
-                }
+            };
+            KeyManager.prototype.oneKeyPress = function (self, uiManager) {
+                //if(self.altKey) {
+                //    $('.pawn:nth-child(1)').trigger('click');
+                //} else {
+                //    uiManager.actionUI.wait();
+                //}
             };
             KeyManager.prototype.twoKeyPress = function (self, uiManager) {
-                if (self.altKey) {
-                    $('.pawn:nth-child(2)').trigger('click');
-                }
-                else {
-                    uiManager.actionUI.select('walk');
-                }
+                //if(self.altKey) {
+                //    $('.pawn:nth-child(2)').trigger('click');
+                //} else {
+                //    uiManager.actionUI.select('walk');
+                //}
             };
             KeyManager.prototype.threeKeyPress = function (self, uiManager) {
-                if (self.altKey) {
-                    $('.pawn:nth-child(3)').trigger('click');
-                }
-                else {
-                    uiManager.actionUI.select('slash');
-                }
+                //if(self.altKey) {
+                //    $('.pawn:nth-child(3)').trigger('click');
+                //} else {
+                //    uiManager.actionUI.select('slash');
+                //}
             };
             KeyManager.prototype.fourKeyPress = function (self, uiManager) {
-                if (self.altKey) {
-                    $('.pawn:nth-child(4)').trigger('click');
-                }
-                else {
-                    uiManager.actionUI.select('fire');
-                }
+                //if(self.altKey) {
+                //    $('.pawn:nth-child(4)').trigger('click');
+                //} else {
+                //    uiManager.actionUI.select('fire');
+                //}
             };
             KeyManager.prototype.fiveKeyPress = function (self, uiManager) {
-                if (self.altKey) {
-                    $('.pawn:nth-child(5)').trigger('click');
-                }
-                else {
-                    uiManager.actionUI.select('wind');
-                }
+                //if(self.altKey) {
+                //    $('.pawn:nth-child(5)').trigger('click');
+                //} else {
+                //    uiManager.actionUI.select('wind');
+                //}
             };
             KeyManager.prototype.wKeyPress = function (self, uiManager) {
                 if (self.altKey) {
@@ -7464,31 +7650,25 @@ var TacticArena;
             };
             Pointer.prototype.update = function (pointer, x, y, clicked) {
                 if (!this.game.process && !this.game.uiManager.isOver()) {
-                    var target_1 = this.getPosition();
-                    if (!this.uiLastPosition.equals(target_1)) {
-                        this.uiLastPosition = target_1;
-                        if (this.game.stageManager.isObstacle(target_1)) {
+                    var target = this.getPosition();
+                    if (!this.uiLastPosition.equals(target)) {
+                        this.uiLastPosition = target;
+                        if (this.game.stageManager.isObstacle(target)) {
                             this.hide();
                         }
                         else {
                             this.updateMarker();
                         }
-                        var selectedSkill = this.game.uiManager.actionMenu.getSelectedSkill();
-                        if (selectedSkill) {
-                            if (selectedSkill.canOrder()) {
-                                selectedSkill.updateUI(target_1);
-                            }
-                            else {
-                                selectedSkill.cleanUI();
-                            }
-                        }
-                        else {
-                            this.game.pawns.forEach(function (p, k) {
-                                if (p.getPosition().equals(target_1)) {
-                                    //console.log(p);
-                                    //let actionMenu = new UI.ActionMenu(self.game, p.type);
+                        if (this.game.uiManager.actionMenu) {
+                            var selectedSkill = this.game.uiManager.actionMenu.getSelectedSkill();
+                            if (selectedSkill) {
+                                if (selectedSkill.canOrder()) {
+                                    selectedSkill.updateUI(target);
                                 }
-                            });
+                                else {
+                                    selectedSkill.cleanUI();
+                                }
+                            }
                         }
                     }
                 }
@@ -7500,18 +7680,18 @@ var TacticArena;
                 var _this = this;
                 if (!this.game.process && !this.game.uiManager.isOver()) {
                     var selectedSkill = this.game.uiManager.actionMenu.getSelectedSkill();
-                    var target_2 = this.getPosition();
-                    console.log(target_2);
+                    var target_1 = this.getPosition();
+                    console.log(target_1);
                     if (selectedSkill) {
                         if (selectedSkill.canOrder()) {
-                            selectedSkill.order(target_2);
+                            selectedSkill.order(target_1);
                         }
                     }
                     else {
                         //TODO SELECT CHARACTER
                         //console.log(target);
                         this.game.pawns.forEach(function (p, k) {
-                            if (p.getPosition().equals(target_2)) {
+                            if (p.getPosition().equals(target_1)) {
                                 if (p.team == _this.game.playerTeam) {
                                     _this.game.turnManager.setActivePawn(p);
                                 }

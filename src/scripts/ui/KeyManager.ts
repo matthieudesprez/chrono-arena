@@ -8,6 +8,7 @@ module TacticArena.UI {
         upKey;
         backKey;
         spacebarKey;
+        dKey;
         pKey;
         oneKey;
         twoKey;
@@ -43,6 +44,9 @@ module TacticArena.UI {
 
             this.backKey = this.menu.game.input.keyboard.addKey(Phaser.KeyCode.BACKSPACE);
             this.backKey.onDown.add(this.backKeyPressed, this, 0, this.menu);
+
+            this.dKey = this.menu.game.input.keyboard.addKey(Phaser.KeyCode.D);
+            this.dKey.onDown.add(this.dKeyPress, this, 0, this.menu);
 
             this.pKey = this.menu.game.input.keyboard.addKey(Phaser.KeyCode.P);
             this.pKey.onDown.add(this.pKeyPress, this, 0, this.menu);
@@ -124,40 +128,46 @@ module TacticArena.UI {
                 uiManager.game.hideProjections = !uiManager.game.hideProjections;
             }
         }
-        oneKeyPress(self, uiManager) {
+
+        dKeyPress(self, uiManager) {
             if(self.altKey) {
-                $('.pawn:nth-child(1)').trigger('click');
-            } else {
-                uiManager.actionUI.wait();
+                uiManager.game.debugMode = !uiManager.game.debugMode;
             }
+        }
+        oneKeyPress(self, uiManager) {
+            //if(self.altKey) {
+            //    $('.pawn:nth-child(1)').trigger('click');
+            //} else {
+            //    uiManager.actionUI.wait();
+            //}
         }
         twoKeyPress(self, uiManager) {
-            if(self.altKey) {
-                $('.pawn:nth-child(2)').trigger('click');
-            } else {
-                uiManager.actionUI.select('walk');
-            }
+            //if(self.altKey) {
+            //    $('.pawn:nth-child(2)').trigger('click');
+            //} else {
+            //    uiManager.actionUI.select('walk');
+            //}
         }
         threeKeyPress(self, uiManager) {
-            if(self.altKey) {
-                $('.pawn:nth-child(3)').trigger('click');
-            } else {
-                uiManager.actionUI.select('slash');
-            }
+            //if(self.altKey) {
+            //    $('.pawn:nth-child(3)').trigger('click');
+            //} else {
+            //    uiManager.actionUI.select('slash');
+            //}
         }
         fourKeyPress(self, uiManager) {
-            if(self.altKey) {
-                $('.pawn:nth-child(4)').trigger('click');
-            } else {
-                uiManager.actionUI.select('fire');
-            }
+            //if(self.altKey) {
+            //    $('.pawn:nth-child(4)').trigger('click');
+            //} else {
+            //    uiManager.actionUI.select('fire');
+            //}
         }
         fiveKeyPress(self, uiManager) {
-            if(self.altKey) {
-                $('.pawn:nth-child(5)').trigger('click');
-            } else {
-                uiManager.actionUI.select('wind');
-            }
+            //if(self.altKey) {
+            //    $('.pawn:nth-child(5)').trigger('click');
+            //} else {
+            //    uiManager.actionUI.select('wind');
+            //}
         }
         wKeyPress(self, uiManager) {
             if(self.altKey) {

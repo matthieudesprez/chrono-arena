@@ -19,6 +19,7 @@ module TacticArena.State {
         players;
         generator;
         mapName;
+        map: Map.BaseMap;
 
         constructor() {
             super();
@@ -26,11 +27,13 @@ module TacticArena.State {
 
         init(data?) {
             super.init();
-            this.game.stage.backgroundColor = 0x000000;
             this.process = true;
             this.modalVisible = false;
             this.tileSize = 32;
             this.isPaused = false;
+
+            this.map = new data.map();
+            this.game.stage.backgroundColor = this.map.backgroundColor;
 
             this.mapGroup = this.add.group();
             this.worldGroup.add(this.mapGroup);
@@ -52,8 +55,6 @@ module TacticArena.State {
 
             this.uiGroup = this.add.group();
             this.worldGroup.add(this.uiGroup);
-
-            //console.log(this.getScaleRatio());
 
             this.pawns = [];
 
@@ -82,7 +83,7 @@ module TacticArena.State {
 
         initMap() {
             this.stageManager = new StageManager(this);
-            this.stageManager.init(this.mapName);
+            this.stageManager.init(this.map);
         }
 
         addDecorations() {

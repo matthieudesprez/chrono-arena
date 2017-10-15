@@ -6,6 +6,10 @@ module TacticArena.State {
         selectedTeamGroup;
         selectedCharactersGroup;
         charactersGroup;
+        selectedMapTextGroup;
+        currentMapIndex;
+        mapPreviewGroup;
+        selectedMap;
 
         create() {
             this.slides = {};
@@ -15,19 +19,20 @@ module TacticArena.State {
                 team: this.game.world.width * -1,
                 settings: this.game.world.width
             };
-            Object.keys(slidesX).forEach( slideName => {
+            Object.keys(slidesX).forEach(slideName => {
                 this.slides[slideName] = this.game.add.group();
                 this.slides[slideName].x = slidesX[slideName];
                 this.slideGroup.add(this.slides[slideName]);
             });
 
             //HOME
-            let logo = this.game.make.image(this.centerX, 150, 'logo3');
-            logo.anchor.set(0.5);
+            let logo = this.game.make.image(this.centerX, 10, 'logo-image');
+            logo.anchor.set(0.5, 0);
             let buttonsGroup = this.game.add.group();
             buttonsGroup.x = this.centerX;
-            buttonsGroup.y = 300;
-            let singleplayerButton = this.game.make.button(0, 0, 'big-button', function() {}, this, 'background-button', 'background-button-clicked');
+            buttonsGroup.y = this.game.height - 260;
+            let singleplayerButton = this.game.make.button(0, 0, 'big-button', function () {
+            }, this, 'background-button', 'background-button-clicked');
             singleplayerButton.anchor.set(0.5, 0);
             singleplayerButton.scale.set(0.7);
             singleplayerButton.inputEnabled = true;
@@ -41,7 +46,45 @@ module TacticArena.State {
             singleplayerButtonLabel.anchor.set(0.5, 0);
             buttonsGroup.add(singleplayerButton);
             buttonsGroup.add(singleplayerButtonLabel);
+
+            this.currentMapIndex = 0;
+            this.selectedMapTextGroup = new Phaser.Group(this.game);
+            this.mapPreviewGroup = new Phaser.Group(this.game);
+            let mapSelectorGroup = new Phaser.Group(this.game);
+            mapSelectorGroup.x = this.game.world.centerX - 189 / 2;
+            mapSelectorGroup.y = 200;
+            mapSelectorGroup.width = this.game.world.width;
+            let mapSelectorBackground = new Phaser.Image(this.game, 0, 0, 'grey-plank');
+            mapSelectorGroup.add(mapSelectorBackground);
+
+            let buttonPrevious = new Phaser.Button(this.game, -80, 0, 'left-button', function () {
+                this.selectMap(-1);
+            }, this, 'normal', 'disabled');
+            let buttonNext = new Phaser.Button(this.game, 199, 0, 'right-button', function () {
+                this.selectMap(1);
+            }, this, 'normal', 'disabled');
+            mapSelectorGroup.add(buttonPrevious);
+            mapSelectorGroup.add(buttonNext);
+
+            (this.game as Game).player.getMaps().forEach((mapClass, index) => {
+                let map = new mapClass();
+                let mapPreview = new Phaser.Image(this.game, 0, 0, map.name + '-preview');
+                this.mapPreviewGroup.add(mapPreview);
+                let mapText = new Phaser.Text(this.game, 0, 0, map.label, {
+                        font: '20px Press Start 2P',
+                        fill: '#333333',
+                        boundsAlignH: 'center',
+                        boundsAlignV: 'middle'
+                    }
+                );
+                mapText.setTextBounds(0, 0, 189, 64);
+                mapText.visible = false;
+                this.selectedMapTextGroup.add(mapText);
+            });
+            mapSelectorGroup.add(this.selectedMapTextGroup);
+
             this.slides['home'].add(logo);
+            this.slides['home'].add(mapSelectorGroup);
             this.slides['home'].add(buttonsGroup);
 
             //TEAM
@@ -84,22 +127,19 @@ module TacticArena.State {
                 partyFrame.inputEnabled = true;
                 partyFrame.events.onInputOver.add(this.overCharacter, this, 0, pawn.sprite);
                 partyFrame.events.onInputOut.add(this.outCharacter, this, 0, pawn.sprite);
-                partyFrame.events.onInputDown.add(this.selectCharacter, this, 0, frameGroup);
+                partyFrame.events.onInputDown.add(this.selectCharacter, this, 0, frameGroup, character);
 
                 frameGroup.add(partyFrame);
                 frameGroup.add(pawn.sprite);
                 this.charactersGroup.add(frameGroup);
 
-                if((this.game as Game).player.isInBattleParty(pawn._name)) {
+                if ((this.game as Game).player.isInBattleParty(pawn._name)) {
                     this.selectCharacter(null, null, frameGroup);
                 }
             });
             this.charactersGroup.align(4, 2, 90, 120);
 
             //GENERAL
-            let background = this.game.make.image(this.centerX, 0, 'bg');
-            background.anchor.set(0.5, 0);
-            background.scale.set(0.9);
             let bottomGroup = this.game.add.group();
             bottomGroup.y = this.game.height - 110;
             let frame = this.game.make.sprite(this.game.world.centerX, 0, 'frame-bottom');
@@ -110,20 +150,32 @@ module TacticArena.State {
                 settings: this.game.world.centerX + 100
             };
             this.slideButtons = {};
-            Object.keys(this.slides).forEach( slideName => {
-                this.slideButtons[slideName] = this.game.make.button(slideButtonsX[slideName], 12, slideName + '-button', function() {}, this, 'normal', 'disabled');
+            Object.keys(this.slides).forEach(slideName => {
+                this.slideButtons[slideName] = this.game.make.button(slideButtonsX[slideName], 12, slideName + '-button', function () {
+                }, this, 'normal', 'disabled');
                 this.slideButtons[slideName].anchor.set(0.5, 0);
                 this.slideButtons[slideName].inputEnabled = true;
                 this.slideButtons[slideName].events.onInputDown.add(this.slide, this, 0, slideName);
             });
             bottomGroup.add(frame);
-            Object.values(this.slideButtons).forEach( button => { bottomGroup.add(button); });
+            Object.values(this.slideButtons).forEach(button => {
+                bottomGroup.add(button);
+            });
 
-            this.worldGroup.add(background);
+            let overlay = new Phaser.Graphics(this.game, this.game.world.width, this.game.world.height);
+            overlay.beginFill(0x000000, 0.5);
+            overlay.drawRect(0, 0, this.game.world.width, this.game.world.height);
+            overlay.x = 0;
+            overlay.y = 0;
+
+            this.worldGroup.add(this.mapPreviewGroup);
+            this.worldGroup.add(overlay);
             this.worldGroup.add(this.slideGroup);
             this.worldGroup.add(bottomGroup);
 
-            this.slide(null, null, 'team');
+            this.slide(null, null, 'home');
+
+            this.selectMap(0);
 
             //this.startSinglePlayer();
         }
@@ -131,9 +183,10 @@ module TacticArena.State {
         startSinglePlayer() {
             this.game.state.start('mainsolooffline', true, false, {
                 players: [
-                    {name: 'BOT 01', faction: 'evil', player: false},
+                    new PlayerBot('BOT01'),
                     (this.game as Game).player
-                ]
+                ],
+                map: this.selectedMap
             }, null);
         }
 
@@ -145,7 +198,7 @@ module TacticArena.State {
         }
 
         deselectedButtons() {
-            Object.values(this.slideButtons).forEach( button => {
+            Object.values(this.slideButtons).forEach(button => {
                 button.setFrames('normal', 'disabled', 'normal');
             });
         }
@@ -153,22 +206,53 @@ module TacticArena.State {
         overCharacter(buttonSprite, pointer, sprite) {
             sprite.walk();
         }
+
         outCharacter(buttonSprite, pointer, sprite) {
             sprite.stand();
         }
 
-        selectCharacter(frame, pointer, group) {
-            if(group.parent.name == 'characters') {
-                if(this.selectedCharactersGroup.countLiving() < 2) {
+        selectCharacter(frame, pointer, group, character=null) {
+            if (group.parent.name == 'characters') {
+                if (this.selectedCharactersGroup.countLiving() < 2) {
                     this.selectedCharactersGroup.add(group);
+                    if (character) {
+                        (this.game as Game).player.addCharacterToParty(character);
+                    }
                 }
             } else {
-                if(this.selectedCharactersGroup.countLiving() > 1) {
+                if (this.selectedCharactersGroup.countLiving() > 1) {
                     this.charactersGroup.add(group);
+                    if (character) {
+                        (this.game as Game).player.removeCharacterFromParty(character);
+                    }
                 }
             }
             this.selectedCharactersGroup.align(3, 1, 95, 124);
             this.charactersGroup.align(4, 2, 90, 120);
+            console.log((this.game as Game).player.battleParty);
+        }
+
+        selectMap(step) {
+            let maps = (this.game as Game).player.getMaps();
+            let newIndex = this.currentMapIndex + step;
+            if (newIndex >= maps.length) {
+                newIndex = 0;
+            }
+            else if (newIndex < 0) {
+                newIndex = maps.length - 1;
+            }
+            this.selectedMap = maps[newIndex];
+            let index = 0;
+            this.selectedMapTextGroup.forEach(text => {
+                (text as Phaser.Text).visible = (index == newIndex);
+                index++;
+            });
+            index = 0;
+            this.mapPreviewGroup.forEach(preview => {
+                (preview as Phaser.Image).visible = (index == newIndex);
+                index++;
+            });
+            this.currentMapIndex = newIndex;
         }
 
     }

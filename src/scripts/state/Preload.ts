@@ -25,14 +25,9 @@ module TacticArena.State {
             this.worldGroup.add(this.preloadBar);
             this.worldGroup.add(logo);
 
-            /* MAPS */
-            this.load.tilemap('mapmobile', 'assets/json/mapmobile.json', null, Phaser.Tilemap.TILED_JSON);
-            this.load.tilemap('map', 'assets/json/map.json', null, Phaser.Tilemap.TILED_JSON);
-            this.load.tilemap('area02', 'assets/json/area02.json', null, Phaser.Tilemap.TILED_JSON);
-            this.load.image('tiles-collection', 'assets/images/maptiles.png');
-            this.load.image('path-tile', 'assets/images/path_tile.png');
-
             /* UI **/
+            this.load.image('grey-plank', 'assets/images/ui/grey-plank.png');
+            this.load.image('logo-image', 'assets/images/ui/logo-image.png');
             this.load.image('selected-party-background', 'assets/images/ui/selected-party-background.png');
             this.load.image('ribbon', 'assets/images/ui/ribbon.png');
             this.load.image('team-background', 'assets/images/ui/team-background.png');
@@ -52,6 +47,8 @@ module TacticArena.State {
             this.load.atlasJSONArray('small-button', 'assets/images/ui/small-button.png', 'assets/images/ui/small-button.json');
             this.load.atlasJSONArray('home-button', 'assets/images/ui/home-button.png', 'assets/images/ui/home-button.json');
             this.load.atlasJSONArray('team-button', 'assets/images/ui/group-button.png', 'assets/images/ui/group-button.json');
+            this.load.atlasJSONArray('left-button', 'assets/images/ui/left-button.png', 'assets/images/ui/left-button.json');
+            this.load.atlasJSONArray('right-button', 'assets/images/ui/right-button.png', 'assets/images/ui/right-button.json');
             this.load.atlasJSONArray('settings-button', 'assets/images/ui/settings-button.png', 'assets/images/ui/settings-button.json');
 
             this.load.image('step', 'assets/images/ui/step.png');
@@ -83,6 +80,18 @@ module TacticArena.State {
                 this.load.image('avatar-' + characterName + '-small', 'assets/images/characters/' + characterName + '/avatar-small.png');
                 this.load.image('frame-' + characterName, 'assets/images/characters/' + characterName + '/frame.png');
             });
+
+            /* MAPS */
+            this.load.image('tiles-collection', 'assets/images/maptiles.png');
+            this.load.image('path-tile', 'assets/images/path_tile.png');
+            //this.load.tilemap('area02', 'assets/json/area02.json', null, Phaser.Tilemap.TILED_JSON);
+            ['arena', 'volcano', 'sky-garden'].forEach( mapName => {
+                this.load.tilemap(mapName, 'assets/maps/' + mapName + '.json', null, Phaser.Tilemap.TILED_JSON);
+                this.load.image(mapName + '-preview', 'assets/maps/' + mapName + '.png');
+            });
+
+
+            this.load.script('filter', 'https://cdn.rawgit.com/photonstorm/phaser/master/v2/filters/Pixelate.js');
 
             this.load.start();
         }

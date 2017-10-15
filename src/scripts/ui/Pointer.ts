@@ -40,20 +40,15 @@ module TacticArena.UI {
                     } else {
                         this.updateMarker();
                     }
-                    let selectedSkill = this.game.uiManager.actionMenu.getSelectedSkill();
-                    if (selectedSkill) {
-                        if (selectedSkill.canOrder()) {
-                            selectedSkill.updateUI(target);
-                        } else {
-                            selectedSkill.cleanUI();
-                        }
-                    } else {
-                        this.game.pawns.forEach((p, k) => {
-                            if (p.getPosition().equals(target)) {
-                                //console.log(p);
-                                //let actionMenu = new UI.ActionMenu(self.game, p.type);
+                    if(this.game.uiManager.actionMenu) {
+                        let selectedSkill = this.game.uiManager.actionMenu.getSelectedSkill();
+                        if (selectedSkill) {
+                            if (selectedSkill.canOrder()) {
+                                selectedSkill.updateUI(target);
+                            } else {
+                                selectedSkill.cleanUI();
                             }
-                        });
+                        }
                     }
                 }
             } else {

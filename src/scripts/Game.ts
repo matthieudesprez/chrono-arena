@@ -10,20 +10,22 @@ module TacticArena {
         initialWidth;
         initialHeight;
         player;
+        debugMode;
 
         constructor(headless:boolean = false) {
             super({
-                width: 380,
+                width: 384,
                 height: 640,
                 renderer: headless ? Phaser.HEADLESS : Phaser.AUTO,
                 parent: 'game-container',
                 antialias: false
             });
 
-            this.initialWidth = 380;
+            this.initialWidth = 384;
             this.initialHeight = 640;
 
             this.player = new Player('Jean Neige');
+            this.debugMode = false;
 
             this.state.add('boot', State.Boot);
             this.state.add('preload', State.Preload);

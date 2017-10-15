@@ -22,7 +22,7 @@ module TacticArena.State {
         }
 
         init(data?, chat?, server?) {
-            super.init();
+            super.init(data);
             this.selecting = false;
             this.hideProjections = false;
             this.teamColors = ['0x8ad886', '0xd68686', '0x87bfdb', '0xcdd385'];
@@ -30,7 +30,6 @@ module TacticArena.State {
             //this.serializer = new TS.Serializer(TacticArena);
             this.signalManager = new SignalManager(this);
             this.signalManager.init();
-
             this.pointer = new UI.Pointer(this);
         }
 

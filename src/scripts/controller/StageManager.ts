@@ -29,11 +29,11 @@ module TacticArena {
             this.initialGrid = [];
         }
 
-        init(name = 'mapmobile') {
-            this.map = this.game.make.tilemap(name);
+        init(map) {
+            this.map = this.game.make.tilemap(map.name);
             this.map.addTilesetImage('tiles-collection', 'tiles-collection', this.game.tileSize, this.game.tileSize, 0, 0);
-            //this.parallaxLayer = this.game.mapGroup.add(this.map.createLayer('Parallax'));
-            if(this.parallaxLayer) {
+            if(map.hasParallaxLayer) {
+                this.parallaxLayer = this.game.mapGroup.add(this.map.createLayer('Parallax'));
                 this.parallaxLayer.scrollFactorX = 0.5;
                 this.parallaxLayer.scrollFactorY = 0.5;
             }

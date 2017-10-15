@@ -18,6 +18,7 @@ module TacticArena {
 						pawn.setAp(pawn._apMax);
 						pawn.setMp(pawn._mpMax);
 						pawn.ghost = null;
+						pawn.active = false;
 					});
 					this.currentTurnIndex++;
 					this.playedPawns = [];
@@ -61,7 +62,9 @@ module TacticArena {
 
 		setActivePawn(pawn) {
 			let activePawn = this.getActivePawn();
+			console.log(pawn, activePawn);
 			if(pawn.isAlive() && (!activePawn || pawn._id != activePawn._id)) {
+				console.log('ok');
 				for (var i = 0; i < this.game.pawns.length; i++) {
 					this.game.pawns[i].active = (this.game.pawns[i]._id == pawn._id);
 				}
