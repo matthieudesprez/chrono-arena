@@ -19,6 +19,7 @@ module TacticArena.State {
         players;
         generator;
         mapName;
+        mapClass;
         map: Map.BaseMap;
 
         constructor() {
@@ -32,6 +33,7 @@ module TacticArena.State {
             this.tileSize = 32;
             this.isPaused = false;
 
+            this.mapClass = data.map;
             this.map = new data.map();
             this.game.stage.backgroundColor = this.map.backgroundColor;
 

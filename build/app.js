@@ -1505,7 +1505,9 @@ var TacticArena;
             for (var i = 0; i < path.length; i++) {
                 //let tile = this.map.getTile(path[i].x, path[i].y, this.backgroundLayer, true);
                 var tile = this.map.putTile(2105, path[i].x, path[i].y, this.uiLayer);
-                tile.alpha = 0.5;
+                if (tile) {
+                    tile.alpha = 0.5;
+                }
             }
             this.backgroundLayer.layer.dirty = true;
         };
@@ -1538,11 +1540,13 @@ var TacticArena;
             if (tint === void 0) { tint = null; }
             for (var i = 0; i < path.length; i++) {
                 var tile = this.map.getTile(path[i].x, path[i].y, this.backgroundLayer, true);
-                var tileSprite = new Phaser.Sprite(this.game, tile.x * this.game.tileSize, tile.y * this.game.tileSize, 'path-tile', '');
-                if (tint) {
-                    tileSprite.tint = tint;
+                if (tile) {
+                    var tileSprite = new Phaser.Sprite(this.game, tile.x * this.game.tileSize, tile.y * this.game.tileSize, 'path-tile', '');
+                    if (tint) {
+                        tileSprite.tint = tint;
+                    }
+                    group.add(tileSprite);
                 }
-                group.add(tileSprite);
             }
         };
         StageManager.prototype.clearPath = function (group) {
@@ -1908,6 +1912,51 @@ var TacticArena;
                     t.onComplete.add(function () { tornado.kill(); }, self);
                 }, 500);
             };
+            Sprite.prototype.castHeal = function (targets, callback) {
+                var self = this;
+                this._animationCompleteCallback = callback;
+                this.playAnimation('cast' + this._ext);
+                console.log(targets);
+                setTimeout(function () {
+                    var initialX = 0;
+                    var initialY = 0;
+                    var targetX = 0;
+                    var targetY = 0;
+                    var scaleX = 1;
+                    if (self._ext == 'W' || self._ext == 'E') {
+                        initialY = self.position.y + 40;
+                        targetY = initialY;
+                        initialX = self.position.x;
+                        targetX = initialX - 100;
+                        if (self._ext == 'E') {
+                            initialX = self.position.x + 65;
+                            targetX = initialX + 100;
+                            scaleX = -1;
+                        }
+                    }
+                    else if (self._ext == 'N' || self._ext == 'S') {
+                        initialX = self.position.x + 30;
+                        targetX = initialX;
+                        initialY = self.position.y + 5;
+                        targetY = initialY - 110;
+                        if (self._ext == 'S') {
+                            initialY = self.position.y + 65;
+                            targetY = initialY + 110;
+                        }
+                    }
+                    //let tornado = self._parent.game.add.sprite(initialX, initialY, 'wind');
+                    //self._parent.game.pawnsSpritesGroup.add(tornado);
+                    //tornado.anchor.setTo(.5, .5);
+                    //tornado.scale.x *= scaleX;
+                    //tornado.animations.add('wind', ["wind_01", "wind_02", "wind_03", "wind_04", "wind_05", "wind_06", "wind_07"], 7, false);
+                    //tornado.animations.play('wind');
+                    if (targets) {
+                        for (var i = 0; i < targets.length; i++) {
+                            targets[i].heal(1);
+                        }
+                    }
+                }, 500);
+            };
             Sprite.prototype.attack = function (target, callback) {
                 this._animationCompleteCallback = callback;
                 this.playAnimation('attack' + this._ext);
@@ -1923,6 +1972,12 @@ var TacticArena;
             Sprite.prototype.hurt = function () {
                 this.game.add.tween(this).to({
                     tint: 0.65 * 0xffffff,
+                    alpha: 0.5
+                }, 100, Phaser.Easing.Exponential.Out, true, 0, 0, true);
+            };
+            Sprite.prototype.heal = function () {
+                this.game.add.tween(this).to({
+                    tint: 0xffffff,
                     alpha: 0.5
                 }, 100, Phaser.Easing.Exponential.Out, true, 0, 0, true);
             };
@@ -2136,6 +2191,7 @@ var TacticArena;
                 this.isBot = bot;
                 this.team = team;
                 this.hurting = 0;
+                this.healing = 0;
                 this.skills = [];
             }
             Pawn.prototype.getReal = function () {
@@ -2192,6 +2248,35 @@ var TacticArena;
                     self.hurting--;
                 }, timeOut);
             };
+            Pawn.prototype.heal = function (hp) {
+                if (hp === void 0) { hp = 1; }
+                console.log('heal');
+                var self = this;
+                self.healing++;
+                var timeOut = self.healing * 300;
+                setTimeout(function () {
+                    if (self.healing == 1) {
+                        self.sprite.heal();
+                    }
+                    self.destroyProjection();
+                    var label_heal = self.game.add.text(20, 10, "+" + hp, {
+                        font: '12px Press Start 2P',
+                        fill: "#5ce11a",
+                        stroke: '#000000',
+                        strokeThickness: 6
+                    }, self.game.pawnsSpritesGroup);
+                    var t = self.game.add.tween(label_heal).to({
+                        x: 20,
+                        y: -20,
+                        alpha: 0
+                    }, 1000, Phaser.Easing.Linear.None, true);
+                    t.onComplete.add(function () {
+                        label_heal.destroy();
+                    }, self);
+                    self.sprite.addChild(label_heal);
+                    self.healing--;
+                }, timeOut);
+            };
             Pawn.prototype.halfcast = function (direction) {
                 if (direction) {
                     this.faceDirection(direction);
@@ -2223,6 +2308,21 @@ var TacticArena;
                     }
                     _this.faceDirection(direction);
                     _this.sprite.castTornado(targets, function () {
+                        that.sprite.stand();
+                        resolve(true);
+                    });
+                });
+            };
+            Pawn.prototype.castHeal = function (targets, direction) {
+                var _this = this;
+                var that = this;
+                return new Promise(function (resolve, reject) {
+                    if (_this.projection) {
+                        _this.projection.hide();
+                        _this.show();
+                    }
+                    _this.faceDirection(direction);
+                    _this.sprite.castHeal(targets, function () {
                         that.sprite.stand();
                         resolve(true);
                     });
@@ -2364,7 +2464,7 @@ var TacticArena;
                 if ((this.isAlive() || forceAnimation) && hp <= 0) {
                     this.sprite.die();
                 }
-                this._hp = hp;
+                this._hp = (hp > this._hpMax) ? this._hpMax : hp;
                 this.game.signalManager.onHpChange.dispatch(this);
             };
             Pawn.prototype.getSprite = function () {
@@ -2394,10 +2494,10 @@ var TacticArena;
             this.faction = 'human';
             this.isMainPlayer = true;
             this.isBot = false;
-            this.battleParty = [TacticArena.Entity.Character.Ruairi];
+            this.battleParty = [TacticArena.Entity.Character.Ruairi, TacticArena.Entity.Character.Blondy];
         }
         Player.prototype.getCharacters = function () {
-            return [TacticArena.Entity.Character.Ruairi, TacticArena.Entity.Character.Skeleton, TacticArena.Entity.Character.Evil, TacticArena.Entity.Character.Blondy];
+            return [TacticArena.Entity.Character.Ruairi, TacticArena.Entity.Character.Skeleton, TacticArena.Entity.Character.Evil, TacticArena.Entity.Character.Blondy, TacticArena.Entity.Character.Amanda];
         };
         Player.prototype.getMaps = function () {
             return [TacticArena.Map.Arena, TacticArena.Map.Volcano, TacticArena.Map.SkyGarden];
@@ -2631,6 +2731,41 @@ var TacticArena;
 (function (TacticArena) {
     var Animation;
     (function (Animation) {
+        var CastHeal = (function (_super) {
+            __extends(CastHeal, _super);
+            function CastHeal(pawn, order, position, state) {
+                var _this = _super.call(this, pawn, order, position) || this;
+                // TODO voué à disparaitre
+                _this.state = state;
+                _this.targets = [];
+                order.targets.forEach(function (t) { _this.targets.push(_this.state.orderManager.getPawn(t)); });
+                return _this;
+            }
+            CastHeal.prototype.get = function () {
+                var _this = this;
+                var self = this;
+                var animation = new Promise(function (resolve, reject) {
+                    if (_this.pawn.projection) {
+                        _this.pawn.projection.hide();
+                        _this.pawn.show();
+                    }
+                    _this.pawn.faceDirection(_this.order.direction);
+                    _this.pawn.sprite.castHeal(_this.targets, function () {
+                        self.pawn.sprite.stand();
+                        resolve(true);
+                    });
+                });
+                return _super.prototype.handleBackward.call(this, animation);
+            };
+            return CastHeal;
+        }(TacticArena.BaseAnimation));
+        Animation.CastHeal = CastHeal;
+    })(Animation = TacticArena.Animation || (TacticArena.Animation = {}));
+})(TacticArena || (TacticArena = {}));
+var TacticArena;
+(function (TacticArena) {
+    var Animation;
+    (function (Animation) {
         var CastWind = (function (_super) {
             __extends(CastWind, _super);
             function CastWind(pawn, order, position, state) {
@@ -2744,16 +2879,42 @@ var TacticArena;
     (function (Entity) {
         var Character;
         (function (Character) {
-            var Blondy = (function (_super) {
-                __extends(Blondy, _super);
-                function Blondy(game, x, y, ext, id, bot, team) {
-                    var _this = _super.call(this, game, x, y, ext, 'blondy', id, bot, team, "Blondy", Entity.Sprite) || this;
+            var Amanda = (function (_super) {
+                __extends(Amanda, _super);
+                function Amanda(game, x, y, ext, id, bot, team) {
+                    var _this = _super.call(this, game, x, y, ext, 'amanda', id, bot, team, "Amanda", Entity.Sprite) || this;
                     _this.skills = _this.skills.concat([
                         new TacticArena.Entity.Skill.Slash(_this.game, _this),
                         //new TacticArena.Entity.Skill.Wind(this.game, this),
                         new TacticArena.Entity.Skill.Fire(_this.game, _this),
                         new TacticArena.Entity.Skill.Walk(_this.game, _this),
                         new TacticArena.Entity.Skill.Watch(_this.game, _this)
+                    ]);
+                    _this._apMax = 4;
+                    return _this;
+                }
+                return Amanda;
+            }(TacticArena.Entity.Pawn));
+            Character.Amanda = Amanda;
+        })(Character = Entity.Character || (Entity.Character = {}));
+    })(Entity = TacticArena.Entity || (TacticArena.Entity = {}));
+})(TacticArena || (TacticArena = {}));
+var TacticArena;
+(function (TacticArena) {
+    var Entity;
+    (function (Entity) {
+        var Character;
+        (function (Character) {
+            var Blondy = (function (_super) {
+                __extends(Blondy, _super);
+                function Blondy(game, x, y, ext, id, bot, team) {
+                    var _this = _super.call(this, game, x, y, ext, 'blondy', id, bot, team, "Blondy", Entity.Sprite) || this;
+                    _this.skills = _this.skills.concat([
+                        new TacticArena.Entity.Skill.Walk(_this.game, _this),
+                        new TacticArena.Entity.Skill.Heal(_this.game, _this),
+                        new TacticArena.Entity.Skill.Wind(_this.game, _this),
+                        new TacticArena.Entity.Skill.Fire(_this.game, _this)
+                        //new TacticArena.Entity.Skill.Watch(this.game, this)
                     ]);
                     _this._apMax = 4;
                     return _this;
@@ -2809,6 +2970,7 @@ var TacticArena;
                     ]);
                     _this._apMax = 4;
                     _this._hpMax = 5;
+                    _this._hp = 5;
                     return _this;
                 }
                 return Ruairi;
@@ -2953,7 +3115,9 @@ var TacticArena;
             }
             Dead.prototype.resolve = function (pawn, stepUnitData, previousStep, animate, backward, i, state) {
                 return new Promise(function (resolve, reject) {
-                    pawn.sprite.die();
+                    if (pawn.isAlive()) {
+                        pawn.sprite.die();
+                    }
                     resolve(true);
                 });
             };
@@ -2995,6 +3159,40 @@ var TacticArena;
             return Fire;
         }(TacticArena.BaseOrder));
         Order.Fire = Fire;
+    })(Order = TacticArena.Order || (TacticArena.Order = {}));
+})(TacticArena || (TacticArena = {}));
+var TacticArena;
+(function (TacticArena) {
+    var Order;
+    (function (Order) {
+        var Heal = (function (_super) {
+            __extends(Heal, _super);
+            function Heal(position, direction, targets) {
+                return _super.call(this, 'heal', position, direction, targets) || this;
+            }
+            Heal.prototype.process = function (ordermanager, steps, stepIndex, aIndex, bIndex) {
+                var result = this;
+                var stepUnits = steps[stepIndex].stepUnits;
+                var stepUnitA = stepUnits[aIndex];
+                var stepUnitB = stepUnits[bIndex];
+                stepUnitA.data.entityAApCost++;
+                var path = ordermanager.game.stageManager.getLinearPath(stepUnitA.pawn, 1, stepUnitA.order.direction, stepUnitA.order.position);
+                stepUnitA.order.targets = stepUnitA.order.targets || [];
+                for (var k = 0; k < path.length; k++) {
+                    var targetPosition = stepUnitB.data.moveHasBeenBlocked ? stepUnitA.data.positionBBeforeOrder : stepUnitB.order.position;
+                    if (path[k].x == targetPosition.x && path[k].y == targetPosition.y) {
+                        stepUnitA.order.targets.push(stepUnitB.pawn._id);
+                        stepUnitA.data.entityBHpLost -= 1;
+                    }
+                }
+                return result;
+            };
+            Heal.prototype.resolve = function (pawn, stepUnitData, previousStep, animate, backward, i, state) {
+                return new TacticArena.Animation.CastHeal(pawn, this, pawn.getPosition(), state).get();
+            };
+            return Heal;
+        }(TacticArena.BaseOrder));
+        Order.Heal = Heal;
     })(Order = TacticArena.Order || (TacticArena.Order = {}));
 })(TacticArena || (TacticArena = {}));
 var TacticArena;
@@ -3236,6 +3434,7 @@ var TacticArena;
                 function LinearSkill(state, pawn) {
                     var _this = _super.call(this, state, pawn) || this;
                     _this.paths = null;
+                    _this.pathColor = 0xfc000f;
                     return _this;
                 }
                 LinearSkill.prototype.onSelect = function () {
@@ -3267,7 +3466,7 @@ var TacticArena;
                     });
                     this.state.stageManager.clearPath(this.state.pathTilesGroup);
                     if (isInPath) {
-                        this.state.stageManager.showPath(this.paths[pathDirection], this.state.pathTilesGroup, 0xfc000f);
+                        this.state.stageManager.showPath(this.paths[pathDirection], this.state.pathTilesGroup, this.pathColor);
                         this.state.uiManager.actionMenu.showCost(this.pawn, 'ap', this.minCost);
                     }
                     else {
@@ -3337,6 +3536,34 @@ var TacticArena;
                 return Fire;
             }(TacticArena.Entity.Skill.LinearSkill));
             Skill.Fire = Fire;
+        })(Skill = Entity.Skill || (Entity.Skill = {}));
+    })(Entity = TacticArena.Entity || (TacticArena.Entity = {}));
+})(TacticArena || (TacticArena = {}));
+/// <reference path="BaseSkill.ts"/>
+var TacticArena;
+(function (TacticArena) {
+    var Entity;
+    (function (Entity) {
+        var Skill;
+        (function (Skill) {
+            var Heal = (function (_super) {
+                __extends(Heal, _super);
+                function Heal(state, pawn) {
+                    var _this = _super.call(this, state, pawn) || this;
+                    _this.id = 'heal';
+                    _this.name = 'Heal';
+                    _this.minCost = 1;
+                    _this.range = 1;
+                    _this.pathColor = null;
+                    return _this;
+                }
+                Heal.prototype.onOrder = function (position, direction) {
+                    this.pawn.getProjectionOrReal(true).halfcast(direction);
+                    this.state.orderManager.add(this.pawn, new TacticArena.Order.Heal(position, direction));
+                };
+                return Heal;
+            }(TacticArena.Entity.Skill.LinearSkill));
+            Skill.Heal = Heal;
         })(Skill = Entity.Skill || (Entity.Skill = {}));
     })(Entity = TacticArena.Entity || (TacticArena.Entity = {}));
 })(TacticArena || (TacticArena = {}));
@@ -3568,6 +3795,7 @@ var TacticArena;
                 this.modalVisible = false;
                 this.tileSize = 32;
                 this.isPaused = false;
+                this.mapClass = data.map;
                 this.map = new data.map();
                 this.game.stage.backgroundColor = this.map.backgroundColor;
                 this.mapGroup = this.add.group();
@@ -3654,6 +3882,7 @@ var TacticArena;
                 this.signalManager = new TacticArena.SignalManager(this);
                 this.signalManager.init();
                 this.pointer = new TacticArena.UI.Pointer(this);
+                this.status = 'Fighting';
             };
             BaseBattle.prototype.create = function () {
                 _super.prototype.create.call(this);
@@ -3729,8 +3958,78 @@ var TacticArena;
                 }
                 return null;
             };
-            BaseBattle.prototype.battleOver = function () {
-                console.log('battle is over');
+            BaseBattle.prototype.battleOver = function (status) {
+                this.status = status;
+                this.uiManager.dialogUI.createModal({
+                    type: "battleOver",
+                    includeBackground: true,
+                    fixedToCamera: true,
+                    itemsArr: [
+                        {
+                            type: "image",
+                            content: "background-modal",
+                            offsetY: -50,
+                            contentScale: 1
+                        },
+                        {
+                            type: "text",
+                            content: "[t]",
+                            fontFamily: "Press Start 2P",
+                            fontSize: 21,
+                            color: "0x000000",
+                            offsetY: -225
+                        },
+                        {
+                            type: "text",
+                            content: this.status,
+                            fontFamily: "Press Start 2P",
+                            fontSize: 18,
+                            color: "0x000000",
+                            offsetY: -150
+                        },
+                        {
+                            type: "button",
+                            atlasParent: "small-button",
+                            content: "background-button",
+                            buttonHover: "background-button-hover",
+                            offsetY: -60,
+                            contentScale: 0.7,
+                            callback: function () {
+                                this.game.state.start('mainsolooffline', true, false, {
+                                    players: this.state.players,
+                                    map: this.state.mapClass
+                                }, null);
+                            }
+                        },
+                        {
+                            type: "text",
+                            content: "Replay",
+                            fontFamily: "Press Start 2P",
+                            fontSize: 18,
+                            color: "0x000000",
+                            offsetY: -60
+                        },
+                        {
+                            type: "button",
+                            atlasParent: "small-button",
+                            content: "background-button",
+                            buttonHover: "background-button-hover",
+                            offsetY: 20,
+                            contentScale: 0.7,
+                            callback: function () {
+                                this.game.state.start('menu');
+                            }
+                        },
+                        {
+                            type: "text",
+                            content: "Quit",
+                            fontFamily: "Press Start 2P",
+                            fontSize: 18,
+                            color: "0x000000",
+                            offsetY: 20
+                        },
+                    ]
+                });
                 this.uiManager.dialogUI.showModal('battleOver');
             };
             return BaseBattle;
@@ -4011,11 +4310,10 @@ var TacticArena;
             function MainSoloOffline() {
                 return _super !== null && _super.apply(this, arguments) || this;
             }
-            MainSoloOffline.prototype.init = function (data, chatUI) {
+            MainSoloOffline.prototype.init = function (data) {
                 var _this = this;
                 _super.prototype.init.call(this, data);
                 this.playMode = 'offline';
-                this.chatUI = chatUI;
                 this.players = data.players;
                 this.players.forEach(function (player, teamIndex) {
                     if (player.isMainPlayer) {
@@ -4028,10 +4326,6 @@ var TacticArena;
                         _this.pawns.push(new character(_this, _this.map.startPositions[teamIndex][characterIndex].x, _this.map.startPositions[teamIndex][characterIndex].y, _this.map.startPositions[teamIndex][characterIndex].d, _this.getUniqueId(), player.isBot, teamIndex));
                     });
                 });
-            };
-            MainSoloOffline.prototype.create = function () {
-                _super.prototype.create.call(this);
-                this.pawns[1].setHp(4);
             };
             return MainSoloOffline;
         }(TacticArena.State.BaseBattle));
@@ -4384,12 +4678,12 @@ var TacticArena;
                 this.load.image('icon-power4', 'assets/images/ui/icon-power4.png');
                 this.load.image('icon-mp2', 'assets/images/ui/icon-mp2.png');
                 this.load.atlasJSONArray('circle', 'assets/images/circle.png', 'assets/images/circle.json');
-                ['walk', 'fire', 'wind', 'slash', 'watch'].forEach(function (skillName) {
+                ['walk', 'fire', 'wind', 'slash', 'watch', 'heal'].forEach(function (skillName) {
                     _this.load.image('skill-' + skillName, 'assets/images/skill/' + skillName + '.jpg');
                 });
                 this.load.atlasJSONArray('fireball', 'assets/images/fireball.png', 'assets/images/fireball.json');
                 this.load.atlasJSONArray('wind', 'assets/images/wind.png', 'assets/images/wind.json');
-                ['ruairi', 'skeleton', 'evil', 'blondy'].forEach(function (characterName) {
+                ['ruairi', 'skeleton', 'evil', 'blondy', 'amanda'].forEach(function (characterName) {
                     _this.load.atlasJSONArray(characterName, 'assets/images/characters/' + characterName + '/spritesheet.png', 'assets/images/characters/' + characterName + '/spritesheet.json');
                     _this.load.image('avatar-' + characterName, 'assets/images/characters/' + characterName + '/avatar.png');
                     _this.load.image('avatar-' + characterName + '-small', 'assets/images/characters/' + characterName + '/avatar-small.png');
@@ -6353,6 +6647,7 @@ var TacticArena;
                 var hpIcon = self.game.make.sprite(0, 0, 'icon-heart');
                 hpIcon.anchor.set(0);
                 this.hpGroup.add(hpIcon);
+                console.log(pawn.getHp());
                 this.hpText = this.game.add.text(32, 0, pawn.getHp() + ' / ' + pawn._hpMax, {
                     font: '20px Iceland',
                     fill: '#ffffff',
@@ -6888,78 +7183,6 @@ var TacticArena;
                             fontSize: 18,
                             color: "0x000000",
                             offsetY: 0
-                        },
-                    ]
-                });
-                this.createModal({
-                    type: "battleOver",
-                    includeBackground: true,
-                    fixedToCamera: true,
-                    itemsArr: [
-                        {
-                            type: "image",
-                            content: "background-modal",
-                            offsetY: -50,
-                            contentScale: 1
-                        },
-                        {
-                            type: "text",
-                            content: "[t]",
-                            fontFamily: "Press Start 2P",
-                            fontSize: 21,
-                            color: "0x000000",
-                            offsetY: -225
-                        },
-                        {
-                            type: "text",
-                            content: "Game Over",
-                            fontFamily: "Press Start 2P",
-                            fontSize: 18,
-                            color: "0x000000",
-                            offsetY: -150
-                        },
-                        {
-                            type: "button",
-                            atlasParent: "small-button",
-                            content: "background-button",
-                            buttonHover: "background-button-hover",
-                            offsetY: -60,
-                            contentScale: 0.7,
-                            callback: function () {
-                                this.game.state.start('mainsolooffline', true, false, {
-                                    players: [
-                                        { name: 'BOT 01', faction: 'evil', player: false },
-                                        { name: 'Matt', faction: 'human', player: true }
-                                    ]
-                                }, null);
-                            }
-                        },
-                        {
-                            type: "text",
-                            content: "Replay",
-                            fontFamily: "Press Start 2P",
-                            fontSize: 18,
-                            color: "0x000000",
-                            offsetY: -60
-                        },
-                        {
-                            type: "button",
-                            atlasParent: "small-button",
-                            content: "background-button",
-                            buttonHover: "background-button-hover",
-                            offsetY: 20,
-                            contentScale: 0.7,
-                            callback: function () {
-                                self.game.state.start('menu');
-                            }
-                        },
-                        {
-                            type: "text",
-                            content: "Quit",
-                            fontFamily: "Press Start 2P",
-                            fontSize: 18,
-                            color: "0x000000",
-                            offsetY: 20
                         },
                     ]
                 });
@@ -7984,6 +8207,9 @@ var TacticArena;
                         dead: dead,
                         avatar: avatar
                     };
+                    self.updateHp(pawn);
+                    self.updateAp(pawn);
+                    self.updateMp(pawn);
                 });
                 this.mainGroup.add(avatarsGroup);
                 this.game.uiGroup.add(this.mainGroup);
@@ -7996,7 +8222,10 @@ var TacticArena;
             };
             TopMenu.prototype.updateHp = function (pawn) {
                 var hp = pawn.getHp();
+                console.log(hp);
                 var percent = (hp / pawn._hpMax) * 100;
+                console.log(percent);
+                console.log(pawn);
                 this.pawns[pawn._id].hpBarGroup.getByName('bar').setPercent(percent);
                 if (hp <= 0) {
                     this.pawns[pawn._id].dead.alpha = 1;
@@ -8125,7 +8354,7 @@ var TacticArena;
                 this.menu = menu;
                 this.mainGroup = this.menu.game.add.group();
                 this.mainGroup.x = this.menu.game.world.width;
-                this.mainGroup.y = 80;
+                this.mainGroup.y = 100;
                 var background = this.menu.game.make.sprite(5, 0, 'background-bar');
                 background.anchor.set(1, 0);
                 this.text = this.menu.game.add.text(0, -1, '', {
@@ -8141,7 +8370,7 @@ var TacticArena;
                 this.menu.game.uiGroup.add(this.mainGroup);
             }
             TurnIndicator.prototype.write = function (turn) {
-                this.text.text = 'Tour ' + ('0' + Number(turn)).slice(-2);
+                this.text.text = 'Turn n° ' + ('0' + Number(turn)).slice(-2);
             };
             return TurnIndicator;
         }());
@@ -8337,9 +8566,7 @@ var TacticArena;
                 //}, 500);
                 state.uiManager.timelineMenu.clean();
                 if (state.isOver()) {
-                    var msg = state.teams[state.playerTeam] ? 'You win' : 'You lose';
-                    state.uiManager.ingamemenuUI.gameOver(msg);
-                    state.battleOver();
+                    state.battleOver(state.teams[state.playerTeam] ? 'You win' : 'You lose');
                 }
                 else {
                     state.uiManager.initOrderPhase(state.getFirstAlive(), true);

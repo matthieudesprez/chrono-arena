@@ -213,6 +213,54 @@ module TacticArena.Entity {
             }, 500);
         }
 
+        castHeal(targets, callback?) {
+            let self = this;
+            this._animationCompleteCallback = callback;
+            this.playAnimation('cast' + this._ext);
+
+            console.log(targets);
+
+            setTimeout( function() {
+                let initialX = 0;
+                let initialY = 0;
+                let targetX = 0;
+                let targetY = 0;
+                let scaleX = 1;
+                if (self._ext == 'W' || self._ext == 'E') {
+                    initialY = self.position.y + 40;
+                    targetY = initialY;
+                    initialX = self.position.x;
+                    targetX = initialX - 100;
+                    if (self._ext == 'E') {
+                        initialX = self.position.x + 65;
+                        targetX = initialX + 100;
+                        scaleX = -1;
+                    }
+                } else if (self._ext == 'N' || self._ext == 'S') {
+                    initialX = self.position.x + 30;
+                    targetX = initialX;
+                    initialY = self.position.y + 5;
+                    targetY = initialY - 110;
+                    if (self._ext == 'S') {
+                        initialY = self.position.y + 65;
+                        targetY = initialY + 110;
+                    }
+                }
+                //let tornado = self._parent.game.add.sprite(initialX, initialY, 'wind');
+                //self._parent.game.pawnsSpritesGroup.add(tornado);
+                //tornado.anchor.setTo(.5, .5);
+                //tornado.scale.x *= scaleX;
+                //tornado.animations.add('wind', ["wind_01", "wind_02", "wind_03", "wind_04", "wind_05", "wind_06", "wind_07"], 7, false);
+                //tornado.animations.play('wind');
+
+                if (targets) {
+                    for (var i = 0; i < targets.length; i++) {
+                        targets[i].heal(1);
+                    }
+                }
+            }, 500);
+        }
+
         attack(target?, callback?) {
             this._animationCompleteCallback = callback;
             this.playAnimation('attack' + this._ext);
@@ -228,6 +276,13 @@ module TacticArena.Entity {
         hurt() {
             this.game.add.tween(this).to({
                 tint : 0.65 * 0xffffff,
+                alpha : 0.5
+            }, 100, Phaser.Easing.Exponential.Out, true, 0, 0, true);
+        }
+
+        heal() {
+            this.game.add.tween(this).to({
+                tint : 0xffffff,
                 alpha : 0.5
             }, 100, Phaser.Easing.Exponential.Out, true, 0, 0, true);
         }

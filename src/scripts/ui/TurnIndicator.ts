@@ -9,7 +9,7 @@ module TacticArena.UI {
 
             this.mainGroup = this.menu.game.add.group();
             this.mainGroup.x = this.menu.game.world.width;
-            this.mainGroup.y = 80;
+            this.mainGroup.y = 100;
 
             let background = this.menu.game.make.sprite(5, 0, 'background-bar');
             background.anchor.set(1, 0);
@@ -29,7 +29,7 @@ module TacticArena.UI {
         }
 
         write(turn) {
-            this.text.text = 'Tour ' + ('0' + Number(turn)).slice(-2);
+            this.text.text = 'Turn n° ' + ('0' + Number(turn)).slice(-2);
         }
 
     }

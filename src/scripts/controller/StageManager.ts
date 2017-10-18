@@ -259,7 +259,9 @@ module TacticArena {
             for (var i = 0; i < path.length; i++) {
                 //let tile = this.map.getTile(path[i].x, path[i].y, this.backgroundLayer, true);
                 let tile = this.map.putTile(2105, path[i].x, path[i].y, this.uiLayer);
-                tile.alpha = 0.5;
+                if (tile) {
+                    tile.alpha = 0.5;
+                }
             }
             this.backgroundLayer.layer.dirty = true;
         }
@@ -296,11 +298,13 @@ module TacticArena {
         showPath(path, group, tint = null) {
             for (var i = 0; i < (path as any).length; i++) {
                 let tile = this.map.getTile(path[i].x, path[i].y, this.backgroundLayer, true);
-                let tileSprite = new Phaser.Sprite(this.game, tile.x * this.game.tileSize, tile.y * this.game.tileSize, 'path-tile', '');
-                if (tint) {
-                    tileSprite.tint = tint;
+                if (tile) {
+                    let tileSprite = new Phaser.Sprite(this.game, tile.x * this.game.tileSize, tile.y * this.game.tileSize, 'path-tile', '');
+                    if (tint) {
+                        tileSprite.tint = tint;
+                    }
+                    group.add(tileSprite);
                 }
-                group.add(tileSprite);
             }
         }
 

@@ -2,10 +2,12 @@
 module TacticArena.Entity.Skill {
     export class LinearSkill extends TacticArena.Entity.Skill.BaseSkill {
         paths;
+        pathColor;
 
         constructor(state, pawn) {
             super(state, pawn);
             this.paths = null;
+            this.pathColor = 0xfc000f;
         }
 
         onSelect() {
@@ -38,7 +40,7 @@ module TacticArena.Entity.Skill {
             });
             this.state.stageManager.clearPath(this.state.pathTilesGroup);
             if (isInPath) {
-                this.state.stageManager.showPath(this.paths[pathDirection], this.state.pathTilesGroup, 0xfc000f);
+                this.state.stageManager.showPath(this.paths[pathDirection], this.state.pathTilesGroup, this.pathColor);
                 this.state.uiManager.actionMenu.showCost(this.pawn, 'ap', this.minCost);
             } else {
                 this.state.uiManager.actionMenu.showCost(this.pawn, 'ap', 0);

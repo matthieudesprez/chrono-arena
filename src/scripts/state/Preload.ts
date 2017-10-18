@@ -68,13 +68,13 @@ module TacticArena.State {
             this.load.image('icon-mp2', 'assets/images/ui/icon-mp2.png');
             this.load.atlasJSONArray('circle', 'assets/images/circle.png', 'assets/images/circle.json');
 
-            ['walk', 'fire', 'wind', 'slash', 'watch'].forEach(skillName => {
+            ['walk', 'fire', 'wind', 'slash', 'watch', 'heal'].forEach(skillName => {
                 this.load.image('skill-' + skillName, 'assets/images/skill/' + skillName + '.jpg');
             });
             this.load.atlasJSONArray('fireball', 'assets/images/fireball.png', 'assets/images/fireball.json');
             this.load.atlasJSONArray('wind', 'assets/images/wind.png', 'assets/images/wind.json');
 
-            ['ruairi', 'skeleton', 'evil', 'blondy'].forEach(characterName => {
+            ['ruairi', 'skeleton', 'evil', 'blondy', 'amanda'].forEach(characterName => {
                 this.load.atlasJSONArray(characterName, 'assets/images/characters/' + characterName + '/spritesheet.png', 'assets/images/characters/' + characterName + '/spritesheet.json');
                 this.load.image('avatar-' + characterName, 'assets/images/characters/' + characterName + '/avatar.png');
                 this.load.image('avatar-' + characterName + '-small', 'assets/images/characters/' + characterName + '/avatar-small.png');

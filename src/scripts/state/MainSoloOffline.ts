@@ -4,10 +4,9 @@ module TacticArena.State {
     export class MainSoloOffline extends TacticArena.State.BaseBattle {
         aiManager: AiManager;
 
-        init(data, chatUI) {
+        init(data) {
             super.init(data);
             this.playMode = 'offline';
-            this.chatUI = chatUI;
             this.players = data.players;
             this.players.forEach( (player, teamIndex) => {
                 if (player.isMainPlayer) {
@@ -19,12 +18,6 @@ module TacticArena.State {
                     this.pawns.push(new character(this, this.map.startPositions[teamIndex][characterIndex].x, this.map.startPositions[teamIndex][characterIndex].y, this.map.startPositions[teamIndex][characterIndex].d, this.getUniqueId(), player.isBot, teamIndex))
                 });
             });
-        }
-
-        create() {
-            super.create();
-
-            this.pawns[1].setHp(4);
         }
 
         //render() {

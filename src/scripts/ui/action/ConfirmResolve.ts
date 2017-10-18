@@ -15,9 +15,7 @@ module TacticArena.Action {
             //}, 500);
             state.uiManager.timelineMenu.clean();
             if(state.isOver()) {
-                let msg = state.teams[state.playerTeam] ? 'You win' : 'You lose';
-                state.uiManager.ingamemenuUI.gameOver(msg);
-                state.battleOver();
+                state.battleOver(state.teams[state.playerTeam] ? 'You win' : 'You lose');
             } else {
                 state.uiManager.initOrderPhase(state.getFirstAlive(), true);
             }

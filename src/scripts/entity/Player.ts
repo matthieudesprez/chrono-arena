@@ -11,11 +11,11 @@ module TacticArena {
             this.faction = 'human';
             this.isMainPlayer = true;
             this.isBot = false;
-            this.battleParty = [Entity.Character.Ruairi];
+            this.battleParty = [Entity.Character.Ruairi, Entity.Character.Blondy];
         }
 
         getCharacters() {
-            return [Entity.Character.Ruairi, Entity.Character.Skeleton, Entity.Character.Evil, Entity.Character.Blondy];
+            return [Entity.Character.Ruairi, Entity.Character.Skeleton, Entity.Character.Evil, Entity.Character.Blondy, Entity.Character.Amanda];
         }
 
         getMaps() {

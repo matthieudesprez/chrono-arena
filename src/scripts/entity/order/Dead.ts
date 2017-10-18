@@ -8,7 +8,9 @@ module TacticArena.Order {
 
         resolve (pawn:Entity.Pawn, stepUnitData:Entity.StepUnitData, previousStep:Entity.StepUnit, animate:boolean, backward:boolean, i:number, state):Promise<any> {
             return new Promise((resolve, reject) => {
-                pawn.sprite.die();
+                if(pawn.isAlive()) {
+                    pawn.sprite.die();
+                }
                 resolve(true);
             });
         }

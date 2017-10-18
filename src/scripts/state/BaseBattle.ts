@@ -16,6 +16,7 @@ module TacticArena.State {
         playMode;
         gridWidth;
         gridHeight;
+        status;
 
         constructor() {
             super();
@@ -31,6 +32,7 @@ module TacticArena.State {
             this.signalManager = new SignalManager(this);
             this.signalManager.init();
             this.pointer = new UI.Pointer(this);
+            this.status = 'Fighting';
         }
 
         create() {
@@ -105,8 +107,78 @@ module TacticArena.State {
             return null;
         }
 
-        battleOver () {
-            console.log('battle is over');
+        battleOver (status) {
+            this.status = status;
+            this.uiManager.dialogUI.createModal({
+                type: "battleOver",
+                includeBackground: true,
+                fixedToCamera: true,
+                itemsArr: [
+                    {
+                        type: "image",
+                        content: "background-modal",
+                        offsetY: -50,
+                        contentScale: 1
+                    },
+                    {
+                        type: "text",
+                        content: "[t]",
+                        fontFamily: "Press Start 2P",
+                        fontSize: 21,
+                        color: "0x000000",
+                        offsetY: -225
+                    },
+                    {
+                        type: "text",
+                        content: this.status,
+                        fontFamily: "Press Start 2P",
+                        fontSize: 18,
+                        color: "0x000000",
+                        offsetY: -150
+                    },
+                    {
+                        type: "button",
+                        atlasParent: "small-button",
+                        content: "background-button",
+                        buttonHover: "background-button-hover",
+                        offsetY: -60,
+                        contentScale: 0.7,
+                        callback: function () {
+                            this.game.state.start('mainsolooffline', true, false, {
+                                players: this.state.players,
+                                map: this.state.mapClass
+                            }, null);
+                        }
+                    },
+                    {
+                        type: "text",
+                        content: "Replay",
+                        fontFamily: "Press Start 2P",
+                        fontSize: 18,
+                        color: "0x000000",
+                        offsetY: -60
+                    },
+                    {
+                        type: "button",
+                        atlasParent: "small-button",
+                        content: "background-button",
+                        buttonHover: "background-button-hover",
+                        offsetY: 20,
+                        contentScale: 0.7,
+                        callback: function () {
+                            this.game.state.start('menu');
+                        }
+                    },
+                    {
+                        type: "text",
+                        content: "Quit",
+                        fontFamily: "Press Start 2P",
+                        fontSize: 18,
+                        color: "0x000000",
+                        offsetY: 20
+                    },
+                ]
+            });
             this.uiManager.dialogUI.showModal('battleOver');
         }
     }

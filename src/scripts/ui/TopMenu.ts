@@ -48,6 +48,10 @@ module TacticArena.UI {
                     dead: dead,
                     avatar: avatar
                 };
+
+                self.updateHp(pawn);
+                self.updateAp(pawn);
+                self.updateMp(pawn);
             });
 
             this.mainGroup.add(avatarsGroup);
@@ -65,7 +69,10 @@ module TacticArena.UI {
 
         updateHp(pawn) {
             let hp = pawn.getHp();
+            console.log(hp);
             let percent = (hp / pawn._hpMax) * 100;
+            console.log(percent);
+            console.log(pawn);
             this.pawns[pawn._id].hpBarGroup.getByName('bar').setPercent(percent);
             if(hp <= 0) {
                 this.pawns[pawn._id].dead.alpha = 1;

@@ -17,6 +17,7 @@ module TacticArena.Entity {
         isBot;
         team;
         hurting;
+        healing;
         spriteClass;
         skills;
 
@@ -47,6 +48,7 @@ module TacticArena.Entity {
             this.isBot = bot;
             this.team = team;
             this.hurting = 0;
+            this.healing = 0;
             this.skills = [];
         }
 
@@ -107,6 +109,35 @@ module TacticArena.Entity {
             }, timeOut);
         }
 
+        heal(hp = 1) {
+            console.log('heal');
+            let self = this;
+            self.healing++;
+            let timeOut = self.healing * 300;
+            setTimeout(function () {
+                if (self.healing == 1) {
+                    self.sprite.heal();
+                }
+                self.destroyProjection();
+                let label_heal = self.game.add.text(20, 10, "+" + hp, {
+                    font: '12px Press Start 2P',
+                    fill: "#5ce11a",
+                    stroke: '#000000',
+                    strokeThickness: 6
+                }, self.game.pawnsSpritesGroup);
+                let t = self.game.add.tween(label_heal).to({
+                    x: 20,
+                    y: -20,
+                    alpha: 0
+                }, 1000, Phaser.Easing.Linear.None, true);
+                t.onComplete.add(function () {
+                    label_heal.destroy();
+                }, self);
+                self.sprite.addChild(label_heal);
+                self.healing--;
+            }, timeOut);
+        }
+
         halfcast(direction?) {
             if (direction) {
                 this.faceDirection(direction);
@@ -138,6 +169,21 @@ module TacticArena.Entity {
                 }
                 this.faceDirection(direction);
                 this.sprite.castTornado(targets, function () {
+                    that.sprite.stand();
+                    resolve(true);
+                });
+            });
+        }
+
+        castHeal(targets, direction) {
+            var that = this;
+            return new Promise((resolve, reject) => {
+                if (this.projection) {
+                    this.projection.hide();
+                    this.show();
+                }
+                this.faceDirection(direction);
+                this.sprite.castHeal(targets, function () {
                     that.sprite.stand();
                     resolve(true);
                 });
@@ -304,7 +350,7 @@ module TacticArena.Entity {
             if ((this.isAlive() || forceAnimation) && hp <= 0) {
                 this.sprite.die();
             }
-            this._hp = hp;
+            this._hp = (hp > this._hpMax) ? this._hpMax : hp;
             this.game.signalManager.onHpChange.dispatch(this);
         }
 
