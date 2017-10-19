@@ -26,15 +26,16 @@ module TacticArena.State {
         selecting: Boolean;
         pointer;
         isPaused: Boolean;
+        map;
 
         init() {
 
         }
 
         preload() {
-            this.load.tilemap('map', 'assets/json/map.json', null, Phaser.Tilemap.TILED_JSON);
-            this.load.image('tiles-collection', 'assets/images/maptiles.png');
-            this.load.atlasJSONArray('skeleton', 'assets/images/skeleton.png', 'assets/images/skeleton.json');
+            this.load.tilemap('arena', 'assets/maps/arena.json', null, Phaser.Tilemap.TILED_JSON);
+            this.load.image('tiles-collection', 'assets/images/maptiles.png'); //
+            this.load.atlasJSONArray('skeleton', 'assets/images/characters/skeleton/spritesheet.png', 'assets/images/characters/skeleton/spritesheet.json');
             this.load.atlasJSONArray('fireball', 'assets/images/fireball.png', 'assets/images/fireball.json');
         }
 
@@ -43,35 +44,36 @@ module TacticArena.State {
             this.selecting = false;
             this.tileSize = 32;
             this.isPaused = false;
-            this.worldGroup = this.add.group();
+            this.worldGroup = new Phaser.Group(this.game);
 
-            this.mapGroup = this.add.group();
+            this.mapGroup = new Phaser.Group(this.game);
             this.worldGroup.add(this.mapGroup);
 
-            this.pathTilesGroup = this.add.group();
+            this.pathTilesGroup = new Phaser.Group(this.game);
             this.worldGroup.add(this.pathTilesGroup);
 
-            this.pathOrdersTilesGroup = this.add.group();
+            this.pathOrdersTilesGroup = new Phaser.Group(this.game);
             this.worldGroup.add(this.pathOrdersTilesGroup);
 
-            this.uiSpritesGroup = this.add.group();
+            this.uiSpritesGroup = new Phaser.Group(this.game);
             this.worldGroup.add(this.uiSpritesGroup);
 
-            this.pawnsSpritesGroup = this.add.group();
+            this.pawnsSpritesGroup = new Phaser.Group(this.game);
             this.worldGroup.add(this.pawnsSpritesGroup);
 
-            this.mapDecorationGroup = this.add.group();
+            this.mapDecorationGroup = new Phaser.Group(this.game);
             this.worldGroup.add(this.mapDecorationGroup);
 
-            this.uiGroup = this.add.group();
+            this.uiGroup = new Phaser.Group(this.game);
             this.worldGroup.add(this.uiGroup);
 
+            this.map = new Map.Test();
             this.stageManager = new StageManager(this);
-            this.stageManager.init('map');
+            this.stageManager.init(this.map);
 
             this.pawns = [];
-            this.pathTilesGroup = this.add.group();
-            this.pawnsSpritesGroup = this.add.group();
+            this.pathTilesGroup = new Phaser.Group(this.game);
+            this.pawnsSpritesGroup = new Phaser.Group(this.game);
 
             this.stageManager.addDecorations();
 

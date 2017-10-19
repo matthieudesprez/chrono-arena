@@ -64,8 +64,6 @@ var TacticArena;
 })(TacticArena || (TacticArena = {}));
 /// <reference path="./definitions/phaser.comments.d.ts"/>
 /// <reference path="./definitions/jasmine.d.ts"/>
-/// <reference path="./definitions/jquery.d.ts" />
-/// <reference path="./definitions/jqueryui.d.ts" />
 /// <reference path="./definitions/easystarjs.d.ts"/>
 var TacticArena;
 (function (TacticArena) {
@@ -76,15 +74,12 @@ var TacticArena;
             function TestGame(headless) {
                 if (headless === void 0) { headless = false; }
                 var _this = _super.call(this, {
-                    width: 640,
+                    width: 384,
                     height: 640,
                     renderer: headless ? Phaser.HEADLESS : Phaser.AUTO,
                     parent: 'game-container'
                 }) || this;
                 _this.state.add('test', TacticArena.State.Test);
-                _this.state.onCreateCallback = function () {
-                };
-                _this.state.start('test');
                 return _this;
             }
             return TestGame;
@@ -220,11 +215,8 @@ var TacticArena;
                 testGame.state.onStateChange.add(function () {
                     currentState = testGame.state.getCurrentState();
                     setTimeout(function () {
-                        currentState.pawns = [];
-                        currentState.pathTilesGroup = currentState.add.group();
-                        currentState.pawnsSpritesGroup = currentState.add.group();
-                        currentState.pawns.push(new TacticArena.Entity.Pawn(currentState, 8, 8, 'E', 'skeleton', 1, false, 1, 'Eikio'));
-                        currentState.pawns.push(new TacticArena.Entity.Pawn(currentState, 10, 8, 'W', 'skeleton', 2, false, 2, 'Dormammu'));
+                        currentState.pawns.push(new TacticArena.Entity.Character.Test(currentState, 8, 8, 'E', 1, false, 1));
+                        currentState.pawns.push(new TacticArena.Entity.Character.Test(currentState, 10, 8, 'W', 2, false, 2));
                         done();
                     }, 200);
                 });
@@ -777,8 +769,8 @@ var TacticArena;
             var testGame, currentState;
             function getInitialStep() {
                 var result = new TacticArena.Entity.Step([
-                    new TacticArena.Entity.StepUnit(currentState.pawns[0], new TacticArena.Entity.StepUnitData(3, 4), new TacticArena.Order.Stand(new TacticArena.Position(8, 8), 'E')),
-                    new TacticArena.Entity.StepUnit(currentState.pawns[1], new TacticArena.Entity.StepUnitData(3, 4), new TacticArena.Order.Stand(new TacticArena.Position(10, 8), 'W'))
+                    new TacticArena.Entity.StepUnit(currentState.pawns[0], new TacticArena.Entity.StepUnitData(3, 4), new TacticArena.Order.Stand(new TacticArena.Position(currentState.map.startPositions[0][0].x, currentState.map.startPositions[0][0].y), currentState.map.startPositions[0][0].d)),
+                    new TacticArena.Entity.StepUnit(currentState.pawns[1], new TacticArena.Entity.StepUnitData(3, 4), new TacticArena.Order.Stand(new TacticArena.Position(currentState.map.startPositions[1][0].x, currentState.map.startPositions[1][0].y), currentState.map.startPositions[1][0].d))
                 ]);
                 return result;
             }
@@ -798,11 +790,8 @@ var TacticArena;
                 testGame.state.onStateChange.add(function () {
                     currentState = testGame.state.getCurrentState();
                     setTimeout(function () {
-                        currentState.pawns = [];
-                        currentState.pathTilesGroup = currentState.add.group();
-                        currentState.pawnsSpritesGroup = currentState.add.group();
-                        currentState.pawns.push(new TacticArena.Entity.Pawn(currentState, 8, 8, 'E', 'skeleton', 1, false, 1, 'Eikio'));
-                        currentState.pawns.push(new TacticArena.Entity.Pawn(currentState, 10, 8, 'W', 'skeleton', 2, false, 2, 'Dormammu'));
+                        currentState.pawns.push(new TacticArena.Entity.Character.Test(currentState, currentState.map.startPositions[0][0].x, currentState.map.startPositions[0][0].y, currentState.map.startPositions[0][0].d, 1, false, 1));
+                        currentState.pawns.push(new TacticArena.Entity.Character.Test(currentState, currentState.map.startPositions[1][0].x, currentState.map.startPositions[1][0].y, currentState.map.startPositions[1][0].d, 2, false, 2));
                         currentState.isPaused = true;
                         done();
                     }, 200);
@@ -816,17 +805,17 @@ var TacticArena;
                 currentState.resolveManager.init([
                     getInitialStep(),
                     new TacticArena.Entity.Step([
-                        new TacticArena.Entity.StepUnit(currentState.pawns[0], new TacticArena.Entity.StepUnitData(2, 4), new TacticArena.Order.Move(new TacticArena.Position(9, 8), 'E')),
-                        new TacticArena.Entity.StepUnit(currentState.pawns[1], new TacticArena.Entity.StepUnitData(2, 4), new TacticArena.Order.Stand(new TacticArena.Position(10, 8), 'W'))
+                        new TacticArena.Entity.StepUnit(currentState.pawns[0], new TacticArena.Entity.StepUnitData(2, 4), new TacticArena.Order.Move(new TacticArena.Position(currentState.map.startPositions[0][0].x + 1, currentState.map.startPositions[0][0].y), currentState.map.startPositions[0][0].d)),
+                        new TacticArena.Entity.StepUnit(currentState.pawns[1], new TacticArena.Entity.StepUnitData(2, 4), new TacticArena.Order.Stand(new TacticArena.Position(currentState.map.startPositions[1][0].x, currentState.map.startPositions[1][0].y), currentState.map.startPositions[1][0].d))
                     ])
                 ]);
                 currentState.resolveManager.processStep(0).then(function () {
-                    testStepResolution(0, { x: 8, y: 8 }, 3, 4, 'E');
-                    testStepResolution(1, { x: 10, y: 8 }, 3, 4, 'W');
+                    testStepResolution(0, { x: currentState.map.startPositions[0][0].x, y: currentState.map.startPositions[0][0].y }, 3, 4, currentState.map.startPositions[0][0].d);
+                    testStepResolution(1, { x: currentState.map.startPositions[1][0].x, y: currentState.map.startPositions[1][0].y }, 3, 4, currentState.map.startPositions[1][0].d);
                     return currentState.resolveManager.processStep(1);
                 }).then(function () {
-                    testStepResolution(0, { x: 9, y: 8 }, 2, 4, 'E');
-                    testStepResolution(1, { x: 10, y: 8 }, 2, 4, 'W');
+                    testStepResolution(0, { x: currentState.map.startPositions[0][0].x + 1, y: currentState.map.startPositions[0][0].y }, 2, 4, currentState.map.startPositions[0][0].d);
+                    testStepResolution(1, { x: currentState.map.startPositions[1][0].x, y: currentState.map.startPositions[1][0].y }, 2, 4, currentState.map.startPositions[1][0].d);
                     done();
                 });
             });
@@ -834,26 +823,26 @@ var TacticArena;
                 currentState.resolveManager.init([
                     getInitialStep(),
                     new TacticArena.Entity.Step([
-                        new TacticArena.Entity.StepUnit(currentState.pawns[0], new TacticArena.Entity.StepUnitData(2, 4), new TacticArena.Order.Move(new TacticArena.Position(9, 8), 'E')),
-                        new TacticArena.Entity.StepUnit(currentState.pawns[1], new TacticArena.Entity.StepUnitData(2, 4), new TacticArena.Order.Stand(new TacticArena.Position(10, 8), 'W'))
+                        new TacticArena.Entity.StepUnit(currentState.pawns[0], new TacticArena.Entity.StepUnitData(2, 4), new TacticArena.Order.Move(new TacticArena.Position(currentState.map.startPositions[0][0].x + 1, currentState.map.startPositions[0][0].y), currentState.map.startPositions[0][0].d)),
+                        new TacticArena.Entity.StepUnit(currentState.pawns[1], new TacticArena.Entity.StepUnitData(2, 4), new TacticArena.Order.Stand(new TacticArena.Position(currentState.map.startPositions[1][0].x, currentState.map.startPositions[1][0].y), currentState.map.startPositions[1][0].d))
                     ]),
                     new TacticArena.Entity.Step([
-                        new TacticArena.Entity.StepUnit(currentState.pawns[0], new TacticArena.Entity.StepUnitData(1, 4), new TacticArena.Order.Attack(new TacticArena.Position(9, 8), 'E', [{ entityId: currentState.pawns[1]._id, dodge: false }])),
-                        new TacticArena.Entity.StepUnit(currentState.pawns[1], new TacticArena.Entity.StepUnitData(1, 3), new TacticArena.Order.Attack(new TacticArena.Position(10, 8), 'W', [{ entityId: currentState.pawns[0]._id, dodge: true }]))
+                        new TacticArena.Entity.StepUnit(currentState.pawns[0], new TacticArena.Entity.StepUnitData(1, 4), new TacticArena.Order.Attack(new TacticArena.Position(currentState.map.startPositions[0][0].x + 1, currentState.map.startPositions[0][0].y), currentState.map.startPositions[0][0].d, [{ entityId: currentState.pawns[1]._id, dodge: false }])),
+                        new TacticArena.Entity.StepUnit(currentState.pawns[1], new TacticArena.Entity.StepUnitData(1, 3), new TacticArena.Order.Attack(new TacticArena.Position(currentState.map.startPositions[1][0].x, currentState.map.startPositions[1][0].y), currentState.map.startPositions[1][0].d, [{ entityId: currentState.pawns[0]._id, dodge: true }]))
                     ])
                 ]);
                 currentState.resolveManager.processStep(0).then(function () {
                 }).then(function () {
-                    testStepResolution(0, { x: 8, y: 8 }, 3, 4, 'E');
-                    testStepResolution(1, { x: 10, y: 8 }, 3, 4, 'W');
+                    testStepResolution(0, { x: currentState.map.startPositions[0][0].x, y: currentState.map.startPositions[0][0].y }, 3, 4, currentState.map.startPositions[0][0].d);
+                    testStepResolution(1, { x: currentState.map.startPositions[1][0].x, y: currentState.map.startPositions[1][0].y }, 3, 4, currentState.map.startPositions[1][0].d);
                     return currentState.resolveManager.processStep(1);
                 }).then(function () {
-                    testStepResolution(0, { x: 9, y: 8 }, 2, 4, 'E');
-                    testStepResolution(1, { x: 10, y: 8 }, 2, 4, 'W');
+                    testStepResolution(0, { x: currentState.map.startPositions[0][0].x + 1, y: currentState.map.startPositions[0][0].y }, 2, 4, currentState.map.startPositions[0][0].d);
+                    testStepResolution(1, { x: currentState.map.startPositions[1][0].x, y: currentState.map.startPositions[1][0].y }, 2, 4, currentState.map.startPositions[1][0].d);
                     return currentState.resolveManager.processStep(2);
                 }).then(function () {
-                    testStepResolution(0, { x: 9, y: 8 }, 1, 4, 'E');
-                    testStepResolution(1, { x: 10, y: 8 }, 1, 3, 'W');
+                    testStepResolution(0, { x: currentState.map.startPositions[0][0].x + 1, y: currentState.map.startPositions[0][0].y }, 1, 4, currentState.map.startPositions[0][0].d);
+                    testStepResolution(1, { x: currentState.map.startPositions[1][0].x, y: currentState.map.startPositions[1][0].y }, 1, 3, currentState.map.startPositions[1][0].d);
                     done();
                 });
             });
@@ -861,34 +850,34 @@ var TacticArena;
                 currentState.resolveManager.init([
                     getInitialStep(),
                     new TacticArena.Entity.Step([
-                        new TacticArena.Entity.StepUnit(currentState.pawns[0], new TacticArena.Entity.StepUnitData(2, 4), new TacticArena.Order.Move(new TacticArena.Position(8, 7), 'E')),
-                        new TacticArena.Entity.StepUnit(currentState.pawns[1], new TacticArena.Entity.StepUnitData(2, 4), new TacticArena.Order.Move(new TacticArena.Position(10, 7), 'W'))
+                        new TacticArena.Entity.StepUnit(currentState.pawns[0], new TacticArena.Entity.StepUnitData(2, 4), new TacticArena.Order.Move(new TacticArena.Position(currentState.map.startPositions[0][0].x, currentState.map.startPositions[0][0].y - 1), currentState.map.startPositions[0][0].d)),
+                        new TacticArena.Entity.StepUnit(currentState.pawns[1], new TacticArena.Entity.StepUnitData(2, 4), new TacticArena.Order.Move(new TacticArena.Position(currentState.map.startPositions[1][0].x, currentState.map.startPositions[1][0].y - 1), currentState.map.startPositions[1][0].d))
                     ]),
                     new TacticArena.Entity.Step([
-                        new TacticArena.Entity.StepUnit(currentState.pawns[0], new TacticArena.Entity.StepUnitData(0, 4), new TacticArena.Order.Fire(new TacticArena.Position(8, 7), 'E', [currentState.pawns[1]._id])),
-                        new TacticArena.Entity.StepUnit(currentState.pawns[1], new TacticArena.Entity.StepUnitData(1, 2), new TacticArena.Order.Move(new TacticArena.Position(9, 7), 'W'))
+                        new TacticArena.Entity.StepUnit(currentState.pawns[0], new TacticArena.Entity.StepUnitData(0, 4), new TacticArena.Order.Fire(new TacticArena.Position(currentState.map.startPositions[0][0].x, currentState.map.startPositions[0][0].y - 1), currentState.map.startPositions[0][0].d, [currentState.pawns[1]._id])),
+                        new TacticArena.Entity.StepUnit(currentState.pawns[1], new TacticArena.Entity.StepUnitData(1, 2), new TacticArena.Order.Move(new TacticArena.Position(currentState.map.startPositions[1][0].x - 1, currentState.map.startPositions[1][0].y - 1), currentState.map.startPositions[1][0].d))
                     ]),
                     new TacticArena.Entity.Step([
-                        new TacticArena.Entity.StepUnit(currentState.pawns[0], new TacticArena.Entity.StepUnitData(0, 3), new TacticArena.Order.Stand(new TacticArena.Position(8, 7), 'E', [currentState.pawns[1]._id])),
-                        new TacticArena.Entity.StepUnit(currentState.pawns[1], new TacticArena.Entity.StepUnitData(0, 2), new TacticArena.Order.Move(new TacticArena.Position(9, 7), 'W', { entity: currentState.pawns[0]._id, dodge: false }))
+                        new TacticArena.Entity.StepUnit(currentState.pawns[0], new TacticArena.Entity.StepUnitData(0, 3), new TacticArena.Order.Stand(new TacticArena.Position(currentState.map.startPositions[0][0].x, currentState.map.startPositions[0][0].y - 1), currentState.map.startPositions[0][0].d, [currentState.pawns[1]._id])),
+                        new TacticArena.Entity.StepUnit(currentState.pawns[1], new TacticArena.Entity.StepUnitData(0, 2), new TacticArena.Order.Move(new TacticArena.Position(currentState.map.startPositions[1][0].x - 1, currentState.map.startPositions[1][0].y - 1), currentState.map.startPositions[1][0].d, { entity: currentState.pawns[0]._id, dodge: false }))
                     ])
                 ]);
                 currentState.resolveManager.processStep(0).then(function () {
                 }).then(function () {
-                    testStepResolution(0, { x: 8, y: 8 }, 3, 4, 'E');
-                    testStepResolution(1, { x: 10, y: 8 }, 3, 4, 'W');
+                    testStepResolution(0, { x: currentState.map.startPositions[0][0].x, y: currentState.map.startPositions[0][0].y }, 3, 4, currentState.map.startPositions[0][0].d);
+                    testStepResolution(1, { x: currentState.map.startPositions[1][0].x, y: currentState.map.startPositions[1][0].y }, 3, 4, currentState.map.startPositions[1][0].d);
                     return currentState.resolveManager.processStep(1);
                 }).then(function () {
-                    testStepResolution(0, { x: 8, y: 7 }, 2, 4, 'E');
-                    testStepResolution(1, { x: 10, y: 7 }, 2, 4, 'W');
+                    testStepResolution(0, { x: currentState.map.startPositions[0][0].x, y: currentState.map.startPositions[0][0].y - 1 }, 2, 4, currentState.map.startPositions[0][0].d);
+                    testStepResolution(1, { x: currentState.map.startPositions[1][0].x, y: currentState.map.startPositions[1][0].y - 1 }, 2, 4, currentState.map.startPositions[1][0].d);
                     return currentState.resolveManager.processStep(2);
                 }).then(function () {
-                    testStepResolution(0, { x: 8, y: 7 }, 0, 4, 'E');
-                    testStepResolution(1, { x: 9, y: 7 }, 1, 2, 'W');
+                    testStepResolution(0, { x: currentState.map.startPositions[0][0].x, y: currentState.map.startPositions[0][0].y - 1 }, 0, 4, currentState.map.startPositions[0][0].d);
+                    testStepResolution(1, { x: currentState.map.startPositions[1][0].x - 1, y: currentState.map.startPositions[1][0].y - 1 }, 1, 2, currentState.map.startPositions[1][0].d);
                     return currentState.resolveManager.processStep(3);
                 }).then(function () {
-                    testStepResolution(0, { x: 8, y: 7 }, 0, 3, 'E');
-                    testStepResolution(1, { x: 9, y: 7 }, 0, 2, 'W');
+                    testStepResolution(0, { x: currentState.map.startPositions[0][0].x, y: currentState.map.startPositions[0][0].y - 1 }, 0, 3, currentState.map.startPositions[0][0].d);
+                    testStepResolution(1, { x: currentState.map.startPositions[1][0].x - 1, y: currentState.map.startPositions[1][0].y - 1 }, 0, 2, currentState.map.startPositions[1][0].d);
                     done();
                 });
             });
@@ -2996,12 +2985,36 @@ var TacticArena;
                         new TacticArena.Entity.Skill.Walk(_this.game, _this),
                         new TacticArena.Entity.Skill.Watch(_this.game, _this)
                     ]);
-                    _this._apMax = 4;
                     return _this;
+                    //this._apMax = 4;
                 }
                 return Skeleton;
             }(TacticArena.Entity.Pawn));
             Character.Skeleton = Skeleton;
+        })(Character = Entity.Character || (Entity.Character = {}));
+    })(Entity = TacticArena.Entity || (TacticArena.Entity = {}));
+})(TacticArena || (TacticArena = {}));
+var TacticArena;
+(function (TacticArena) {
+    var Entity;
+    (function (Entity) {
+        var Character;
+        (function (Character) {
+            var Test = (function (_super) {
+                __extends(Test, _super);
+                function Test(game, x, y, ext, id, bot, team) {
+                    var _this = _super.call(this, game, x, y, ext, 'skeleton', id, bot, team, "Skeleton", Entity.Sprite) || this;
+                    _this.skills = _this.skills.concat([
+                        new TacticArena.Entity.Skill.Walk(_this.game, _this),
+                        new TacticArena.Entity.Skill.Slash(_this.game, _this),
+                        new TacticArena.Entity.Skill.Wind(_this.game, _this),
+                        new TacticArena.Entity.Skill.Fire(_this.game, _this)
+                    ]);
+                    return _this;
+                }
+                return Test;
+            }(TacticArena.Entity.Pawn));
+            Character.Test = Test;
         })(Character = Entity.Character || (Entity.Character = {}));
     })(Entity = TacticArena.Entity || (TacticArena.Entity = {}));
 })(TacticArena || (TacticArena = {}));
@@ -3064,6 +3077,27 @@ var TacticArena;
             return SkyGarden;
         }(Map.BaseMap));
         Map.SkyGarden = SkyGarden;
+    })(Map = TacticArena.Map || (TacticArena.Map = {}));
+})(TacticArena || (TacticArena = {}));
+/// <reference path="BaseMap.ts"/>
+var TacticArena;
+(function (TacticArena) {
+    var Map;
+    (function (Map) {
+        var Test = (function (_super) {
+            __extends(Test, _super);
+            function Test() {
+                var _this = this;
+                var startPositions = [
+                    [{ x: 4, y: 9, d: 'E' }, { x: 3, y: 8, d: 'E' }],
+                    [{ x: 6, y: 9, d: 'W' }, { x: 8, y: 8, d: 'W' }]
+                ];
+                _this = _super.call(this, 'arena', 'The Pit', startPositions) || this;
+                return _this;
+            }
+            return Test;
+        }(Map.BaseMap));
+        Map.Test = Test;
     })(Map = TacticArena.Map || (TacticArena.Map = {}));
 })(TacticArena || (TacticArena = {}));
 /// <reference path="BaseMap.ts"/>
@@ -4726,9 +4760,9 @@ var TacticArena;
             Test.prototype.init = function () {
             };
             Test.prototype.preload = function () {
-                this.load.tilemap('map', 'assets/json/map.json', null, Phaser.Tilemap.TILED_JSON);
-                this.load.image('tiles-collection', 'assets/images/maptiles.png');
-                this.load.atlasJSONArray('skeleton', 'assets/images/skeleton.png', 'assets/images/skeleton.json');
+                this.load.tilemap('arena', 'assets/maps/arena.json', null, Phaser.Tilemap.TILED_JSON);
+                this.load.image('tiles-collection', 'assets/images/maptiles.png'); //
+                this.load.atlasJSONArray('skeleton', 'assets/images/characters/skeleton/spritesheet.png', 'assets/images/characters/skeleton/spritesheet.json');
                 this.load.atlasJSONArray('fireball', 'assets/images/fireball.png', 'assets/images/fireball.json');
             };
             Test.prototype.create = function () {
@@ -4736,26 +4770,27 @@ var TacticArena;
                 this.selecting = false;
                 this.tileSize = 32;
                 this.isPaused = false;
-                this.worldGroup = this.add.group();
-                this.mapGroup = this.add.group();
+                this.worldGroup = new Phaser.Group(this.game);
+                this.mapGroup = new Phaser.Group(this.game);
                 this.worldGroup.add(this.mapGroup);
-                this.pathTilesGroup = this.add.group();
+                this.pathTilesGroup = new Phaser.Group(this.game);
                 this.worldGroup.add(this.pathTilesGroup);
-                this.pathOrdersTilesGroup = this.add.group();
+                this.pathOrdersTilesGroup = new Phaser.Group(this.game);
                 this.worldGroup.add(this.pathOrdersTilesGroup);
-                this.uiSpritesGroup = this.add.group();
+                this.uiSpritesGroup = new Phaser.Group(this.game);
                 this.worldGroup.add(this.uiSpritesGroup);
-                this.pawnsSpritesGroup = this.add.group();
+                this.pawnsSpritesGroup = new Phaser.Group(this.game);
                 this.worldGroup.add(this.pawnsSpritesGroup);
-                this.mapDecorationGroup = this.add.group();
+                this.mapDecorationGroup = new Phaser.Group(this.game);
                 this.worldGroup.add(this.mapDecorationGroup);
-                this.uiGroup = this.add.group();
+                this.uiGroup = new Phaser.Group(this.game);
                 this.worldGroup.add(this.uiGroup);
+                this.map = new TacticArena.Map.Test();
                 this.stageManager = new TacticArena.StageManager(this);
-                this.stageManager.init('map');
+                this.stageManager.init(this.map);
                 this.pawns = [];
-                this.pathTilesGroup = this.add.group();
-                this.pawnsSpritesGroup = this.add.group();
+                this.pathTilesGroup = new Phaser.Group(this.game);
+                this.pawnsSpritesGroup = new Phaser.Group(this.game);
                 this.stageManager.addDecorations();
                 this.pathfinder = new EasyStar.js();
                 this.pathfinder.setAcceptableTiles([-1]);

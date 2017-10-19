@@ -26,11 +26,8 @@ module TacticArena.Specs {
             testGame.state.onStateChange.add(function () {
                 currentState = testGame.state.getCurrentState();
                 setTimeout(function () {
-                    currentState.pawns = [];
-                    currentState.pathTilesGroup = currentState.add.group();
-                    currentState.pawnsSpritesGroup = currentState.add.group();
-                    currentState.pawns.push(new Entity.Pawn(currentState, 8, 8, 'E', 'skeleton', 1, false, 1, 'Eikio'));
-                    currentState.pawns.push(new Entity.Pawn(currentState, 10, 8, 'W', 'skeleton', 2, false, 2, 'Dormammu'));
+                    currentState.pawns.push(new Entity.Character.Test(currentState, 8, 8, 'E', 1, false, 1));
+                    currentState.pawns.push(new Entity.Character.Test(currentState, 10, 8, 'W', 2, false, 2));
                     done();
                 }, 200);
             });

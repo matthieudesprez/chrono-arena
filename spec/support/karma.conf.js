@@ -23,13 +23,13 @@ module.exports = function(config) {
             'build/app.js'
         ],
         proxies: {
-            '/assets/json/map.json': 'http://localhost:8000/assets/json/map.json',
+            '/assets/maps/arena.json': 'http://localhost:8000/assets/maps/arena.json',
             '/assets/json/gridtiles.json': 'http://localhost:8000/assets/json/gridtiles.json',
             '/assets/images/fireball.json': 'http://localhost:8000/assets/images/fireball.json',
             '/assets/images/fireball.png': 'http://localhost:8000/assets/images/fireball.png',
-            '/assets/images/skeleton.json': 'http://localhost:8000/assets/images/skeleton.json',
-            '/assets/images/skeleton.png': 'http://localhost:8000/assets/images/skeleton.png',
-            '/assets/images/maptiles.png': 'http://localhost:8000/assets/images/maptiles.png',
+            '/assets/images/characters/skeleton/spritesheet.json': 'http://localhost:8000/assets/images/characters/skeleton/spritesheet.json',
+            '/assets/images/characters/skeleton/spritesheet.png': 'http://localhost:8000/assets/images/characters/skeleton/spritesheet.png',
+            '/assets/images/maptiles.png': 'http://localhost:8000/assets/images/maptiles.png'
         }
     })
 }
