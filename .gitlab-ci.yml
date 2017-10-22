@@ -28,7 +28,8 @@ build:
     - npm install typescript -g
   script:
     - tsc
-    - cp src/index.html build
+    - cp src/{index.html,tests.html} build
+    - cp favicon.ico build
     - cp -R src/vendor src/css src/assets build
 
 deploy:
