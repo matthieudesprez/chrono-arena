@@ -24,7 +24,7 @@ build:
   before_script:
     - npm install
     - npm install bower -g
-    - bower install
+    - bower install --allow-root
     - npm install typescript -g
   script:
     - tsc
