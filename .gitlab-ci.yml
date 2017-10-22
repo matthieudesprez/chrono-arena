@@ -23,6 +23,8 @@ build:
   stage: build
   before_script:
     - npm install
+    - npm install bower -g
+    - bower install
     - npm install typescript -g
   script:
     - tsc
