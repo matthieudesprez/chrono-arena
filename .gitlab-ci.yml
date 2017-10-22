@@ -21,8 +21,8 @@ stages:
 
 build:
   stage: build
-  tags:
-    - typescript
+  before_script:
+    - npm install
   script:
     - tsc
     - cp src/index.html build
