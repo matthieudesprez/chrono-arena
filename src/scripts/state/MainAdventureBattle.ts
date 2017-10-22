@@ -42,7 +42,7 @@ module TacticArena.State {
         }
 
         battleOver () {
-            super.battleOver();
+            //super.battleOver();
             //this.game.state.start("mainadventure", true, false, {
             //    mainPawn: this.pawns[0].export(),
             //});

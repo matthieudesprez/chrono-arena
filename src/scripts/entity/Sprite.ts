@@ -280,7 +280,7 @@ module TacticArena.Entity {
             }, 100, Phaser.Easing.Exponential.Out, true, 0, 0, true);
         }
 
-        heal() {
+        healAnimation() {
             this.game.add.tween(this).to({
                 tint : 0xffffff,
                 alpha : 0.5

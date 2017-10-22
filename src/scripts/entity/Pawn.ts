@@ -110,13 +110,12 @@ module TacticArena.Entity {
         }
 
         heal(hp = 1) {
-            console.log('heal');
             let self = this;
             self.healing++;
             let timeOut = self.healing * 300;
             setTimeout(function () {
                 if (self.healing == 1) {
-                    self.sprite.heal();
+                    self.sprite.healAnimation();
                 }
                 self.destroyProjection();
                 let label_heal = self.game.add.text(20, 10, "+" + hp, {

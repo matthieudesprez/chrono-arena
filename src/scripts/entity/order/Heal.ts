@@ -1,8 +1,8 @@
 module TacticArena.Order {
     export class Heal extends BaseOrder {
 
-        constructor(position, direction, targets) {
-            super('heal', position, direction, targets);
+        constructor(position, direction) {
+            super('heal', position, direction); //
         }
 
         process(ordermanager:OrderManager, steps:Entity.Step[], stepIndex:number, aIndex:number, bIndex:number):BaseOrder {
