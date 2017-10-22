@@ -7,6 +7,7 @@
 #    - node_modules/
 
 stages:
+  - build
 #  - test
   - deploy
 
@@ -17,6 +18,15 @@ stages:
 #  script:
 #    - npm run serve_headless
 #    - npm run test
+
+build:
+  stage: build
+  tags:
+    - typescript
+  script:
+    - tsc
+    - cp src/index.html build
+    - cp -R src/vendor src/css src/assets build
 
 deploy:
   stage: deploy

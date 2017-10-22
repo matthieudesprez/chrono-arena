@@ -2,7 +2,7 @@
 // / <reference path="../state/Main.ts"/>
 
 module TacticArena.Specs {
-    describe("OrderManager", () => {
+    fdescribe("OrderManager", () => {
         var testGame, currentState;
 
         function testStep(steps, i, j, entityId, action, direction, orderPosition, ap, hp, moveHasBeenBlocked, positionBlocked) {
