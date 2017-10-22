@@ -23,6 +23,7 @@ build:
   stage: build
   before_script:
     - npm install
+    - npm install typescript -g
   script:
     - tsc
     - cp src/index.html build
