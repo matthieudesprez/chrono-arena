@@ -11,7 +11,7 @@ module TacticArena.Action {
 
             if(!state.process && activePawn.getAp() > 0) {
                 activePawn.createProjection();
-                activePawn.getProjectionOrReal().faceDirection(direction);
+                state.spritesManager.getProjectionOrReal(activePawn, true).stand(direction);
                 //let position = activePawn.getProjectionOrReal().getPosition();
                 //this.menu.game.orderManager.add('stand', activePawn, position.x, position.y, direction);
                 //activePawn.setAp(activePawn.getAp() - 1);

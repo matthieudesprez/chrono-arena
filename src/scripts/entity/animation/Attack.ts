@@ -15,8 +15,24 @@ module TacticArena.Animation {
         }
 
         get():Promise<any> {
-            let animation = this.pawn.attack(this.targets[0], this.order.direction).then((res) => {
-                return res;
+            let that = this;
+            let target = this.targets[0];
+            let animation =  new Promise((resolve, reject) => {
+                if(this.order.direction) {
+                    this.pawn.faceDirection(this.order.direction);
+                }
+                this.state.spritesManager.sprites[this.pawn._id].attack(() => {
+                    resolve(true);
+                    that.state.spritesManager.sprites[that.pawn._id].stand();
+                    return true;
+                }).then( () => {
+                    if (target.dodge) {
+                        target.entity.dodge();
+                    } else {
+                        target.entity.hurt(target.damages);
+                    }
+                    resolve(true);
+                });
             });
             return super.handleBackward(animation);
         }

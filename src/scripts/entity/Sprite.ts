@@ -9,8 +9,8 @@ module TacticArena.Entity {
         constructor(game, x, y, ext, type, parent, size, tint=null) {
             super(
                 game.game, 
-                game.tileSize * x - (size / 4), 
-                game.tileSize * y - (size / 2), 
+                x, //game.tileSize * x - (size / 4),
+                y, //game.tileSize * y - (size / 2),
                 type
             );
             this._parent = parent;
@@ -23,6 +23,7 @@ module TacticArena.Entity {
                 this.tint = tint;
             }
             this.anchor.set(0);
+            this.stand();
         }
 
         setAnimations() {
@@ -95,11 +96,13 @@ module TacticArena.Entity {
             this.playAnimation('walk' + this._ext);
         }
 
-        stand() {
+        stand(ext=this._ext) {
+            this._ext = ext;
             this.playAnimation('stand' + this._ext);
         }
 
-        halfcast() {
+        halfcast(ext=this._ext) {
+            this._ext = ext;
             this.playAnimation('halfcast' + this._ext);
         }
 
@@ -261,16 +264,9 @@ module TacticArena.Entity {
             }, 500);
         }
 
-        attack(target?, callback?) {
+        attack(callback?) {
             this._animationCompleteCallback = callback;
             this.playAnimation('attack' + this._ext);
-            if(target) {
-                if (target.dodge) {
-                    target.entity.dodge();
-                } else {
-                    target.entity.hurt(target.damages);
-                }
-            }
         }
 
         hurt() {

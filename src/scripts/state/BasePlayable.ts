@@ -2,6 +2,7 @@
 module TacticArena.State {
     export class BasePlayable extends TacticArena.State.BaseState {
         pawns: Entity.Pawn[];
+        spritesManager: SpritesManager;
         mapGroup: Phaser.Group;
         mapDecorationGroup: Phaser.Group;
         pathTilesGroup: Phaser.Group;
@@ -10,7 +11,6 @@ module TacticArena.State {
         uiSpritesGroup: Phaser.Group;
         uiGroup: Phaser.Group;
         pathfinder;
-        tileSize: number;
         stageManager: StageManager;
         process: Boolean;
         modalVisible: Boolean;
@@ -30,8 +30,9 @@ module TacticArena.State {
             super.init();
             this.process = true;
             this.modalVisible = false;
-            this.tileSize = 32;
             this.isPaused = false;
+
+            this.spritesManager = new SpritesManager(this);
 
             this.mapClass = data.map;
             this.map = new data.map();
@@ -103,7 +104,6 @@ module TacticArena.State {
             //delete this.pathOrdersTilesGroup;
             //delete this.pawnsSpritesGroup;
             //delete this.uiSpritesGroup;
-            //delete this.tileSize;
             //delete this.stageManager;
             //delete this.process;
             //delete this.isPaused;

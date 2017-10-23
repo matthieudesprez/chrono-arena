@@ -32,9 +32,9 @@ module TacticArena.Entity {
             this.events.onAnimationComplete.add(this.animationComplete, this);
         }
 
-        attack(target?, callback?) {
+        attack(callback?) {
             let self = this;
-            super.attack(target, callback);
+            super.attack(callback);
             let newX = self.position.x;
             let newY = self.position.y;
             if (this._ext == 'E') {

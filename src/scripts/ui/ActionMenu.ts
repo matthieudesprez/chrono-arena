@@ -180,12 +180,6 @@ module TacticArena.UI {
 
         initDirection(direction) {
             this.savedDirection = direction;
-            this.selectDirection(direction);
-        }
-
-        selectDirection(direction) {
-            //deselect direction icons
-            //select right direction icon
         }
 
         clean() {

@@ -8,9 +8,9 @@ module TacticArena.UI {
         constructor(game) {
             this.game = game;
             this.uiLastPosition = new Position(-1, -1);
-            this.marker =  this.game.make.graphics(-1 * this.game.tileSize, -1 * this.game.tileSize);
+            this.marker =  this.game.make.graphics(-1 * this.game.game.tileSize, -1 * this.game.game.tileSize);
             this.marker.lineStyle(2, 0xffffff, 1);
-            this.marker.drawRect(0, 0, this.game.tileSize, this.game.tileSize);
+            this.marker.drawRect(0, 0, this.game.game.tileSize, this.game.game.tileSize);
             this.game.worldGroup.add(this.marker);
 
             this.game.input.addMoveCallback(this.update, this);
@@ -26,8 +26,8 @@ module TacticArena.UI {
         updateMarker() {
             this.show();
             let p = this.getPosition();
-            this.marker.x = p.x * this.game.tileSize;
-            this.marker.y = p.y * this.game.tileSize;
+            this.marker.x = p.x * this.game.game.tileSize;
+            this.marker.y = p.y * this.game.game.tileSize;
         }
 
         update(pointer, x, y, clicked) {
@@ -91,8 +91,8 @@ module TacticArena.UI {
         }
 
         show() {
-            this.marker.x = -this.game.tileSize;
-            this.marker.y = -this.game.tileSize;
+            this.marker.x = -this.game.game.tileSize;
+            this.marker.y = -this.game.game.tileSize;
             this.marker.visible = true;
         }
 

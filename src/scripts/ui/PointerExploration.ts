@@ -8,15 +8,15 @@ module TacticArena.UI {
             if(!this.game.process) {
                 let activePawn = this.game.pawns[0];
                 let p = this.getPosition();
-                this.marker.x = p.x * this.game.tileSize;
-                this.marker.y = p.y * this.game.tileSize;
+                this.marker.x = p.x * this.game.game.tileSize;
+                this.marker.y = p.y * this.game.game.tileSize;
 
                 if (this.game.stageManager.grid[p.y][p.x] == 0 && !this.game.stageManager.equalPositions(p, activePawn.getPosition())) {
                     this.marker.lineStyle(2, 0xcd2f36, 1);
                 } else {
                     this.marker.lineStyle(2, 0xffffff, 1);
                 }
-                this.marker.drawRect(0, 0, this.game.tileSize, this.game.tileSize);
+                this.marker.drawRect(0, 0, this.game.game.tileSize, this.game.game.tileSize);
             }
         }
 
@@ -25,8 +25,8 @@ module TacticArena.UI {
                 let self = this;
                 var activePawn = this.game.pawns[0];
                 let p = this.getPosition();
-                var targetX = this.marker.x / this.game.tileSize;
-                var targetY = this.marker.y / this.game.tileSize;
+                var targetX = this.marker.x / this.game.game.tileSize;
+                var targetY = this.marker.y / this.game.game.tileSize;
                 self.game.process = true;
                 console.log(p);
                 if(this.game.stageManager.grid[p.y][p.x] != 0) {

@@ -27,7 +27,7 @@ module TacticArena.State {
         create() {
             super.create();
             //this.game.camera.focusOnXY(this.pawns[0].getSprite().x + 16, this.pawns[0].getSprite().y + 16);
-            this.game.camera.focusOnXY(this.data.center.x * this.tileSize + 16, this.data.center.y * this.tileSize + 16);
+            this.game.camera.focusOnXY(this.data.center.x * this.game.game.tileSize + 16, this.data.center.y * this.game.game.tileSize + 16);
         }
 
         initMap() {

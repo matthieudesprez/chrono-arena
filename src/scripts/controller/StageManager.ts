@@ -31,14 +31,14 @@ module TacticArena {
 
         init(map) {
             this.map = this.game.make.tilemap(map.name);
-            this.map.addTilesetImage('tiles-collection', 'tiles-collection', this.game.tileSize, this.game.tileSize, 0, 0);
+            this.map.addTilesetImage('tiles-collection', 'tiles-collection', this.game.game.tileSize, this.game.game.tileSize, 0, 0);
             if(map.hasParallaxLayer) {
                 this.parallaxLayer = this.game.mapGroup.add(this.map.createLayer('Parallax'));
                 this.parallaxLayer.scrollFactorX = 0.5;
                 this.parallaxLayer.scrollFactorY = 0.5;
             }
             this.backgroundLayer = this.game.mapGroup.add(this.map.createLayer('Background'));
-            this.uiLayer = this.game.mapGroup.add(this.map.createBlankLayer('UI', this.backgroundLayer.layer.data[0].length, this.backgroundLayer.layer.data.length, this.game.tileSize, this.game.tileSize));
+            this.uiLayer = this.game.mapGroup.add(this.map.createBlankLayer('UI', this.backgroundLayer.layer.data[0].length, this.backgroundLayer.layer.data.length, this.game.game.tileSize, this.game.game.tileSize));
             this.foregroundLayer = this.game.mapGroup.add(this.map.createLayer('Foreground'));
             this.collisionLayer = this.game.mapGroup.add(this.map.createLayer('Collision'));
             //this.collisionLayer.debug = true;
@@ -54,17 +54,17 @@ module TacticArena {
             width = data.background.layer.width;
             height = data.background.layer.height;
 
-            this.map.addTilesetImage('tiles-collection', 'tiles-collection', this.game.tileSize, this.game.tileSize, 0, 0, 1);
-            this.parallaxLayer = this.map.create('Parallax', width, height, this.game.tileSize, this.game.tileSize);
+            this.map.addTilesetImage('tiles-collection', 'tiles-collection', this.game.game.tileSize, this.game.game.tileSize, 0, 0, 1);
+            this.parallaxLayer = this.map.create('Parallax', width, height, this.game.game.tileSize, this.game.game.tileSize);
             this.parallaxLayer.scrollFactorX = 0.5;
             this.parallaxLayer.scrollFactorY = 0.5;
-            this.backgroundLayer = this.map.createBlankLayer('Background', width, height, this.game.tileSize, this.game.tileSize);
-            this.uiLayer = this.map.createBlankLayer('UI', width, height, this.game.tileSize, this.game.tileSize);
-            this.foregroundLayer = this.map.createBlankLayer('Foreground', width, height, this.game.tileSize, this.game.tileSize);
-            this.collisionLayer = this.map.createBlankLayer('Collision', width, height, this.game.tileSize, this.game.tileSize);
+            this.backgroundLayer = this.map.createBlankLayer('Background', width, height, this.game.game.tileSize, this.game.game.tileSize);
+            this.uiLayer = this.map.createBlankLayer('UI', width, height, this.game.game.tileSize, this.game.game.tileSize);
+            this.foregroundLayer = this.map.createBlankLayer('Foreground', width, height, this.game.game.tileSize, this.game.game.tileSize);
+            this.collisionLayer = this.map.createBlankLayer('Collision', width, height, this.game.game.tileSize, this.game.game.tileSize);
             //this.collisionLayer.debug = true;
-            this.decorationLayer1 = this.map.createBlankLayer('Decorations', width, height, this.game.tileSize, this.game.tileSize);
-            this.decorationLayer2 = this.map.createBlankLayer('Decorations2', width, height, this.game.tileSize, this.game.tileSize);
+            this.decorationLayer1 = this.map.createBlankLayer('Decorations', width, height, this.game.game.tileSize, this.game.game.tileSize);
+            this.decorationLayer2 = this.map.createBlankLayer('Decorations2', width, height, this.game.game.tileSize, this.game.game.tileSize);
 
             this.map.paste(0, 0, data.background.map.copy(start.x, start.y, width, height, data.parallax), this.parallaxLayer);
             this.map.paste(0, 0, data.background.map.copy(start.x, start.y, width, height, data.background), this.backgroundLayer);
@@ -112,14 +112,14 @@ module TacticArena {
         addDecorationsFromData(data) {
             let width = data.stage.background.layer.width;
             let height = data.stage.background.layer.height;
-            this.decorationLayer3 = this.map.createBlankLayer('Decorations3', width, height, this.game.tileSize, this.game.tileSize);
+            this.decorationLayer3 = this.map.createBlankLayer('Decorations3', width, height, this.game.game.tileSize, this.game.game.tileSize);
             this.map.paste(0, 0, data.stage.background.map.copy(0, 0, width, height, data.stage.decoration3), this.decorationLayer3);
         }
 
         addBlackLayer(data) {
             let width = data.stage.background.layer.width;
             let height = data.stage.background.layer.height;
-            this.blackLayer = this.map.createBlankLayer('Black', width, height, this.game.tileSize, this.game.tileSize);
+            this.blackLayer = this.map.createBlankLayer('Black', width, height, this.game.game.tileSize, this.game.game.tileSize);
             let endX = data.startPosition.x + data.gridWidth;
             let endY = data.startPosition.y + data.gridHeight;
             for (var x = 0; x < width; x++) {
@@ -139,9 +139,9 @@ module TacticArena {
             return new Promise((resolve, reject) => {
                 let width = this.backgroundLayer.layer.width;
                 let height = this.backgroundLayer.layer.height;
-                this.blackLayer = this.map.createBlankLayer('Black', width, height, this.game.tileSize, this.game.tileSize);
-                let startX = Math.floor(Math.abs(this.game.world.position.x) / this.game.tileSize);
-                let startY = Math.floor(Math.abs(this.game.world.position.y) / this.game.tileSize);
+                this.blackLayer = this.map.createBlankLayer('Black', width, height, this.game.game.tileSize, this.game.game.tileSize);
+                let startX = Math.floor(Math.abs(this.game.world.position.x) / this.game.game.tileSize);
+                let startY = Math.floor(Math.abs(this.game.world.position.y) / this.game.game.tileSize);
                 let endX = startX + 20;
                 let endY = startY + 19;
                 let self = this;
@@ -299,7 +299,7 @@ module TacticArena {
             for (var i = 0; i < (path as any).length; i++) {
                 let tile = this.map.getTile(path[i].x, path[i].y, this.backgroundLayer, true);
                 if (tile) {
-                    let tileSprite = new Phaser.Sprite(this.game, tile.x * this.game.tileSize, tile.y * this.game.tileSize, 'path-tile', '');
+                    let tileSprite = new Phaser.Sprite(this.game, tile.x * this.game.game.tileSize, tile.y * this.game.game.tileSize, 'path-tile', '');
                     if (tint) {
                         tileSprite.tint = tint;
                     }
@@ -360,8 +360,8 @@ module TacticArena {
 
         getPosition(absolutePosition:Phaser.Point):Position {
             return new Position(
-                Math.floor(absolutePosition.x / this.game.worldGroup.scale.x / this.game.tileSize),
-                Math.floor(absolutePosition.y / this.game.worldGroup.scale.y / this.game.tileSize)
+                Math.floor(absolutePosition.x / this.game.worldGroup.scale.x / this.game.game.tileSize),
+                Math.floor(absolutePosition.y / this.game.worldGroup.scale.y / this.game.game.tileSize)
             );
         }
     }

@@ -1,6 +1,7 @@
 module TacticArena {
     export class SignalManager {
         game;
+        onPawnDirectionChange:Phaser.Signal;
         onMpChange:Phaser.Signal;
         onApChange:Phaser.Signal;
         onHpChange:Phaser.Signal;
@@ -19,6 +20,7 @@ module TacticArena {
         constructor(game) {
             this.game = game;
 
+            this.onPawnDirectionChange = new Phaser.Signal();
             this.onMpChange = new Phaser.Signal();
             this.onApChange = new Phaser.Signal();
             this.onHpChange = new Phaser.Signal();
@@ -37,6 +39,11 @@ module TacticArena {
 
         init() {
             var self = this;
+
+            this.onPawnDirectionChange.add(function(pawn) {
+                self.game.spritesManager.sprites[pawn._id]._ext = pawn.direction;
+                self.game.spritesManager.sprites[pawn._id].stand();
+            });
 
             this.onMpChange.add(function(pawn) {
                 if (self.game.uiManager.actionMenu) {
@@ -70,7 +77,6 @@ module TacticArena {
 
             this.onActionPlayed.add(function(pawn) {
                 self.game.pointer.update();
-                //self.game.uiManager.actionUI.update(pawn.getAp());
             });
 
             this.turnInitialized.add(function(pawn) {
@@ -121,7 +127,7 @@ module TacticArena {
                 let position = activePawn.getPosition();
 
                 self.game.uiSpritesGroup.removeAll();
-                let s = self.game.uiSpritesGroup.create(position.x * self.game.tileSize - 1, position.y * self.game.tileSize + 15, 'circle');
+                let s = self.game.uiSpritesGroup.create(position.x * self.game.game.tileSize - 1, position.y * self.game.game.tileSize + 15, 'circle');
                 s.animations.add('turn', ["selected_circle_01", "selected_circle_02"], 4, true);
                 s.play('turn');
                 //this.consolelogsUI.write('au tour du joueur ' + activePawn._id);

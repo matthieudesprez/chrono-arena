@@ -119,18 +119,18 @@ module TacticArena.State {
             this.charactersGroup.y = 280;
             (this.game as Game).player.getCharacters().forEach((character, index) => {
                 let frameGroup = new Phaser.Group(this.game);
+                console.log(character.spriteClass);
                 let pawn = new character(this, 0, 0, 'S', 0, false, 0);
-                pawn.sprite.x = 8;
-                pawn.sprite.y = 32;
+                let sprite = new pawn.spriteClass(this, 8, 32, 'S', pawn.type, pawn, 64);
                 let partyFrame = new Phaser.Image(this.game, 0, 0, 'frame-' + pawn.type);
 
                 partyFrame.inputEnabled = true;
-                partyFrame.events.onInputOver.add(this.overCharacter, this, 0, pawn.sprite);
-                partyFrame.events.onInputOut.add(this.outCharacter, this, 0, pawn.sprite);
+                partyFrame.events.onInputOver.add(this.overCharacter, this, 0, sprite);
+                partyFrame.events.onInputOut.add(this.outCharacter, this, 0, sprite);
                 partyFrame.events.onInputDown.add(this.selectCharacter, this, 0, frameGroup, character);
 
                 frameGroup.add(partyFrame);
-                frameGroup.add(pawn.sprite);
+                frameGroup.add(sprite);
                 this.charactersGroup.add(frameGroup);
 
                 if ((this.game as Game).player.isInBattleParty(pawn._name)) {

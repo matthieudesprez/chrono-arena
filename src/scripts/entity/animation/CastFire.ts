@@ -19,8 +19,8 @@ module TacticArena.Animation {
                     this.pawn.show();
                 }
                 this.pawn.faceDirection(this.order.direction);
-                this.pawn.sprite.cast(this.targets, function() {
-                    self.pawn.sprite.stand();
+                this.state.spritesManager.sprites[this.pawn._id].cast(this.targets, function() {
+                    self.state.spritesManager.sprites[self.pawn._id].stand();
                     resolve(true);
                 });
             });

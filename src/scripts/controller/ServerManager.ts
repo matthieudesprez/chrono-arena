@@ -112,10 +112,10 @@ module TacticArena {
                 }, 30000);
             };
 
-            $(window).on('beforeunload', function() {
-                console.log('disconnect');
-                self.socket.close();
-            });
+            //$(window).on('beforeunload', function() {
+            //    console.log('disconnect');
+            //    self.socket.close();
+            //});
         }
 
         send(message, callback = null) {

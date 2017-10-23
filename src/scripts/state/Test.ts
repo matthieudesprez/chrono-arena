@@ -4,7 +4,6 @@ module TacticArena.State {
         layer: Phaser.TilemapLayer;
         pawns: Entity.Pawn[];
         pathfinder;
-        tileSize: number;
 
         worldGroup: Phaser.Group;
         mapGroup: Phaser.Group;
@@ -42,7 +41,6 @@ module TacticArena.State {
         create() {
             this.process = true;
             this.selecting = false;
-            this.tileSize = 32;
             this.isPaused = false;
             this.worldGroup = new Phaser.Group(this.game);
 

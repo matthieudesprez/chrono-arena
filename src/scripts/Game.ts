@@ -1,8 +1,5 @@
 /// <reference path="./definitions/phaser.comments.d.ts"/>
 /// <reference path="./definitions/jasmine.d.ts"/>
-/// <reference path="./definitions/jquery.d.ts" />
-/// <reference path="./definitions/jqueryui.d.ts" />
-/// <reference path="./definitions/jquery.contextMenu.d.ts" />
 /// <reference path="./definitions/easystarjs.d.ts"/>
 
 module TacticArena {
@@ -11,6 +8,7 @@ module TacticArena {
         initialHeight;
         player;
         debugMode;
+        tileSize;
 
         constructor(headless:boolean = false) {
             super({
@@ -26,6 +24,7 @@ module TacticArena {
 
             this.player = new Player('Jean Neige');
             this.debugMode = false;
+            this.tileSize = 32;
 
             this.state.add('boot', State.Boot);
             this.state.add('preload', State.Preload);
