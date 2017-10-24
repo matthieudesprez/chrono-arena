@@ -79,6 +79,7 @@ module TacticArena.State {
         }
 
         update() {
+            this.spritesManager.update();
             //this.pathTilesGroup.sort('y', Phaser.Group.SORT_ASCENDING);
             //this.uiSpritesGroup.sort('y', Phaser.Group.SORT_ASCENDING);
             this.pawnsSpritesGroup.sort('y', Phaser.Group.SORT_ASCENDING);

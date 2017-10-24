@@ -11,7 +11,7 @@ module TacticArena.Entity.Skill {
         }
 
         onSelect() {
-            this.updateUI(this.pawn.getProjectionOrReal().getPosition());
+            this.updateUI(this.pawn.position);
         }
 
         onDeselect() {
@@ -22,10 +22,9 @@ module TacticArena.Entity.Skill {
             this.state.stageManager.clearHelp();
         }
 
-        updateUI(position) {
-            console.log('update');
-            this.state.stageManager.showPossibleMove(this.pawn.getProjectionOrReal().getPosition(), this.pawn.getAp());
-            this.state.stageManager.canMove(this.pawn.getProjectionOrReal(), position.x, position.y, this.pawn.getAp()).then((path) => {
+        updateUI(position:Position) {
+            this.state.stageManager.showPossibleMove(position, this.pawn.getAp());
+            this.state.stageManager.canMove(position, position.x, position.y, this.pawn.getAp()).then((path) => {
                 this.state.stageManager.clearPath(this.state.pathTilesGroup);
                 this.state.stageManager.showPath(path, this.state.pathTilesGroup);
                 this.state.uiManager.actionMenu.showCost(this.pawn, 'ap', (<any>path).length);
@@ -36,16 +35,16 @@ module TacticArena.Entity.Skill {
         }
         
         order(target) {
-            let distance = this.state.stageManager.getNbTilesBetween(target, this.pawn.getProjectionOrReal().getPosition());
-            this.state.stageManager.canMove(this.pawn.getProjectionOrReal(), target.x, target.y, this.pawn.getAp()).then((path) => {
+            let distance = this.state.stageManager.getNbTilesBetween(target, this.pawn.position);
+            this.state.stageManager.canMove(this.pawn.position, target.x, target.y, this.pawn.getAp()).then((path) => {
                 this.state.process = true;
-                let resultPath = path.slice(0);
-                this.pawn.createProjection();
-                this.pawn.projection.moveTo(0, 0, path).then( (res) => {
+                let resultPath = path.slice(0); // copy because path is changed during moveTo process
+                this.state.spritesManager.createProjection(this.pawn).moveTo(0, 0, path).then( (res) => {
                     for (var i = 0; i < (resultPath as any).length; i++) {
-                        let order = new Order.Move(new Position(resultPath[i].x, resultPath[i].y), this.pawn.getProjectionOrReal().getDirection());
-                        this.state.orderManager.add(this.pawn, order);
+                        // TODO the direction wont be accurate if moveTo(faceDirection==true)
+                        this.state.orderManager.add(this.pawn, new Order.Move(resultPath[i], this.pawn.direction));
                     }
+                    this.pawn.position = resultPath.slice(-1).pop(); // update the pawn with the targeted position
                     this.pawn.setAp(this.pawn.getAp() - distance * this.minCost);
                     this.state.process = false;
                     this.state.signalManager.onActionPlayed.dispatch(this.pawn);

@@ -3,8 +3,8 @@ module TacticArena.Animation {
         targetPosition:Position;
         animate:boolean;
 
-        constructor(pawn:Entity.Pawn, order:BaseOrder, position:Position, targetPosition:Position, animate:boolean) {
-            super(pawn, order, position);
+        constructor(state:State.BasePlayable, pawn:Entity.Pawn, order:BaseOrder, position:Position, targetPosition:Position, animate:boolean) {
+            super(state, pawn, order, position);
             this.targetPosition = targetPosition;
             this.animate = animate;
         }

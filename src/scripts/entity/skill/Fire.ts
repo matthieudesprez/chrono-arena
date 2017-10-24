@@ -12,7 +12,6 @@ module TacticArena.Entity.Skill {
         }
 
         onOrder(position, direction) {
-            this.pawn.getProjectionOrReal(true).halfcast(direction);
             this.state.spritesManager.getProjectionOrReal(this.pawn, true).halfcast(direction);
             this.state.orderManager.add(this.pawn, new Order.Fire(position, direction));
         }

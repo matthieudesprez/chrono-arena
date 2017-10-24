@@ -72,22 +72,21 @@ module TacticArena {
             step.stepUnits.forEach( (stepUnit, i) => {
                 var entityA = stepUnit.pawn;
                 let order = stepUnit.order;
-                let position = entityA.getProjectionOrReal().getPosition();
+                let position = this.game.spritesManager.getProjectionOrReal(entityA).getPosition();
 
-                if (entityA.projection) {
+                if (this.game.spritesManager.getProjection(entityA)) {
                     let condition = false;
                     if(compareActualEntity) {
-                        condition = (JSON.stringify(entityA.getPosition()) == JSON.stringify(entityA.getProjectionOrReal().getPosition()));
+                        condition = this.game.spritesManager.getReal(entityA).getPosition().equals(position);
                     } else {
                         condition = order.position.equals(position);
                     }
 
                     if (condition) {
-                        entityA.projection.hide();
-                        entityA.show();
+                        this.game.spritesManager.getProjection(entityA).hide();
+                        this.game.spritesManager.getReal(entityA).show();
                     } else {
-                        entityA.projection.show(0.7);
-                        //entityA.hide();
+                        this.game.spritesManager.getProjection(entityA).show(0.7);
                     }
                 }
             });

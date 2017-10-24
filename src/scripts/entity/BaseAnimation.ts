@@ -1,10 +1,12 @@
 module TacticArena {
     export class BaseAnimation {
+        state:State.BasePlayable;
         pawn:Entity.Pawn;
         order:BaseOrder;
         position:Position;
 
-        constructor(pawn:Entity.Pawn, order:BaseOrder, position:Position) {
+        constructor(state:State.BasePlayable, pawn:Entity.Pawn, order:BaseOrder, position:Position) {
+            this.state = state;
             this.pawn = pawn;
             this.order = order;
             this.position = position;

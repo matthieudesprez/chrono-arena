@@ -1,7 +1,6 @@
 module TacticArena.Entity {
     export class Pawn {
         game;
-        _parent;
         _id;
         _name;
         _ap;
@@ -26,7 +25,6 @@ module TacticArena.Entity {
             this._id = id;
             this._name = name;
             this.type = type;
-            this._parent = null;
             this.position = new Position(x, y);
             this.direction = direction;
             let tint = null; //team != this.game.playerTeam ? this.game.teamColors[team-1] : null;
@@ -47,10 +45,6 @@ module TacticArena.Entity {
         }
 
         getPosition():Position {
-            //return new Position(
-            //    (this.sprite.position.x + this.sprite._size / 4) / this.game.tileSize,
-            //    (this.sprite.position.y + this.sprite._size / 2) / this.game.tileSize
-            //);
             return this.position;
         }
 
@@ -117,7 +111,7 @@ module TacticArena.Entity {
                     this.projection.hide();
                     this.show();
                 }
-                this.faceDirection(direction);
+                this.changeDirection(direction);
                 this.game.spritesManager.sprites[this._id].cast(targets, function () {
                     that.game.spritesManager.sprites[that._id].stand();
                     resolve(true);
@@ -132,7 +126,7 @@ module TacticArena.Entity {
                     this.projection.hide();
                     this.show();
                 }
-                this.faceDirection(direction);
+                this.changeDirection(direction);
                 this.game.spritesManager.sprites[this._id].castTornado(targets, function () {
                     that.game.spritesManager.sprites[that._id].stand();
                     resolve(true);
@@ -147,7 +141,7 @@ module TacticArena.Entity {
                     this.projection.hide();
                     this.show();
                 }
-                this.faceDirection(direction);
+                this.changeDirection(direction);
                 this.game.spritesManager.sprites[this._id].castHeal(targets, function () {
                     that.game.spritesManager.sprites[that._id].stand();
                     resolve(true);
@@ -177,49 +171,6 @@ module TacticArena.Entity {
             return this._hp > 0;
         }
 
-        moveTo(x, y, path = [], animate = true, faceDirection = false) {
-            return new Promise((resolve, reject) => {
-                var tile_y, tile_x;
-                if (path != undefined && path.length > 0) {
-                    tile_y = path[0].y;
-                    tile_x = path[0].x;
-                    path.shift();
-                } else {
-                    tile_y = Math.floor(y);
-                    tile_x = Math.floor(x);
-                }
-                var tile = this.game.stageManager.map.layers[1].data[tile_y][tile_x];
-                var newX = tile.x * this.game.game.tileSize - this.game.spritesManager.sprites[this._id]._size / 4;
-                var newY = tile.y * this.game.game.tileSize - this.game.spritesManager.sprites[this._id]._size / 2;
-                if (animate) {
-                    if (faceDirection) {
-                        this.game.spritesManager.sprites[this._id].faceTo(newX, newY);
-                    }
-                    if (this.game.spritesManager.sprites[this._id].animations.currentAnim.name != 'walk' + this.game.spritesManager.sprites[this._id]._ext) {
-                        this.game.spritesManager.sprites[this._id].walk();
-                    }
-                    var t = this.game.add.tween(this.game.spritesManager.sprites[this._id]).to({
-                        x: newX,
-                        y: newY
-                    }, this.game.spritesManager.sprites[this._id]._speed, Phaser.Easing.Linear.None, true);
-                    t.onComplete.add(function () {
-                        if (path != undefined && path.length > 0) {
-                            this.moveTo(0, 0, path, animate, faceDirection).then((res) => {
-                                resolve(res);
-                            }); // recursive
-                        } else {
-                            this.sprite.stand();
-                            resolve(true);
-                        }
-                    }, this);
-                } else {
-                    this.game.spritesManager.sprites[this._id].x = newX;
-                    this.game.spritesManager.sprites[this._id].y = newY;
-                    resolve(true);
-                }
-            });
-        }
-
         createProjection() {
             this.game.spritesManager.createProjection(this);
         }
@@ -228,12 +179,11 @@ module TacticArena.Entity {
             this.game.spritesManager.destroyProjection(this);
         }
 
-
         getDirection() {
             return this.game.spritesManager.sprites[this._id]._ext;
         }
 
-        faceDirection(direction) {
+        changeDirection(direction) {
             this.direction = direction;
             this.game.signalManager.onPawnDirectionChange.dispatch(this);
         }

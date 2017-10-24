@@ -41,8 +41,7 @@ module TacticArena {
             var self = this;
 
             this.onPawnDirectionChange.add(function(pawn) {
-                self.game.spritesManager.sprites[pawn._id]._ext = pawn.direction;
-                self.game.spritesManager.sprites[pawn._id].stand();
+                self.game.spritesManager.getProjectionOrReal(pawn).stand(pawn.direction);
             });
 
             this.onMpChange.add(function(pawn) {

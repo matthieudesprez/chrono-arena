@@ -30,7 +30,7 @@ module TacticArena.UI {
                 self.game.process = true;
                 console.log(p);
                 if(this.game.stageManager.grid[p.y][p.x] != 0) {
-                    this.game.stageManager.canMove(activePawn, targetX, targetY).then((path) => {
+                    this.game.stageManager.canMove(activePawn.position, targetX, targetY).then((path) => {
                         console.log(path);
                         activePawn.moveTo(0, 0, path, true, true).then((res) => {
                             self.game.stageManager.markPawns();

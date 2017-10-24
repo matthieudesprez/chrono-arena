@@ -1,13 +1,10 @@
 module TacticArena.Animation {
     export class Attack extends BaseAnimation {
-        state;
         targets;
 
-        constructor(pawn:Entity.Pawn, order:BaseOrder, position:Position, state) {
-            super(pawn, order, position);
+        constructor(state:State.BasePlayable, pawn:Entity.Pawn, order:BaseOrder, position:Position) {
+            super(state, pawn, order, position);
             this.targets = [];
-            // TODO voué à disparaître
-            this.state = state;
             this.order.targets.forEach( t => {
                 t.entity = this.state.orderManager.getPawn(t.entityId);
                 this.targets.push(t);
@@ -19,7 +16,7 @@ module TacticArena.Animation {
             let target = this.targets[0];
             let animation =  new Promise((resolve, reject) => {
                 if(this.order.direction) {
-                    this.pawn.faceDirection(this.order.direction);
+                    this.pawn.changeDirection(this.order.direction);
                 }
                 this.state.spritesManager.sprites[this.pawn._id].attack(() => {
                     resolve(true);

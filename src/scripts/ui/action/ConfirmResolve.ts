@@ -6,9 +6,7 @@ module TacticArena.Action {
         }
 
         static process(state) {
-            for(var i = 0; i < state.pawns.length; i++) {
-                state.pawns[i].destroyProjection();
-            }
+            state.spritesManager.destroyAllProjections();
             state.resolveManager.active = false;
             //setTimeout(function() {
                 //state.uiManager.notificationsUI.clean();

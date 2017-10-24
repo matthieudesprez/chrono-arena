@@ -121,7 +121,7 @@ module TacticArena.State {
                 let frameGroup = new Phaser.Group(this.game);
                 console.log(character.spriteClass);
                 let pawn = new character(this, 0, 0, 'S', 0, false, 0);
-                let sprite = new pawn.spriteClass(this, 8, 32, 'S', pawn.type, pawn, 64);
+                let sprite = new pawn.spriteClass(this, 8, 32, 'S', pawn.type);
                 let partyFrame = new Phaser.Image(this.game, 0, 0, 'frame-' + pawn.type);
 
                 partyFrame.inputEnabled = true;

@@ -184,15 +184,19 @@ module TacticArena {
             this.grid[p.y][p.x] = pawn.isAlive() ? -1 : 3;
         }
 
-        canMove(entity, x, y, ap = Infinity) {
+        canMove(position, x, y, ap = Infinity) {
             return new Promise((resolve, reject) => {
-                this.game.pathfinder.findPath(entity.getPosition().x, entity.getPosition().y, x, y, function (path) {
+                this.game.pathfinder.findPath(position.x, position.y, x, y, function (path) {
                     if (path && path.length > 0) {
                         path.shift();
                         if (path.length > ap) {
                             reject(path);
                         } else {
-                            resolve(path);
+                            let formatedPath = [];
+                            path.forEach(p => {
+                                formatedPath.push(new Position(p.x, p.y));
+                            });
+                            resolve(formatedPath);
                         }
                     } else {
                         reject(path);

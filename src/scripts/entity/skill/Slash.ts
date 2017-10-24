@@ -12,8 +12,9 @@ module TacticArena.Entity.Skill {
         }
 
         onOrder(position, direction) {
-            this.pawn.getProjectionOrReal(true).faceDirection(direction);
-            this.pawn.getProjectionOrReal().getSprite().attack();
+            this.state.spritesManager.createProjection(this.pawn);
+            this.pawn.changeDirection(direction);
+            this.state.spritesManager.getProjectionOrReal(this.pawn, true).attack(direction);
             this.state.orderManager.add(this.pawn, new Order.Slash(position, direction));
         }
     }

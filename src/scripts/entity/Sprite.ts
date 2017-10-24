@@ -1,19 +1,14 @@
 module TacticArena.Entity {
     export class Sprite extends Phaser.Sprite {
-        _parent;
+        state;
         _speed:number;
         _size;
         _ext:string;
         _animationCompleteCallback;
 
-        constructor(game, x, y, ext, type, parent, size, tint=null) {
-            super(
-                game.game, 
-                x, //game.tileSize * x - (size / 4),
-                y, //game.tileSize * y - (size / 2),
-                type
-            );
-            this._parent = parent;
+        constructor(state, x, y, ext, type, size=64, tint=null) {
+            super(state.game, x, y, type);
+            this.state = state;
             this._ext = ext;
             this._speed = 200;
             this._size = size;
@@ -67,18 +62,6 @@ module TacticArena.Entity {
             this.animations.play(animation);
         }
 
-        update() {
-            if(this._parent.game.selecting && this._parent.projection != null) {
-                let p1 = this._parent.getPosition();
-                let p2 = this._parent.projection.getPosition();
-                if (p1.x == p2.x && p1.y == p2.y) {
-                    this._parent.hide();
-                } else {
-                    this._parent.show();
-                }
-            }
-        }
-
         faceTo(x:number, y:number) {
             if (this.position.x < x) {
                 this._ext = 'E';
@@ -107,6 +90,7 @@ module TacticArena.Entity {
         }
 
         cast(targets, callback?) {
+            //TODO use promise, not callback
             let self = this;
             this._animationCompleteCallback = callback;
             this.playAnimation('cast' + this._ext);
@@ -142,8 +126,8 @@ module TacticArena.Entity {
                         angle = 270;
                     }
                 }
-                let fireball = self._parent.game.add.sprite(initialX, initialY, 'fireball');
-                self._parent.game.pawnsSpritesGroup.add(fireball);
+                let fireball = self.state.add.sprite(initialX, initialY, 'fireball');
+                self.state.pawnsSpritesGroup.add(fireball);
                 fireball.anchor.setTo(.5, .5);
                 fireball.scale.x *= scaleX;
                 fireball.angle += angle;
@@ -156,12 +140,13 @@ module TacticArena.Entity {
                     }
                 }
 
-                var t = self._parent.game.add.tween(fireball).to({x: targetX, y: targetY}, 700, Phaser.Easing.Linear.None, true);
+                var t = self.state.add.tween(fireball).to({x: targetX, y: targetY}, 700, Phaser.Easing.Linear.None, true);
                 t.onComplete.add(function () { fireball.kill(); }, self);
             }, 500);
         }
 
         castTornado(targets, callback?) {
+            //TODO use promise, not callback
             let self = this;
             this._animationCompleteCallback = callback;
             this.playAnimation('cast' + this._ext);
@@ -192,8 +177,8 @@ module TacticArena.Entity {
                         targetY = initialY + 110;
                     }
                 }
-                let tornado = self._parent.game.add.sprite(initialX, initialY, 'wind');
-                self._parent.game.pawnsSpritesGroup.add(tornado);
+                let tornado = self.state.add.sprite(initialX, initialY, 'wind');
+                self.state.pawnsSpritesGroup.add(tornado);
                 tornado.anchor.setTo(.5, .5);
                 tornado.scale.x *= scaleX;
                 tornado.animations.add('wind', ["wind_01", "wind_02", "wind_03", "wind_04", "wind_05", "wind_06", "wind_07"], 7, false);
@@ -211,51 +196,17 @@ module TacticArena.Entity {
                     }
                 }
 
-                var t = self._parent.game.add.tween(tornado).to({x: targetX, y: targetY}, 1000, Phaser.Easing.Linear.None, true);
+                var t = self.state.add.tween(tornado).to({x: targetX, y: targetY}, 1000, Phaser.Easing.Linear.None, true);
                 t.onComplete.add(function () { tornado.kill(); }, self);
             }, 500);
         }
 
         castHeal(targets, callback?) {
-            let self = this;
+            //TODO use promise, not callback
             this._animationCompleteCallback = callback;
             this.playAnimation('cast' + this._ext);
 
-            console.log(targets);
-
             setTimeout( function() {
-                let initialX = 0;
-                let initialY = 0;
-                let targetX = 0;
-                let targetY = 0;
-                let scaleX = 1;
-                if (self._ext == 'W' || self._ext == 'E') {
-                    initialY = self.position.y + 40;
-                    targetY = initialY;
-                    initialX = self.position.x;
-                    targetX = initialX - 100;
-                    if (self._ext == 'E') {
-                        initialX = self.position.x + 65;
-                        targetX = initialX + 100;
-                        scaleX = -1;
-                    }
-                } else if (self._ext == 'N' || self._ext == 'S') {
-                    initialX = self.position.x + 30;
-                    targetX = initialX;
-                    initialY = self.position.y + 5;
-                    targetY = initialY - 110;
-                    if (self._ext == 'S') {
-                        initialY = self.position.y + 65;
-                        targetY = initialY + 110;
-                    }
-                }
-                //let tornado = self._parent.game.add.sprite(initialX, initialY, 'wind');
-                //self._parent.game.pawnsSpritesGroup.add(tornado);
-                //tornado.anchor.setTo(.5, .5);
-                //tornado.scale.x *= scaleX;
-                //tornado.animations.add('wind', ["wind_01", "wind_02", "wind_03", "wind_04", "wind_05", "wind_06", "wind_07"], 7, false);
-                //tornado.animations.play('wind');
-
                 if (targets) {
                     for (var i = 0; i < targets.length; i++) {
                         targets[i].heal(1);
@@ -264,7 +215,9 @@ module TacticArena.Entity {
             }, 500);
         }
 
-        attack(callback?) {
+        attack(ext=this._ext, callback?) {
+            //TODO use promise, not callback
+            this._ext = ext;
             this._animationCompleteCallback = callback;
             this.playAnimation('attack' + this._ext);
         }
@@ -285,6 +238,64 @@ module TacticArena.Entity {
 
         die() {
             this.playAnimation('dying');
+        }
+
+        moveTo(x, y, path = [], animate = true, faceDirection = false):Promise {
+            return new Promise((resolve, reject) => {
+                var tile_y, tile_x;
+                if (path != undefined && path.length > 0) {
+                    tile_y = path[0].y;
+                    tile_x = path[0].x;
+                    path.shift();
+                } else {
+                    tile_y = Math.floor(y);
+                    tile_x = Math.floor(x);
+                }
+                var tile = this.state.stageManager.map.layers[1].data[tile_y][tile_x];
+                var newX = tile.x * this.state.game.tileSize - this._size / 4;
+                var newY = tile.y * this.state.game.tileSize - this._size / 2;
+                if (animate) {
+                    if (faceDirection) {
+                        this.faceTo(newX, newY);
+                    }
+                    if (this.animations.currentAnim.name != 'walk' + this._ext) {
+                        this.walk();
+                    }
+                    var t = this.game.add.tween(this).to({
+                        x: newX,
+                        y: newY
+                    }, this._speed, Phaser.Easing.Linear.None, true);
+                    t.onComplete.add(function () {
+                        if (path != undefined && path.length > 0) {
+                            this.moveTo(0, 0, path, animate, faceDirection).then((res) => {
+                                resolve(res);
+                            }); // recursive
+                        } else {
+                            this.sprite.stand();
+                            resolve(true);
+                        }
+                    }, this);
+                } else {
+                    this.x = newX;
+                    this.y = newY;
+                    resolve(true);
+                }
+            });
+        }
+
+        getPosition():Position {
+            return new Position(
+                (this.position.x + this._size / 4) / this.state.game.tileSize,
+                (this.position.y + this._size / 2) / this.state.game.tileSize
+            );
+        }
+
+        hide() {
+            this.alpha = 0;
+        }
+
+        show(alpha=1) {
+            this.alpha = alpha;
         }
     }
 }

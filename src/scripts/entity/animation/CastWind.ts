@@ -1,12 +1,9 @@
 module TacticArena.Animation {
     export class CastWind extends BaseAnimation {
-        state;
         targets;
 
-        constructor(pawn:Entity.Pawn, order:BaseOrder, position:Position, state) {
-            super(pawn, order, position);
-            // TODO voué à disparaitre
-            this.state = state;
+        constructor(state:State.BasePlayable, pawn:Entity.Pawn, order:BaseOrder, position:Position) {
+            super(state, pawn, order, position);
             this.targets = [];
             this.order.targets.forEach( t => {
                 this.targets.push({
@@ -23,7 +20,7 @@ module TacticArena.Animation {
                     this.pawn.projection.hide();
                     this.pawn.show();
                 }
-                this.pawn.faceDirection(this.order.direction);
+                this.pawn.changeDirection(this.order.direction);
                 this.state.spritesManager.sprites[this.pawn._id].castTornado(this.targets, function() {
                     self.state.spritesManager.sprites[self.pawn._id].stand();
                     resolve(true);
