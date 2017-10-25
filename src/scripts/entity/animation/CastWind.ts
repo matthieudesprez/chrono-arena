@@ -16,13 +16,10 @@ module TacticArena.Animation {
         get():Promise<any> {
             let self = this;
             let animation = new Promise((resolve, reject) => {
-                if(this.pawn.projection) {
-                    this.pawn.projection.hide();
-                    this.pawn.show();
-                }
+                this.state.spritesManager.showReal(this.pawn);
                 this.pawn.changeDirection(this.order.direction);
-                this.state.spritesManager.sprites[this.pawn._id].castTornado(this.targets, function() {
-                    self.state.spritesManager.sprites[self.pawn._id].stand();
+                this.state.spritesManager.getReal(this.pawn).castTornado(this.targets, () => {
+                    self.state.spritesManager.getReal(self.pawn).stand();
                     resolve(true);
                 });
             });

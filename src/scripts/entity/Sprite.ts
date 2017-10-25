@@ -5,6 +5,7 @@ module TacticArena.Entity {
         _size;
         _ext:string;
         _animationCompleteCallback;
+        textDelay;
 
         constructor(state, x, y, ext, type, size=64, tint=null) {
             super(state.game, x, y, type);
@@ -12,6 +13,7 @@ module TacticArena.Entity {
             this._ext = ext;
             this._speed = 200;
             this._size = size;
+            this.textDelay = 0;
             this.setAnimations();
             this._animationCompleteCallback = null;
             if(tint) {
@@ -89,7 +91,7 @@ module TacticArena.Entity {
             this.playAnimation('halfcast' + this._ext);
         }
 
-        cast(targets, callback?) {
+        castFire(targets, callback?) {
             //TODO use promise, not callback
             let self = this;
             this._animationCompleteCallback = callback;
@@ -136,7 +138,8 @@ module TacticArena.Entity {
 
                 if (targets) {
                     for (var i = 0; i < targets.length; i++) {
-                        targets[i].hurt(2);
+                        self.state.spritesManager.getProjectionOrReal(targets[i].entity).hurtAnimation();
+                        self.state.spritesManager.getProjectionOrReal(targets[i].entity).hurtText(2);
                     }
                 }
 
@@ -188,9 +191,10 @@ module TacticArena.Entity {
                     for (var i = 0; i < targets.length; i++) {
                         let target = targets[i];
                         setTimeout( function() {
-                            target.entity.hurt(1);
+                            self.state.spritesManager.getProjectionOrReal(targets[i].entity).hurtAnimation();
+                            self.state.spritesManager.getProjectionOrReal(targets[i].entity).hurtText(1);
                             if(target.moved) {
-                                target.entity.moveTo(target.moved.x, target.moved.y);
+                                self.state.spritesManager.getProjectionOrReal(targets[i].entity).moveTo(target.moved.x, target.moved.y);
                             }
                         }, target.moved.d * 100);
                     }
@@ -209,7 +213,8 @@ module TacticArena.Entity {
             setTimeout( function() {
                 if (targets) {
                     for (var i = 0; i < targets.length; i++) {
-                        targets[i].heal(1);
+                        self.state.spritesManager.getProjectionOrReal(targets[i].entity).healAnimation();
+                        self.state.spritesManager.getProjectionOrReal(targets[i].entity).healText(1);
                     }
                 }
             }, 500);
@@ -222,7 +227,7 @@ module TacticArena.Entity {
             this.playAnimation('attack' + this._ext);
         }
 
-        hurt() {
+        hurtAnimation() {
             this.game.add.tween(this).to({
                 tint : 0.65 * 0xffffff,
                 alpha : 0.5
@@ -240,7 +245,7 @@ module TacticArena.Entity {
             this.playAnimation('dying');
         }
 
-        moveTo(x, y, path = [], animate = true, faceDirection = false):Promise {
+        moveTo(x, y, path = [], animate = true, faceDirection = false):Promise<any> {
             return new Promise((resolve, reject) => {
                 var tile_y, tile_x;
                 if (path != undefined && path.length > 0) {
@@ -296,6 +301,38 @@ module TacticArena.Entity {
 
         show(alpha=1) {
             this.alpha = alpha;
+        }
+
+        displayText(content, color="#ffffff", fontSize=8, strokeThickness=0) {
+            let label = this.game.add.text(20, 10, content, {font: fontSize + 'px Press Start 2P', fill: color,
+                stroke: '#000000', strokeThickness: strokeThickness});
+            let t = this.game.add.tween(label).to({x: 20, y: -20, alpha: 0}, 1000, Phaser.Easing.Linear.None, true);
+            t.onComplete.add(function () {
+                label.destroy();
+            }, this);
+            this.addChild(label);
+        }
+
+        hurtText(hp = 1) {
+            let self = this;
+            self.textDelay++;
+            let timeOut = self.textDelay * 300;
+            setTimeout(function () {
+                if (self.textDelay == 1) { self.hurt(); }
+                self.displayText('-' + hp, '#ff021b', 12, 6);
+                self.textDelay--;
+            }, timeOut);
+        }
+
+        healText(hp = 1) {
+            let self = this;
+            self.textDelay++;
+            let timeOut = self.textDelay * 300;
+            setTimeout(function () {
+                if (self.textDelay == 1) { self.hurt(); }
+                self.displayText('+' + hp, '#5ce11a', 12, 6);
+                self.textDelay--;
+            }, timeOut);
         }
     }
 }

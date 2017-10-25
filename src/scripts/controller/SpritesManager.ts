@@ -79,6 +79,13 @@ module TacticArena {
             this.getReal(pawn).alpha = alpha;
         }
 
+        showReal(pawn) {
+            if(this.getProjection(pawn)) {
+                this.getProjection(pawn).hide();
+                this.getReal(pawn).show();
+            }
+        }
+
         update() {
             if(this.state.selecting) {
                 let activePawn = this.state.turnManager.getActivePawn();

@@ -11,14 +11,14 @@ module TacticArena.Animation {
 
         get():Promise<any> {
             if (this.animate) {
-                return this.pawn.moveTo(this.targetPosition.x, this.targetPosition.y).then((res) => {
-                    this.pawn.blocked();
-                    this.pawn.moveTo(this.position.x, this.position.y).then((res) => {
+                return this.state.spritesManager.getReal(this.pawn).moveTo(this.targetPosition.x, this.targetPosition.y).then((res) => {
+                    this.state.spritesManager.getReal(this.pawn).displayText('blocked');
+                    this.state.spritesManager.getReal(this.pawn).moveTo(this.position.x, this.position.y).then((res) => {
                         return res;
                     });
                 });
             } else {
-                return new Animation.Stand(this.pawn, this.order, this.position).get();
+                return new Animation.Stand(this.state, this.pawn, this.order, this.position).get();
             }
         }
     }

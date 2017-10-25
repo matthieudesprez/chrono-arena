@@ -13,8 +13,6 @@ module TacticArena.Entity {
         selected;
         isBot;
         team;
-        hurting;
-        healing;
         spriteClass:typeof Entity.Sprite;
         skills;
         position:Position;
@@ -39,140 +37,11 @@ module TacticArena.Entity {
             this.selected = false;
             this.isBot = bot;
             this.team = team;
-            this.hurting = 0;
-            this.healing = 0;
             this.skills = [];
-        }
-
-        getPosition():Position {
-            return this.position;
-        }
-
-        hurt(hp = 1) {
-            let self = this;
-            self.hurting++;
-            let timeOut = self.hurting * 300;
-            setTimeout(function () {
-                if (self.hurting == 1) {
-                    self.game.spritesManager.sprites[self._id].hurt();
-                }
-                self.destroyProjection();
-                let label_dmg = self.game.add.text(20, 10, "-" + hp, {
-                    font: '12px Press Start 2P',
-                    fill: "#ff021b",
-                    stroke: '#000000',
-                    strokeThickness: 6
-                }, self.game.pawnsSpritesGroup);
-                let t = self.game.add.tween(label_dmg).to({
-                    x: 20,
-                    y: -20,
-                    alpha: 0
-                }, 1000, Phaser.Easing.Linear.None, true);
-                t.onComplete.add(function () {
-                    label_dmg.destroy();
-                }, self);
-                self.game.spritesManager.sprites[self._id].addChild(label_dmg);
-                self.hurting--;
-            }, timeOut);
-        }
-
-        heal(hp = 1) {
-            let self = this;
-            self.healing++;
-            let timeOut = self.healing * 300;
-            setTimeout(function () {
-                if (self.healing == 1) {
-                    self.game.spritesManager.sprites[self._id].healAnimation();
-                }
-                self.destroyProjection();
-                let label_heal = self.game.add.text(20, 10, "+" + hp, {
-                    font: '12px Press Start 2P',
-                    fill: "#5ce11a",
-                    stroke: '#000000',
-                    strokeThickness: 6
-                }, self.game.pawnsSpritesGroup);
-                let t = self.game.add.tween(label_heal).to({
-                    x: 20,
-                    y: -20,
-                    alpha: 0
-                }, 1000, Phaser.Easing.Linear.None, true);
-                t.onComplete.add(function () {
-                    label_heal.destroy();
-                }, self);
-                self.game.spritesManager.sprites[self._id].addChild(label_heal);
-                self.healing--;
-            }, timeOut);
-        }
-
-        cast(targets, direction) {
-            var that = this;
-            return new Promise((resolve, reject) => {
-                if (this.projection) {
-                    this.projection.hide();
-                    this.show();
-                }
-                this.changeDirection(direction);
-                this.game.spritesManager.sprites[this._id].cast(targets, function () {
-                    that.game.spritesManager.sprites[that._id].stand();
-                    resolve(true);
-                });
-            });
-        }
-
-        castTornado(targets, direction) {
-            var that = this;
-            return new Promise((resolve, reject) => {
-                if (this.projection) {
-                    this.projection.hide();
-                    this.show();
-                }
-                this.changeDirection(direction);
-                this.game.spritesManager.sprites[this._id].castTornado(targets, function () {
-                    that.game.spritesManager.sprites[that._id].stand();
-                    resolve(true);
-                });
-            });
-        }
-
-        castHeal(targets, direction) {
-            var that = this;
-            return new Promise((resolve, reject) => {
-                if (this.projection) {
-                    this.projection.hide();
-                    this.show();
-                }
-                this.changeDirection(direction);
-                this.game.spritesManager.sprites[this._id].castHeal(targets, function () {
-                    that.game.spritesManager.sprites[that._id].stand();
-                    resolve(true);
-                });
-            });
-        }
-
-        dodge() {
-            let label = this.game.add.text(20, 10, "miss", {font: '8px Press Start 2P', fill: "#ffffff"});
-            let t = this.game.add.tween(label).to({x: 20, y: -20, alpha: 0}, 1000, Phaser.Easing.Linear.None, true);
-            t.onComplete.add(function () {
-                label.destroy();
-            }, this);
-            this.game.spritesManager.sprites[this._id].addChild(label);
-        }
-
-        blocked() {
-            let label = this.game.add.text(20, 10, "block", {font: '8px Press Start 2P', fill: "#ffffff"});
-            let t = this.game.add.tween(label).to({x: 20, y: -20, alpha: 0}, 1000, Phaser.Easing.Linear.None, true);
-            t.onComplete.add(function () {
-                label.destroy();
-            }, this);
-            this.game.spritesManager.sprites[this._id].addChild(label);
         }
 
         isAlive() {
             return this._hp > 0;
-        }
-
-        createProjection() {
-            this.game.spritesManager.createProjection(this);
         }
 
         destroyProjection() {
@@ -225,8 +94,8 @@ module TacticArena.Entity {
         export() {
             return {
                 _id: this._id,
-                direction: this.getDirection(),
-                position: this.getPosition(),
+                direction: this.direction,
+                position: this.position,
                 hp: this.getHp(),
                 name: this._name,
                 type: this.type,

@@ -12,7 +12,7 @@ module TacticArena.Animation {
         get():Promise<any> {
             return this.state.spritesManager.getReal(self.pawn).moveTo(this.position.x, this.position.y, null, this.animate).then((res) => {
                 if(this.direction) {
-                    return new Animation.Stand(this.pawn, this.order, this.position).get();
+                    return new Animation.Stand(this.state, this.pawn, this.order, this.position).get();
                 } else {
                     return res;
                 }

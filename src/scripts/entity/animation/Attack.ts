@@ -18,14 +18,14 @@ module TacticArena.Animation {
                 if(this.order.direction) {
                     this.pawn.changeDirection(this.order.direction);
                 }
-                this.state.spritesManager.sprites[this.pawn._id].attack(() => {
+                this.state.spritesManager.getReal(this.pawn).attack(this.order.direction, () => {
+                    that.state.spritesManager.getReal(this.pawn).stand();
                     resolve(true);
-                    that.state.spritesManager.sprites[that.pawn._id].stand();
-                    return true;
                 }).then( () => {
                     if (target.dodge) {
-                        target.entity.dodge();
+                        that.state.spritesManager.getReal(this.pawn).displayText('miss');
                     } else {
+                        this.state.spritesManager.destroyProjection(this.pawn);
                         target.entity.hurt(target.damages);
                     }
                     resolve(true);
