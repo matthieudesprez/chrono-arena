@@ -7,7 +7,6 @@ module TacticArena.State {
         data;
 
         init(data) {
-            console.log(data);
             this.data = data;
             super.init();
             this.game.stage.backgroundColor = 0x67AEE4;
@@ -20,7 +19,7 @@ module TacticArena.State {
                 } else {
                     this.aiManager = new AiManager(this, k);
                 }
-                this.pawns.push(new Entity.Pawn(this, p.position.x, p.position.y, p.direction, p.type, this.getUniqueId(), isBot, k, p.name, p.spriteClass));
+                this.pawns.push(new Entity.Pawn(this, p.position.x, p.position.y, p.direction, p.type, this.getUniqueId(), k, p.name, p.spriteClass));
             });
         }
 
@@ -31,7 +30,6 @@ module TacticArena.State {
         }
 
         initMap() {
-            console.log(this.data);
             this.stageManager = new StageManager(this);
             this.stageManager.initFromArray(this.data.stage, this.data.gridWidth, this.data.gridHeight);
         }

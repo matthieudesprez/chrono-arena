@@ -51,7 +51,7 @@ module TacticArena {
         	});
         }
 
-        getActivePawn():Entity.Pawn {
+        getActivePawn(): Entity.Pawn {
         	for(var i = 0; i < this.game.pawns.length; i++) {
         		if(this.game.pawns[i].active) {
         			return this.game.pawns[i];
@@ -62,9 +62,7 @@ module TacticArena {
 
 		setActivePawn(pawn) {
 			let activePawn = this.getActivePawn();
-			console.log(pawn, activePawn);
 			if(pawn.isAlive() && (!activePawn || pawn._id != activePawn._id)) {
-				console.log('ok');
 				for (var i = 0; i < this.game.pawns.length; i++) {
 					this.game.pawns[i].active = (this.game.pawns[i]._id == pawn._id);
 				}
@@ -75,6 +73,15 @@ module TacticArena {
 
 		setActivePawnAsPlayed() {
 			this.playedPawns.push(this.getActivePawn()._id);
+		}
+
+		getActivePlayer(): Player {
+			for(var i = 0; i < this.game.players.length; i++) {
+				if(this.game.players[i].team == this.currentTeam) {
+					return this.game.players[i];
+				}
+			}
+			return null;
 		}
 	}
 }

@@ -32,24 +32,24 @@ module TacticArena.Entity {
             this.events.onAnimationComplete.add(this.animationComplete, this);
         }
 
-        attack(callback?) {
-            let self = this;
-            super.attack(callback);
-            let newX = self.position.x;
-            let newY = self.position.y;
-            if (this._ext == 'E') {
-                newX += 10;
-            } else if (this._ext == 'W') {
-                newX -= 10;
-            } else if (this._ext == 'N') {
-                newY -= 10;
-            } else if (this._ext == 'S') {
-                newY += 10;
-            }
-            this.game.add.tween(this).to({
-                x: newX,
-                y: newY
-            }, 100, Phaser.Easing.Exponential.Out, true, 0, 0, true);
-        }
+        //attack(ext=this._ext) {
+            //let self = this;
+            //super.attack(callback);
+            //let newX = self.position.x;
+            //let newY = self.position.y;
+            //if (this._ext == 'E') {
+            //    newX += 10;
+            //} else if (this._ext == 'W') {
+            //    newX -= 10;
+            //} else if (this._ext == 'N') {
+            //    newY -= 10;
+            //} else if (this._ext == 'S') {
+            //    newY += 10;
+            //}
+            //this.game.add.tween(this).to({
+            //    x: newX,
+            //    y: newY
+            //}, 100, Phaser.Easing.Exponential.Out, true, 0, 0, true);
+        //}
     }
 }

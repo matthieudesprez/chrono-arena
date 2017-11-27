@@ -26,8 +26,8 @@ module TacticArena.Specs {
             testGame.state.onStateChange.add(function () {
                 currentState = testGame.state.getCurrentState();
                 setTimeout(function () {
-                    currentState.pawns.push(new Entity.Character.Test(currentState, 8, 8, 'E', 1, false, 1));
-                    currentState.pawns.push(new Entity.Character.Test(currentState, 10, 8, 'W', 2, false, 2));
+                    currentState.pawns.push(new Entity.Character.Test(currentState, 8, 8, 'E', 1, 1));
+                    currentState.pawns.push(new Entity.Character.Test(currentState, 10, 8, 'W', 2, 2));
                     done();
                 }, 200);
             });
@@ -271,8 +271,8 @@ module TacticArena.Specs {
                     return true;
                 });
 
-                currentState.pawns.push(new Entity.Pawn(currentState, 7, 7, 'E', 'skeleton', 3, false, 1, 'Diana'));
-                currentState.pawns.push(new Entity.Pawn(currentState, 12, 7, 'W', 'skeleton', 4, false, 2, 'Oscar'));
+                currentState.pawns.push(new Entity.Pawn(currentState, 7, 7, 'E', 'skeleton', 3, 1, 'Diana'));
+                currentState.pawns.push(new Entity.Pawn(currentState, 12, 7, 'W', 'skeleton', 4, 2, 'Oscar'));
             });
 
             it("with 1 dead - nothing is played", function () {

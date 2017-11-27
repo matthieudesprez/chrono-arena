@@ -7,7 +7,6 @@ module TacticArena.State {
             this.menuGroup.x = 0;
             this.menuGroup.y = 0;
 
-            console.log(this.game.world);
             let background = this.game.add.image(this.game.world.centerX, this.game.world.centerY, 'bg');
             background.anchor.set(0.5);
             background.scale.set(2);

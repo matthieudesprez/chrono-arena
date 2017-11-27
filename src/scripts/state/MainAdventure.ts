@@ -4,7 +4,6 @@ module TacticArena.State {
         dialogUI;
 
         init(data) {
-            console.log(data);
             this.mapName = 'area02';
             super.init();
             this.game.stage.backgroundColor = 0x67AEE4;
@@ -15,12 +14,12 @@ module TacticArena.State {
             let name = (data && data.mainPawn.name) ? data.mainPawn.name : 'Red';
             let type = (data && data.mainPawn.type) ? data.mainPawn.type : 'ruairi';
             let spriteClass = (data && data.mainPawn.spriteClass) ? data.mainPawn.spriteClass : Entity.Sprite;
-            this.pawns.push(new Entity.Pawn(this, position.x, position.y, direction, type, 1, false, 1, name, spriteClass)); //
+            this.pawns.push(new Entity.Pawn(this, position.x, position.y, direction, type, 1, 1, name, spriteClass)); //
 
             //this.pawns.push(new Entity.Pawn(this, 25, 6, 'E', 'rabbit', 1, false, 1, 'Amandine', Entity.MobSpriteSimpleBis)); //
             //let enemyPosition = [{x:7,y:15},{x:12,y:23},{x:14,y:11},{x:24,y:11}][Math.floor(Math.random() * 4)];
             let enemyPosition = {x:24,y:11};
-            this.pawns.push(new Entity.Pawn(this, enemyPosition.x, enemyPosition.y, 'E', 'bee', 1, false, 1, 'Amandine', Entity.MobSpriteSimple)); //
+            //this.pawns.push(new Entity.Pawn(this, enemyPosition.x, enemyPosition.y, 'E', 'bee', 1, false, 1, 'Amandine', Entity.MobSpriteSimple)); //
             this.stageManager.markPawns();
 
             this.dialogUI = new UI.Dialog(this);

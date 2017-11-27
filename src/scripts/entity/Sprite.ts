@@ -32,18 +32,18 @@ module TacticArena.Entity {
             this.animations.add('walkN', ["walkN2","walkN3","walkN4","walkN5","walkN6","walkN7","walkN8","walkN9"], 12, true);
             this.animations.add('walkW', ["walkW1","walkW2","walkW3","walkW4","walkW5","walkW6","walkW7","walkW8","walkW9"], 12, true);
             this.animations.add('walkE', ["walkE1","walkE2","walkE3","walkE4","walkE5","walkE6","walkE7","walkE8","walkE9"], 12, true);
-            this.animations.add('attackS', ["attackS1","attackS2","attackS3","attackS4","attackS5","attackS6"], 12, false);
-            this.animations.add('attackN', ["attackN1","attackN2","attackN3","attackN4","attackN5","attackN6"], 12, false);
-            this.animations.add('attackW', ["attackW1","attackW2","attackW3","attackW4","attackW5","attackW6"], 12, false);
-            this.animations.add('attackE', ["attackE1","attackE2","attackE3","attackE4","attackE5","attackE6"], 12, false);
-            this.animations.add('castS', ["castS1","castS2","castS3","castS3","castS3","castS4","castS5","castS6", "castS7"], 10, false);
-            this.animations.add('castN', ["castN1","castN2","castN3","castN3","castN3","castN4","castN5","castN6", "castN7"], 10, false);
-            this.animations.add('castW', ["castW1","castW2","castW3","castW3","castW3","castW4","castW5","castW6", "castW7"], 10, false);
-            this.animations.add('castE', ["castE1","castE2","castE3","castE3","castE3","castE4","castE5","castE6", "castE7"], 10, false);
-            this.animations.add('halfcastS', ["castS1","castS2","castS3"], 10, false);
-            this.animations.add('halfcastN', ["castN1","castN2","castN3"], 10, false);
-            this.animations.add('halfcastW', ["castW1","castW2","castW3"], 10, false);
-            this.animations.add('halfcastE', ["castE1","castE2","castE3"], 10, false);
+            this.animations.add('attackS', ["attackS1","attackS2","attackS3","attackS4","attackS5","attackS6", "walkS1"], 12, false);
+            this.animations.add('attackN', ["attackN1","attackN2","attackN3","attackN4","attackN5","attackN6", "walkN1"], 12, false);
+            this.animations.add('attackW', ["attackW1","attackW2","attackW3","attackW4","attackW5","attackW6", "walkW1"], 12, false);
+            this.animations.add('attackE', ["attackE1","attackE2","attackE3","attackE4","attackE5","attackE6", "walkE1"], 12, false);
+            this.animations.add('castS', ["castS1","castS2","castS3","castS3","castS3","castS4","castS5","castS6", "castS7", "walkS1"], 10, false);
+            this.animations.add('castN', ["castN1","castN2","castN3","castN3","castN3","castN4","castN5","castN6", "castN7", "walkN1"], 10, false);
+            this.animations.add('castW', ["castW1","castW2","castW3","castW3","castW3","castW4","castW5","castW6", "castW7", "walkW1"], 10, false);
+            this.animations.add('castE', ["castE1","castE2","castE3","castE3","castE3","castE4","castE5","castE6", "castE7", "walkE1"], 10, false);
+            this.animations.add('halfcastS', ["castS1","castS2","castS3", "walkS1"], 10, false);
+            this.animations.add('halfcastN', ["castN1","castN2","castN3", "walkN1"], 10, false);
+            this.animations.add('halfcastW', ["castW1","castW2","castW3", "walkW1"], 10, false);
+            this.animations.add('halfcastE', ["castE1","castE2","castE3", "walkE1"], 10, false);
             this.animations.add('dying', ["dying1","dying2","dying3","dying4","dying5","dying6"], 10, false);
             this.events.onAnimationComplete.add(this.animationComplete, this);
         }
@@ -52,11 +52,6 @@ module TacticArena.Entity {
             if(this._animationCompleteCallback){
                 this._animationCompleteCallback();
                 this._animationCompleteCallback = null;
-            }
-
-            var animationName = this.animations.currentAnim.name;
-            if(animationName.indexOf('attack') >= 0) {
-                this.stand();
             }
         }
 
@@ -91,156 +86,39 @@ module TacticArena.Entity {
             this.playAnimation('halfcast' + this._ext);
         }
 
-        castFire(targets, callback?) {
-            //TODO use promise, not callback
-            let self = this;
-            this._animationCompleteCallback = callback;
-            this.playAnimation('cast' + this._ext);
-
-            setTimeout( function() {
-                let initialX = 0;
-                let initialY = 0;
-                let targetX = 0;
-                let targetY = 0;
-                let scaleX = 1;
-                let angle = 0;
-                if (self._ext == 'W' || self._ext == 'E') {
-                    initialY = self.position.y + 40;
-                    targetY = initialY;
-
-                    initialX = self.position.x - 40;
-                    targetX = initialX - 45;
-                    if (self._ext == 'E') {
-                        initialX = self.position.x + 110;
-                        targetX = initialX + 45;
-                        scaleX = -1;
-                    }
-                } else if (self._ext == 'N' || self._ext == 'S') {
-                    initialX = self.position.x + 33;
-                    targetX = initialX;
-
-                    initialY = self.position.y - 40;
-                    targetY = initialY - 45;
-                    angle = 90;
-                    if (self._ext == 'S') {
-                        initialY = self.position.y + 110;
-                        targetY = initialY + 50;
-                        angle = 270;
-                    }
-                }
-                let fireball = self.state.add.sprite(initialX, initialY, 'fireball');
-                self.state.pawnsSpritesGroup.add(fireball);
-                fireball.anchor.setTo(.5, .5);
-                fireball.scale.x *= scaleX;
-                fireball.angle += angle;
-                fireball.animations.add('fire', ["fireball_04", "fireball_03", "fireball_02", "fireball_01", "fireball_02", "fireball_03", "fireball_04"], 10, false);
-                fireball.animations.play('fire');
-
-                if (targets) {
-                    for (var i = 0; i < targets.length; i++) {
-                    targets.forEach( target => {
-                        self.state.spritesManager.getProjectionOrReal(target).hurtAnimation();
-                        self.state.spritesManager.getProjectionOrReal(target).hurtText(2);
-                    });
-                }
-
-                var t = self.state.add.tween(fireball).to({x: targetX, y: targetY}, 700, Phaser.Easing.Linear.None, true);
-                t.onComplete.add(function () { fireball.kill(); }, self);
-            }, 500);
+        attack(ext=this._ext) {
+            return new Promise((resolve, reject) => {
+                this._ext = ext;
+                this._animationCompleteCallback = function () {
+                    resolve(true);
+                };
+                this.playAnimation('attack' + this._ext);
+            });
         }
 
-        castTornado(targets, callback?) {
-            //TODO use promise, not callback
-            let self = this;
-            this._animationCompleteCallback = callback;
-            this.playAnimation('cast' + this._ext);
-
-            setTimeout( function() {
-                let initialX = 0;
-                let initialY = 0;
-                let targetX = 0;
-                let targetY = 0;
-                let scaleX = 1;
-                if (self._ext == 'W' || self._ext == 'E') {
-                    initialY = self.position.y + 40;
-                    targetY = initialY;
-                    initialX = self.position.x;
-                    targetX = initialX - 100;
-                    if (self._ext == 'E') {
-                        initialX = self.position.x + 65;
-                        targetX = initialX + 100;
-                        scaleX = -1;
-                    }
-                } else if (self._ext == 'N' || self._ext == 'S') {
-                    initialX = self.position.x + 30;
-                    targetX = initialX;
-                    initialY = self.position.y + 5;
-                    targetY = initialY - 110;
-                    if (self._ext == 'S') {
-                        initialY = self.position.y + 65;
-                        targetY = initialY + 110;
-                    }
-                }
-                let tornado = self.state.add.sprite(initialX, initialY, 'wind');
-                self.state.pawnsSpritesGroup.add(tornado);
-                tornado.anchor.setTo(.5, .5);
-                tornado.scale.x *= scaleX;
-                tornado.animations.add('wind', ["wind_01", "wind_02", "wind_03", "wind_04", "wind_05", "wind_06", "wind_07"], 7, false);
-                tornado.animations.play('wind');
-
-                if (targets) {
-                    console.log(targets);
-                    for (var i = 0; i < targets.length; i++) {
-                        let target = targets[i];
-                        setTimeout( function() {
-                            self.state.spritesManager.getProjectionOrReal(target.entity).hurtAnimation();
-                            self.state.spritesManager.getProjectionOrReal(target.entity).hurtText(1);
-                            if(target.moved) {
-                                self.state.spritesManager.getProjectionOrReal(target.entity).moveTo(target.moved.x, target.moved.y);
-                            }
-                        }, target.moved.d * 100);
-                    }
-                }
-
-                var t = self.state.add.tween(tornado).to({x: targetX, y: targetY}, 1000, Phaser.Easing.Linear.None, true);
-                t.onComplete.add(function () { tornado.kill(); }, self);
-            }, 500);
+        cast(ext=this._ext) {
+            return new Promise((resolve, reject) => {
+                this._ext = ext;
+                this.playAnimation('cast' + this._ext);
+                setTimeout( function() {
+                    resolve(true);
+                }, 500);
+            });
         }
 
-        castHeal(targets, callback?) {
-            //TODO use promise, not callback
-            this._animationCompleteCallback = callback;
-            this.playAnimation('cast' + this._ext);
-            let self = this;
-            setTimeout( function() {
-                if (targets) {
-                    for (var i = 0; i < targets.length; i++) {
-                        self.state.spritesManager.getProjectionOrReal(targets[i].entity).healAnimation();
-                        self.state.spritesManager.getProjectionOrReal(targets[i].entity).healText(1);
-                    }
-                }
-            }, 500);
-        }
-
-        attack(ext=this._ext, callback?) {
-            //TODO use promise, not callback
-            this._ext = ext;
-            this._animationCompleteCallback = callback;
-            this.playAnimation('attack' + this._ext);
+        blink(tintFactor=1) {
+            this.game.add.tween(this).to({
+                tint : tintFactor * 0xffffff,
+                alpha : 0.5
+            }, 100, Phaser.Easing.Exponential.Out, true, 0, 0, true);
         }
 
         hurtAnimation() {
-            this.game.add.tween(this).to({
-                tint : 0.65 * 0xffffff,
-                alpha : 0.5
-            }, 100, Phaser.Easing.Exponential.Out, true, 0, 0, true);
+            this.blink(0.65)
         }
 
         healAnimation() {
-            this.game.add.tween(this).to({
-                tint : 0xffffff,
-                alpha : 0.5
-            }, 100, Phaser.Easing.Exponential.Out, true, 0, 0, true);
+            this.blink();
         }
 
         die() {
@@ -269,7 +147,6 @@ module TacticArena.Entity {
                     if (this.animations.currentAnim.name != 'walk' + this._ext) {
                         this.walk();
                     }
-                    console.log(this._speed, this.x, newX, this.y, newY);
                     var t = this.game.add.tween(this).to({
                         x: newX,
                         y: newY
@@ -292,10 +169,17 @@ module TacticArena.Entity {
             });
         }
 
-        getPosition():Position {
+        getPosition(): Position {
             return new Position(
                 (this.position.x + this._size / 4) / this.state.game.tileSize,
                 (this.position.y + this._size / 2) / this.state.game.tileSize
+            );
+        }
+
+        getRawPosition(): Position {
+            return new Position(
+                this.position.x,
+                this.position.y
             );
         }
 
@@ -321,24 +205,24 @@ module TacticArena.Entity {
             this.addChild(label);
         }
 
-        hurtText(hp = 1) {
+        queueAction(action) {
             let self = this;
             self.textDelay++;
             let timeOut = self.textDelay * 300;
             setTimeout(function () {
-                self.displayText('-' + hp, '#ff021b', 12, 6);
+                action();
                 self.textDelay--;
             }, timeOut);
         }
 
+        hurtText(hp = 1) {
+            let self = this;
+            this.queueAction( function () { self.displayText('-' + hp, '#ff021b', 12, 6); });
+        }
+
         healText(hp = 1) {
             let self = this;
-            self.textDelay++;
-            let timeOut = self.textDelay * 300;
-            setTimeout(function () {
-                self.displayText('+' + hp, '#5ce11a', 12, 6);
-                self.textDelay--;
-            }, timeOut);
+            this.queueAction( function () { self.displayText('+' + hp, '#5ce11a', 12, 6); });
         }
     }
 }

@@ -68,7 +68,6 @@ module TacticArena.UI {
             let hpIcon = self.game.make.sprite(0, 0, 'icon-heart');
             hpIcon.anchor.set(0);
             this.hpGroup.add(hpIcon);
-            console.log(pawn.getHp());
             this.hpText = this.game.add.text(32, 0, pawn.getHp() + ' / ' + pawn._hpMax, {
                 font: '20px Iceland',
                 fill: '#ffffff',

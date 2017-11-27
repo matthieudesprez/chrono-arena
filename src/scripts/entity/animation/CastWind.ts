@@ -1,25 +1,29 @@
 module TacticArena.Animation {
     export class CastWind extends BaseAnimation {
-        targets;
 
         constructor(state:State.BasePlayable, pawn:Entity.Pawn, order:BaseOrder) {
             super(state, pawn, order);
-            this.targets = [];
-            this.order.targets.forEach( target => {
-                this.targets.push({
-                    entity: (this.state as State.BaseBattle).orderManager.getPawn(target.entity),
-                    moved: target.moved
-                });
-            });
         }
 
         get():Promise<any> {
             let self = this;
             let animation = new Promise((resolve, reject) => {
                 this.state.spritesManager.showReal(this.pawn);
-                this.state.spritesManager.getReal(this.pawn).stand(this.order.direction);
-                this.state.spritesManager.getReal(this.pawn).castTornado(this.targets, () => {
-                    self.state.spritesManager.getReal(self.pawn).stand();
+                let sprite = this.state.spritesManager.getReal(this.pawn);
+                sprite.cast(this.order.direction).then( () => {
+                    let tornado = self.state.pawnsSpritesGroup.add(new FX.Tornado(self.state, sprite.getRawPosition(), sprite.getDirection()));
+                    self.order.targets.forEach( target => {
+                        let pawn = (this.state as State.BaseBattle).orderManager.getPawn(target.entity);
+                        setTimeout( function() {
+                            self.state.spritesManager.getReal(pawn).hurtAnimation();
+                            self.state.spritesManager.getReal(pawn).hurtText(1);
+                            if(target.moved) {
+                                self.state.spritesManager.getReal(pawn).moveTo(target.moved.x, target.moved.y);
+                            }
+                        }, target.moved.d * 100);
+                    });
+                    return tornado.playDefault();
+                }).then( () => {
                     resolve(true);
                 });
             });

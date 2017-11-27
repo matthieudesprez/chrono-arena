@@ -101,7 +101,6 @@ module TacticArena.UI {
 
         update(current) {
             let self = this;
-            console.log(current);
             this.stepsColors.forEach((stepColor:Phaser.Group, index) => {
                 stepColor.removeAll(true);
                 if(index > current) { return; }

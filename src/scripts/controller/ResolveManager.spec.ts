@@ -38,8 +38,8 @@ module TacticArena.Specs {
             testGame.state.onStateChange.add(function() {
                 currentState = testGame.state.getCurrentState();
                 setTimeout(function() {
-                    currentState.pawns.push(new Entity.Character.Test(currentState, currentState.map.startPositions[0][0].x, currentState.map.startPositions[0][0].y, currentState.map.startPositions[0][0].d, 1, false, 1));
-                    currentState.pawns.push(new Entity.Character.Test(currentState, currentState.map.startPositions[1][0].x, currentState.map.startPositions[1][0].y, currentState.map.startPositions[1][0].d, 2, false, 2));
+                    currentState.pawns.push(new Entity.Character.Test(currentState, currentState.map.startPositions[0][0].x, currentState.map.startPositions[0][0].y, currentState.map.startPositions[0][0].d, 1, 1));
+                    currentState.pawns.push(new Entity.Character.Test(currentState, currentState.map.startPositions[1][0].x, currentState.map.startPositions[1][0].y, currentState.map.startPositions[1][0].d, 2, 2));
                     currentState.isPaused = true;
                     done();
                 }, 200);

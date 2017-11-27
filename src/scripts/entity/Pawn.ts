@@ -11,14 +11,13 @@ module TacticArena.Entity {
         _mpMax;
         type;
         selected;
-        isBot;
         team;
         spriteClass:typeof Entity.Sprite;
         skills;
-        position:Position; // during Order Phase = initial position, during Resolve Phase = current step position
-        direction;
+        position:Position; // during Order Phase = initial position, during Resolve Phase = current step position (TODO beware of moved)
+        direction; // during Order Phase = initial direction, during Resolve Phase = current step direction
 
-        constructor(game, x, y, direction, type, id, bot, team, name = "", spriteClass:typeof Entity.Sprite = Entity.Sprite) {
+        constructor(game, x, y, direction, type, id, team, name = "", spriteClass:typeof Entity.Sprite = Entity.Sprite) {
             this.game = game;
             this._id = id;
             this._name = name;
@@ -35,7 +34,6 @@ module TacticArena.Entity {
             this._apMax = 3;
             this._mpMax = 2;
             this.selected = false;
-            this.isBot = bot;
             this.team = team;
             this.skills = [];
         }
@@ -69,18 +67,22 @@ module TacticArena.Entity {
             return this._ap;
         }
 
-        setAp(ap) {
+        setAp(ap, dispatch=true) {
             this._ap = ap;
-            this.game.signalManager.onApChange.dispatch(this);
+            if(dispatch) {
+                this.game.signalManager.onApChange.dispatch(this);
+            }
         }
 
         getMp() {
             return this._mp;
         }
 
-        setMp(mp) {
+        setMp(mp, dispatch=true) {
             this._mp = mp;
-            this.game.signalManager.onMpChange.dispatch(this);
+            if(dispatch) {
+                this.game.signalManager.onMpChange.dispatch(this);
+            }
         }
 
         getHp() {
