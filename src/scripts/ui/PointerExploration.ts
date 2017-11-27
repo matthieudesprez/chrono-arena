@@ -11,7 +11,7 @@ module TacticArena.UI {
                 this.marker.x = p.x * this.game.game.tileSize;
                 this.marker.y = p.y * this.game.game.tileSize;
 
-                if (this.game.stageManager.grid[p.y][p.x] == 0 && !this.game.stageManager.equalPositions(p, activePawn.getPosition())) {
+                if (this.game.stageManager.grid[p.y][p.x] == 0 && !this.game.spritesManager.getReal(activePawn).getPosition().equals(p)) {
                     this.marker.lineStyle(2, 0xcd2f36, 1);
                 } else {
                     this.marker.lineStyle(2, 0xffffff, 1);
@@ -28,9 +28,8 @@ module TacticArena.UI {
                 var targetX = this.marker.x / this.game.game.tileSize;
                 var targetY = this.marker.y / this.game.game.tileSize;
                 self.game.process = true;
-                console.log(p);
                 if(this.game.stageManager.grid[p.y][p.x] != 0) {
-                    this.game.stageManager.canMove(activePawn.position, targetX, targetY).then((path) => {
+                    this.game.stageManager.canMove(self.game.spritesManager.getReal(activePawn).getPosition(), targetX, targetY).then((path) => {
                         console.log(path);
                         activePawn.moveTo(0, 0, path, true, true).then((res) => {
                             self.game.stageManager.markPawns();
@@ -42,7 +41,7 @@ module TacticArena.UI {
                         console.log(res);
                         self.game.process = false;
                     });
-                } else if (!this.game.stageManager.equalPositions(p, activePawn.getPosition())){
+                } else if (!this.game.stageManager.equalPositions(p, this.game.spritesManager.getReal(activePawn).getPosition())){
                     console.log('attack');
                     let enemy = self.game.pawns[1];
                     self.game.process = false;
@@ -55,7 +54,7 @@ module TacticArena.UI {
                     self.game.state.start('mainadventurebattle', true, false, {
                         players: [
                             {name: 'Beez', faction: 'animals', player: false, type: enemy.type, spriteClass: enemy.spriteClass, position: enemy.getPosition(), direction: enemy.getDirection()},
-                            {name: activePawn._name, faction: 'human', player: true, type: activePawn.type, spriteClass: activePawn.spriteClass, position: activePawn.getPosition(), direction: activePawn.getDirection()}
+                            {name: activePawn._name, faction: 'human', player: true, type: activePawn.type, spriteClass: activePawn.spriteClass, position: this.game.spritesManager.getReal(activePawn).getPosition(), direction: this.game.spritesManager.getReal(activePawn).getDirection()}
                         ],
                         stage: layers,
                         center: p, // {x: startPosition.x - Math.floor(gridWidth / 2), y: startPosition.y - Math.floor(gridHeight / 2)},

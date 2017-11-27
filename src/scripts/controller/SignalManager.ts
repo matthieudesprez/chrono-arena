@@ -1,7 +1,6 @@
 module TacticArena {
     export class SignalManager {
         game;
-        onPawnDirectionChange:Phaser.Signal;
         onMpChange:Phaser.Signal;
         onApChange:Phaser.Signal;
         onHpChange:Phaser.Signal;
@@ -20,7 +19,6 @@ module TacticArena {
         constructor(game) {
             this.game = game;
 
-            this.onPawnDirectionChange = new Phaser.Signal();
             this.onMpChange = new Phaser.Signal();
             this.onApChange = new Phaser.Signal();
             this.onHpChange = new Phaser.Signal();
@@ -39,10 +37,6 @@ module TacticArena {
 
         init() {
             var self = this;
-
-            this.onPawnDirectionChange.add(function(pawn) {
-                self.game.spritesManager.getProjectionOrReal(pawn).stand(pawn.direction);
-            });
 
             this.onMpChange.add(function(pawn) {
                 if (self.game.uiManager.actionMenu) {
@@ -116,14 +110,13 @@ module TacticArena {
             });
 
             this.onActivePawnChange.add(function(activePawn) {
-                console.log(activePawn);
                 self.game.uiManager.ordersnotificationsUI.clean();
                 self.game.uiManager.ordersnotificationsUI.update(self.game.orderManager.getOrders(activePawn._id));
                 //self.game.uiManager.pawnsinfosUI.select(activePawn._id);
                 //self.game.uiManager.actionUI.update(activePawn.getAp());
                 //self.game.uiManager.actionUI.select('walk');
 
-                let position = activePawn.getPosition();
+                let position = self.game.spritesManager.getReal(activePawn).getPosition();
 
                 self.game.uiSpritesGroup.removeAll();
                 let s = self.game.uiSpritesGroup.create(position.x * self.game.game.tileSize - 1, position.y * self.game.game.tileSize + 15, 'circle');

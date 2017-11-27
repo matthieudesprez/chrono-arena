@@ -11,7 +11,7 @@ module TacticArena.Entity.Skill {
         }
 
         onSelect() {
-            this.paths = this.state.stageManager.getLinearPathsAllDirections(this.pawn.getProjectionOrReal(), this.range);
+            this.paths = this.state.stageManager.getLinearPathsAllDirections(this.state.spritesManager.getProjectionOrReal(this.pawn).getPosition(), this.range);
             let joinedPaths = [];
             Object.entries(this.paths).forEach(([direction, path]) => {
                 joinedPaths = joinedPaths.concat(path);
@@ -31,7 +31,8 @@ module TacticArena.Entity.Skill {
             let isInPath = false;
             let pathDirection = null;
             Object.entries(this.paths).forEach(([direction, path]) => {
-                for (var i = 0; i < path.length; i++) {
+                // TODO create Path class
+                for (var i = 0; i < (path as Array<any>).length; i++) {
                     if (path[i].x == position.x && path[i].y == position.y) {
                         isInPath = true;
                         pathDirection = direction;
@@ -52,7 +53,8 @@ module TacticArena.Entity.Skill {
             Object.entries(this.paths).forEach(([direction, path]) => {
                 let maxX = null;
                 let maxY = null;
-                for (var i = 0; i < path.length; i++) {
+                // TODO create Path class
+                for (var i = 0; i < (path as Array<any>).length; i++) {
                     if (path[i].x == target.x && path[i].y == target.y) {
                         result = direction;
                     }
@@ -70,12 +72,14 @@ module TacticArena.Entity.Skill {
         }
 
         order(target) {
-            let position = this.pawn.getProjectionOrReal().getPosition();
+            let position = this.state.spritesManager.getProjectionOrReal(this.pawn).getPosition();
             if (this.state.stageManager.getNbTilesBetween(target, position) <= this.range) {
                 let direction = this.getPathDirection(position, target);
                 if (direction) {
                     this.onOrder(position, direction);
                     this.pawn.setAp(this.pawn.getAp() - this.minCost);
+                    this.onDeselect();
+                    this.onSelect();
                     this.state.signalManager.onActionPlayed.dispatch(this.pawn);
                 }
             }

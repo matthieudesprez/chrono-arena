@@ -138,9 +138,10 @@ module TacticArena.Entity {
 
                 if (targets) {
                     for (var i = 0; i < targets.length; i++) {
-                        self.state.spritesManager.getProjectionOrReal(targets[i].entity).hurtAnimation();
-                        self.state.spritesManager.getProjectionOrReal(targets[i].entity).hurtText(2);
-                    }
+                    targets.forEach( target => {
+                        self.state.spritesManager.getProjectionOrReal(target).hurtAnimation();
+                        self.state.spritesManager.getProjectionOrReal(target).hurtText(2);
+                    });
                 }
 
                 var t = self.state.add.tween(fireball).to({x: targetX, y: targetY}, 700, Phaser.Easing.Linear.None, true);
@@ -188,13 +189,14 @@ module TacticArena.Entity {
                 tornado.animations.play('wind');
 
                 if (targets) {
+                    console.log(targets);
                     for (var i = 0; i < targets.length; i++) {
                         let target = targets[i];
                         setTimeout( function() {
-                            self.state.spritesManager.getProjectionOrReal(targets[i].entity).hurtAnimation();
-                            self.state.spritesManager.getProjectionOrReal(targets[i].entity).hurtText(1);
+                            self.state.spritesManager.getProjectionOrReal(target.entity).hurtAnimation();
+                            self.state.spritesManager.getProjectionOrReal(target.entity).hurtText(1);
                             if(target.moved) {
-                                self.state.spritesManager.getProjectionOrReal(targets[i].entity).moveTo(target.moved.x, target.moved.y);
+                                self.state.spritesManager.getProjectionOrReal(target.entity).moveTo(target.moved.x, target.moved.y);
                             }
                         }, target.moved.d * 100);
                     }
@@ -209,7 +211,7 @@ module TacticArena.Entity {
             //TODO use promise, not callback
             this._animationCompleteCallback = callback;
             this.playAnimation('cast' + this._ext);
-
+            let self = this;
             setTimeout( function() {
                 if (targets) {
                     for (var i = 0; i < targets.length; i++) {
@@ -245,6 +247,7 @@ module TacticArena.Entity {
             this.playAnimation('dying');
         }
 
+        //TODO change x, y to position: Position
         moveTo(x, y, path = [], animate = true, faceDirection = false):Promise<any> {
             return new Promise((resolve, reject) => {
                 var tile_y, tile_x;
@@ -266,6 +269,7 @@ module TacticArena.Entity {
                     if (this.animations.currentAnim.name != 'walk' + this._ext) {
                         this.walk();
                     }
+                    console.log(this._speed, this.x, newX, this.y, newY);
                     var t = this.game.add.tween(this).to({
                         x: newX,
                         y: newY
@@ -276,7 +280,7 @@ module TacticArena.Entity {
                                 resolve(res);
                             }); // recursive
                         } else {
-                            this.sprite.stand();
+                            this.stand();
                             resolve(true);
                         }
                     }, this);
@@ -293,6 +297,10 @@ module TacticArena.Entity {
                 (this.position.x + this._size / 4) / this.state.game.tileSize,
                 (this.position.y + this._size / 2) / this.state.game.tileSize
             );
+        }
+
+        getDirection() {
+            return this._ext;
         }
 
         hide() {
@@ -318,7 +326,6 @@ module TacticArena.Entity {
             self.textDelay++;
             let timeOut = self.textDelay * 300;
             setTimeout(function () {
-                if (self.textDelay == 1) { self.hurt(); }
                 self.displayText('-' + hp, '#ff021b', 12, 6);
                 self.textDelay--;
             }, timeOut);
@@ -329,7 +336,6 @@ module TacticArena.Entity {
             self.textDelay++;
             let timeOut = self.textDelay * 300;
             setTimeout(function () {
-                if (self.textDelay == 1) { self.hurt(); }
                 self.displayText('+' + hp, '#5ce11a', 12, 6);
                 self.textDelay--;
             }, timeOut);

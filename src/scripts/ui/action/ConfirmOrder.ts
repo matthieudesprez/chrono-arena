@@ -26,6 +26,7 @@ module TacticArena.Action {
                     } else {
                         if (state.turnManager.getRemainingPawns().length == 0) {
                             let steps = state.orderManager.getSteps();
+                            console.log(steps);
                             state.uiManager.initResolvePhase(steps);
                         } else {
                             state.uiManager.initOrderPhase(nextPawn, false);

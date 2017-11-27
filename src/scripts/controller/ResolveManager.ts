@@ -55,7 +55,7 @@ module TacticArena {
             var promisesOrders = [];
             this.steps[index].stepUnits.forEach( (stepUnit, i) => {
                 stepUnit.pawn.setAp(stepUnit.data.ap); // met à jour le nombre d'AP du pawn
-                promisesOrders.push(stepUnit.order.resolve(stepUnit.pawn, stepUnit.data, previousStep, animate, backward, i, self.game)); //lance l'animation
+                promisesOrders.push(stepUnit.order.resolve(stepUnit.pawn, stepUnit.data, previousStep, animate, backward, i, self.game)); // lance l'animation
             });
             this.manageProjectionDislay(this.steps[index]);
             return Promise.all(promisesOrders).then( res => {
@@ -64,6 +64,9 @@ module TacticArena {
                 self.steps[index].stepUnits.forEach(stepUnit => { // On met à jour la vie et les états
                     let forceAnimation = typeof stepUnit.data.dies !== 'undefined' && stepUnit.data.dies;
                     stepUnit.pawn.setHp(stepUnit.data.hp, forceAnimation);
+                    //TODO update position & direction du pawn, entité logique
+                    stepUnit.pawn.setPosition(stepUnit.order.position);
+                    stepUnit.pawn.setDirection(stepUnit.order.direction);
                 });
             });
         }

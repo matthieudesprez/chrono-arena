@@ -11,7 +11,7 @@ module TacticArena.Order {
             let stepUnitA = stepUnits[aIndex];
             let stepUnitB = stepUnits[bIndex];
             stepUnitA.data.entityAApCost++;
-            let path = ordermanager.game.stageManager.getLinearPath(stepUnitA.pawn, 4, stepUnitA.order.direction, stepUnitA.order.position);
+            let path = ordermanager.game.stageManager.getLinearPath(stepUnitA.order.position, 4, stepUnitA.order.direction);
             stepUnitA.order.targets = stepUnitA.order.targets || [];
             for (var k = 0; k < path.length; k++) {
                 let targetPosition = stepUnitB.data.moveHasBeenBlocked ? stepUnitA.data.positionBBeforeOrder : stepUnitB.order.position;
@@ -20,11 +20,11 @@ module TacticArena.Order {
                     stepUnitA.data.entityBHpLost += 2;
                 }
             }
-            return result
+            return result;
         }
 
         resolve (pawn:Entity.Pawn, stepUnitData:Entity.StepUnitData, previousStep:Entity.StepUnit, animate:boolean, backward:boolean, i:number, state):Promise<any> {
-            return new Animation.CastFire(pawn, this, pawn.getPosition(), state).get();
+            return new Animation.CastFire(state, pawn, this).get();
         }
 
     }

@@ -41,7 +41,7 @@ module TacticArena.UI {
                     //}
 
                     let activePawn = this.menu.game.turnManager.getActivePawn();
-                    if(!this.menu.game.stageManager.equalPositions(activePawn.getPosition(), order.position)) {
+                    if(!this.menu.game.stageManager.equalPositions(this.menu.game.spritesManager.getReal(activePawn).getPosition(), order.position)) {
                         this.menu.game.stageManager.showPath([order.position], this.menu.game.pathOrdersTilesGroup, 0xffffff);
                     }
                 });

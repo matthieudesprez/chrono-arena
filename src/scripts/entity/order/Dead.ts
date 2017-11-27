@@ -7,7 +7,7 @@ module TacticArena.Order {
         }
 
         resolve (pawn:Entity.Pawn, stepUnitData:Entity.StepUnitData, previousStep:Entity.StepUnit, animate:boolean, backward:boolean, i:number, state):Promise<any> {
-            return new Animation.Die(pawn, this, pawn.getPosition(), state).get();
+            return new Animation.Die(state, pawn, this).get();
         }
     }
 }

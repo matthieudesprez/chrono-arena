@@ -77,14 +77,17 @@ module TacticArena {
             return max;
         }
 
+        /*
+        In case of a pawn having less actions than the others, fill this.orders with Stand orders
+         */
         formatOrders() {
-            for (var i = 0; i < this.game.pawns.length; i++) {
-                let p = this.game.pawns[i];
-                if (!this.hasOrder(p._id)) {
-                    let position = p.getPosition();
-                    this.add(p, new Order.Stand(position, p.getDirection()), false);
+            let self = this;
+            this.game.pawns.forEach( pawn => {
+                if (!self.hasOrder(pawn._id)) {
+                    // TODO must be filled with something else, not including the position or direction because it can change if moved by a tornado for example
+                    self.add(pawn, new Order.Stand(pawn.getPosition(), pawn.getDirection()), false);
                 }
-            }
+            });
         }
 
         getInitialStep() {
@@ -139,7 +142,6 @@ module TacticArena {
                 steps[j] = new Entity.Step();
                 for (var i = 0; i < this.orders.length; i++) {
                     var pawn = this.orders[i].entity;
-                    pawn.show(); // TODO ugly
                     steps[j].stepUnits.push( new Entity.StepUnit(
                         pawn,
                         new Entity.StepUnitData(),

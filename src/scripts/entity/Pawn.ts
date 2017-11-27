@@ -15,7 +15,7 @@ module TacticArena.Entity {
         team;
         spriteClass:typeof Entity.Sprite;
         skills;
-        position:Position;
+        position:Position; // during Order Phase = initial position, during Resolve Phase = current step position
         direction;
 
         constructor(game, x, y, direction, type, id, bot, team, name = "", spriteClass:typeof Entity.Sprite = Entity.Sprite) {
@@ -48,13 +48,21 @@ module TacticArena.Entity {
             this.game.spritesManager.destroyProjection(this);
         }
 
-        getDirection() {
-            return this.game.spritesManager.sprites[this._id]._ext;
+        getPosition() {
+            return this.position;
         }
 
-        changeDirection(direction) {
+        setPosition(position) {
+            this.position = position;
+        }
+
+        getDirection() {
+            return this.direction;
+            //return this.game.spritesManager.sprites[this._id]._ext;
+        }
+
+        setDirection(direction) {
             this.direction = direction;
-            this.game.signalManager.onPawnDirectionChange.dispatch(this);
         }
 
         getAp() {
@@ -85,10 +93,6 @@ module TacticArena.Entity {
             }
             this._hp = (hp > this._hpMax) ? this._hpMax : hp;
             this.game.signalManager.onHpChange.dispatch(this);
-        }
-
-        getSprite() {
-            return this.game.spritesManager.sprites[this._id];
         }
 
         export() {

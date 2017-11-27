@@ -11,7 +11,7 @@ module TacticArena.Action {
                 activePawn.setAp(activePawn._apMax);
                 state.spritesManager.show(activePawn);
                 state.spritesManager.destroyProjection(activePawn);
-                activePawn.changeDirection(state.uiManager.actionMenu.savedDirection);
+                state.spritesManager.getReal(activePawn).stand(state.uiManager.actionMenu.savedDirection);
                 state.uiManager.actionMenu.skillDeselectAll();
                 state.orderManager.removeEntityOrder(activePawn);
                 state.signalManager.onActionPlayed.dispatch(activePawn);

@@ -3,7 +3,7 @@ module TacticArena.Entity {
     export class MobSprite extends TacticArena.Entity.Sprite {
 
         constructor(game, x, y, ext, type, parent, size, tint=null) {
-            super(game, x, y, ext, type, parent, size, tint=null);
+            super(game, x, y, ext, type, size, tint=null);
         }
 
         setAnimations() {

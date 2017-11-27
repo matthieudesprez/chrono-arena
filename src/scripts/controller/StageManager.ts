@@ -180,7 +180,7 @@ module TacticArena {
         }
 
         handleTile(pawn) {
-            let p = pawn.getPosition();
+            let p = this.game.spritesManager.getReal(pawn).getPosition();
             this.grid[p.y][p.x] = pawn.isAlive() ? -1 : 3;
         }
 
@@ -206,22 +206,21 @@ module TacticArena {
             });
         }
 
-        getLinearPath(pawn, distance, direction = null, position = null) {
-            let p = position ? position : pawn.getPosition();
-            let d = direction ? direction : pawn.getDirection();
+        // TODO create Path class
+        getLinearPath(position: Position, distance, direction): Array<any> {
             let path = [];
-            let startCornerX = Math.max(0, p.x - distance);
-            let endCornerX = Math.min(this.map.width, p.x + distance);
-            let startCornerY = Math.max(0, p.y - distance);
-            let endCornerY = Math.min(this.map.height, p.y + distance);
+            let startCornerX = Math.max(0, position.x - distance);
+            let endCornerX = Math.min(this.map.width, position.x + distance);
+            let startCornerY = Math.max(0, position.y - distance);
+            let endCornerY = Math.min(this.map.height, position.y + distance);
             for (var x = startCornerX; x <= endCornerX; x++) {
                 for (var y = startCornerY; y <= endCornerY; y++) {
                     if (
-                        (d == 'W' && p.x > x && p.y == y ||
-                        d == 'E' && p.x < x && p.y == y ||
-                        d == 'N' && p.x == x && p.y > y ||
-                        d == 'S' && p.x == x && p.y < y) &&
-                        this.getNbTilesBetween(p, {'x': x, 'y': y}) <= distance
+                        (direction == 'W' && position.x > x && position.y == y ||
+                        direction == 'E' && position.x < x && position.y == y ||
+                        direction == 'N' && position.x == x && position.y > y ||
+                        direction == 'S' && position.x == x && position.y < y) &&
+                        this.getNbTilesBetween(position, {'x': x, 'y': y}) <= distance
                     ) {
                         path.push({'x': x, 'y': y});
                     }
@@ -230,32 +229,13 @@ module TacticArena {
             return path;
         }
 
-        getLinearPathsAllDirections(pawn, distance) {
+        getLinearPathsAllDirections(position: Position, distance) {
             return {
-                W: this.getLinearPath(pawn, distance, 'W'),
-                E: this.getLinearPath(pawn, distance, 'E'),
-                N: this.getLinearPath(pawn, distance, 'N'),
-                S: this.getLinearPath(pawn, distance, 'S')
+                W: this.getLinearPath(position, distance, 'W'),
+                E: this.getLinearPath(position, distance, 'E'),
+                N: this.getLinearPath(position, distance, 'N'),
+                S: this.getLinearPath(position, distance, 'S')
             };
-        }
-
-        getFrontTile(pawn, direction = null, position = null) {
-            let p = position ? position : pawn.getPosition();
-            let d = direction ? direction : pawn.getDirection();
-            let path = [];
-            if (d == 'W') {
-                path.push({'x': p.x - 1, 'y': p.y});
-            }
-            else if (d == 'E') {
-                path.push({'x': p.x + 1, 'y': p.y});
-            }
-            else if (d == 'S') {
-                path.push({'x': p.x, 'y': p.y + 1});
-            }
-            else if (d == 'N') {
-                path.push({'x': p.x, 'y': p.y - 1});
-            }
-            return path;
         }
 
         showPossibleLinearTrajectories(path) {

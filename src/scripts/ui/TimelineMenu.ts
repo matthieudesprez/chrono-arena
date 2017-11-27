@@ -71,7 +71,7 @@ module TacticArena.UI {
                 this.timelineGroup.y = this.mainGroup.height / 2 - this.timelineGroup.height / 2;
                 this.mainGroup.add(this.timelineGroup);
 
-                let buttonPrevious = self.game.make.sprite(50, 33, 'button-square-previous');
+                let buttonPrevious = self.game.make.sprite(30, 33, 'button-square-previous');
                 buttonPrevious.anchor.set(0);
                 //buttonPrevious.scale.set(0.2);
 
@@ -81,7 +81,7 @@ module TacticArena.UI {
 
                 //buttonPrevious.filters = [filter];
 
-                let buttonNext = self.game.make.sprite(this.game.world.width - 85, 33, 'button-square-next');
+                let buttonNext = self.game.make.sprite(this.game.world.width - 65, 33, 'button-square-next');
                 buttonNext.anchor.set(0);
                 //buttonNext.scale.set(0.2);
 

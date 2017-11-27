@@ -45,9 +45,11 @@ module TacticArena {
         }
 
         destroyAllProjections() {
-            this.projections.forEach(projection => {
-                projection.kill();
-            });
+            if(this.projections) {
+                Object.keys(this.projections).forEach(pawnId => {
+                    this.projections[pawnId].kill();
+                });
+            }
             this.projections = [];
         }
 

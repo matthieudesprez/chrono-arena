@@ -1,13 +1,13 @@
 module TacticArena.Animation {
     export class Stand extends BaseAnimation {
 
-        constructor(state:State.BasePlayable, pawn:Entity.Pawn, order:BaseOrder, position:Position) {
-            super(state, pawn, order, position);
+        constructor(state:State.BasePlayable, pawn:Entity.Pawn, order:BaseOrder) {
+            super(state, pawn, order);
         }
 
         get():Promise<any> {
             let animation = new Promise((resolve, reject) => {
-                this.pawn.changeDirection(this.order.direction);
+                this.state.spritesManager.getProjectionOrReal(this.pawn).stand(this.order.direction);
                 setTimeout(function () {
                     resolve(true);
                 }, 250);

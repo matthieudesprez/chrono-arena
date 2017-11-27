@@ -12,13 +12,13 @@ module TacticArena.Order {
         resolve (pawn:Entity.Pawn, stepUnitData:Entity.StepUnitData, previousStep:Entity.StepUnit, animate:boolean, backward:boolean, i:number, state):Promise<any> {
             let result = null;
             if (stepUnitData.moveHasBeenBlocked) {
-                result = new Animation.Block(pawn, this, pawn.getPosition(), stepUnitData.positionBlocked, animate).get();
+                result = new Animation.Block(state, pawn, this, stepUnitData.positionBlocked, animate).get();
             } else {
-                if (backward && pawn.getPosition().equals(this.position)) {
+                if (backward && state.spritesManager.getReal(pawn).getPosition().equals(this.position)) {
                     //let direction = previousStep ? previousStep[i].order.direction : pawn.getDirection();
-                    result = new Animation.Stand(pawn, this, pawn.getPosition()).get();
+                    result = new Animation.Stand(state, pawn, this).get();
                 } else {
-                    result = new Animation.Move(pawn, this, this.position, animate, this.direction).get();
+                    result = new Animation.Move(state, pawn, this, animate, this.direction).get();
                 }
             }
             return result;

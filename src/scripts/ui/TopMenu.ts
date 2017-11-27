@@ -15,10 +15,12 @@ module TacticArena.UI {
             this.mainGroup.x = 40;
             this.mainGroup.y = 37;
 
+            let itemWidth = this.game.pawns.length > 5 ? 60 : 65;
+
             let avatarsGroup = this.game.add.group();
             this.game.pawns.forEach(function (pawn, index) {
                 let pawnGroup = self.game.add.group();
-                pawnGroup.x = index * 70;
+                pawnGroup.x = index * itemWidth;
                 let frame = self.game.make.sprite(0, 0, 'avatar-frame');
                 frame.anchor.set(0.5);
                 let avatar = self.game.make.sprite(0, 0, 'avatar-' + pawn.type + '-small');
@@ -69,10 +71,7 @@ module TacticArena.UI {
 
         updateHp(pawn) {
             let hp = pawn.getHp();
-            console.log(hp);
             let percent = (hp / pawn._hpMax) * 100;
-            console.log(percent);
-            console.log(pawn);
             this.pawns[pawn._id].hpBarGroup.getByName('bar').setPercent(percent);
             if(hp <= 0) {
                 this.pawns[pawn._id].dead.alpha = 1;

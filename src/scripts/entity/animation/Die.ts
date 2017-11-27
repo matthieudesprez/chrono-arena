@@ -1,8 +1,8 @@
 module TacticArena.Animation {
     export class Die extends BaseAnimation {
 
-        constructor(state:State.BasePlayable, pawn:Entity.Pawn, order:BaseOrder, position:Position) {
-            super(state, pawn, order, position);
+        constructor(state:State.BasePlayable, pawn:Entity.Pawn, order:BaseOrder) {
+            super(state, pawn, order);
         }
 
         get():Promise<any> {

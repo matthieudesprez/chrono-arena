@@ -22,26 +22,14 @@ module TacticArena {
             return result;
         }
 
-        getDirection(p1, p2) {
-            if(p1.x > p2.x) {
-                return 'W';
-            } else if(p1.x < p2.x) {
-                return 'E';
-            } else if(p1.y > p2.y) {
-                return 'N';
-            } else if(p1.y < p2.y) {
-                return 'S';
-            }
-        }
-
         play(pawn) {
             var self = this;
-            let p = pawn.getPosition();
+            let p = this.game.spritesManager.getReal(pawn).getPosition();
             let target = this.getClosestPawn(p);
             if(target) {
-                let targetPosition = target.getPosition();
+                let targetPosition = this.game.spritesManager.getReal(target).getPosition();
 
-                let direction = self.getDirection(p, targetPosition);
+                let direction = p.getDirectionTo(targetPosition);
                 if(pawn.getDirection() != direction) {
                     this.game.orderManager.add(pawn, new Order.Stand(p, direction));
                     pawn.setAp(pawn.getAp() - 1);
@@ -62,7 +50,7 @@ module TacticArena {
                             path.shift();
                             for (var i = 0; i < (path as any).length; i++) {
                                 if(pawn.getAp() > 0) {
-                                    direction = self.getDirection(p, targetPosition);
+                                    direction = p.getDirectionTo(targetPosition);
                                     self.game.orderManager.add(pawn, new Order.Move(new Position(path[i].x, path[i].y), direction));
                                     pawn.setAp(pawn.getAp() - 1);
 

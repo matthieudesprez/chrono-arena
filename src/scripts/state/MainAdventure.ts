@@ -54,7 +54,8 @@ module TacticArena.State {
 
         update () {
             super.update();
-            this.game.camera.focusOnXY(this.pawns[0].getSprite().x + 16, this.pawns[0].getSprite().y + 16);
+            let position = this.spritesManager.getReal(this.pawns[0]).getPosition();
+            this.game.camera.focusOnXY(position.x + 16, position.y + 16);
         }
 
         //initMap() {

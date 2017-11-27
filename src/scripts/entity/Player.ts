@@ -15,7 +15,7 @@ module TacticArena {
         }
 
         getCharacters() {
-            return [Entity.Character.Ruairi, Entity.Character.Skeleton, Entity.Character.Evil, Entity.Character.Blondy, Entity.Character.Amanda];
+            return [Entity.Character.Ruairi, Entity.Character.Skeleton, Entity.Character.Evil, Entity.Character.Blondy];
         }
 
         getMaps() {
@@ -23,7 +23,7 @@ module TacticArena {
         }
 
         isInBattleParty(name) {
-            return this.battleParty.find(character => {
+            return this.battleParty.find((character: Function) => {
                 return character.name === name;
             });
         }

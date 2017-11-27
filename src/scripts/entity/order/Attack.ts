@@ -6,7 +6,7 @@ module TacticArena.Order {
         }
 
         resolve (pawn:Entity.Pawn, stepUnitData:Entity.StepUnitData, previousStep:Entity.StepUnit, animate:boolean, backward:boolean, i:number, state):Promise<any> {
-            return new Animation.Attack(pawn, this, pawn.getPosition(), state).get();
+            return new Animation.Attack(state, pawn, this).get();
         }
     }
 }

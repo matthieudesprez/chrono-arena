@@ -46,5 +46,17 @@ module TacticArena {
         getDistanceFrom(position) {
             return Math.abs(this.x - position.x) + Math.abs(this.y - position.y);
         }
+
+        getDirectionTo(position: Position) {
+            if(this.x > position.x) {
+                return 'W';
+            } else if(this.x < position.x) {
+                return 'E';
+            } else if(this.y > position.y) {
+                return 'N';
+            } else if(this.y < position.y) {
+                return 'S';
+            }
+        }
     }
 }
