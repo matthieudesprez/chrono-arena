@@ -21,10 +21,10 @@ module TacticArena.State {
         logManager: LogManager;
         signalManager: SignalManager;
         uiManager: UI.UIManager;
-        process: Boolean;
-        selecting: Boolean;
+        process: boolean;
+        selecting: boolean;
         pointer;
-        isPaused: Boolean;
+        isPaused: boolean;
         map;
 
         init() {

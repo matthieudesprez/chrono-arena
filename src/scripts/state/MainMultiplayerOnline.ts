@@ -1,7 +1,6 @@
 declare var EasyStar;
 module TacticArena.State {
     export class MainMultiplayerOnline extends TacticArena.State.BaseBattle {
-        serverManager: ServerManager;
 
         init(data, chatUI, serverManager) {
             super.init();
@@ -14,7 +13,7 @@ module TacticArena.State {
             let startPositions = [[{x: 8, y: 8, d: 'E'}, {x: 7, y: 7, d: 'E'}], [{x: 11, y: 8, d: 'W'}, {x: 12, y: 7, d: 'W'}]];
             this.players.forEach( (p, k) => {
                 if (p.token == self.serverManager.token) {
-                    this.playerTeam = k;
+                    //this.playerTeam = k;
                 }
                 if (p.faction == 'human') {
                     this.pawns.push(new Entity.Pawn(this, startPositions[k][0].x, startPositions[k][0].y, startPositions[k][0].d, 'ruairi', this.getUniqueId(), k, this.generator.generate()));

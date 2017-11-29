@@ -1,13 +1,13 @@
 module TacticArena.Entity.Character {
     export class Blondy extends TacticArena.Entity.Pawn {
 
-        constructor(game, x, y, ext, id, team) {
-            super(game, x, y, ext, 'blondy', id, team, "Blondy", Entity.Sprite);
+        constructor(state, x, y, ext, id, team) {
+            super(state, x, y, ext, 'blondy', id, team, "Blondy", Entity.Sprite);
             this.skills = this.skills.concat([
-                new TacticArena.Entity.Skill.Walk(this.game, this),
-                new TacticArena.Entity.Skill.Heal(this.game, this),
-                new TacticArena.Entity.Skill.Wind(this.game, this),
-                new TacticArena.Entity.Skill.Fire(this.game, this)
+                new TacticArena.Skill.Walk(this.state, this),
+                new TacticArena.Skill.Heal(this.state, this),
+                new TacticArena.Skill.Wind(this.state, this),
+                new TacticArena.Skill.Fire(this.state, this)
             ]);
             this._apMax = 4;
         }

@@ -6,17 +6,16 @@ module TacticArena.State {
         resolveManager: ResolveManager;
         logManager: LogManager;
         signalManager: SignalManager;
+        aiManager: AiManager;
         uiManager: UI.UIManager;
         selecting: Boolean;
         hideProjections: Boolean;
-        teamColors;
-        playerTeam;
-        teams;
+        serverManager: ServerManager;
+        teamsStates;
         chatUI;
         playMode;
         gridWidth;
         gridHeight;
-        status;
 
         constructor() {
             super();
@@ -26,160 +25,120 @@ module TacticArena.State {
             super.init(data);
             this.selecting = false;
             this.hideProjections = false;
-            this.teamColors = ['0x8ad886', '0xd68686', '0x87bfdb', '0xcdd385'];
-            this.teams = {};
-            //this.serializer = new TS.Serializer(TacticArena);
+            this.teamsStates = {};
             this.signalManager = new SignalManager(this);
             this.signalManager.init();
             this.pointer = new UI.Pointer(this);
-            this.status = 'Fighting';
         }
 
         create() {
             super.create();
-            let self = this;
-
             this.logManager = new LogManager(this);
             this.orderManager = new OrderManager(this);
             this.resolveManager = new ResolveManager(this);
             this.turnManager = new TurnManager(this);
             this.uiManager = new UI.UIManager(this);
-            if(this.chatUI) {
-                this.chatUI.menu = this.uiManager;
-            }
-
-            let playerPawns = this.pawns.filter( pawn => { return pawn.team == self.playerTeam; });
-            this.uiManager.initOrderPhase(playerPawns[0], true);
+            if(this.chatUI) { this.chatUI.menu = this.uiManager; }
+            this.initOrderPhase(this.turnManager.getNextPawn(), true);
         }
 
-        isGameReadyPromise() {
+        /*
+        Init the order phase during which the players can plan orders for their pawns and confirm them
+         */
+        initOrderPhase(pawn: Entity.Pawn, first: boolean): void {
+            console.log(pawn);
+            if(first) { this.orderManager.orders = []; }
+            this.turnManager.init(pawn, first).then( res => {
+                if(first) {
+                    this.uiManager.turnIndicatorUI.write(this.turnManager.currentTurnIndex + 1);
+                    return this.uiManager.transitionUI.show('PLAN');
+                }
+                return true;
+            }).then( res => {
+                this.process = false;
+                this.selecting = true;
+                if(this.turnManager.getActivePlayer().isBot) {
+                    this.aiManager.play(pawn);
+                }
+            });
+        }
+
+        /*
+        Init the resolve phase which is a step by step representation of what results from the orderManager processing
+         */
+        initResolvePhase(steps): void {
+            this.resolveManager.init(steps);
+            this.uiManager.transitionUI.show('EXECUTION').then( res => {
+                return res;
+            }).then( res => {
+                this.uiManager.timelineMenu = new UI.TimelineMenu(this);
+                return this.uiManager.timelineMenu.init(<any>steps.length);
+            }).then( res => {
+                this.resolveManager.processSteps(0);
+            });
+        }
+
+        /*
+        Return a promise, which resolve when the game is not paused
+         */
+        isGameReady(): Promise<any> {
             var self = this;
-            return new Promise((resolve, reject) => {
-                (function isGameReady(){
-                    if (!self.isPaused) return resolve();
-                    setTimeout(isGameReady, 300);
+            return new Promise( (resolve, reject) => {
+                (function isReady(){
+                    if (!self.isPaused) resolve();
+                    setTimeout(isReady, 300);
                 })();
             });
         }
 
-        isOver() {
-            //let everyoneElseIsDead = true;
-            let ennemyPawnAlive = false;
-            let allyPawnAlive = false;
-            this.pawns.forEach( pawn => {
-                this.teams[pawn.team] = true; //this.teams[pawn.team] || pawn.isAlive();
-                //if(pawn.team != this.playerTeam) {
-                //    everyoneElseIsDead = everyoneElseIsDead && !this.teams[pawn.team];
-                //}
-                if(pawn.team != this.playerTeam) {
-                    if(pawn.isAlive()) { ennemyPawnAlive = true; }
-                } else {
-                    if(pawn.isAlive()) { allyPawnAlive = true; }
-                }
+        /*
+        Return true if there is 1 or 0 player remaining (all the other's pawns are dead)
+         */
+        getRemainingPlayers(): Player[] {
+            return this.players.filter( (player: Player) => {
+                return this.pawns.filter((pawn:Entity.Pawn) => {
+                    return pawn.isAlive() && pawn.team === player._id
+                }).length > 0;
             });
-            if(!allyPawnAlive) { this.teams[this.playerTeam] = false; }
-            return (!allyPawnAlive || !ennemyPawnAlive);
         }
 
+        /*
+        Return true if there is 1 or 0 players remaining (all the other's pawns are dead)
+         */
+        isOver(): boolean {
+            return this.getRemainingPlayers().length <= 1;
+        }
+
+        /*
+        Return a text representing the result of the battle
+         */
+        getResult(): string {
+            let result = 'Fighting';
+            let remaingPlayers = this.getRemainingPlayers();
+            if (remaingPlayers.length === 0) { result = 'Draw'; }
+            else if (remaingPlayers.length === 1) { result = remaingPlayers[0].name + '\nWins'; }
+            return result;
+        }
+
+        /*
+        Return a unique id, which is for now the index of the pawn in this.pawns
+         */
         getUniqueId() {
-            var id = 0; //Math.floor(Math.random() * 1000);
-            var isUnique = false;
-            while(!isUnique) {
-                isUnique = true;
-                id++;
-                for(var i= 0; i < this.pawns.length; i++) {
-                    if(this.pawns[i]._id && this.pawns[i]._id == id) {
-                        isUnique = false;
-                        break;
-                    }
-                }
-            }
-            return id;
+            return this.pawns.length;
         }
 
-        getFirstAlive() {
-            for(var i = 0; i < this.pawns.length; i++) {
-                let p = this.pawns[i];
-                if(p.team == this.playerTeam && p.isAlive()) {
-                    return p;
-                }
-            }
-            return null;
-        }
-
-        battleOver (status) {
-            this.status = status;
-            this.uiManager.dialogUI.createModal({
-                type: "battleOver",
-                includeBackground: true,
-                fixedToCamera: true,
-                itemsArr: [
-                    {
-                        type: "image",
-                        content: "background-modal",
-                        offsetY: -50,
-                        contentScale: 1
-                    },
-                    {
-                        type: "text",
-                        content: "[t]",
-                        fontFamily: "Press Start 2P",
-                        fontSize: 21,
-                        color: "0x000000",
-                        offsetY: -225
-                    },
-                    {
-                        type: "text",
-                        content: this.status,
-                        fontFamily: "Press Start 2P",
-                        fontSize: 18,
-                        color: "0x000000",
-                        offsetY: -150
-                    },
-                    {
-                        type: "button",
-                        atlasParent: "small-button",
-                        content: "background-button",
-                        buttonHover: "background-button-hover",
-                        offsetY: -60,
-                        contentScale: 0.7,
-                        callback: function () {
-                            this.game.state.start('mainsolooffline', true, false, {
-                                players: this.state.players,
-                                map: this.state.mapClass
-                            }, null);
-                        }
-                    },
-                    {
-                        type: "text",
-                        content: "Replay",
-                        fontFamily: "Press Start 2P",
-                        fontSize: 18,
-                        color: "0x000000",
-                        offsetY: -60
-                    },
-                    {
-                        type: "button",
-                        atlasParent: "small-button",
-                        content: "background-button",
-                        buttonHover: "background-button-hover",
-                        offsetY: 20,
-                        contentScale: 0.7,
-                        callback: function () {
-                            this.game.state.start('menu');
-                        }
-                    },
-                    {
-                        type: "text",
-                        content: "Quit",
-                        fontFamily: "Press Start 2P",
-                        fontSize: 18,
-                        color: "0x000000",
-                        offsetY: 20
-                    },
-                ]
-            });
+        /*
+        Show the battleOver modal
+         */
+        battleOver() {
+            this.uiManager.modalUI.createGameOverModal();
             this.uiManager.dialogUI.showModal('battleOver');
+        }
+
+        getPlayablePlayers() {
+            return this.players.filter( (player: Player) => {
+               return player.isLocalPlayer;
+            });
         }
     }
 }

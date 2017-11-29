@@ -179,6 +179,9 @@ module TacticArena {
             return this.grid[position.y][position.x] != -1;
         }
 
+        /*
+        Mark position in grid as an obstacle if pawn is dead
+         */
         handleTile(pawn) {
             let p = this.game.spritesManager.getReal(pawn).getPosition();
             this.grid[p.y][p.x] = pawn.isAlive() ? -1 : 3;

@@ -1,15 +1,16 @@
 module TacticArena {
     export class Player {
+        _id;
         name;
         faction;
-        isMainPlayer;
+        isLocalPlayer;
         isBot;
         battleParty;
 
         constructor(name) {
             this.name = name;
             this.faction = 'human';
-            this.isMainPlayer = true;
+            this.isLocalPlayer = true;
             this.isBot = false;
             this.battleParty = [Entity.Character.Ruairi, Entity.Character.Blondy];
         }

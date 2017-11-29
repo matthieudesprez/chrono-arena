@@ -17,11 +17,6 @@ module TacticArena.UI {
             let frame = this.game.make.sprite(this.game.world.centerX - 2, 0, 'frame-bottom');
             frame.anchor.set(0.5, 0);
 
-            //var filter = this.game.add.filter('Pixelate');
-            //frame.filters = [filter];
-            //filter.sizeX = 2;
-            //filter.sizeY = 2;
-
             frame.inputEnabled = true;
             frame.events.onInputOver.add(this.over, this);
             frame.events.onInputOut.add(this.out, this);

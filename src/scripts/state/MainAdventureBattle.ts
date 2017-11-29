@@ -12,10 +12,8 @@ module TacticArena.State {
             this.game.stage.backgroundColor = 0x67AEE4;
             this.playMode = 'offline';
             this.data.players.forEach( (p, k) => {
-                let isBot = true;
                 if (p.player) {
-                    this.playerTeam = k;
-                    isBot = false;
+                    //this.playerTeam = k;
                 } else {
                     this.aiManager = new AiManager(this, k);
                 }

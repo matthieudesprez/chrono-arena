@@ -8,14 +8,12 @@ module TacticArena.Action {
         static process(state) {
             state.spritesManager.destroyAllProjections();
             state.resolveManager.active = false;
-            //setTimeout(function() {
-                //state.uiManager.notificationsUI.clean();
-            //}, 500);
             state.uiManager.timelineMenu.clean();
             if(state.isOver()) {
-                state.battleOver(state.teams[state.playerTeam] ? 'You win' : 'You lose');
+                state.battleOver();
             } else {
-                state.uiManager.initOrderPhase(state.getFirstAlive(), true);
+                state.turnManager.reset();
+                state.initOrderPhase(state.turnManager.getNextPawn(), true); // start next turn
             }
         }
     }

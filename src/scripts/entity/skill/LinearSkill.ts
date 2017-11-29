@@ -1,6 +1,6 @@
-/// <reference path="BaseSkill.ts"/>
-module TacticArena.Entity.Skill {
-    export class LinearSkill extends TacticArena.Entity.Skill.BaseSkill {
+/// <reference path="Skill.ts"/>
+module TacticArena.Skill {
+    export class LinearSkill extends TacticArena.Skill.Skill {
         paths;
         pathColor;
 

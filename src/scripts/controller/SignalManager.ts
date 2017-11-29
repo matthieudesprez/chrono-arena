@@ -73,11 +73,6 @@ module TacticArena {
             });
 
             this.turnInitialized.add(function(pawn) {
-                self.game.process = false;
-                self.game.selecting = true;
-                if(self.game.turnManager.getActivePlayer().isBot) {
-                    self.game.aiManager.play(pawn);
-                }
             });
 
             this.stepResolutionFinished.add(function(stepIndex) {
@@ -86,7 +81,7 @@ module TacticArena {
             });
 
             this.resolvePhaseFinished.add(function() {
-                self.game.isGameReadyPromise().then((res) => {
+                self.game.isGameReady().then((res) => {
                     Action.ConfirmResolve.process(self.game);
                 });
             });
@@ -98,7 +93,12 @@ module TacticArena {
                 }
             });
 
-            this.onTurnEnded.add(function(activePawn) {
+            this.onTurnEnded.add( (nextPawn) => {
+                // in case of a local multiplayer, the projections can be hidden
+                if(!!nextPawn && nextPawn.team !== self.game.turnManager.currentPawn.team && self.game.hideProjections) {
+                    self.game.spritesManager.destroyAllProjections();
+                }
+                self.game.stageManager.clearHelp();
                 self.game.uiManager.ordersnotificationsUI.clean();
                 self.game.uiSpritesGroup.removeAll();
                 if(self.game.uiManager.actionMenu) {
@@ -125,20 +125,12 @@ module TacticArena {
                 self.game.uiManager.actionMenu = new UI.ActionMenu(self.game, activePawn);
             });
 
-            this.onTeamChange.add(function() {
-                if(self.game.hideProjections) {
-                    self.game.pawns.forEach(function (pawn) {
-                        pawn.destroyProjection();
-                    });
-                }
-            });
-
             this.onChatMessageReception.add(function(data) {
                 self.game.uiManager.chatUI.write(data.name + ': ' + data.message)
             });
 
             this.onProcessedOrders.add(function(steps) {
-                self.game.uiManager.initResolvePhase(steps);
+                self.game.initResolvePhase(steps);
                 self.game.logManager.add(steps);
             });
         }

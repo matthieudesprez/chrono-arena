@@ -1,6 +1,6 @@
 /// <reference path="LinearSkill.ts"/>
-module TacticArena.Entity.Skill {
-    export class Fire extends TacticArena.Entity.Skill.LinearSkill {
+module TacticArena.Skill {
+    export class Fire extends TacticArena.Skill.LinearSkill {
 
         constructor(state, pawn) {
             super(state, pawn);
@@ -11,7 +11,7 @@ module TacticArena.Entity.Skill {
             this.range = 4;
         }
 
-        onOrder(position, direction) {
+        onOrder(position, direction): void {
             this.state.spritesManager.getProjectionOrReal(this.pawn, true).halfcast(direction);
             this.state.orderManager.add(this.pawn, new Order.Fire(position, direction));
         }

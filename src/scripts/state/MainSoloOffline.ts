@@ -2,27 +2,22 @@ declare var EasyStar;
 module TacticArena.State {
     import AiManager = TacticArena.AiManager;
     export class MainSoloOffline extends TacticArena.State.BaseBattle {
-        aiManager: AiManager;
 
         init(data) {
             super.init(data);
             this.playMode = 'offline';
             this.players = data.players;
-            this.players.forEach( (player, teamIndex) => {
-                if (player.isMainPlayer) {
-                    this.playerTeam = teamIndex;
-                } else { //TODO ok seulement si pas plus de 2 players
-                    this.aiManager = new AiManager(this, teamIndex);
-                }
+            this.players.forEach( (player: Player, playerId: number) => {
+                player._id = playerId;
+                if (player.isBot) { this.aiManager = new AiManager(this, player._id); }
                 player.battleParty.forEach((character, characterIndex) => {
                     let pawn = new character(
                         this,
-                        this.map.startPositions[teamIndex][characterIndex].x,
-                        this.map.startPositions[teamIndex][characterIndex].y,
-                        this.map.startPositions[teamIndex][characterIndex].d,
+                        this.map.startPositions[player._id][characterIndex].x,
+                        this.map.startPositions[player._id][characterIndex].y,
+                        this.map.startPositions[player._id][characterIndex].d,
                         this.getUniqueId(),
-                        player.isBot,
-                        teamIndex);
+                        player._id);
                     this.pawns.push(pawn);
                     this.spritesManager.add(pawn);
                 });

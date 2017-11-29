@@ -54,10 +54,10 @@ module TacticArena {
             return [];
         }
 
-        getPlayerOrders(teamId) {
+        getPlayerOrders(teams) {
             let result = [];
             for (var i = 0; i < this.orders.length; i++) {
-                if (this.orders[i].entity.team == teamId) {
+                if (teams.indexOf(this.orders[i].entity.team) > -1) {
                     result.push({
                         entityId: this.orders[i].entity._id,
                         list: this.orders[i].list
@@ -115,10 +115,10 @@ module TacticArena {
                         steps[i].stepUnits[j].order = order;
                     }
                     steps[i].stepUnits[j].order.position = order.position;
+                    steps[i].stepUnits[j].data.altered = true;
                 }
             }
             this.alteredPawns.push(entity._id);
-            entity.destroyProjection();
             return steps;
         }
 
@@ -128,9 +128,9 @@ module TacticArena {
                     new Position(state.moved.x, state.moved.y),
                     order.direction
                 );
+                steps[i].stepUnits[j].data.altered = true;
             }
             this.alteredPawns.push(entity._id);
-            entity.destroyProjection();
             return steps;
         }
 

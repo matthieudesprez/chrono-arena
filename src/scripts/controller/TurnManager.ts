@@ -1,87 +1,88 @@
 module TacticArena {
+	/*
+	Handles turns basic mechanics
+	 */
     export class TurnManager {
-		currentTurnIndex;
-		currentTeam;
-		playedPawns;
-		game;
+		state: State.BaseBattle;
+		currentTurnIndex: number;
+		currentPawn: Entity.Pawn;
+		playedPawnsIds: number[];
 
-        constructor(game) {
-			this.game = game;
+        constructor(state) {
+			this.state = state;
 			this.currentTurnIndex = -1;
-			this.playedPawns = [];
+			this.currentPawn = null;
+			this.playedPawnsIds = [];
         }
 
-        init(pawn, firstTurnCall = false) {
+		/*
+		set the pawn as active
+		if firstTurnCall, set AP & MP of all pawns, increment turnIndex and reset playedPawnsIds
+		 */
+        init(pawn, firstTurnCall = false): Promise<boolean> {
             return new Promise((resolve, reject) => {
 				if(firstTurnCall) {
-					this.game.pawns.forEach((pawn) => {
+					this.state.pawns.forEach((pawn: Entity.Pawn) => {
 						pawn.setAp(pawn._apMax);
 						pawn.setMp(pawn._mpMax);
-						pawn.ghost = null;
-						pawn.active = false;
 					});
 					this.currentTurnIndex++;
-					this.playedPawns = [];
 				}
                 this.setActivePawn(pawn);
 	        	resolve(true);
         	});
         }
 
-		getRemainingPawns(teamId = null) {
-			return this.game.pawns.filter((pawn) => {
-				let condition = pawn.isAlive() && this.playedPawns.indexOf(pawn._id) < 0;
-				if (teamId !== null) { condition = condition && pawn.team == teamId; }
-				return condition;
-			});
-		}
-
-        endTurn() {
+		/*
+		 set the current active pawn as played
+		 resolve(the next playable pawn)
+		 */
+        endTurn(): Promise<Entity.Pawn> {
             return new Promise((resolve, reject) => {
-				this.setActivePawnAsPlayed();
-				var nextPawn;
-				let remainingPawns = this.getRemainingPawns();
-				if(remainingPawns.length > 0) {
-					nextPawn = remainingPawns[0];
-					if(nextPawn.team != this.currentTeam) {
-						this.game.signalManager.onTeamChange.dispatch();
-					}
-				}
+				this.playedPawnsIds.push(this.getActivePawn()._id); // set activePawn as played
+				let nextPawn = this.getNextPawn();
 	        	resolve(nextPawn);
         	});
         }
 
+		/*
+		Return current active pawn
+		 */
         getActivePawn(): Entity.Pawn {
-        	for(var i = 0; i < this.game.pawns.length; i++) {
-        		if(this.game.pawns[i].active) {
-        			return this.game.pawns[i];
-        		}
-        	}
-        	return null;
+        	return this.currentPawn;
         }
 
-		setActivePawn(pawn) {
-			let activePawn = this.getActivePawn();
-			if(pawn.isAlive() && (!activePawn || pawn._id != activePawn._id)) {
-				for (var i = 0; i < this.game.pawns.length; i++) {
-					this.game.pawns[i].active = (this.game.pawns[i]._id == pawn._id);
-				}
-				this.currentTeam = pawn.team;
-				this.game.signalManager.onActivePawnChange.dispatch(pawn);
+		/*
+		Set parameter pawn as this.currentPawn
+		 */
+		setActivePawn(pawn: Entity.Pawn): void {
+			if(pawn.isAlive() && (!this.getActivePawn() || pawn._id != this.getActivePawn()._id)) {
+				this.currentPawn = pawn;
+				this.state.signalManager.onActivePawnChange.dispatch(pawn);
 			}
 		}
 
-		setActivePawnAsPlayed() {
-			this.playedPawns.push(this.getActivePawn()._id);
-		}
-
+		/*
+		Return current active player based on current active pawn
+		 */
 		getActivePlayer(): Player {
-			for(var i = 0; i < this.game.players.length; i++) {
-				if(this.game.players[i].team == this.currentTeam) {
-					return this.game.players[i];
-				}
-			}
-			return null;
+			return this.state.players.find( (player: Player) => {
+				return player._id === this.currentPawn.team;
+			});
+		}
+
+		/*
+		Return the next playable pawn
+		 */
+		getNextPawn(): Entity.Pawn {
+			return this.state.pawns.find( (pawn: Entity.Pawn) => {
+				let isPlayable = this.state.getPlayablePlayers().some( (player: Player) => { return player._id === pawn.team; });
+				return pawn.isAlive() && this.playedPawnsIds.indexOf(pawn._id) < 0 && isPlayable;
+			});
+		}
+
+		reset(): void {
+			this.playedPawnsIds = [];
 		}
 	}
 }

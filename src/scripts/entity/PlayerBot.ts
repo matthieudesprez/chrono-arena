@@ -4,7 +4,7 @@ module TacticArena {
         constructor(name) {
             super(name);
             this.faction = 'bot';
-            this.isMainPlayer = false;
+            this.isLocalPlayer = true;
             this.isBot = true;
             this.battleParty = [Entity.Character.Skeleton, Entity.Character.Evil];
         }

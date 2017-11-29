@@ -3,6 +3,7 @@ module TacticArena.Entity {
         moveHasBeenBlocked:boolean;
         positionBlocked:Position;
         moved:Position;
+        altered:boolean;
         ap:number;
         hp:number;
         dies:boolean;
@@ -24,6 +25,7 @@ module TacticArena.Entity {
             this.moveHasBeenBlocked = false;
             this.positionBlocked = null;
             this.moved = null;
+            this.altered = false;
             this.ap = ap;
             this.hp = hp;
             this.dies = false;

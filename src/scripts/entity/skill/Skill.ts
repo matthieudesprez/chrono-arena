@@ -1,5 +1,5 @@
-module TacticArena.Entity.Skill {
-    export class BaseSkill {
+module TacticArena.Skill {
+    export abstract class Skill {
         state;
         pawn;
         id;
@@ -18,28 +18,14 @@ module TacticArena.Entity.Skill {
             this.range = 0;
         }
 
-        canOrder() {
+        canOrder(): boolean {
             return this.pawn.getAp() >= this.minCost;
         }
 
-        updateUI(position) {
-
-        }
-
-        cleanUI() {
-
-        }
-
-        order(target) {
-
-        }
-
-        onDeselect() {
-
-        }
-
-        onSelect() {
-
-        }
+        abstract updateUI(position): void
+        abstract cleanUI(): void
+        abstract order(target): void
+        abstract onDeselect(): void
+        abstract onSelect(): void
     }
 }

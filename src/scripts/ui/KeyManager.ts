@@ -32,6 +32,8 @@ module TacticArena.UI {
 
             this.escapeKey = this.menu.game.input.keyboard.addKey(Phaser.KeyCode.ESC);
             this.escapeKey.onDown.add(this.escapeKeyPress, this, 0, this.menu);
+
+            this.logInformations();
         }
 
         enterKeyPressed(self, uiManager) {
@@ -47,6 +49,7 @@ module TacticArena.UI {
         backKeyPressed(self, uiManager) {
             Action.Cancel.process(uiManager.game);
         }
+
         escapeKeyPress(self, uiManager) {
             Action.Cancel.process(uiManager.game);
         }
@@ -55,22 +58,48 @@ module TacticArena.UI {
             Action.Timeline.TogglePause.process(uiManager.game);
         }
 
+        /*
+        Shortcut to hide projections : alt + P
+        Usefull with multiple local players to not show them previous orders
+        Todo needs more work
+         */
         pKeyPress(self, uiManager) {
             if(self.altKey) {
                 uiManager.game.hideProjections = !uiManager.game.hideProjections;
             }
         }
 
+        /*
+         Shortcut to take control of the AI : alt + D
+         Wont take effect on the current turn if AI has already played
+         */
         dKeyPress(self, uiManager) {
             if(self.altKey) {
                 uiManager.game.debugMode = !uiManager.game.debugMode;
             }
         }
 
+        /*
+        Shortcut to win a battle => alt + W
+         */
         wKeyPress(self, uiManager) {
             if(self.altKey) {
+                uiManager.game.players.filter( (player: Player) => {
+                    return player.isBot;
+                }).forEach( (player: Player) => {
+                    uiManager.game.pawns.filter( (pawn: Entity.Pawn) => {
+                        return pawn.team === player._id;
+                    }).forEach((pawn:Entity.Pawn) => {
+                        pawn.setHp(0);
+                    });
+                });
                 uiManager.game.battleOver();
             }
+        }
+
+        logInformations(): void {
+            console.info('take control of the AI (takes effect next turn if already played) : alt + D');
+            console.info('win a battle : alt + W');
         }
     }
 }

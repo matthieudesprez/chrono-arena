@@ -31,7 +31,7 @@ module TacticArena.UI {
         }
 
         update(pointer, x, y, clicked) {
-            if (!this.game.process && !this.game.uiManager.isOver()) {
+            if (!this.game.process && !this.game.uiManager.mouseOver()) {
                 let target = this.getPosition();
                 if(!this.uiLastPosition.equals(target)) {
                     this.uiLastPosition = target;
@@ -57,7 +57,7 @@ module TacticArena.UI {
         }
 
         onGridLeftClick() {
-            if (!this.game.process && !this.game.uiManager.isOver()) {
+            if (!this.game.process && !this.game.uiManager.mouseOver()) {
                 let selectedSkill = this.game.uiManager.actionMenu.getSelectedSkill();
                 let target = this.getPosition();
                 if(selectedSkill) {
@@ -68,7 +68,7 @@ module TacticArena.UI {
                     //TODO SELECT CHARACTER
                     this.game.pawns.forEach( (p, k) => {
                         if (p.getPosition().equals(target)) {
-                            if(p.team == this.game.playerTeam) {
+                            if(p.team == this.game.turnManager.getActivePlayer().team) {
                                 this.game.turnManager.setActivePawn(p);
                             } else {
                                 this.game.uiManager.actionMenu.clean();

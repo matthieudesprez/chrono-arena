@@ -12,10 +12,10 @@ module TacticArena.State {
         uiGroup: Phaser.Group;
         pathfinder;
         stageManager: StageManager;
-        process: Boolean;
-        modalVisible: Boolean;
+        process: boolean;
+        modalVisible: boolean;
         pointer;
-        isPaused: Boolean;
+        isPaused: boolean;
         players;
         generator;
         mapName;

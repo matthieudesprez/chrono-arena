@@ -1,6 +1,6 @@
 module TacticArena.UI {
     export class skillButton extends Phaser.Group {
-        selected:Boolean;
+        selected:boolean;
 
         constructor(game:Phaser.Game) {
             super(game);

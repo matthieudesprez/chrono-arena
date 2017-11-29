@@ -12,7 +12,7 @@ module TacticArena.UI {
         topMenu;
         timelineMenu;
         dialogUI;
-        bitmapManager;
+        modalUI;
 
         constructor(game) {
             this.game = game;
@@ -20,15 +20,12 @@ module TacticArena.UI {
             this.actionMenu = null;
             this.timelineMenu = null;
 
-            this.bitmapManager = new UI.BitmapManager(this.game);
-
             this.dialogUI = new UI.Dialog(this.game);
-
+            this.modalUI = new UI.Modal(this.game);
             this.topMenu = new UI.TopMenu(this.game);
             this.turnIndicatorUI = new UI.TurnIndicator(this);
             this.modeIndicator = new UI.ModeIndicator(this);
             this.ingamemenuUI = new UI.IngameMenu(this);
-
             this.keyManager = new UI.KeyManager(this);
 
             this.ordersnotificationsUI = new UI.OrdersNotifications(this);
@@ -37,38 +34,7 @@ module TacticArena.UI {
             this.process = false;
         }
 
-        initOrderPhase(pawn, first) {
-            if(first) {
-                this.game.orderManager.orders = [];
-            }
-            this.game.turnManager.init(pawn, first).then( data => {
-                if(first) {
-                    this.turnIndicatorUI.write(this.game.turnManager.currentTurnIndex + 1);
-                    return this.transitionUI.show('PLAN');
-                }
-                return true;
-            }).then( res => {
-                this.game.signalManager.turnInitialized.dispatch(pawn);
-            });
-        }
-
-        initResolvePhase(steps) {
-            this.game.resolveManager.init(steps);
-            this.transitionUI.show('EXECUTION').then((res) => {
-                return res;
-            }).then((res) => {
-                this.timelineMenu = new TimelineMenu(this.game);
-                return this.timelineMenu.init(<any>steps.length);
-            }).then( res => {
-                this.game.resolveManager.processSteps(0);
-            });
-        }
-
-        isOver() {
-            //return (this.actionMenu && this.actionMenu.isOver) ||
-            //    (this.timelineMenu && this.timelineMenu.isOver) ||
-            //    this.topMenu.isOver ||
-            //    this.ingamemenuUI.active;
+        mouseOver() {
             return this.ingamemenuUI.active;
         }
     }

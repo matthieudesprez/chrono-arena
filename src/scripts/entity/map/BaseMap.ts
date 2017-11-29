@@ -1,9 +1,9 @@
 module TacticArena.Map {
     export class BaseMap {
-        name:string;
-        label:string;
-        backgroundColor:number;
-        hasParallaxLayer:Boolean;
+        name: string;
+        label: string;
+        backgroundColor: number;
+        hasParallaxLayer: boolean;
         startPositions;
 
         constructor(name, label, startPositions, backgroundColor=0x000000, hasParallaxLayer=false) {

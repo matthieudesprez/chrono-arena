@@ -1,6 +1,6 @@
-/// <reference path="BaseSkill.ts"/>
-module TacticArena.Entity.Skill {
-    export class Walk extends TacticArena.Entity.Skill.BaseSkill {
+/// <reference path="Skill.ts"/>
+module TacticArena.Skill {
+    export class Walk extends TacticArena.Skill.Skill {
 
         constructor(state, pawn) {
             super(state, pawn);

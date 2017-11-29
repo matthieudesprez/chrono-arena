@@ -43,7 +43,7 @@ module TacticArena {
         }
 
         /*
-         * Retourne une promesse qui est résolue lorsque toutes les animations de this.steps[index] sont résolues
+         * Return a promise which resolves when all this.steps[index] animations are done
          */
         processStep(index:number, animate:boolean = true, backward:boolean = false):Promise<any> {
             if (index >= this.steps.length) return Promise.resolve(true);
@@ -54,19 +54,18 @@ module TacticArena {
 
             var promisesOrders = [];
             this.steps[index].stepUnits.forEach( (stepUnit, i) => {
-                stepUnit.pawn.setAp(stepUnit.data.ap); // met à jour le nombre d'AP du pawn
-                promisesOrders.push(stepUnit.order.resolve(stepUnit.pawn, stepUnit.data, previousStep, animate, backward, i, self.game)); // lance l'animation
+                stepUnit.pawn.setAp(stepUnit.data.ap); // update pawn AP
+                promisesOrders.push(stepUnit.order.resolve(stepUnit.pawn, stepUnit.data, previousStep, animate, backward, i, self.game)); // execute animation
             });
             this.manageProjectionDislay(this.steps[index]);
             return Promise.all(promisesOrders).then( res => {
                 if (!backward) { self.manageProjectionDislay(self.steps[index]);}
 
-                self.steps[index].stepUnits.forEach(stepUnit => { // On met à jour la vie et les états
+                self.steps[index].stepUnits.forEach(stepUnit => { // update pawn HP and its different states
                     let forceAnimation = typeof stepUnit.data.dies !== 'undefined' && stepUnit.data.dies;
-                    stepUnit.pawn.setHp(stepUnit.data.hp, forceAnimation);
-                    //TODO update position & direction du pawn, entité logique
-                    stepUnit.pawn.setPosition(stepUnit.order.position);
+                    stepUnit.pawn.setPosition(stepUnit.order.position); // TODO beware of moved or blocked
                     stepUnit.pawn.setDirection(stepUnit.order.direction);
+                    stepUnit.pawn.setHp(stepUnit.data.hp, forceAnimation);
                 });
             });
         }
@@ -85,7 +84,7 @@ module TacticArena {
                         condition = order.position.equals(position);
                     }
 
-                    if (condition) {
+                    if (condition || !stepUnit.data.aIsAlive || stepUnit.data.altered) {
                         this.game.spritesManager.getProjection(entityA).hide();
                         this.game.spritesManager.getReal(entityA).show();
                     } else {

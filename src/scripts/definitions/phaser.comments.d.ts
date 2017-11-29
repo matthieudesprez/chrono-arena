@@ -6398,7 +6398,7 @@ declare module Phaser {
         * It is sent three arguments:
         * {any} The Game Object that received the event.
         * {Phaser.Pointer} The Phaser.Pointer object that caused the event.
-        * {boolean} isOver - Is the Pointer still over the Game Object?
+        * {boolean} mouseOver - Is the Pointer still over the Game Object?
         */
         onInputUp: Phaser.Signal;
 
@@ -9338,7 +9338,7 @@ declare module Phaser {
         * every child Sprite.
         * 
         * This Signal is sent 3 arguments: A reference to the Sprite that triggered the signal,
-        * a reference to the Pointer that caused it, and a boolean value `isOver` that tells you if the Pointer
+        * a reference to the Pointer that caused it, and a boolean value `mouseOver` that tells you if the Pointer
         * is still over the Sprite or not.
         */
         onChildInputUp: Phaser.Signal;
