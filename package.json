@@ -9,8 +9,8 @@
     "serve_headless": "lite-server -c ./bs-config-gitlab-ci.json",
     "test": "karma start spec/support/karma.conf.js",
     "test_watch": "karma start spec/support/karma.conf.js --no-single-run",
-    "build": "tsc && concurrent \"npm cp\"",
-    "cp": "concurrent \"cp src/index.html build\" \"cp src/tests.html build\" \"cp favicon.png build\" \"cp -R src/vendor src/css src/assets build\"",
+    "build": "(tsc; npm run cp)",
+    "cp": "concurrent \"cp src/index.html build\" \"cp src/tests.html build\" \"cp src/favicon.png build\" \"cp -R src/vendor src/css src/assets build\"",
     "clean_vendors": "find ./src/vendor/phaser-official/ ! -name \"phaser.js\" -type f -delete && find ./src/vendor/phaser-official/ -type d -empty -delete && find ./src/vendor/easystarjs/ ! -name \"easystar-0.2.3.min.js\" -type f -delete && find ./src/vendor/easystarjs/ -type d -empty -delete"
   },
   "devDependencies": {

@@ -29,7 +29,7 @@ build:
   script:
     - tsc
     - cp src/{index.html,tests.html} build
-    - cp favicon.ico build
+    - cp src/favicon.png build
     - cp -R src/vendor src/css src/assets build
   only:
       - master
