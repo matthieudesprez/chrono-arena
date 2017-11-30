@@ -36,6 +36,7 @@ Unit Tests are run on a [Karma sever](https://karma-runner.github.io/1.0/index.h
 * Map Tilesets from RPG Maker free resources
 * Maps are generated using [Tiled Map Editor](http://www.mapeditor.org/)
 * UI Skill Icons from [DGHZ Fantasy Icon Pack Free Sample](https://dghz.itch.io/fantasy-icon-pack)
+* Special thanks to [Michaël Lemaire](https://thunderk.net/) for his feedbacks and advices
 
 
 ## Install project
