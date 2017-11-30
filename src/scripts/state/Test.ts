@@ -3,6 +3,7 @@ module TacticArena.State {
     export class Test extends TacticArena.State.BaseState {
         layer: Phaser.TilemapLayer;
         pawns: Entity.Pawn[];
+        spritesManager: SpritesManager;
         pathfinder;
 
         worldGroup: Phaser.Group;
@@ -42,6 +43,7 @@ module TacticArena.State {
             this.process = true;
             this.selecting = false;
             this.isPaused = false;
+            this.spritesManager = new SpritesManager(this);
             this.worldGroup = new Phaser.Group(this.game);
 
             this.mapGroup = new Phaser.Group(this.game);

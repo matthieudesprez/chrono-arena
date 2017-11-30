@@ -23,10 +23,10 @@ module TacticArena.Specs {
 
         function testStepResolution(index, position, ap, hp, direction) {
             let pawn = currentState.pawns[index];
-            expect(this.game.spritesManager.getReal(pawn).getPosition().equals(position)).toEqual(true);
+            expect(currentState.spritesManager.getReal(pawn).getPosition().equals(position)).toEqual(true);
             expect(pawn.getAp()).toEqual(ap);
             expect(pawn.getHp()).toEqual(hp);
-            expect(this.game.spritesManager.getReal(pawn).getDirection()).toEqual(direction);
+            expect(currentState.spritesManager.getReal(pawn).getDirection()).toEqual(direction);
         }
 
         beforeEach(function (done) {
@@ -38,8 +38,12 @@ module TacticArena.Specs {
             testGame.state.onStateChange.add(function() {
                 currentState = testGame.state.getCurrentState();
                 setTimeout(function() {
-                    currentState.pawns.push(new Entity.Character.Test(currentState, currentState.map.startPositions[0][0].x, currentState.map.startPositions[0][0].y, currentState.map.startPositions[0][0].d, 1, 1));
-                    currentState.pawns.push(new Entity.Character.Test(currentState, currentState.map.startPositions[1][0].x, currentState.map.startPositions[1][0].y, currentState.map.startPositions[1][0].d, 2, 2));
+                    let p1 = new Entity.Character.Test(currentState, currentState.map.startPositions[0][0].x, currentState.map.startPositions[0][0].y, currentState.map.startPositions[0][0].d, 1, 1);
+                    currentState.pawns.push(p1);
+                    currentState.spritesManager.add(p1);
+                    let p2 = new Entity.Character.Test(currentState, currentState.map.startPositions[1][0].x, currentState.map.startPositions[1][0].y, currentState.map.startPositions[1][0].d, 2, 2)
+                    currentState.pawns.push(p2);
+                    currentState.spritesManager.add(p2);
                     currentState.isPaused = true;
                     done();
                 }, 200);

@@ -8,7 +8,6 @@ module TacticArena.UI {
         stepsColors;
 
         constructor(game) {
-            let self = this;
             this.isOver = false;
             this.game = game;
             this.mainGroup = this.game.add.group();
@@ -24,8 +23,7 @@ module TacticArena.UI {
             this.mainGroup.add(frame);
 
             this.mainGroup.x = 0;
-            this.mainGroup.y = this.game.height - 110; //460; //window.innerHeight / this.game.getScaleRatio() - 132;
-            //this.mainGroup.y = Math.min(512, window.innerHeight / this.game.getScaleRatio() - 100);
+            this.mainGroup.y = this.game.height - 110;
 
             this.game.uiGroup.add(this.mainGroup);
         }
@@ -68,19 +66,9 @@ module TacticArena.UI {
 
                 let buttonPrevious = self.game.make.sprite(30, 33, 'button-square-previous');
                 buttonPrevious.anchor.set(0);
-                //buttonPrevious.scale.set(0.2);
-
-                //var filter = this.game.add.filter('Pixelate');
-                //filter.sizeX = 2;
-                //filter.sizeY = 2;
-
-                //buttonPrevious.filters = [filter];
 
                 let buttonNext = self.game.make.sprite(this.game.world.width - 65, 33, 'button-square-next');
                 buttonNext.anchor.set(0);
-                //buttonNext.scale.set(0.2);
-
-                //buttonNext.filters = [filter];
 
                 buttonPrevious.inputEnabled = true;
                 buttonPrevious.events.onInputDown.add(this.previous, this);

@@ -81,11 +81,8 @@ module TacticArena.Entity {
         }
 
         setHp(hp, forceAnimation=false) {
-            if ((this.isAlive() || forceAnimation) && hp <= 0) {
-                this.state.spritesManager.sprites[this._id].die();
-            }
             this._hp = (hp > this._hpMax) ? this._hpMax : hp;
-            this.state.signalManager.onHpChange.dispatch(this);
+            this.state.signalManager.onHpChange.dispatch(this, forceAnimation);
         }
     }
 }

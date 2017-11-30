@@ -46,7 +46,6 @@ module TacticArena.State {
         Init the order phase during which the players can plan orders for their pawns and confirm them
          */
         initOrderPhase(pawn: Entity.Pawn, first: boolean): void {
-            console.log(pawn);
             if(first) { this.orderManager.orders = []; }
             this.turnManager.init(pawn, first).then( res => {
                 if(first) {

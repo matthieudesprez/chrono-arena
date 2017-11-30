@@ -196,13 +196,18 @@ module TacticArena.Entity {
         }
 
         displayText(content, color="#ffffff", fontSize=8, strokeThickness=0) {
-            let label = this.game.add.text(20, 10, content, {font: fontSize + 'px Press Start 2P', fill: color,
-                stroke: '#000000', strokeThickness: strokeThickness});
-            let t = this.game.add.tween(label).to({x: 20, y: -20, alpha: 0}, 1000, Phaser.Easing.Linear.None, true);
-            t.onComplete.add(function () {
-                label.destroy();
-            }, this);
-            this.addChild(label);
+            // TODO return a promise un queueAction and in hurtText & healText because in UT, it passes here after the game is destroyed with the setTimeOut
+            if(this.game) {
+                let label = new Phaser.Text(this.game, 20, 10, content, {
+                    font: fontSize + 'px Press Start 2P', fill: color,
+                    stroke: '#000000', strokeThickness: strokeThickness
+                });
+                let t = this.game.add.tween(label).to({x: 20, y: -20, alpha: 0}, 1000, Phaser.Easing.Linear.None, true);
+                t.onComplete.add(function () {
+                    label.destroy();
+                }, this);
+                this.addChild(label);
+            }
         }
 
         queueAction(action) {
