@@ -1,5 +1,5 @@
-module TacticArena {
-    export class Player {
+module TacticArena.Player {
+    export class BasePlayer {
         _id;
         name;
         faction;
@@ -12,11 +12,11 @@ module TacticArena {
             this.faction = 'human';
             this.isLocalPlayer = true;
             this.isBot = false;
-            this.battleParty = [Entity.Character.Ruairi, Entity.Character.Blondy];
+            this.battleParty = [Champion.Ruairi, Champion.Blondy];
         }
 
         getCharacters() {
-            return [Entity.Character.Ruairi, Entity.Character.Skeleton, Entity.Character.Evil, Entity.Character.Blondy];
+            return [Champion.Ruairi, Champion.Skeleton, Champion.Evil, Champion.Blondy];
         }
 
         getMaps() {

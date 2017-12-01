@@ -1,15 +1,15 @@
 module TacticArena.Animation {
     export class Block extends BaseAnimation {
-        targetPosition:Position;
-        animate:boolean;
+        targetPosition: Position;
+        animate: boolean;
 
-        constructor(state:State.BasePlayable, pawn:Entity.Pawn, order:BaseOrder, targetPosition:Position, animate:boolean) {
+        constructor(state: State.BasePlayable, pawn: Champion.BaseChampion, order: Order.BaseOrder, targetPosition: Position, animate: boolean) {
             super(state, pawn, order);
             this.targetPosition = targetPosition;
             this.animate = animate;
         }
 
-        get():Promise<any> {
+        get(): Promise<any> {
             let spritePosition = this.state.spritesManager.getReal(this.pawn).getPosition();
             if (this.animate) {
                 return this.state.spritesManager.getReal(this.pawn).moveTo(this.targetPosition.x, this.targetPosition.y).then((res) => {

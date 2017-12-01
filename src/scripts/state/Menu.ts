@@ -182,7 +182,7 @@ module TacticArena.State {
         startSinglePlayer() {
             this.game.state.start('mainsolooffline', true, false, {
                 players: [
-                    new PlayerBot('Bender'),
+                    new Player.Bot('Bender'),
                     (this.game as Game).player
                 ],
                 map: this.selectedMap

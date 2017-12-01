@@ -58,8 +58,8 @@ module TacticArena {
                     for(var i = 0; i < data.content.length; i++) {
                         if(data.content[i].orders) {
                             for (var j = 0; j < data.content[i].orders.length; j++) {
-                                if(data.content[i].orders[j].entityId) {
-                                    data.content[i].orders[j].entity = self.game.orderManager.getPawn(data.content[i].orders[j].entityId);
+                                if(data.content[i].orders[j].championId) {
+                                    data.content[i].orders[j].champion = self.game.orderManager.getPawn(data.content[i].orders[j].championId);
                                 }
                                 orders = orders.concat(data.content[i].orders[j]);
                             }
@@ -72,7 +72,7 @@ module TacticArena {
                         serializedSteps.push([]);
                         for (var j = 0; j < steps[i].length; j++) {
                             let s = {
-                                entityId: steps[i].stepUnits[j].pawn._id,
+                                championId: steps[i].stepUnits[j].pawn._id,
                                 stepUnitState: steps[i].stepUnits[j].stepUnitData,
                                 order: steps[i].stepUnits[j].order,
                             };
@@ -87,7 +87,7 @@ module TacticArena {
                         steps.push([]);
                         for (var j = 0; j < serializedSteps[i].length; j++) {
                             let s = {
-                                entity: self.game.pawns.find( o => { return o._id == serializedSteps[i].stepUnits[j].entityId; }),
+                                champion: self.game.pawns.find( o => { return o._id == serializedSteps[i].stepUnits[j].championId; }),
                                 stepUnitState: serializedSteps[i].stepUnits[j].stepUnitData,
                                 order: serializedSteps[i].stepUnits[j].order,
                             };

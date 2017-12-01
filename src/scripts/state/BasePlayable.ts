@@ -1,7 +1,7 @@
 /// <reference path="BaseState.ts"/>
 module TacticArena.State {
     export class BasePlayable extends TacticArena.State.BaseState {
-        pawns: Entity.Pawn[];
+        pawns: Champion.BaseChampion[];
         spritesManager: SpritesManager;
         mapGroup: Phaser.Group;
         mapDecorationGroup: Phaser.Group;

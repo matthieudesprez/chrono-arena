@@ -1,6 +1,5 @@
-/// <reference path="Sprite.ts"/>
-module TacticArena.Entity {
-    export class MobSpriteSimple extends TacticArena.Entity.Sprite {
+module TacticArena.Sprite {
+    export class MobSpriteSimple extends BaseSprite {
 
         constructor(game, x, y, ext, type, parent, size, tint=null) {
             super(game, x, y, ext, type, size, tint=null);

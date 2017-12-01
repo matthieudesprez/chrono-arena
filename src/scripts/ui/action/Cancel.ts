@@ -13,7 +13,7 @@ module TacticArena.Action {
                 state.spritesManager.destroyProjection(activePawn);
                 state.spritesManager.getReal(activePawn).stand(state.uiManager.actionMenu.savedDirection);
                 state.uiManager.actionMenu.skillDeselectAll();
-                state.orderManager.removeEntityOrder(activePawn);
+                state.orderManager.removeOrders(activePawn);
                 state.signalManager.onActionPlayed.dispatch(activePawn);
             }
         }

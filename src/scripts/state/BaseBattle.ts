@@ -38,52 +38,56 @@ module TacticArena.State {
             this.resolveManager = new ResolveManager(this);
             this.turnManager = new TurnManager(this);
             this.uiManager = new UI.UIManager(this);
-            if(this.chatUI) { this.chatUI.menu = this.uiManager; }
+            if (this.chatUI) {
+                this.chatUI.menu = this.uiManager;
+            }
             this.initOrderPhase(this.turnManager.getNextPawn(), true);
         }
 
         /*
-        Init the order phase during which the players can plan orders for their pawns and confirm them
+         Init the order phase during which the players can plan orders for their pawns and confirm them
          */
-        initOrderPhase(pawn: Entity.Pawn, first: boolean): void {
-            if(first) { this.orderManager.orders = []; }
-            this.turnManager.init(pawn, first).then( res => {
-                if(first) {
+        initOrderPhase(pawn: Champion.BaseChampion, first: boolean): void {
+            if (first) {
+                this.orderManager.orders = [];
+            }
+            this.turnManager.init(pawn, first).then(res => {
+                if (first) {
                     this.uiManager.turnIndicatorUI.write(this.turnManager.currentTurnIndex + 1);
                     return this.uiManager.transitionUI.show('PLAN');
                 }
                 return true;
-            }).then( res => {
+            }).then(res => {
                 this.process = false;
                 this.selecting = true;
-                if(this.turnManager.getActivePlayer().isBot) {
+                if (this.turnManager.getActivePlayer().isBot) {
                     this.aiManager.play(pawn);
                 }
             });
         }
 
         /*
-        Init the resolve phase which is a step by step representation of what results from the orderManager processing
+         Init the resolve phase which is a step by step representation of what results from the orderManager processing
          */
         initResolvePhase(steps): void {
             this.resolveManager.init(steps);
-            this.uiManager.transitionUI.show('EXECUTION').then( res => {
+            this.uiManager.transitionUI.show('EXECUTION').then(res => {
                 return res;
-            }).then( res => {
+            }).then(res => {
                 this.uiManager.timelineMenu = new UI.TimelineMenu(this);
                 return this.uiManager.timelineMenu.init(<any>steps.length);
-            }).then( res => {
+            }).then(res => {
                 this.resolveManager.processSteps(0);
             });
         }
 
         /*
-        Return a promise, which resolve when the game is not paused
+         Return a promise, which resolve when the game is not paused
          */
         isGameReady(): Promise<any> {
             var self = this;
-            return new Promise( (resolve, reject) => {
-                (function isReady(){
+            return new Promise((resolve, reject) => {
+                (function isReady() {
                     if (!self.isPaused) resolve();
                     setTimeout(isReady, 300);
                 })();
@@ -91,43 +95,47 @@ module TacticArena.State {
         }
 
         /*
-        Return true if there is 1 or 0 player remaining (all the other's pawns are dead)
+         Return true if there is 1 or 0 player remaining (all the other's pawns are dead)
          */
-        getRemainingPlayers(): Player[] {
-            return this.players.filter( (player: Player) => {
-                return this.pawns.filter((pawn:Entity.Pawn) => {
-                    return pawn.isAlive() && pawn.team === player._id
-                }).length > 0;
+        getRemainingPlayers(): Player.BasePlayer[] {
+            return this.players.filter((player: Player.BasePlayer) => {
+                return this.pawns.filter((pawn: Champion.BaseChampion) => {
+                        return pawn.isAlive() && pawn.team === player._id
+                    }).length > 0;
             });
         }
 
         /*
-        Return true if there is 1 or 0 players remaining (all the other's pawns are dead)
+         Return true if there is 1 or 0 players remaining (all the other's pawns are dead)
          */
         isOver(): boolean {
             return this.getRemainingPlayers().length <= 1;
         }
 
         /*
-        Return a text representing the result of the battle
+         Return a text representing the result of the battle
          */
         getResult(): string {
             let result = 'Fighting';
             let remaingPlayers = this.getRemainingPlayers();
-            if (remaingPlayers.length === 0) { result = 'Draw'; }
-            else if (remaingPlayers.length === 1) { result = remaingPlayers[0].name + '\nWins'; }
+            if (remaingPlayers.length === 0) {
+                result = 'Draw';
+            }
+            else if (remaingPlayers.length === 1) {
+                result = remaingPlayers[0].name + '\nWins';
+            }
             return result;
         }
 
         /*
-        Return a unique id, which is for now the index of the pawn in this.pawns
+         Return a unique id, which is for now the index of the pawn in this.pawns
          */
         getUniqueId() {
             return this.pawns.length;
         }
 
         /*
-        Show the battleOver modal
+         Show the battleOver modal
          */
         battleOver() {
             this.uiManager.modalUI.createGameOverModal();
@@ -135,8 +143,8 @@ module TacticArena.State {
         }
 
         getPlayablePlayers() {
-            return this.players.filter( (player: Player) => {
-               return player.isLocalPlayer;
+            return this.players.filter((player: Player.BasePlayer) => {
+                return player.isLocalPlayer;
             });
         }
     }

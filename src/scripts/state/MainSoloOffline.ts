@@ -7,7 +7,7 @@ module TacticArena.State {
             super.init(data);
             this.playMode = 'offline';
             this.players = data.players;
-            this.players.forEach( (player: Player, playerId: number) => {
+            this.players.forEach( (player: Player.BasePlayer, playerId: number) => {
                 player._id = playerId;
                 if (player.isBot) { this.aiManager = new AiManager(this, player._id); }
                 player.battleParty.forEach((character, characterIndex) => {

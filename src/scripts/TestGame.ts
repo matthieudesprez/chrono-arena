@@ -2,7 +2,7 @@
 /// <reference path="./definitions/jasmine.d.ts"/>
 /// <reference path="./definitions/easystarjs.d.ts"/>
 
-module TacticArena.Specs {
+module TacticArena {
     export class TestGame extends Phaser.Game {
         tileSize;
         constructor(headless: boolean = false) {

@@ -1,5 +1,5 @@
-module TacticArena.Entity {
-    export class Sprite extends Phaser.Sprite {
+module TacticArena.Sprite {
+    export class BaseSprite extends Phaser.Sprite {
         state;
         _speed:number;
         _size;

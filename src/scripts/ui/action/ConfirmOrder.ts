@@ -14,7 +14,7 @@ module TacticArena.Action {
                     if(state.playMode == 'online' && !nextPawn) { // if no more playable pawns to play
                         state.serverManager.request('VALID_ORDER_PHASE', {
                             turn: state.turnManager.currentTurnIndex,
-                            orders: state.orderManager.getPlayerOrders(state.getPlayablePlayers())
+                            orders: state.orderManager.orders
                         }); // end order phase and send orders to server
                         state.uiManager.ingamemenuUI.show('Waiting for opponent move');
                     } else {

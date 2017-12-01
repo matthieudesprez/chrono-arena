@@ -1,6 +1,5 @@
-/// <reference path="Skill.ts"/>
 module TacticArena.Skill {
-    export class Wind extends TacticArena.Skill.LinearSkill {
+    export class Wind extends LinearSkill {
 
         constructor(state, pawn) {
             super(state, pawn);

@@ -1,4 +1,4 @@
-module TacticArena {
+module TacticArena.Order {
     export class BaseOrder {
         action:string;
         position:Position;
@@ -12,7 +12,7 @@ module TacticArena {
             this.targets = targets;
         }
 
-        process(ordermanager:OrderManager, steps:Entity.Step[], stepIndex:number, aIndex:number, bIndex:number):BaseOrder {
+        process(ordermanager:OrderManager, steps:Step[], stepIndex:number, aIndex:number, bIndex:number):BaseOrder {
             return this;
         }
 

@@ -6,20 +6,20 @@ module TacticArena.Order {
             super('slash', position, direction);
         }
 
-        process(ordermanager:OrderManager, steps:Entity.Step[], stepIndex:number, aIndex:number, bIndex:number):BaseOrder {
+        process(ordermanager:OrderManager, steps:Step[], stepIndex:number, aIndex:number, bIndex:number):BaseOrder {
             let stepUnits = steps[stepIndex].stepUnits;
             let stepUnitA = stepUnits[aIndex];
             let stepUnitB = stepUnits[bIndex];
             stepUnitA.data.fleeRate = 0;
             let result = super.process(ordermanager, steps, stepIndex, aIndex, bIndex);
             if (result instanceof Attack) {
-                //entityBHpLost += 1;
+                //championBHpLost += 1;
             }
             return result
         }
 
         //TODO voir pour factoriser avec Attack
-        resolve (pawn:Entity.Pawn, stepUnitData:Entity.StepUnitData, previousStep:Entity.StepUnit, animate:boolean, backward:boolean, i:number, state):Promise<any> {
+        resolve (pawn:Champion.BaseChampion, stepUnitData:StepUnitData, previousStep:StepUnit, animate:boolean, backward:boolean, i:number, state):Promise<any> {
             return new Animation.Attack(state, pawn, this).get();
         }
     }

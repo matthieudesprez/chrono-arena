@@ -61,9 +61,9 @@ module TacticArena {
             });
 
             this.onOrderChange.add(function(pawn) {
-                self.game.uiManager.ordersnotificationsUI.update(self.game.orderManager.getOrders(pawn._id));
+                self.game.uiManager.ordersnotificationsUI.update(self.game.orderManager.getOrders(pawn));
                 self.game.uiManager.actionMenu.enableConfirm();
-                if(self.game.orderManager.getOrders(pawn._id).length > 0) {
+                if(self.game.orderManager.getOrders(pawn).length > 0) {
                     self.game.uiManager.actionMenu.enableCancel();
                 } else {
                     self.game.uiManager.actionMenu.disableCancel();
@@ -112,7 +112,7 @@ module TacticArena {
 
             this.onActivePawnChange.add(function(activePawn) {
                 self.game.uiManager.ordersnotificationsUI.clean();
-                self.game.uiManager.ordersnotificationsUI.update(self.game.orderManager.getOrders(activePawn._id));
+                self.game.uiManager.ordersnotificationsUI.update(self.game.orderManager.getOrders(activePawn));
                 //self.game.uiManager.pawnsinfosUI.select(activePawn._id);
                 //self.game.uiManager.actionUI.update(activePawn.getAp());
                 //self.game.uiManager.actionUI.select('walk');

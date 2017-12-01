@@ -2,10 +2,9 @@ declare var EasyStar;
 module TacticArena.State {
     export class Test extends TacticArena.State.BaseState {
         layer: Phaser.TilemapLayer;
-        pawns: Entity.Pawn[];
+        pawns: Champion.BaseChampion[];
         spritesManager: SpritesManager;
         pathfinder;
-
         worldGroup: Phaser.Group;
         mapGroup: Phaser.Group;
         mapDecorationGroup: Phaser.Group;

@@ -14,7 +14,7 @@ module TacticArena {
             this.active = false;
         }
 
-        init(steps:Entity.Step[]) {
+        init(steps:Step[]) {
             this.steps = steps;
             this.manageProjectionDislay(steps[0], true);
             this.currentIndex = 0;
@@ -72,23 +72,23 @@ module TacticArena {
 
         manageProjectionDislay(step, compareActualEntity = false) {
             step.stepUnits.forEach( (stepUnit, i) => {
-                var entityA = stepUnit.pawn;
+                var championA = stepUnit.pawn;
                 let order = stepUnit.order;
-                let position = this.game.spritesManager.getProjectionOrReal(entityA).getPosition();
+                let position = this.game.spritesManager.getProjectionOrReal(championA).getPosition();
 
-                if (this.game.spritesManager.getProjection(entityA)) {
+                if (this.game.spritesManager.getProjection(championA)) {
                     let condition = false;
                     if(compareActualEntity) {
-                        condition = this.game.spritesManager.getReal(entityA).getPosition().equals(position);
+                        condition = this.game.spritesManager.getReal(championA).getPosition().equals(position);
                     } else {
                         condition = order.position.equals(position);
                     }
 
                     if (condition || !stepUnit.data.aIsAlive || stepUnit.data.altered) {
-                        this.game.spritesManager.getProjection(entityA).hide();
-                        this.game.spritesManager.getReal(entityA).show();
+                        this.game.spritesManager.getProjection(championA).hide();
+                        this.game.spritesManager.getReal(championA).show();
                     } else {
-                        this.game.spritesManager.getProjection(entityA).show(0.7);
+                        this.game.spritesManager.getProjection(championA).show(0.7);
                     }
                 }
             });

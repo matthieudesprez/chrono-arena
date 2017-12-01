@@ -1,5 +1,5 @@
-module TacticArena.Entity {
-    export class Pawn {
+module TacticArena.Champion {
+    export class BaseChampion {
         state;
         _id: number;
         _name: string;
@@ -11,12 +11,12 @@ module TacticArena.Entity {
         _mpMax: number;
         type: string;
         team: number;
-        spriteClass:typeof Entity.Sprite;
-        skills: Skill.Skill[];
-        position:Position; // during Order Phase = initial position, during Resolve Phase = current step position (TODO beware of moved -> see ResolveManager)
+        spriteClass: typeof Sprite.BaseSprite;
+        skills: Skill.BaseSkill[];
+        position: Position; // during Order Phase = initial position, during Resolve Phase = current step position (TODO beware of moved -> see ResolveManager)
         direction; // during Order Phase = initial direction, during Resolve Phase = current step direction
 
-        constructor(state, x, y, direction, type, id, team, name = "", spriteClass:typeof Entity.Sprite = Entity.Sprite) {
+        constructor(state, x, y, direction, type, id, team, name = "", spriteClass: typeof Sprite.BaseSprite = Sprite.BaseSprite) {
             this.state = state;
             this._id = id;
             this._name = name;
@@ -58,9 +58,9 @@ module TacticArena.Entity {
             return this._ap;
         }
 
-        setAp(ap, dispatch=true) {
+        setAp(ap, dispatch = true) {
             this._ap = ap;
-            if(dispatch) {
+            if (dispatch) {
                 this.state.signalManager.onApChange.dispatch(this);
             }
         }
@@ -69,9 +69,9 @@ module TacticArena.Entity {
             return this._mp;
         }
 
-        setMp(mp, dispatch=true) {
+        setMp(mp, dispatch = true) {
             this._mp = mp;
-            if(dispatch) {
+            if (dispatch) {
                 this.state.signalManager.onMpChange.dispatch(this);
             }
         }
@@ -80,7 +80,7 @@ module TacticArena.Entity {
             return this._hp;
         }
 
-        setHp(hp, forceAnimation=false) {
+        setHp(hp, forceAnimation = false) {
             this._hp = (hp > this._hpMax) ? this._hpMax : hp;
             this.state.signalManager.onHpChange.dispatch(this, forceAnimation);
         }

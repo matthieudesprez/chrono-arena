@@ -1,5 +1,5 @@
 module TacticArena.Skill {
-    export abstract class Skill {
+    export abstract class BaseSkill {
         state;
         pawn;
         id;

@@ -1,4 +1,4 @@
-module TacticArena.Entity {
+module TacticArena {
     export class StepUnitData {
         moveHasBeenBlocked:boolean;
         positionBlocked:Position;
@@ -10,15 +10,15 @@ module TacticArena.Entity {
         aWasFacingB:boolean;
         aWasNextToB:boolean;
         fleeRate:number;
-        entityAApCost:number;
-        entityBHpLost:number;
+        championAApCost:number;
+        championBHpLost:number;
         aIsActive:boolean;
         aIsAlive:boolean;
         keepDirection:boolean;
         keepPosition:boolean;
         equalPositions:boolean;
         differentTeams:boolean;
-        alteredEntityB:boolean;
+        alteredChampionB:boolean;
         positionBBeforeOrder:Position;
 
         constructor(ap=null, hp=null) {
@@ -34,8 +34,8 @@ module TacticArena.Entity {
             this.aWasNextToB = false;
 
             this.fleeRate = 50;
-            this.entityAApCost = 1;
-            this.entityBHpLost = 0;
+            this.championAApCost = 1;
+            this.championBHpLost = 0;
 
             this.aIsActive = false;
             this.aIsAlive = true;
@@ -43,7 +43,7 @@ module TacticArena.Entity {
             this.keepPosition = false;
             this.equalPositions = false;
             this.differentTeams = false;
-            this.alteredEntityB = false;
+            this.alteredChampionB = false;
             this.positionBBeforeOrder = null;
         }
     }

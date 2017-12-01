@@ -84,12 +84,12 @@ module TacticArena.UI {
          */
         wKeyPress(self, uiManager) {
             if(self.altKey) {
-                uiManager.game.players.filter( (player: Player) => {
+                uiManager.game.players.filter( (player: Player.BasePlayer) => {
                     return player.isBot;
-                }).forEach( (player: Player) => {
-                    uiManager.game.pawns.filter( (pawn: Entity.Pawn) => {
+                }).forEach( (player: Player.BasePlayer) => {
+                    uiManager.game.pawns.filter( (pawn: Champion.BaseChampion) => {
                         return pawn.team === player._id;
-                    }).forEach((pawn:Entity.Pawn) => {
+                    }).forEach((pawn:Champion.BaseChampion) => {
                         pawn.setHp(0);
                     });
                 });

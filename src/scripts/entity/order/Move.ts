@@ -1,6 +1,6 @@
 /// <reference path="ReflexOrder.ts"/>
 module TacticArena.Order {
-    import StepUnitData = TacticArena.Entity.StepUnitData;
+    import StepUnitData = TacticArena.StepUnitData;
     export class Move extends ReflexOrder {
         target;
 
@@ -9,7 +9,7 @@ module TacticArena.Order {
             this.target = target;
         }
 
-        resolve (pawn:Entity.Pawn, stepUnitData:Entity.StepUnitData, previousStep:Entity.StepUnit, animate:boolean, backward:boolean, i:number, state):Promise<any> {
+        resolve (pawn:Champion.BaseChampion, stepUnitData:StepUnitData, previousStep:StepUnit, animate:boolean, backward:boolean, i:number, state):Promise<any> {
             let result = null;
             if (stepUnitData.moveHasBeenBlocked) {
                 result = new Animation.Block(state, pawn, this, stepUnitData.positionBlocked, animate).get();

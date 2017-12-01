@@ -22,7 +22,7 @@ module TacticArena {
             this.initialWidth = 384;
             this.initialHeight = 640;
 
-            this.player = new Player('Jean Neige');
+            this.player = new Player.BasePlayer('Jean Neige');
             this.debugMode = false;
             this.tileSize = 32;
 

@@ -1,8 +1,8 @@
-module TacticArena.Entity {
+module TacticArena {
     export class Step {
-        stepUnits:StepUnit[];
+        stepUnits: StepUnit[];
 
-        constructor(stepUnits:StepUnit[] = []) {
+        constructor(stepUnits: StepUnit[] = []) {
             this.stepUnits = stepUnits;
 
         }

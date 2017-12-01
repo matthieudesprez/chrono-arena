@@ -1,20 +1,20 @@
 /// <reference path="../TestGame.ts"/>
 // / <reference path="../state/Main.ts"/>
 
-module TacticArena.Specs {
+module TacticArena {
     describe("ResolveManager", () => {
         var testGame, currentState;
 
-        function getInitialStep():Entity.Step {
-            let result = new Entity.Step([
-                new Entity.StepUnit(
+        function getInitialStep():Step {
+            let result = new Step([
+                new StepUnit(
                     currentState.pawns[0],
-                    new Entity.StepUnitData(3, 4),
+                    new StepUnitData(3, 4),
                     new Order.Stand(new Position(currentState.map.startPositions[0][0].x, currentState.map.startPositions[0][0].y), currentState.map.startPositions[0][0].d)
                 ),
-                new Entity.StepUnit(
+                new StepUnit(
                     currentState.pawns[1],
-                    new Entity.StepUnitData(3, 4),
+                    new StepUnitData(3, 4),
                     new Order.Stand(new Position(currentState.map.startPositions[1][0].x, currentState.map.startPositions[1][0].y), currentState.map.startPositions[1][0].d)
                 )
             ]);
@@ -38,10 +38,10 @@ module TacticArena.Specs {
             testGame.state.onStateChange.add(function() {
                 currentState = testGame.state.getCurrentState();
                 setTimeout(function() {
-                    let p1 = new Entity.Character.Test(currentState, currentState.map.startPositions[0][0].x, currentState.map.startPositions[0][0].y, currentState.map.startPositions[0][0].d, 1, 1);
+                    let p1 = new Champion.Test(currentState, currentState.map.startPositions[0][0].x, currentState.map.startPositions[0][0].y, currentState.map.startPositions[0][0].d, 1, 1);
                     currentState.pawns.push(p1);
                     currentState.spritesManager.add(p1);
-                    let p2 = new Entity.Character.Test(currentState, currentState.map.startPositions[1][0].x, currentState.map.startPositions[1][0].y, currentState.map.startPositions[1][0].d, 2, 2)
+                    let p2 = new Champion.Test(currentState, currentState.map.startPositions[1][0].x, currentState.map.startPositions[1][0].y, currentState.map.startPositions[1][0].d, 2, 2)
                     currentState.pawns.push(p2);
                     currentState.spritesManager.add(p2);
                     currentState.isPaused = true;
@@ -59,15 +59,15 @@ module TacticArena.Specs {
             currentState.resolveManager.init(
                 [
                     getInitialStep(),
-                    new Entity.Step([
-                        new Entity.StepUnit(
+                    new Step([
+                        new StepUnit(
                             currentState.pawns[0],
-                            new Entity.StepUnitData(2, 4),
+                            new StepUnitData(2, 4),
                             new Order.Move(new Position(currentState.map.startPositions[0][0].x + 1, currentState.map.startPositions[0][0].y), currentState.map.startPositions[0][0].d)
                         ),
-                        new Entity.StepUnit(
+                        new StepUnit(
                             currentState.pawns[1],
-                            new Entity.StepUnitData(2, 4),
+                            new StepUnitData(2, 4),
                             new Order.Stand(new Position(currentState.map.startPositions[1][0].x, currentState.map.startPositions[1][0].y), currentState.map.startPositions[1][0].d)
                         )
                     ])
@@ -88,28 +88,28 @@ module TacticArena.Specs {
             currentState.resolveManager.init(
                 [
                     getInitialStep(),
-                    new Entity.Step([
-                        new Entity.StepUnit(
+                    new Step([
+                        new StepUnit(
                             currentState.pawns[0],
-                            new Entity.StepUnitData(2, 4),
+                            new StepUnitData(2, 4),
                             new Order.Move(new Position(currentState.map.startPositions[0][0].x + 1, currentState.map.startPositions[0][0].y), currentState.map.startPositions[0][0].d)
                         ),
-                        new Entity.StepUnit(
+                        new StepUnit(
                             currentState.pawns[1],
-                            new Entity.StepUnitData(2, 4),
+                            new StepUnitData(2, 4),
                             new Order.Stand(new Position(currentState.map.startPositions[1][0].x, currentState.map.startPositions[1][0].y), currentState.map.startPositions[1][0].d)
                         )
                     ]),
-                    new Entity.Step([
-                        new Entity.StepUnit(
+                    new Step([
+                        new StepUnit(
                             currentState.pawns[0],
-                            new Entity.StepUnitData(1, 4),
-                            new Order.Attack(new Position(currentState.map.startPositions[0][0].x + 1, currentState.map.startPositions[0][0].y), currentState.map.startPositions[0][0].d, [{ entityId: currentState.pawns[1]._id, dodge: false }])
+                            new StepUnitData(1, 4),
+                            new Order.Attack(new Position(currentState.map.startPositions[0][0].x + 1, currentState.map.startPositions[0][0].y), currentState.map.startPositions[0][0].d, [{ championId: currentState.pawns[1]._id, dodge: false }])
                         ),
-                        new Entity.StepUnit(
+                        new StepUnit(
                             currentState.pawns[1],
-                            new Entity.StepUnitData(1, 3),
-                            new Order.Attack(new Position(currentState.map.startPositions[1][0].x, currentState.map.startPositions[1][0].y), currentState.map.startPositions[1][0].d, [{ entityId: currentState.pawns[0]._id, dodge: true }])
+                            new StepUnitData(1, 3),
+                            new Order.Attack(new Position(currentState.map.startPositions[1][0].x, currentState.map.startPositions[1][0].y), currentState.map.startPositions[1][0].d, [{ championId: currentState.pawns[0]._id, dodge: true }])
                         )
                     ])
                 ]
@@ -134,40 +134,40 @@ module TacticArena.Specs {
             currentState.resolveManager.init(
                 [
                     getInitialStep(),
-                    new Entity.Step([
-                        new Entity.StepUnit(
+                    new Step([
+                        new StepUnit(
                             currentState.pawns[0],
-                            new Entity.StepUnitData(2, 4),
+                            new StepUnitData(2, 4),
                             new Order.Move(new Position(currentState.map.startPositions[0][0].x, currentState.map.startPositions[0][0].y - 1), currentState.map.startPositions[0][0].d)
                         ),
-                        new Entity.StepUnit(
+                        new StepUnit(
                             currentState.pawns[1],
-                            new Entity.StepUnitData(2, 4),
+                            new StepUnitData(2, 4),
                             new Order.Move(new Position(currentState.map.startPositions[1][0].x, currentState.map.startPositions[1][0].y - 1), currentState.map.startPositions[1][0].d)
                         )
                     ]),
-                    new Entity.Step([
-                        new Entity.StepUnit(
+                    new Step([
+                        new StepUnit(
                             currentState.pawns[0],
-                            new Entity.StepUnitData(0, 4),
+                            new StepUnitData(0, 4),
                             new Order.Fire(new Position(currentState.map.startPositions[0][0].x, currentState.map.startPositions[0][0].y - 1), currentState.map.startPositions[0][0].d, [currentState.pawns[1]._id])
                         ),
-                        new Entity.StepUnit(
+                        new StepUnit(
                             currentState.pawns[1],
-                            new Entity.StepUnitData(1, 2),
+                            new StepUnitData(1, 2),
                             new Order.Move(new Position(currentState.map.startPositions[1][0].x - 1, currentState.map.startPositions[1][0].y - 1), currentState.map.startPositions[1][0].d)
                         )
                     ]),
-                    new Entity.Step([
-                        new Entity.StepUnit(
+                    new Step([
+                        new StepUnit(
                             currentState.pawns[0],
-                            new Entity.StepUnitData(0, 3),
+                            new StepUnitData(0, 3),
                             new Order.Stand(new Position(currentState.map.startPositions[0][0].x, currentState.map.startPositions[0][0].y - 1), currentState.map.startPositions[0][0].d, [currentState.pawns[1]._id])
                         ),
-                        new Entity.StepUnit(
+                        new StepUnit(
                             currentState.pawns[1],
-                            new Entity.StepUnitData(0, 2),
-                            new Order.Move(new Position(currentState.map.startPositions[1][0].x - 1, currentState.map.startPositions[1][0].y - 1), currentState.map.startPositions[1][0].d, { entity: currentState.pawns[0]._id, dodge: false })
+                            new StepUnitData(0, 2),
+                            new Order.Move(new Position(currentState.map.startPositions[1][0].x - 1, currentState.map.startPositions[1][0].y - 1), currentState.map.startPositions[1][0].d, { champion: currentState.pawns[0]._id, dodge: false })
                         )
                     ])
                 ]

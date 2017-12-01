@@ -15,7 +15,7 @@ module TacticArena.Order {
         // AND IF A & B are not in the same team
         // AND IF A keeps its direction (aIsFacingB) (et ne va donc pas pas se détourner de B)
         // AND IF A stays next to B OR IF A moves toward B (equalPositions) (en lui faisant face)
-        process(ordermanager:OrderManager, steps:Entity.Step[], stepIndex:number, aIndex:number, bIndex:number):BaseOrder {
+        process(ordermanager:OrderManager, steps:Step[], stepIndex:number, aIndex:number, bIndex:number):BaseOrder {
             let result: ReflexOrder|Attack;
             result = this;
             let stepUnits = steps[stepIndex].stepUnits;
@@ -23,18 +23,18 @@ module TacticArena.Order {
             let stepUnitB = stepUnits[bIndex];
             if (stepUnitA.data.aWasNextToB && stepUnitA.data.aWasFacingB && stepUnitA.data.aIsActive && stepUnitA.data.differentTeams &&
                 stepUnitA.data.keepDirection && (stepUnitA.data.keepPosition || stepUnitA.data.equalPositions)) {
-                let entityBIsDodging = true;
+                let championBIsDodging = true;
                 if (OrderManager.resolutionEsquive(stepUnitA.data.fleeRate)) {
-                    stepUnitA.data.entityBHpLost += 1;
-                    entityBIsDodging = false;
-                    if (stepUnitA.data.alteredEntityB) {
+                    stepUnitA.data.championBHpLost += 1;
+                    championBIsDodging = false;
+                    if (stepUnitA.data.alteredChampionB) {
                         stepUnitB.data.moveHasBeenBlocked = (stepUnitB.order.action == 'move');
                     }
                 }
                 result = new Attack(this.position, this.direction, [{
-                    entityId: stepUnitB.pawn._id,
-                    dodge: entityBIsDodging,
-                    damages: stepUnitA.data.entityBHpLost
+                    championId: stepUnitB.pawn._id,
+                    dodge: championBIsDodging,
+                    damages: stepUnitA.data.championBHpLost
                 }]);
             }
             if(result === null) {

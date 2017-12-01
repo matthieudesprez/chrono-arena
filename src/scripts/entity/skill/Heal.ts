@@ -1,6 +1,6 @@
-/// <reference path="Skill.ts"/>
+/// <reference path="LinearSkill.ts"/>
 module TacticArena.Skill {
-    export class Heal extends TacticArena.Skill.LinearSkill {
+    export class Heal extends LinearSkill {
 
         constructor(state, pawn) {
             super(state, pawn);

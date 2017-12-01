@@ -17,6 +17,7 @@ module.exports = function(config) {
             file: 'coverage.json'
         },
         files: [
+            'node_modules/phantomjs-polyfill-find/find-polyfill.js',
             'node_modules/promise-polyfill/promise.min.js',
             'build/vendor/easystarjs/bin/easystar-0.2.3.min.js',
             'build/vendor/phaser-official/build/phaser.js',

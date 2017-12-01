@@ -1,6 +1,6 @@
 /// <reference path="LinearSkill.ts"/>
 module TacticArena.Skill {
-    export class Fire extends TacticArena.Skill.LinearSkill {
+    export class Fire extends LinearSkill {
 
         constructor(state, pawn) {
             super(state, pawn);

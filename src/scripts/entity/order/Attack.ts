@@ -1,3 +1,4 @@
+/// <reference path="BaseOrder.ts"/>
 module TacticArena.Order {
     export class Attack extends BaseOrder {
 
@@ -5,7 +6,7 @@ module TacticArena.Order {
             super('attack', position, direction, targets);
         }
 
-        resolve (pawn:Entity.Pawn, stepUnitData:Entity.StepUnitData, previousStep:Entity.StepUnit, animate:boolean, backward:boolean, i:number, state):Promise<any> {
+        resolve (pawn:Champion.BaseChampion, stepUnitData:StepUnitData, previousStep:StepUnit, animate:boolean, backward:boolean, i:number, state):Promise<any> {
             return new Animation.Attack(state, pawn, this).get();
         }
     }

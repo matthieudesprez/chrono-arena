@@ -1,12 +1,12 @@
-module TacticArena {
-    export class PlayerBot extends Player {
+module TacticArena.Player {
+    export class Bot extends BasePlayer {
 
         constructor(name) {
             super(name);
             this.faction = 'bot';
             this.isLocalPlayer = true;
             this.isBot = true;
-            this.battleParty = [Entity.Character.Skeleton, Entity.Character.Evil];
+            this.battleParty = [Champion.Skeleton, Champion.Evil];
         }
     }
 }
