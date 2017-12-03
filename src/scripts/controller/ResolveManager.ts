@@ -50,7 +50,7 @@ module TacticArena {
 
             let self = this;
             this.setCurrentIndex(index);
-            let previousStep = index > 0 ? this.steps[index - 1] : null;
+            let previousStep: Step = index > 0 ? this.steps[index - 1] : null;
 
             var promisesOrders = [];
             this.steps[index].stepUnits.forEach( (stepUnit, i) => {
@@ -60,9 +60,9 @@ module TacticArena {
             this.manageProjectionDislay(this.steps[index]);
             return Promise.all(promisesOrders).then( res => {
                 if (!backward) { self.manageProjectionDislay(self.steps[index]);}
-
-                self.steps[index].stepUnits.forEach(stepUnit => { // update pawn HP and its different states
-                    let forceAnimation = typeof stepUnit.data.dies !== 'undefined' && stepUnit.data.dies;
+                self.steps[index].stepUnits.forEach((stepUnit, i) => { // update pawn HP and its different states
+                    //let forceAnimation = typeof stepUnit.data.dies !== 'undefined' && stepUnit.data.dies;
+                    let forceAnimation = previousStep !== null && !(previousStep.stepUnits[i].order instanceof Order.Dead);
                     stepUnit.pawn.setPosition(stepUnit.order.position); // TODO beware of moved or blocked
                     stepUnit.pawn.setDirection(stepUnit.order.direction);
                     stepUnit.pawn.setHp(stepUnit.data.hp, forceAnimation);

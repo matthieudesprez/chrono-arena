@@ -10,17 +10,17 @@ module TacticArena.State {
             this.serverManager = serverManager;
             this.serverManager.game = this;
             this.players = data.content.players;
-            let startPositions = [[{x: 8, y: 8, d: 'E'}, {x: 7, y: 7, d: 'E'}], [{x: 11, y: 8, d: 'W'}, {x: 12, y: 7, d: 'W'}]];
+            let startPositions = [[new Position(8, 8, 'E'), new Position(7, 7, 'E')], [new Position(11, 8, 'W'), new Position(12, 7, 'W')]];
             this.players.forEach( (p, k) => {
                 if (p.token == self.serverManager.token) {
                     //this.playerTeam = k;
                 }
                 if (p.faction == 'human') {
-                    this.pawns.push(new Champion.BaseChampion(this, startPositions[k][0].x, startPositions[k][0].y, startPositions[k][0].d, 'ruairi', this.getUniqueId(), k, this.generator.generate()));
-                    this.pawns.push(new Champion.BaseChampion(this, startPositions[k][1].x, startPositions[k][1].y, startPositions[k][1].d, 'blondy', this.getUniqueId(), k, this.generator.generate()));
+                    this.pawns.push(new Champion.BaseChampion(this, startPositions[k][0], 'ruairi', this.getUniqueId(), k, this.generator.generate()));
+                    this.pawns.push(new Champion.BaseChampion(this, startPositions[k][1], 'blondy', this.getUniqueId(), k, this.generator.generate()));
                 } else {
-                    this.pawns.push(new Champion.BaseChampion(this, startPositions[k][0].x, startPositions[k][0].y, startPositions[k][0].d, 'evil', this.getUniqueId(), k, this.generator.generate()));
-                    this.pawns.push(new Champion.BaseChampion(this, startPositions[k][1].x, startPositions[k][1].y, startPositions[k][1].d, 'skeleton', this.getUniqueId(), k, this.generator.generate()));
+                    this.pawns.push(new Champion.BaseChampion(this, startPositions[k][0], 'evil', this.getUniqueId(), k, this.generator.generate()));
+                    this.pawns.push(new Champion.BaseChampion(this, startPositions[k][1], 'skeleton', this.getUniqueId(), k, this.generator.generate()));
                 }
             });
         }

@@ -1,8 +1,8 @@
 module TacticArena.Champion {
     export class Ruairi extends BaseChampion {
 
-        constructor(state, x, y, ext, id, team) {
-            super(state, x, y, ext, 'ruairi', id, team, "Ruairi", Sprite.BaseSprite);
+        constructor(state, position, id, team) {
+            super(state, position, 'ruairi', id, team, "Ruairi", Sprite.BaseSprite);
             this.skills = this.skills.concat([
                 new TacticArena.Skill.Walk(this.state, this),
                 new TacticArena.Skill.Slash(this.state, this),

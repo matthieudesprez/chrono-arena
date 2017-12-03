@@ -16,10 +16,7 @@ module TacticArena.State {
         playMode;
         gridWidth;
         gridHeight;
-
-        constructor() {
-            super();
-        }
+        debugMode;
 
         init(data?, chat?, server?) {
             super.init(data);
@@ -29,6 +26,7 @@ module TacticArena.State {
             this.signalManager = new SignalManager(this);
             this.signalManager.init();
             this.pointer = new UI.Pointer(this);
+            this.debugMode = false; // true => allow AI control
         }
 
         create() {
@@ -38,9 +36,7 @@ module TacticArena.State {
             this.resolveManager = new ResolveManager(this);
             this.turnManager = new TurnManager(this);
             this.uiManager = new UI.UIManager(this);
-            if (this.chatUI) {
-                this.chatUI.menu = this.uiManager;
-            }
+            if (this.chatUI) { this.chatUI.menu = this.uiManager; }
             this.initOrderPhase(this.turnManager.getNextPawn(), true);
         }
 
@@ -129,6 +125,7 @@ module TacticArena.State {
 
         /*
          Return a unique id, which is for now the index of the pawn in this.pawns
+         TODO won't work if adding multiple Champions at once
          */
         getUniqueId() {
             return this.pawns.length;

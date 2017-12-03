@@ -5,8 +5,8 @@ module TacticArena {
     describe("ResolveManager", () => {
         var testGame, currentState;
 
-        function getInitialStep():Step {
-            let result = new Step([
+        function getInitialStep(): Step {
+            return new Step([
                 new StepUnit(
                     currentState.pawns[0],
                     new StepUnitData(3, 4),
@@ -18,35 +18,35 @@ module TacticArena {
                     new Order.Stand(new Position(currentState.map.startPositions[1][0].x, currentState.map.startPositions[1][0].y), currentState.map.startPositions[1][0].d)
                 )
             ]);
-            return result;
         }
 
-        function testStepResolution(index, position, ap, hp, direction) {
+        function testStepResolution(index, position, ap, hp) {
             let pawn = currentState.pawns[index];
             expect(currentState.spritesManager.getReal(pawn).getPosition().equals(position)).toEqual(true);
             expect(pawn.getAp()).toEqual(ap);
             expect(pawn.getHp()).toEqual(hp);
-            expect(currentState.spritesManager.getReal(pawn).getDirection()).toEqual(direction);
         }
 
         beforeEach(function (done) {
-            spyOn(console, 'log').and.stub();
+            //spyOn(console, 'log').and.stub();
             spyOn(console, 'info').and.stub();
             spyOn(console, 'warn').and.stub();
             testGame = new TestGame(true);
-            testGame.state.start('test');
-            testGame.state.onStateChange.add(function() {
-                currentState = testGame.state.getCurrentState();
-                setTimeout(function() {
-                    let p1 = new Champion.Test(currentState, currentState.map.startPositions[0][0].x, currentState.map.startPositions[0][0].y, currentState.map.startPositions[0][0].d, 1, 1);
-                    currentState.pawns.push(p1);
-                    currentState.spritesManager.add(p1);
-                    let p2 = new Champion.Test(currentState, currentState.map.startPositions[1][0].x, currentState.map.startPositions[1][0].y, currentState.map.startPositions[1][0].d, 2, 2)
-                    currentState.pawns.push(p2);
-                    currentState.spritesManager.add(p2);
-                    currentState.isPaused = true;
-                    done();
-                }, 200);
+            testGame.state.start('testpreload');
+            testGame.state.onStateChange.add(function (stateName) {
+                if (stateName === 'test') {
+                    currentState = testGame.state.getCurrentState();
+                    setTimeout(function () {
+                        let p1 = new Champion.Test(currentState, currentState.map.startPositions[0][0], 1, 1);
+                        currentState.pawns.push(p1);
+                        currentState.spritesManager.add(p1);
+                        let p2 = new Champion.Test(currentState, currentState.map.startPositions[1][0], 2, 2);
+                        currentState.pawns.push(p2);
+                        currentState.spritesManager.add(p2);
+                        currentState.isPaused = true;
+                        done();
+                    }, 200);
+                }
             });
         });
 
@@ -55,7 +55,7 @@ module TacticArena {
             testGame = null;
         });
 
-        it("basic move from 1st pawn", function (done) {
+        it("basic move from 1st pawn", async function (done) {
             currentState.resolveManager.init(
                 [
                     getInitialStep(),
@@ -73,18 +73,17 @@ module TacticArena {
                     ])
                 ]
             );
-            currentState.resolveManager.processStep(0).then(() => {
-                testStepResolution(0, {x: currentState.map.startPositions[0][0].x, y: currentState.map.startPositions[0][0].y}, 3, 4, currentState.map.startPositions[0][0].d);
-                testStepResolution(1, {x: currentState.map.startPositions[1][0].x, y: currentState.map.startPositions[1][0].y}, 3, 4, currentState.map.startPositions[1][0].d);
-                return currentState.resolveManager.processStep(1);
-            }).then(() => {
-                testStepResolution(0, {x: currentState.map.startPositions[0][0].x + 1, y: currentState.map.startPositions[0][0].y}, 2, 4, currentState.map.startPositions[0][0].d);
-                testStepResolution(1, {x: currentState.map.startPositions[1][0].x, y: currentState.map.startPositions[1][0].y}, 2, 4, currentState.map.startPositions[1][0].d);
-                done();
-            });
+            console.log(currentState.map);
+            await currentState.resolveManager.processStep(0);
+            testStepResolution(0, currentState.map.startPositions[0][0], 3, 4);
+            testStepResolution(1, currentState.map.startPositions[1][0], 3, 4);
+            await currentState.resolveManager.processStep(1);
+            testStepResolution(0, currentState.map.startPositions[0][0].translate(1, 0), 2, 4);
+            testStepResolution(1, currentState.map.startPositions[1][0], 2, 4);
+            done();
         });
 
-        it("attack from 1st pawn", function (done) {
+        it("attack from 1st pawn", async function (done) {
             currentState.resolveManager.init(
                 [
                     getInitialStep(),
@@ -104,33 +103,35 @@ module TacticArena {
                         new StepUnit(
                             currentState.pawns[0],
                             new StepUnitData(1, 4),
-                            new Order.Attack(new Position(currentState.map.startPositions[0][0].x + 1, currentState.map.startPositions[0][0].y), currentState.map.startPositions[0][0].d, [{ championId: currentState.pawns[1]._id, dodge: false }])
+                            new Order.Attack(new Position(currentState.map.startPositions[0][0].x + 1, currentState.map.startPositions[0][0].y), currentState.map.startPositions[0][0].d, [{
+                                championId: currentState.pawns[1]._id,
+                                dodge: false
+                            }])
                         ),
                         new StepUnit(
                             currentState.pawns[1],
                             new StepUnitData(1, 3),
-                            new Order.Attack(new Position(currentState.map.startPositions[1][0].x, currentState.map.startPositions[1][0].y), currentState.map.startPositions[1][0].d, [{ championId: currentState.pawns[0]._id, dodge: true }])
+                            new Order.Attack(new Position(currentState.map.startPositions[1][0].x, currentState.map.startPositions[1][0].y), currentState.map.startPositions[1][0].d, [{
+                                championId: currentState.pawns[0]._id,
+                                dodge: true
+                            }])
                         )
                     ])
                 ]
             );
-            currentState.resolveManager.processStep(0).then(() => {
-            }).then(() => {
-                testStepResolution(0, {x: currentState.map.startPositions[0][0].x, y: currentState.map.startPositions[0][0].y}, 3, 4, currentState.map.startPositions[0][0].d);
-                testStepResolution(1, {x: currentState.map.startPositions[1][0].x, y: currentState.map.startPositions[1][0].y}, 3, 4, currentState.map.startPositions[1][0].d);
-                return currentState.resolveManager.processStep(1);
-            }).then(() => {
-                testStepResolution(0, {x: currentState.map.startPositions[0][0].x + 1, y: currentState.map.startPositions[0][0].y}, 2, 4, currentState.map.startPositions[0][0].d);
-                testStepResolution(1, {x: currentState.map.startPositions[1][0].x, y: currentState.map.startPositions[1][0].y}, 2, 4, currentState.map.startPositions[1][0].d);
-                return currentState.resolveManager.processStep(2);
-            }).then(() => {
-                testStepResolution(0, {x: currentState.map.startPositions[0][0].x + 1, y: currentState.map.startPositions[0][0].y}, 1, 4, currentState.map.startPositions[0][0].d);
-                testStepResolution(1, {x: currentState.map.startPositions[1][0].x, y: currentState.map.startPositions[1][0].y}, 1, 3, currentState.map.startPositions[1][0].d);
-                done();
-            });
+            await currentState.resolveManager.processStep(0);
+            testStepResolution(0, currentState.map.startPositions[0][0], 3, 4);
+            testStepResolution(1, currentState.map.startPositions[1][0], 3, 4);
+            await currentState.resolveManager.processStep(1);
+            testStepResolution(0, currentState.map.startPositions[0][0].translate(1, 0), 2, 4);
+            testStepResolution(1, currentState.map.startPositions[1][0], 2, 4);
+            await currentState.resolveManager.processStep(2);
+            testStepResolution(0, currentState.map.startPositions[0][0].translate(1, 0), 1, 4);
+            testStepResolution(1, currentState.map.startPositions[1][0], 1, 3);
+            done();
         });
 
-        it("move then cast from 1st pawn while 2nd move", function (done) {
+        it("move then cast from 1st pawn while 2nd move", async function (done) {
             currentState.resolveManager.init(
                 [
                     getInitialStep(),
@@ -167,29 +168,27 @@ module TacticArena {
                         new StepUnit(
                             currentState.pawns[1],
                             new StepUnitData(0, 2),
-                            new Order.Move(new Position(currentState.map.startPositions[1][0].x - 1, currentState.map.startPositions[1][0].y - 1), currentState.map.startPositions[1][0].d, { champion: currentState.pawns[0]._id, dodge: false })
+                            new Order.Move(new Position(currentState.map.startPositions[1][0].x - 1, currentState.map.startPositions[1][0].y - 1), currentState.map.startPositions[1][0].d, {
+                                champion: currentState.pawns[0]._id,
+                                dodge: false
+                            })
                         )
                     ])
                 ]
             );
-            currentState.resolveManager.processStep(0).then(() => {
-            }).then(() => {
-                testStepResolution(0, {x: currentState.map.startPositions[0][0].x, y: currentState.map.startPositions[0][0].y}, 3, 4, currentState.map.startPositions[0][0].d);
-                testStepResolution(1, {x: currentState.map.startPositions[1][0].x, y: currentState.map.startPositions[1][0].y}, 3, 4, currentState.map.startPositions[1][0].d);
-                return currentState.resolveManager.processStep(1);
-            }).then(() => {
-                testStepResolution(0, {x: currentState.map.startPositions[0][0].x, y: currentState.map.startPositions[0][0].y - 1}, 2, 4, currentState.map.startPositions[0][0].d);
-                testStepResolution(1, {x: currentState.map.startPositions[1][0].x, y: currentState.map.startPositions[1][0].y - 1}, 2, 4, currentState.map.startPositions[1][0].d);
-                return currentState.resolveManager.processStep(2);
-            }).then(() => {
-                testStepResolution(0, {x: currentState.map.startPositions[0][0].x, y: currentState.map.startPositions[0][0].y - 1}, 0, 4, currentState.map.startPositions[0][0].d);
-                testStepResolution(1, {x: currentState.map.startPositions[1][0].x - 1, y: currentState.map.startPositions[1][0].y - 1}, 1, 2, currentState.map.startPositions[1][0].d);
-                return currentState.resolveManager.processStep(3);
-            }).then(() => {
-                testStepResolution(0, {x: currentState.map.startPositions[0][0].x, y: currentState.map.startPositions[0][0].y - 1}, 0, 3, currentState.map.startPositions[0][0].d);
-                testStepResolution(1, {x: currentState.map.startPositions[1][0].x - 1, y: currentState.map.startPositions[1][0].y - 1}, 0, 2, currentState.map.startPositions[1][0].d);
-                done();
-            });
+            await currentState.resolveManager.processStep(0);
+            testStepResolution(0, currentState.map.startPositions[0][0], 3, 4);
+            testStepResolution(1, currentState.map.startPositions[1][0], 3, 4);
+            await currentState.resolveManager.processStep(1);
+            testStepResolution(0, currentState.map.startPositions[0][0].translate(0, -1), 2, 4);
+            testStepResolution(1, currentState.map.startPositions[1][0].translate(0, -1), 2, 4);
+            await currentState.resolveManager.processStep(2);
+            testStepResolution(0, currentState.map.startPositions[0][0].translate(0, -1), 0, 4);
+            testStepResolution(1, currentState.map.startPositions[1][0].translate(-1, -1), 1, 2);
+            await currentState.resolveManager.processStep(3);
+            testStepResolution(0, currentState.map.startPositions[0][0].translate(0, -1), 0, 3);
+            testStepResolution(1, currentState.map.startPositions[1][0].translate(-1, -1), 0, 2);
+            done();
         });
     });
 }

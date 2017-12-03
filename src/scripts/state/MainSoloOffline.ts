@@ -11,15 +11,9 @@ module TacticArena.State {
                 player._id = playerId;
                 if (player.isBot) { this.aiManager = new AiManager(this, player._id); }
                 player.battleParty.forEach((character, characterIndex) => {
-                    let pawn = new character(
-                        this,
-                        this.map.startPositions[player._id][characterIndex].x,
-                        this.map.startPositions[player._id][characterIndex].y,
-                        this.map.startPositions[player._id][characterIndex].d,
-                        this.getUniqueId(),
-                        player._id);
-                    this.pawns.push(pawn);
-                    this.spritesManager.add(pawn);
+                    let champion = new character(this, this.map.startPositions[player._id][characterIndex], this.getUniqueId(), player._id);
+                    this.pawns.push(champion);
+                    this.spritesManager.add(champion);
                 });
             });
         }

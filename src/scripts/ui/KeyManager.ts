@@ -76,6 +76,7 @@ module TacticArena.UI {
         dKeyPress(self, uiManager) {
             if(self.altKey) {
                 uiManager.game.debugMode = !uiManager.game.debugMode;
+                console.info('debug mode : ' + (uiManager.game.debugMode ? 'enabled' : 'disabled'));
             }
         }
 

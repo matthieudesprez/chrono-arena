@@ -13,7 +13,8 @@ module TacticArena {
                 parent: 'game-container'
             });
             this.tileSize = 32;
-            this.state.add('test', State.Test);
+            this.state.add('testpreload', State.TestPreload);
+            this.state.add('test', State.TestBattle);
         }
     }
 }

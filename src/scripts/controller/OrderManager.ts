@@ -95,7 +95,10 @@ module TacticArena {
             return (Math.floor(Math.random() * 100) > fleeRate);
         }
 
-        blockEntity(steps, startI, j, order, champion) {
+        /*
+        Replace all champion steps for the given order, from startI to the end
+         */
+        blockChampion(steps, startI, j, order, champion) {
             steps[startI].stepUnits[j].data.positionBlocked = steps[startI].stepUnits[j].order.position;
             for (var i = startI; i < steps.length; i++) {
                 if (steps[i].stepUnits[j].order) {
@@ -110,7 +113,10 @@ module TacticArena {
             return steps;
         }
 
-        pacifyEntity(steps, startI, j, order, champion, state) {
+        /*
+         Replace all champion steps for the given order, from startI to the end
+         */
+        pacifyChampion(steps, startI, j, order, champion, state) {
             for (var i = startI; i < steps.length; i++) {
                 let position = state.moved !== null ? new Position(state.moved.x, state.moved.y) : steps[i].stepUnits[j].order.position;
                 steps[i].stepUnits[j].order = new Order.Stand(
@@ -121,6 +127,18 @@ module TacticArena {
             }
             this.alteredPawns.push(champion._id);
             return steps;
+        }
+
+        /*
+        Return true if the given position is not already used by any of the stepUnits (to avoid having 2 champions on the same tile)
+         */
+        tileIsFree(stepUnits: StepUnit[], position: Position): boolean {
+            return !stepUnits.some( (stepUnit: StepUnit) => {
+                return (
+                    (typeof stepUnit.data.moved === 'undefined' && stepUnit.order.position.equals(position)) || // the champion is not moved and its default order position equals the given position
+                    (stepUnit.data.moved && stepUnit.data.moved.equals(position)) // the champion is moved and its movedPosition equals the given position
+                );
+            });
         }
 
         getSteps(): Step[] {
@@ -143,27 +161,6 @@ module TacticArena {
             return this.processOrders(steps);
         }
 
-        getPawn(id) {
-            let result = null;
-            this.state.pawns.forEach(p => {
-                if (p._id == id) {
-                    result = p;
-                }
-            });
-            return result;
-        }
-
-        tileIsFree(stepUnits: StepUnit[], position: Position) {
-            for (var i = 0; i < stepUnits.length; i++) {
-                if (
-                    (typeof stepUnits[i].data.moved === 'undefined' && position.equals(stepUnits[i].order.position)) ||
-                    (stepUnits[i].data.moved && stepUnits[i].data.moved.equals(position))) {
-                    return false;
-                }
-            }
-            return true;
-        }
-
         processOrders(steps: Step[]): Step[] {
             for (var l = 1; l < steps.length; l++) {
                 var stepUnits = steps[l].stepUnits;
@@ -180,7 +177,7 @@ module TacticArena {
                 for (var i = 0; i < stepUnits.length; i++) {
                     // foreach entities except A
                     for (var j = 0; j < stepUnits.length; j++) {
-                        if (stepUnits[i].pawn._id == stepUnits[j].pawn._id) continue; // Pas d'interaction avec soi-même
+                        if (stepUnits[i].pawn._id == stepUnits[j].pawn._id) continue; // No interaction with oneself
 
                         let positionBBeforeOrder = previousStepUnit[j].data.moved ? previousStepUnit[j].data.moved : previousStepUnit[j].order.position;
 
@@ -199,10 +196,8 @@ module TacticArena {
 
                         stepUnits[i].data.hp = typeof stepUnits[i].data.hp !== 'undefined' ? stepUnits[i].data.hp : previousStepUnit[i].data.hp;
 
-                        if (!stepUnits[i].data.aIsAlive) {
+                        if (!stepUnits[i].data.aIsAlive) { // If the Champion was dead in the previous step
                             stepUnits[i].order = new Order.Dead(previousStepUnit[i].order.position, previousStepUnit[i].order.direction);
-                            stepUnits[i].data.ap = previousStepUnit[i].data.ap;
-                            stepUnits[i].data.hp = 0;
                             previousStepUnit[i].data.dies = !(previousStepUnit[i].order instanceof Order.Dead);
                             continue;
                         }
@@ -219,10 +214,10 @@ module TacticArena {
                         stepUnits[i].data.ap = stepUnits[i].data.aIsActive ? previousStepUnit[i].data.ap - stepUnits[i].data.championAApCost : 0;
 
                         if (stepUnits[i].data.moveHasBeenBlocked && this.alteredPawns.indexOf(stepUnits[i].pawn._id) < 0) {
-                            this.blockEntity(steps, l, i, new Order.Stand(previousStepUnit[i].order.position, previousStepUnit[i].order.direction), stepUnits[i].pawn);
+                            this.blockChampion(steps, l, i, new Order.Stand(previousStepUnit[i].order.position, previousStepUnit[i].order.direction), stepUnits[i].pawn);
                         }
                         if (stepUnits[j].data.moveHasBeenBlocked && this.alteredPawns.indexOf(stepUnits[j].pawn._id) < 0) {
-                            this.blockEntity(steps, l, j, new Order.Stand(previousStepUnit[j].order.position, previousStepUnit[j].order.direction), stepUnits[j].pawn);
+                            this.blockChampion(steps, l, j, new Order.Stand(previousStepUnit[j].order.position, previousStepUnit[j].order.direction), stepUnits[j].pawn);
                         }
                     }
                 }

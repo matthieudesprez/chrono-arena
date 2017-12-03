@@ -13,7 +13,6 @@ module TacticArena.State {
         pathfinder;
         stageManager: StageManager;
         process: boolean;
-        modalVisible: boolean;
         pointer;
         isPaused: boolean;
         players;
@@ -22,41 +21,36 @@ module TacticArena.State {
         mapClass;
         map: Map.BaseMap;
 
-        constructor() {
-            super();
-        }
-
         init(data?) {
             super.init();
             this.process = true;
-            this.modalVisible = false;
             this.isPaused = false;
 
             this.spritesManager = new SpritesManager(this);
 
             this.mapClass = data.map;
-            this.map = new data.map();
+            this.map = new this.mapClass();
             this.game.stage.backgroundColor = this.map.backgroundColor;
 
-            this.mapGroup = this.add.group();
+            this.mapGroup = new Phaser.Group(this.game);
             this.worldGroup.add(this.mapGroup);
 
-            this.pathTilesGroup = this.add.group();
+            this.pathTilesGroup = new Phaser.Group(this.game);
             this.worldGroup.add(this.pathTilesGroup);
 
-            this.pathOrdersTilesGroup = this.add.group();
+            this.pathOrdersTilesGroup = new Phaser.Group(this.game);
             this.worldGroup.add(this.pathOrdersTilesGroup);
 
-            this.uiSpritesGroup = this.add.group();
+            this.uiSpritesGroup = new Phaser.Group(this.game);
             this.worldGroup.add(this.uiSpritesGroup);
 
-            this.pawnsSpritesGroup = this.add.group();
+            this.pawnsSpritesGroup = new Phaser.Group(this.game);
             this.worldGroup.add(this.pawnsSpritesGroup);
 
-            this.mapDecorationGroup = this.add.group();
+            this.mapDecorationGroup = new Phaser.Group(this.game);
             this.worldGroup.add(this.mapDecorationGroup);
 
-            this.uiGroup = this.add.group();
+            this.uiGroup = new Phaser.Group(this.game);
             this.worldGroup.add(this.uiGroup);
 
             this.pawns = [];
@@ -68,13 +62,9 @@ module TacticArena.State {
 
         create() {
             this.addDecorations();
-
-            this.pathfinder = null;
             this.pathfinder = new EasyStar.js();
             this.pathfinder.setAcceptableTiles([-1]);
             this.pathfinder.disableDiagonals();
-            //this.pathfinder.enableDiagonals();
-            //this.pathfinder.disableSync();
             this.pathfinder.setGrid(this.stageManager.grid);
         }
 
@@ -95,22 +85,14 @@ module TacticArena.State {
         }
 
         shutdown () {
-            if(this.pointer) {
-                this.pointer.destroy();
-            }
+            if(this.pointer) { this.pointer.destroy(); }
             this.pointer = null;
-            //delete this.pathfinder;
-            //delete this.pawns;
-            //delete this.pathTilesGroup;
-            //delete this.pathOrdersTilesGroup;
-            //delete this.pawnsSpritesGroup;
-            //delete this.uiSpritesGroup;
-            //delete this.stageManager;
-            //delete this.process;
-            //delete this.isPaused;
-            //delete this.players;
-            //delete this.generator;
-            //delete this.mapName;
+        }
+
+        getChampion(id): Champion.BaseChampion {
+            return this.pawns.find( (champion: Champion.BaseChampion) => {
+                return champion._id === id;
+            });
         }
     }
 }

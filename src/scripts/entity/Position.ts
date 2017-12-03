@@ -2,22 +2,32 @@ module TacticArena {
     export class Position {
         x;
         y;
+        d;
 
-        constructor(x, y) {
+        constructor(x, y, d?) {
             this.x = x;
             this.y = y;
+            this.d = d;
         }
 
         get() {
             return {
                 x: this.x,
-                y: this.y
+                y: this.y,
+                d: this.d
             };
         }
 
-        set(x, y) {
-            this.x = x;
-            this.y = y;
+        //set(x, y, d) {
+        //    this.x = x;
+        //    this.y = y;
+        //    this.d = d;
+        //}
+
+        set(position: Position) {
+            if(position.x) { this.x = position.x; }
+            if(position.y) { this.y = position.y; }
+            if(position.d) { this.d = position.d; }
         }
 
         setX(x) {
@@ -28,11 +38,24 @@ module TacticArena {
             this.y = y;
         }
 
-        equals(position:Position):boolean {
-            return this.x == position.x && this.y == position.y;
+        setD(d) {
+            this.d = d;
         }
 
-        faces(position:Position, direction):boolean {
+        translate(x, y): Position {
+            return new Position(this.x + x, this.y + y, this.d);
+        }
+
+        turn(d): Position {
+            return new Position(this.x, this.y, d);
+        }
+
+        equals(position: Position, withDirection=false): boolean {
+
+            return this.x === position.x && this.y === position.y && (!withDirection || this.d === position.d);
+        }
+
+        faces(position: Position, direction): boolean {
             return (
                 this.x == position.x && (
                     (this.y == position.y + 1 && direction == 'N') || (this.y == position.y - 1 && direction == 'S')
@@ -48,15 +71,19 @@ module TacticArena {
         }
 
         getDirectionTo(position: Position) {
-            if(this.x > position.x) {
+            if (this.x > position.x) {
                 return 'W';
-            } else if(this.x < position.x) {
+            } else if (this.x < position.x) {
                 return 'E';
-            } else if(this.y > position.y) {
+            } else if (this.y > position.y) {
                 return 'N';
-            } else if(this.y < position.y) {
+            } else if (this.y < position.y) {
                 return 'S';
             }
+        }
+
+        clone(): Position {
+            return new Position(this.x, this.y, this.d);
         }
     }
 }

@@ -15,7 +15,7 @@ module TacticArena {
                 this.state,
                 this.state.game.tileSize * pawn.position.x - (64 / 4),
                 this.state.game.tileSize * pawn.position.y - (64 / 2),
-                pawn.direction,
+                pawn.getDirection(),
                 pawn.type
             );
         }

@@ -70,7 +70,7 @@ module TacticArena.UI {
         }
 
         updateHp(pawn) {
-            let hp = pawn.getHp();
+            let hp = Math.max(0, pawn.getHp());
             let percent = (hp / pawn._hpMax) * 100;
             this.pawns[pawn._id].hpBarGroup.getByName('bar').setPercent(percent);
             if(hp <= 0) {

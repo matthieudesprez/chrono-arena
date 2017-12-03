@@ -5,7 +5,7 @@ module TacticArena.Animation {
             let self = this;
             return new Promise((resolve, reject) => {
                 self.order.targets.forEach(target => {
-                    let pawn = (self.state as State.BaseBattle).orderManager.getPawn(target);
+                    let pawn = (self.state as State.BaseBattle).getChampion(target);
                     self.state.spritesManager.getReal(pawn).healAnimation();
                     self.state.spritesManager.getReal(pawn).healText(1);
                 });

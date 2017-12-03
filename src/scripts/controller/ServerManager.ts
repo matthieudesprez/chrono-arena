@@ -59,7 +59,7 @@ module TacticArena {
                         if(data.content[i].orders) {
                             for (var j = 0; j < data.content[i].orders.length; j++) {
                                 if(data.content[i].orders[j].championId) {
-                                    data.content[i].orders[j].champion = self.game.orderManager.getPawn(data.content[i].orders[j].championId);
+                                    data.content[i].orders[j].champion = self.game.getChampion(data.content[i].orders[j].championId);
                                 }
                                 orders = orders.concat(data.content[i].orders[j]);
                             }

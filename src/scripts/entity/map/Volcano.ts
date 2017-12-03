@@ -4,8 +4,8 @@ module TacticArena.Map {
 
         constructor() {
             let startPositions = [
-                [{x: 4, y: 9, d: 'E'}, {x: 3, y: 10, d: 'E'},  {x: 3, y: 9, d: 'E'}],
-                [{x: 7, y: 9, d: 'W'}, {x: 8, y: 10, d: 'W'}, {x: 8, y: 9, d: 'W'}]
+                [new Position(4, 9, 'E'), new Position(3, 10, 'E'), new Position(3, 9, 'E')],
+                [new Position(7, 9, 'W'), new Position(8, 10, 'W'), new Position(8, 9, 'W')]
             ];
             super('volcano', 'Volcano', startPositions);
         }

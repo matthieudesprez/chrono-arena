@@ -5,7 +5,7 @@ module TacticArena.Animation {
             let sprite = this.state.spritesManager.getReal(this.pawn);
             let fireball = this.state.pawnsSpritesGroup.add(new FX.FireBall(this.state, sprite.getRawPosition(), sprite.getDirection()));
             this.order.targets.forEach(target => {
-                let pawn = (this.state as State.BaseBattle).orderManager.getPawn(target);
+                let pawn = (this.state as State.BaseBattle).getChampion(target);
                 this.state.spritesManager.getReal(pawn).hurtAnimation();
                 this.state.spritesManager.getReal(pawn).hurtText(2);
             });

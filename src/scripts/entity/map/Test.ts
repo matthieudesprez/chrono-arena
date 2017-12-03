@@ -4,8 +4,8 @@ module TacticArena.Map {
 
         constructor() {
             let startPositions = [
-                [{x: 4, y: 9, d: 'E'}, {x: 3, y: 8, d: 'E'}],
-                [{x: 6, y: 9, d: 'W'}, {x: 8, y: 8, d: 'W'}]
+                [new Position(4, 9, 'E'), new Position(3, 8, 'E')],
+                [new Position(6, 9, 'W'), new Position(8, 8, 'W')]
             ];
             super('arena', 'The Pit', startPositions);
         }

@@ -14,15 +14,13 @@ module TacticArena.Champion {
         spriteClass: typeof Sprite.BaseSprite;
         skills: Skill.BaseSkill[];
         position: Position; // during Order Phase = initial position, during Resolve Phase = current step position (TODO beware of moved -> see ResolveManager)
-        direction; // during Order Phase = initial direction, during Resolve Phase = current step direction
 
-        constructor(state, x, y, direction, type, id, team, name = "", spriteClass: typeof Sprite.BaseSprite = Sprite.BaseSprite) {
+        constructor(state, position: Position, type, id, team, name = "", spriteClass: typeof Sprite.BaseSprite = Sprite.BaseSprite) {
             this.state = state;
             this._id = id;
             this._name = name;
             this.type = type;
-            this.position = new Position(x, y);
-            this.direction = direction;
+            this.position = position.clone();
             this.spriteClass = spriteClass;
             this._hp = 4;
             this._ap = 0;
@@ -43,15 +41,15 @@ module TacticArena.Champion {
         }
 
         setPosition(position) {
-            this.position = position;
+            this.position.set(position);
         }
 
         getDirection() {
-            return this.direction;
+            return this.position.d;
         }
 
         setDirection(direction) {
-            this.direction = direction;
+            this.position.setD(direction);
         }
 
         getAp() {

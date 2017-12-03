@@ -30,7 +30,7 @@ module TacticArena.Order {
                         moved: movedPosition != null ? {x: movedPosition.x, y: movedPosition.y, d: ordermanager.state.stageManager.getNbTilesBetween(stepUnitA.order.position, stepUnitB.order.position)} : null
                     });
                     stepUnitA.data.championBHpLost += 1;
-                    ordermanager.pacifyEntity(steps, stepIndex + 1, bIndex, stepUnitB.order, stepUnitB.pawn, stepUnitB.data);
+                    ordermanager.pacifyChampion(steps, stepIndex + 1, bIndex, stepUnitB.order, stepUnitB.pawn, stepUnitB.data);
                 }
             }
             return result

@@ -6,7 +6,7 @@ module TacticArena.Animation {
             let sprite = this.state.spritesManager.getReal(this.pawn);
             let tornado = this.state.pawnsSpritesGroup.add(new FX.Tornado(this.state, sprite.getRawPosition(), sprite.getDirection()));
             this.order.targets.forEach(target => {
-                let pawn = (this.state as State.BaseBattle).orderManager.getPawn(target.champion);
+                let pawn = (this.state as State.BaseBattle).getChampion(target.champion);
                 let movedDistance = target.moved !== null ? target.moved.d * 100 : 0;
                 setTimeout(function () {
                     self.state.spritesManager.getReal(pawn).hurtAnimation();

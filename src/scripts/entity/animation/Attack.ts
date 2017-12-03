@@ -8,7 +8,7 @@ module TacticArena.Animation {
                 this.state.spritesManager.getReal(this.pawn).stand(this.order.direction);
                 this.state.spritesManager.getReal(this.pawn).attack(this.order.direction).then(() => {
                     this.order.targets.forEach(target => {
-                        let champion = (this.state as State.BaseBattle).orderManager.getPawn(target.championId);
+                        let champion = (this.state as State.BaseBattle).getChampion(target.championId);
                         if (target.dodge) {
                             self.state.spritesManager.getReal(champion).displayText('miss');
                         } else {

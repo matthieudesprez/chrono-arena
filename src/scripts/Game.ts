@@ -7,7 +7,6 @@ module TacticArena {
         initialWidth;
         initialHeight;
         player;
-        debugMode;
         tileSize;
 
         constructor(headless:boolean = false) {
@@ -23,7 +22,6 @@ module TacticArena {
             this.initialHeight = 640;
 
             this.player = new Player.BasePlayer('Jean Neige');
-            this.debugMode = false;
             this.tileSize = 32;
 
             this.state.add('boot', State.Boot);

@@ -4,7 +4,7 @@ module TacticArena.Map {
         label: string;
         backgroundColor: number;
         hasParallaxLayer: boolean;
-        startPositions;
+        startPositions: Position[];
 
         constructor(name, label, startPositions, backgroundColor=0x000000, hasParallaxLayer=false) {
             this.name = name;

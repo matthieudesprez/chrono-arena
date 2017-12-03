@@ -119,7 +119,7 @@ module TacticArena.State {
             this.charactersGroup.y = 280;
             (this.game as Game).player.getCharacters().forEach((character, index) => {
                 let frameGroup = new Phaser.Group(this.game);
-                let pawn = new character(this, 0, 0, 'S', 0, 0);
+                let pawn = new character(this, new Position(0, 0, 'S'), 0, 0);
                 let sprite = new pawn.spriteClass(this, 8, 32, 'S', pawn.type);
                 let partyFrame = new Phaser.Image(this.game, 0, 0, 'frame-' + pawn.type);
 
@@ -176,7 +176,7 @@ module TacticArena.State {
 
             this.selectMap(0);
 
-            this.startSinglePlayer();
+            //this.startSinglePlayer();
         }
 
         startSinglePlayer() {

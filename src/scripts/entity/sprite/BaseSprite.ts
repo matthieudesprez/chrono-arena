@@ -172,7 +172,8 @@ module TacticArena.Sprite {
         getPosition(): Position {
             return new Position(
                 (this.position.x + this._size / 4) / this.state.game.tileSize,
-                (this.position.y + this._size / 2) / this.state.game.tileSize
+                (this.position.y + this._size / 2) / this.state.game.tileSize,
+                this._ext
             );
         }
 

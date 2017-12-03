@@ -3,9 +3,8 @@ module TacticArena.Animation {
 
         get(): Promise<any> {
             return new Promise((resolve, reject) => {
-                if (this.pawn.isAlive()) {
-                    this.state.spritesManager.getReal(this.pawn).die();
-                }
+                // No more dying animation from here because it would happen too soon (before cast animations) in the step resolving
+                // It's played in the onHpChange signal after the Promises.all() from the ResolveManager
                 resolve(true);
             });
         }

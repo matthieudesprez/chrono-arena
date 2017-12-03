@@ -56,7 +56,6 @@ module TacticArena {
                 if ((pawn.isAlive() || forceAnimation) && pawn.getHp() <= 0) {
                     self.game.spritesManager.sprites[pawn._id].die();
                 }
-                self.game.stageManager.handleTile(pawn);
                 self.game.uiManager.topMenu.updateHp(pawn);
             });
 

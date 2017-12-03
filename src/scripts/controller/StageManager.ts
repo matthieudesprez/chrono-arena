@@ -179,14 +179,6 @@ module TacticArena {
             return this.grid[position.y][position.x] != -1;
         }
 
-        /*
-        Mark position in grid as an obstacle if pawn is dead
-         */
-        handleTile(pawn) {
-            let p = this.game.spritesManager.getReal(pawn).getPosition();
-            this.grid[p.y][p.x] = pawn.isAlive() ? -1 : 3;
-        }
-
         canMove(position, x, y, ap = Infinity) {
             return new Promise((resolve, reject) => {
                 this.game.pathfinder.findPath(position.x, position.y, x, y, function (path) {
@@ -309,17 +301,6 @@ module TacticArena {
             return Math.abs(coordsA.x - coordsB.x) + Math.abs(coordsA.y - coordsB.y);
         }
 
-        isFacing(coordsA, directionA, coordsB) {
-            return (
-                coordsA.x == coordsB.x && (
-                    (coordsA.y == coordsB.y + 1 && directionA == 'N') || (coordsA.y == coordsB.y - 1 && directionA == 'S')
-                ) ||
-                coordsA.y == coordsB.y && (
-                    (coordsA.x == coordsB.x + 1 && directionA == 'W') || (coordsA.x == coordsB.x - 1 && directionA == 'E')
-                )
-            );
-        }
-
         isFacingAway(coordsA, directionA, coordsB) {
             return (
                 (coordsA.x == coordsB.x && (directionA == 'N' || directionA == 'S')) ||
@@ -329,10 +310,6 @@ module TacticArena {
 
         equalPositions(p1, p2) {
             return p1.x == p2.x && p1.y == p2.y;
-        }
-
-        differenceBetweenPositions(p1, p2) {
-            return {x: Math.abs(p1.x - p2.x), y: Math.abs(p1.y - p2.y)};
         }
 
         markPawns() {
