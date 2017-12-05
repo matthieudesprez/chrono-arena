@@ -66,7 +66,7 @@ module TacticArena.Skill {
             return result;
         }
 
-        onOrder(position, direction) {
+        onOrder(position) {
 
         }
 
@@ -75,7 +75,9 @@ module TacticArena.Skill {
             if (this.state.stageManager.getNbTilesBetween(target, position) <= this.range) {
                 let direction = this.getPathDirection(position, target);
                 if (direction) {
-                    this.onOrder(position, direction);
+                    let orderPosition = position.clone();
+                    orderPosition.setD(direction);
+                    this.onOrder(orderPosition);
                     this.pawn.setAp(this.pawn.getAp() - this.minCost);
                     this.onDeselect();
                     this.onSelect();

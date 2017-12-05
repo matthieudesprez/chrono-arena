@@ -51,19 +51,33 @@ module TacticArena {
         }
 
         equals(position: Position, withDirection=false): boolean {
-
             return this.x === position.x && this.y === position.y && (!withDirection || this.d === position.d);
         }
 
-        faces(position: Position, direction): boolean {
+        faces(position: Position): boolean {
             return (
-                this.x == position.x && (
-                    (this.y == position.y + 1 && direction == 'N') || (this.y == position.y - 1 && direction == 'S')
+                this.x === position.x && (
+                    (this.y === position.y + 1 && this.d === 'N') || (this.y === position.y - 1 && this.d === 'S')
                 ) ||
-                this.y == position.y && (
-                    (this.x == position.x + 1 && direction == 'W') || (this.x == position.x - 1 && direction == 'E')
+                this.y === position.y && (
+                    (this.x === position.x + 1 && this.d === 'W') || (this.x === position.x - 1 && this.d === 'E')
                 )
             );
+        }
+
+        facesAway(position: Position): boolean {
+            return (
+                this.x === position.x && (
+                    (this.y > position.y && this.d === 'N') || (this.y < position.y && this.d === 'S')
+                ) ||
+                this.y === position.y && (
+                    (this.x > position.x && this.d === 'W') || (this.x < position.x && this.d === 'E')
+                )
+            );
+        }
+
+        isInRange(position: Position, distance: number): boolean {
+            return this.facesAway(position) && this.getDistanceFrom(position) <= distance;
         }
 
         getDistanceFrom(position) {

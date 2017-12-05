@@ -107,10 +107,15 @@ module TacticArena.Sprite {
         }
 
         blink(tintFactor=1) {
-            this.game.add.tween(this).to({
+            let self = this;
+            let t = this.game.add.tween(this).to({
                 tint : tintFactor * 0xffffff,
                 alpha : 0.5
             }, 100, Phaser.Easing.Exponential.Out, true, 0, 0, true);
+            t.onComplete.add(function () {
+                self.tint = 0xffffff;
+                self.alpha = 1;
+            }, this);
         }
 
         hurtAnimation() {
@@ -126,7 +131,7 @@ module TacticArena.Sprite {
         }
 
         //TODO change x, y to position: Position
-        moveTo(x, y, path = [], animate = true, faceDirection = false):Promise<any> {
+        moveTo(x, y, path = [], animate = true, faceDirection = false, playWalkAnimation = true):Promise<any> {
             return new Promise((resolve, reject) => {
                 var tile_y, tile_x;
                 if (path != undefined && path.length > 0) {
@@ -144,7 +149,7 @@ module TacticArena.Sprite {
                     if (faceDirection) {
                         this.faceTo(newX, newY);
                     }
-                    if (this.animations.currentAnim.name != 'walk' + this._ext) {
+                    if (playWalkAnimation && this.animations.currentAnim.name != 'walk' + this._ext) {
                         this.walk();
                     }
                     var t = this.game.add.tween(this).to({
@@ -157,7 +162,9 @@ module TacticArena.Sprite {
                                 resolve(res);
                             }); // recursive
                         } else {
-                            this.stand();
+                            if(playWalkAnimation) {
+                                this.stand();
+                            }
                             resolve(true);
                         }
                     }, this);

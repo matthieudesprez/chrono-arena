@@ -3,7 +3,7 @@ module TacticArena.Animation {
 
         get(): Promise<any> {
             let animation = new Promise((resolve, reject) => {
-                this.state.spritesManager.getProjectionOrReal(this.pawn).stand(this.order.direction);
+                this.state.spritesManager.getProjectionOrReal(this.pawn).stand(this.order.position.d);
                 setTimeout(function () {
                     resolve(true);
                 }, 250);

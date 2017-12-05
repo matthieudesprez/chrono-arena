@@ -10,10 +10,10 @@ module TacticArena.Skill {
             this.range = 1;
         }
 
-        onOrder(position, direction) {
+        onOrder(position) {
             this.state.spritesManager.createProjection(this.pawn);
-            this.state.spritesManager.getProjectionOrReal(this.pawn, true).attack(direction);
-            this.state.orderManager.add(this.pawn, new Order.Slash(position, direction));
+            this.state.spritesManager.getProjectionOrReal(this.pawn, true).attack(position.d);
+            this.state.orderManager.add(this.pawn, new Order.Slash(position));
         }
     }
 }

@@ -48,10 +48,6 @@ module TacticArena.Champion {
             return this.position.d;
         }
 
-        setDirection(direction) {
-            this.position.setD(direction);
-        }
-
         getAp() {
             return this._ap;
         }
@@ -78,9 +74,14 @@ module TacticArena.Champion {
             return this._hp;
         }
 
-        setHp(hp, forceAnimation = false) {
+        setHp(hp, triggerDispatchMenu = false, triggerDispatchAnimation = false, forceAnimation = false) {
             this._hp = (hp > this._hpMax) ? this._hpMax : hp;
-            this.state.signalManager.onHpChange.dispatch(this, forceAnimation);
+            if(triggerDispatchMenu) {
+                this.state.signalManager.onHpChangeMenu.dispatch(this);
+            }
+            if(triggerDispatchAnimation) {
+                this.state.signalManager.onHpChangeAnimation.dispatch(this, forceAnimation);
+            }
         }
     }
 }

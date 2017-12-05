@@ -3,7 +3,8 @@ module TacticArena {
         game;
         onMpChange:Phaser.Signal;
         onApChange:Phaser.Signal;
-        onHpChange:Phaser.Signal;
+        onHpChangeMenu:Phaser.Signal;
+        onHpChangeAnimation:Phaser.Signal;
         onOrderChange:Phaser.Signal;
         onActionPlayed:Phaser.Signal;
         turnInitialized:Phaser.Signal;
@@ -21,7 +22,8 @@ module TacticArena {
 
             this.onMpChange = new Phaser.Signal();
             this.onApChange = new Phaser.Signal();
-            this.onHpChange = new Phaser.Signal();
+            this.onHpChangeMenu = new Phaser.Signal();
+            this.onHpChangeAnimation = new Phaser.Signal();
             this.onOrderChange = new Phaser.Signal();
             this.onActionPlayed = new Phaser.Signal();
             this.turnInitialized = new Phaser.Signal();
@@ -52,11 +54,14 @@ module TacticArena {
                 self.game.uiManager.topMenu.updateAp(pawn);
             });
 
-            this.onHpChange.add(function(pawn, forceAnimation) {
+            this.onHpChangeMenu.add(function(pawn) {
+                self.game.uiManager.topMenu.updateHp(pawn);
+            });
+
+            this.onHpChangeAnimation.add(function(pawn, forceAnimation) {
                 if ((pawn.isAlive() || forceAnimation) && pawn.getHp() <= 0) {
                     self.game.spritesManager.sprites[pawn._id].die();
                 }
-                self.game.uiManager.topMenu.updateHp(pawn);
             });
 
             this.onOrderChange.add(function(pawn) {
@@ -112,9 +117,6 @@ module TacticArena {
             this.onActivePawnChange.add(function(activePawn) {
                 self.game.uiManager.ordersnotificationsUI.clean();
                 self.game.uiManager.ordersnotificationsUI.update(self.game.orderManager.getOrders(activePawn));
-                //self.game.uiManager.pawnsinfosUI.select(activePawn._id);
-                //self.game.uiManager.actionUI.update(activePawn.getAp());
-                //self.game.uiManager.actionUI.select('walk');
 
                 let position = self.game.spritesManager.getReal(activePawn).getPosition();
 
@@ -122,7 +124,6 @@ module TacticArena {
                 let s = self.game.uiSpritesGroup.create(position.x * self.game.game.tileSize - 1, position.y * self.game.game.tileSize + 15, 'circle');
                 s.animations.add('turn', ["selected_circle_01", "selected_circle_02"], 4, true);
                 s.play('turn');
-                //this.consolelogsUI.write('au tour du joueur ' + activePawn._id);
 
                 self.game.uiManager.actionMenu = new UI.ActionMenu(self.game, activePawn);
             });

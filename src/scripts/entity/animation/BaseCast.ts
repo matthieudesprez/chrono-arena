@@ -4,7 +4,7 @@ module TacticArena.Animation {
         get(): Promise<any> {
             let animation = new Promise((resolve, reject) => {
                 this.state.spritesManager.showReal(this.pawn);
-                this.state.spritesManager.getReal(this.pawn).cast(this.order.direction).then(() => {
+                this.state.spritesManager.getReal(this.pawn).cast(this.order.position.d).then(() => {
                     return this.getCastCallback();
                 }).then(() => {
                     resolve(true);

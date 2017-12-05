@@ -201,8 +201,7 @@ module TacticArena {
             });
         }
 
-        // TODO create Path class
-        getLinearPath(position: Position, distance, direction): Array<any> {
+        getLinearPath(position: Position, distance): Position[] {
             let path = [];
             let startCornerX = Math.max(0, position.x - distance);
             let endCornerX = Math.min(this.map.width, position.x + distance);
@@ -210,14 +209,9 @@ module TacticArena {
             let endCornerY = Math.min(this.map.height, position.y + distance);
             for (var x = startCornerX; x <= endCornerX; x++) {
                 for (var y = startCornerY; y <= endCornerY; y++) {
-                    if (
-                        (direction == 'W' && position.x > x && position.y == y ||
-                        direction == 'E' && position.x < x && position.y == y ||
-                        direction == 'N' && position.x == x && position.y > y ||
-                        direction == 'S' && position.x == x && position.y < y) &&
-                        this.getNbTilesBetween(position, {'x': x, 'y': y}) <= distance
-                    ) {
-                        path.push({'x': x, 'y': y});
+                    let p = new Position(x, y);
+                    if (position.isInRange(p, distance)) {
+                        path.push(p);
                     }
                 }
             }
@@ -226,10 +220,10 @@ module TacticArena {
 
         getLinearPathsAllDirections(position: Position, distance) {
             return {
-                W: this.getLinearPath(position, distance, 'W'),
-                E: this.getLinearPath(position, distance, 'E'),
-                N: this.getLinearPath(position, distance, 'N'),
-                S: this.getLinearPath(position, distance, 'S')
+                W: this.getLinearPath(position.turn('W'), distance),
+                E: this.getLinearPath(position.turn('E'), distance),
+                N: this.getLinearPath(position.turn('N'), distance),
+                S: this.getLinearPath(position.turn('S'), distance)
             };
         }
 
@@ -306,10 +300,6 @@ module TacticArena {
                 (coordsA.x == coordsB.x && (directionA == 'N' || directionA == 'S')) ||
                 (coordsA.y == coordsB.y && (directionA == 'W' || directionA == 'E'))
             );
-        }
-
-        equalPositions(p1, p2) {
-            return p1.x == p2.x && p1.y == p2.y;
         }
 
         markPawns() {

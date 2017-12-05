@@ -41,7 +41,7 @@ module TacticArena.UI {
                     //}
 
                     let activePawn = this.menu.game.turnManager.getActivePawn();
-                    if(!this.menu.game.stageManager.equalPositions(this.menu.game.spritesManager.getReal(activePawn).getPosition(), order.position)) {
+                    if(!this.menu.game.spritesManager.getReal(activePawn).getPosition().equals(order.position)) {
                         this.menu.game.stageManager.showPath([order.position], this.menu.game.pathOrdersTilesGroup, 0xffffff);
                     }
                 });
@@ -64,11 +64,11 @@ module TacticArena.UI {
             let activePawn = this.menu.game.turnManager.getActivePawn();
             //let msg = '<b>' + activePawn._name + '</b>';
             //if (order.action == 'move') {
-            //    msg += ' se déplacera en ' + order.x + ', ' + order.y + ', orienté vers le ' + this.directionMapping[order.direction];
+            //    msg += ' se déplacera en ' + order.x + ', ' + order.y + ', orienté vers le ' + this.directionMapping[order.position.d];
             //} else if (order.action == 'cast') {
-            //    msg += ' lancera une boule de feu vers ' + this.directionMapping[order.direction];
+            //    msg += ' lancera une boule de feu vers ' + this.directionMapping[order.position.d];
             //} else if (order.action == 'stand') {
-            //    msg += ' restera en position ' + order.x + ', ' + order.y + ' et fera preuve de vigilence vers ' + this.directionMapping[order.direction];
+            //    msg += ' restera en position ' + order.x + ', ' + order.y + ' et fera preuve de vigilence vers ' + this.directionMapping[order.position.d];
             //}
             //return '<span style="color:#ffffff;">' + msg + '</span>';
         }

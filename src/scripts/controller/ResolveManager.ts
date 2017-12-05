@@ -61,11 +61,12 @@ module TacticArena {
             return Promise.all(promisesOrders).then( res => {
                 if (!backward) { self.manageProjectionDislay(self.steps[index]);}
                 self.steps[index].stepUnits.forEach((stepUnit, i) => { // update pawn HP and its different states
-                    //let forceAnimation = typeof stepUnit.data.dies !== 'undefined' && stepUnit.data.dies;
                     let forceAnimation = previousStep !== null && !(previousStep.stepUnits[i].order instanceof Order.Dead);
-                    stepUnit.pawn.setPosition(stepUnit.order.position); // TODO beware of moved or blocked
-                    stepUnit.pawn.setDirection(stepUnit.order.direction);
-                    stepUnit.pawn.setHp(stepUnit.data.hp, forceAnimation);
+                    stepUnit.pawn.setPosition(stepUnit.getPosition());
+                    stepUnit.pawn.setHp(stepUnit.data.hp, true);
+                    if ((stepUnit.pawn.isAlive() || forceAnimation) && stepUnit.pawn.getHp() <= 0) {
+                        self.game.spritesManager.getReal(stepUnit.pawn).die();
+                    }
                 });
             });
         }
@@ -84,12 +85,12 @@ module TacticArena {
                         condition = order.position.equals(position);
                     }
 
-                    if (condition || !stepUnit.data.aIsAlive || stepUnit.data.altered) {
-                        this.game.spritesManager.getProjection(championA).hide();
-                        this.game.spritesManager.getReal(championA).show();
-                    } else {
-                        this.game.spritesManager.getProjection(championA).show(0.7);
-                    }
+                    //if (condition || stepUnit.data.hp <= 0) { // || stepUnit.data.altered) {
+                    //    this.game.spritesManager.getProjection(championA).hide();
+                    //    this.game.spritesManager.getReal(championA).show();
+                    //} else {
+                    //    this.game.spritesManager.getProjection(championA).show(0.7);
+                    //}
                 }
             });
         }

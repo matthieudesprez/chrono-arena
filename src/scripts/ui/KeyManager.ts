@@ -91,7 +91,7 @@ module TacticArena.UI {
                     uiManager.game.pawns.filter( (pawn: Champion.BaseChampion) => {
                         return pawn.team === player._id;
                     }).forEach((pawn:Champion.BaseChampion) => {
-                        pawn.setHp(0);
+                        pawn.setHp(0, true, true);
                     });
                 });
                 uiManager.game.battleOver();

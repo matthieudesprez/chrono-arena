@@ -5,8 +5,8 @@ module TacticArena.Animation {
         get(): Promise<any> {
             let self = this;
             let animation = new Promise((resolve, reject) => {
-                this.state.spritesManager.getReal(this.pawn).stand(this.order.direction);
-                this.state.spritesManager.getReal(this.pawn).attack(this.order.direction).then(() => {
+                this.state.spritesManager.getReal(this.pawn).stand(this.order.position.d);
+                this.state.spritesManager.getReal(this.pawn).attack(this.order.position.d).then(() => {
                     this.order.targets.forEach(target => {
                         let champion = (this.state as State.BaseBattle).getChampion(target.championId);
                         if (target.dodge) {

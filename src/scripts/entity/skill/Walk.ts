@@ -38,7 +38,7 @@ module TacticArena.Skill {
             this.state.stageManager.canMove(this.state.spritesManager.getProjectionOrReal(this.pawn).getPosition(), target.x, target.y, this.pawn.getAp()).then((path) => {
                 this.state.process = true;
                 let resultPath = path.slice(0); // copy because path is changed during moveTo process
-                this.state.spritesManager.createProjection(this.pawn).moveTo(0, 0, path).then( (res) => {
+                this.state.spritesManager.getProjectionOrReal(this.pawn, true).moveTo(0, 0, path).then( (res) => {
                     for (var i = 0; i < (resultPath as any).length; i++) {
                         // TODO the direction wont be accurate if moveTo(faceDirection==true)
                         this.state.orderManager.add(this.pawn, new Order.Move(resultPath[i], this.state.spritesManager.getProjectionOrReal(this.pawn).getDirection()));

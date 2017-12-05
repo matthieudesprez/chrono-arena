@@ -11,9 +11,9 @@ module TacticArena.Skill {
             this.pathColor = null;
         }
 
-        onOrder(position, direction) {
-            this.state.spritesManager.getProjectionOrReal(this.pawn, true).halfcast(direction);
-            this.state.orderManager.add(this.pawn, new Order.Heal(position, direction));
+        onOrder(position) {
+            this.state.spritesManager.getProjectionOrReal(this.pawn, true).halfcast(position.d);
+            this.state.orderManager.add(this.pawn, new Order.Heal(position));
         }
     }
 }

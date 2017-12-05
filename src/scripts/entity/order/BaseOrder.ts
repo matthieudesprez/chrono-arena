@@ -2,13 +2,11 @@ module TacticArena.Order {
     export class BaseOrder {
         action: string;
         position: Position;
-        direction;
         targets;
 
-        constructor(action, position, direction, targets = []) {
+        constructor(action, position, targets = []) {
             this.action = action;
             this.position = position;
-            this.direction = direction;
             this.targets = targets;
         }
 

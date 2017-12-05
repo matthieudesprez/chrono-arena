@@ -2,8 +2,8 @@
 module TacticArena.Order {
     export class Attack extends BaseOrder {
 
-        constructor(position, direction, targets) {
-            super('attack', position, direction, targets);
+        constructor(position, targets) {
+            super('attack', position, targets);
         }
 
         resolve (pawn:Champion.BaseChampion, stepUnitData:StepUnitData, previousStep:StepUnit, animate:boolean, backward:boolean, i:number, state):Promise<any> {

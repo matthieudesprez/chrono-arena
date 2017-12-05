@@ -31,6 +31,8 @@ module.exports = function(config) {
             '/assets/json/gridtiles.json': 'http://localhost:9876/base/build/assets/json/gridtiles.json',
             '/assets/images/fireball.json': 'http://localhost:9876/base/build/assets/images/fireball.json',
             '/assets/images/fireball.png': 'http://localhost:9876/base/build/assets/images/fireball.png',
+            '/assets/images/wind.json': 'http://localhost:9876/base/build/assets/images/wind.json',
+            '/assets/images/wind.png': 'http://localhost:9876/base/build/assets/images/wind.png',
             '/assets/images/characters/skeleton/spritesheet.json': 'http://localhost:9876/base/build/assets/images/characters/skeleton/spritesheet.json',
             '/assets/images/characters/skeleton/spritesheet.png': 'http://localhost:9876/base/build/assets/images/characters/skeleton/spritesheet.png',
             '/assets/images/maptiles.png': 'http://localhost:9876/base/build/assets/images/maptiles.png'

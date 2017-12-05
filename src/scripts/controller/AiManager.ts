@@ -28,14 +28,13 @@ module TacticArena {
             let target = this.getClosestPawn(p);
             if(target) {
                 let targetPosition = this.game.spritesManager.getReal(target).getPosition();
-
                 let direction = p.getDirectionTo(targetPosition);
                 if(pawn.getDirection() != direction) {
-                    this.game.orderManager.add(pawn, new Order.Stand(p, direction));
+                    this.game.orderManager.add(pawn, new Order.Stand(new Position(p.x, p.y, direction)));
                     pawn.setAp(pawn.getAp() - 1, false);
                 }
                 if(self.game.stageManager.isFacingAway(p, pawn.getDirection(), targetPosition)) {
-                    this.game.orderManager.add(pawn, new Order.Fire(p, pawn.getDirection()));
+                    this.game.orderManager.add(pawn, new Order.Fire(new Position(p.x, p.y, pawn.getDirection())));
                     pawn.setAp(pawn.getAp() - 2, false);
                 }
 

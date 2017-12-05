@@ -11,9 +11,9 @@ module TacticArena.Skill {
             this.range = 4;
         }
 
-        onOrder(position, direction): void {
-            this.state.spritesManager.getProjectionOrReal(this.pawn, true).halfcast(direction);
-            this.state.orderManager.add(this.pawn, new Order.Fire(position, direction));
+        onOrder(position): void {
+            this.state.spritesManager.getProjectionOrReal(this.pawn, true).halfcast(position.d);
+            this.state.orderManager.add(this.pawn, new Order.Fire(position));
         }
     }
 }
