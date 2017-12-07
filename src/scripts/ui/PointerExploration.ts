@@ -30,7 +30,6 @@ module TacticArena.UI {
                 self.game.process = true;
                 if (this.game.stageManager.grid[p.y][p.x] != 0) {
                     this.game.stageManager.canMove(self.game.spritesManager.getReal(activePawn).getPosition(), targetX, targetY).then((path) => {
-                        console.log(path);
                         activePawn.moveTo(0, 0, path, true, true).then((res) => {
                             self.game.stageManager.markPawns();
                             self.game.process = false;
@@ -38,11 +37,9 @@ module TacticArena.UI {
                             self.game.process = false;
                         });
                     }, (res) => {
-                        console.log(res);
                         self.game.process = false;
                     });
                 } else if (!p.equals(this.game.spritesManager.getReal(activePawn).getPosition())) {
-                    console.log('attack');
                     let enemy = self.game.pawns[1];
                     self.game.process = false;
                     let gridWidth = 10;

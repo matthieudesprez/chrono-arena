@@ -9,19 +9,8 @@ module TacticArena.UI {
             this.active = false;
             let icon = this.menu.game.make.image(this.menu.game.world.width - 43, 8, 'icon-menu4');
             this.menu.game.uiGroup.add(icon);
-
             icon.inputEnabled = true;
             icon.events.onInputDown.add(this.open, this);
-
-            //this.open();
-        }
-
-        showOverlay() {
-
-        }
-
-        gameOver(msg) {
-
         }
 
         show(msg) {

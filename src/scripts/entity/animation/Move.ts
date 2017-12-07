@@ -3,19 +3,15 @@ module TacticArena.Animation {
         animate: boolean;
         direction: string;
 
-        constructor(state: State.BasePlayable, pawn: Champion.BaseChampion, order: Order.BaseOrder, animate: boolean, direction: string = null) {
-            super(state, pawn, order);
+        constructor(state: State.BasePlayable, pawn: Champion.BaseChampion, order: Order.BaseOrder, stepUnit: StepUnit, animate: boolean, direction: string = null) {
+            super(state, pawn, order, stepUnit);
             this.animate = animate;
             this.direction = direction;
         }
 
         get(): Promise<any> {
             return this.state.spritesManager.getReal(this.pawn).moveTo(this.order.position.x, this.order.position.y, null, this.animate).then((res) => {
-                if (this.direction) {
-                    return new Animation.Stand(this.state, this.pawn, this.order).get();
-                } else {
-                    return res;
-                }
+                return new Animation.Stand(this.state, this.pawn, this.order, this.stepUnit).get();
             });
         }
     }

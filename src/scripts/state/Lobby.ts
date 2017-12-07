@@ -28,7 +28,6 @@ module TacticArena.State {
             //    self.initChat(self.login);
             //});
             //this.menu.find('.login-input').on('keyup', function (e) {
-            //    console.log(e);
             //    if (e.keyCode == 13) {
             //        self.initChat($('#game-menu .ui .login-input').val());
             //    }
@@ -39,7 +38,6 @@ module TacticArena.State {
         //    this.menu.html('');
         //    var self = this;
         //    this.serverManager = new ServerManager(this, login, function (data, server = false) {
-        //        console.log(data);
         //        let msg = server ? '<span class="notification">' + data.content + '</span>' : data.name + ': ' + data.content;
         //        self.chatUI.write(msg);
         //    }, function (data) {

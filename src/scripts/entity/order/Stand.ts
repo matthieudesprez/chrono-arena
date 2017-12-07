@@ -14,8 +14,8 @@ module TacticArena.Order {
             return this;
         }
 
-        resolve(pawn: Champion.BaseChampion, stepUnitData: StepUnitData, previousStep: StepUnit, animate: boolean, backward: boolean, i: number, state): Promise<any> {
-            return new Animation.Stand(state, pawn, this).get();
+        resolve(pawn: Champion.BaseChampion, stepUnit: StepUnit, animate: boolean, state): Promise<any> {
+            return new Animation.Stand(state, pawn, this, stepUnit).get();
         }
 
     }

@@ -31,7 +31,7 @@ module TacticArena {
         }
 
         beforeEach(function (done) {
-            //spyOn(console, 'log').and.stub();
+            spyOn(console, 'log').and.stub();
             spyOn(console, 'info').and.stub();
             spyOn(console, 'warn').and.stub();
             testGame = new TestGame(true);
@@ -213,6 +213,45 @@ module TacticArena {
 
                 testStepUnit(steps[3].getStepUnit(currentState.getChampion(1)), 'stand', 'E', new Position(9, 8), 0, 1);
                 testStepUnit(steps[3].getStepUnit(currentState.getChampion(2)), 'slash', 'W', new Position(10, 8), 0, 4);
+
+                await playAnimation(steps);
+                done();
+            });
+
+            it("the first one wants to move east, he gets blocked by the other, but continue his actions from his blocked position", async function (done) {
+                currentState.getChampion(1)._apMax = 4;
+                currentState.orderManager.orders = [
+                    new ChampionOrders(currentState.getChampion(1), [
+                            new Order.Move(new Position(9, 8, 'E')),
+                            new Order.Fire(new Position(9, 9, 'E')),
+                            new Order.Move(new Position(10, 9, 'E'))
+                        ]
+                    ),
+                    new ChampionOrders(currentState.getChampion(2), [
+                            new Order.Move(new Position(9, 8, 'W')),
+                            new Order.Move(new Position(8, 8, 'W')),
+                            new Order.Move(new Position(7, 8, 'W'))
+                        ]
+                    ),
+                ];
+                let steps = currentState.orderManager.getSteps();
+                expect(steps.length).toEqual(4);
+                expect(steps[0].stepUnits.length).toEqual(2);
+                testStepUnit(steps[0].getStepUnit(currentState.getChampion(1)), 'stand', 'E', new Position(8, 8), 4, 4);
+                testStepUnit(steps[0].getStepUnit(currentState.getChampion(2)), 'stand', 'W', new Position(10, 8), 3, 4);
+
+                testStepUnit(steps[1].getStepUnit(currentState.getChampion(1)), 'move', 'E', new Position(8, 8), 3, 4);
+                expect(steps[1].getStepUnit(currentState.getChampion(1)).data.moveHasBeenBlocked).toBeTruthy();
+                expect(steps[1].getStepUnit(currentState.getChampion(1)).data.positionBlocked.equals(new Position(9, 8))).toBeTruthy();
+                testStepUnit(steps[1].getStepUnit(currentState.getChampion(2)), 'move', 'W', new Position(10, 8), 2, 4);
+                expect(steps[1].getStepUnit(currentState.getChampion(2)).data.moveHasBeenBlocked).toBeTruthy();
+                expect(steps[1].getStepUnit(currentState.getChampion(2)).data.positionBlocked.equals(new Position(9, 8))).toBeTruthy();
+
+                testStepUnit(steps[2].getStepUnit(currentState.getChampion(1)), 'cast', 'E', new Position(8, 8), 1, 4);
+                testStepUnit(steps[2].getStepUnit(currentState.getChampion(2)), 'stand', 'W', new Position(10, 8), 1, 2);
+
+                testStepUnit(steps[3].getStepUnit(currentState.getChampion(1)), 'stand', 'E', new Position(8, 8), 0, 4);
+                testStepUnit(steps[3].getStepUnit(currentState.getChampion(2)), 'stand', 'W', new Position(10, 8), 0, 2);
 
                 await playAnimation(steps);
                 done();
@@ -631,7 +670,7 @@ module TacticArena {
                 done();
             });
 
-            it("3 champions in line, 2 tiles between each, the two at extrem left & right cast a tornado on the middle one", async function (done) {
+            it("3 champions on left & right cast a tornado on the middle one", async function (done) {
                 currentState.getChampion(1).setPosition(new Position(3, 6));
                 currentState.getChampion(2).setPosition(new Position(6, 6));
                 currentState.getChampion(3).setPosition(new Position(9, 5));

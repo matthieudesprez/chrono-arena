@@ -37,7 +37,6 @@ module TacticArena {
             this.socket = new WebSocket(this.url);
             this.socket.onmessage = function (message) {
                 let data = JSON.parse(message.data).data;
-                console.log(data);
                 let server_msg = data.type == 'SERVER_NOTIFICATION';
                 if(data.type == 'SERVER_PLAYERS_LIST') {
                     self.onPlayersListUpdateCallback(data);
@@ -100,20 +99,16 @@ module TacticArena {
                 }
             };
             this.socket.onclose = function (e) {
-                console.log('close', e);
             };
             this.socket.onerror = function (e) {
-                console.log('error', e);
             };
             this.socket.onopen = function (e) {
-                console.log('open', e);
                 setInterval(function(){
                     self.request('KEEP_ALIVE', 'keep me alive');
                 }, 30000);
             };
 
             //$(window).on('beforeunload', function() {
-            //    console.log('disconnect');
             //    self.socket.close();
             //});
         }

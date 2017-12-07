@@ -100,7 +100,7 @@ module TacticArena {
         /*
          Replace all champion steps for the given order, from startI to the end
          */
-        blockChampion(steps: Step[], startI: number, j: number, order: Order.BaseOrder): void {
+        blockChampion(steps: Step[], startI: number, j: number, order: Order.Stand): void {
             let stepUnit = steps[startI].stepUnits[j];
             stepUnit.data.positionBlocked = stepUnit.order.position;
             stepUnit.data.moveHasBeenBlocked = (stepUnit.order instanceof Order.Move);
@@ -109,9 +109,9 @@ module TacticArena {
             for (var i = startI; i < steps.length; i++) {
                 if (steps[i].stepUnits[j].order) {
                     if (i > startI && steps[i].stepUnits[j].order instanceof Order.Move) {
-                        steps[i].stepUnits[j].order = order;
+                        steps[i].stepUnits[j].order = new Order.Stand(order.position, order.targets);
                     }
-                    steps[i].stepUnits[j].order.position = order.position;
+                    steps[i].stepUnits[j].order.position = order.position.clone();
                 }
             }
             this.alteredPawns.push(stepUnit.pawn._id);

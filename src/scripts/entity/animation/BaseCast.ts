@@ -10,7 +10,8 @@ module TacticArena.Animation {
                     resolve(true);
                 });
             });
-            return super.handleBackward(animation);
+            //return super.handleBackward(animation);
+            return animation;
         }
 
         getCastCallback(): Promise<any> {

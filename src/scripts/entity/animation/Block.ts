@@ -3,8 +3,8 @@ module TacticArena.Animation {
         targetPosition: Position;
         animate: boolean;
 
-        constructor(state: State.BasePlayable, pawn: Champion.BaseChampion, order: Order.BaseOrder, targetPosition: Position, animate: boolean) {
-            super(state, pawn, order);
+        constructor(state: State.BasePlayable, pawn: Champion.BaseChampion, order: Order.BaseOrder, stepUnit: StepUnit, targetPosition: Position, animate: boolean) {
+            super(state, pawn, order, stepUnit);
             this.targetPosition = targetPosition;
             this.animate = animate;
         }
@@ -19,7 +19,7 @@ module TacticArena.Animation {
                     });
                 });
             } else {
-                return new Animation.Stand(this.state, this.pawn, this.order).get();
+                return new Animation.Stand(this.state, this.pawn, this.order, this.stepUnit).get();
             }
         }
     }

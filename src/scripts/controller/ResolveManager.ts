@@ -2,9 +2,9 @@ module TacticArena {
     export class ResolveManager {
         steps;
         game;
-        processing:boolean;
-        currentIndex:Number;
-        active:boolean;
+        processing: boolean;
+        currentIndex: Number;
+        active: boolean;
 
         constructor(game) {
             this.steps = [];
@@ -14,7 +14,7 @@ module TacticArena {
             this.active = false;
         }
 
-        init(steps:Step[]) {
+        init(steps: Step[]) {
             this.steps = steps;
             this.manageProjectionDislay(steps[0], true);
             this.currentIndex = 0;
@@ -23,7 +23,7 @@ module TacticArena {
         /*
          * Call processStep
          */
-        processSteps(index, animate:boolean = true, backward:boolean = false) {
+        processSteps(index, animate: boolean = true, backward: boolean = false) {
             this.processing = true;
             this.active = true;
             let self = this;
@@ -45,7 +45,7 @@ module TacticArena {
         /*
          * Return a promise which resolves when all this.steps[index] animations are done
          */
-        processStep(index:number, animate:boolean = true, backward:boolean = false):Promise<any> {
+        processStep(index: number, animate: boolean = true, backward: boolean = false): Promise<any> {
             if (index >= this.steps.length) return Promise.resolve(true);
 
             let self = this;
@@ -53,33 +53,35 @@ module TacticArena {
             let previousStep: Step = index > 0 ? this.steps[index - 1] : null;
 
             var promisesOrders = [];
-            this.steps[index].stepUnits.forEach( (stepUnit, i) => {
+            this.steps[index].stepUnits.forEach((stepUnit, i) => {
                 stepUnit.pawn.setAp(stepUnit.data.ap); // update pawn AP
-                promisesOrders.push(stepUnit.order.resolve(stepUnit.pawn, stepUnit.data, previousStep, animate, backward, i, self.game)); // execute animation
+                promisesOrders.push(stepUnit.order.resolve(stepUnit.pawn, stepUnit, animate, self.game)); // execute animation
             });
             this.manageProjectionDislay(this.steps[index]);
-            return Promise.all(promisesOrders).then( res => {
-                if (!backward) { self.manageProjectionDislay(self.steps[index]);}
+            return Promise.all(promisesOrders).then(res => {
+                if (!backward) {
+                    self.manageProjectionDislay(self.steps[index]);
+                }
                 self.steps[index].stepUnits.forEach((stepUnit, i) => { // update pawn HP and its different states
-                    let forceAnimation = previousStep !== null && !(previousStep.stepUnits[i].order instanceof Order.Dead);
                     stepUnit.pawn.setPosition(stepUnit.getPosition());
                     stepUnit.pawn.setHp(stepUnit.data.hp, true);
-                    if ((stepUnit.pawn.isAlive() || forceAnimation) && stepUnit.pawn.getHp() <= 0) {
-                        self.game.spritesManager.getReal(stepUnit.pawn).die();
+                    if (stepUnit.pawn.getHp() <= 0) {
+                        let forceAnimation = previousStep !== null && !(previousStep.stepUnits[i].order instanceof Order.Dead);
+                        self.game.spritesManager.getReal(stepUnit.pawn).die(animate || forceAnimation);
                     }
                 });
             });
         }
 
         manageProjectionDislay(step, compareActualEntity = false) {
-            step.stepUnits.forEach( (stepUnit, i) => {
+            step.stepUnits.forEach((stepUnit, i) => {
                 var championA = stepUnit.pawn;
                 let order = stepUnit.order;
                 let position = this.game.spritesManager.getProjectionOrReal(championA).getPosition();
 
                 if (this.game.spritesManager.getProjection(championA)) {
                     let condition = false;
-                    if(compareActualEntity) {
+                    if (compareActualEntity) {
                         condition = this.game.spritesManager.getReal(championA).getPosition().equals(position);
                     } else {
                         condition = order.position.equals(position);

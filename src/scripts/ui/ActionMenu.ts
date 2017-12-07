@@ -152,6 +152,14 @@ module TacticArena.UI {
                 this.disableCancel();
             }
 
+            if(this.game.resolveManager.steps.length > 0) {
+                let btnReplay = this.game.make.image(frame.width - 43, frame.y - 40, 'icon-replay');
+                this.game.uiGroup.add(btnReplay);
+                btnReplay.inputEnabled = true;
+                btnReplay.events.onInputDown.add(this.replay, this);
+                this.mainGroup.add(btnReplay);
+            }
+
             this.mainGroup.add(frame);
             this.mainGroup.add(avatar);
             this.mainGroup.add(name);
@@ -207,6 +215,13 @@ module TacticArena.UI {
             }
         }
 
+        replay(buttonSprite, pointer, buttonGroup) {
+            this.game.signalManager.onTurnEnded.dispatch(this.game);
+            this.game.turnManager.currentTurnIndex--;
+            this.game.uiManager.turnIndicatorUI.write(this.game.turnManager.currentTurnIndex + 1);
+            this.game.initResolvePhase(this.game.resolveManager.steps);
+        }
+
         buttonOver(buttonSprite, pointer, buttonGroup) {
             this.isOver = true;
         }
@@ -241,7 +256,7 @@ module TacticArena.UI {
                 }
                 if (actionMenuSkill.selected) {
                     actionMenuSkill.skill.onDeselect();
-                    actionMenuSkill.selected = false;
+                    (actionMenuSkill as any).selected = false;
                 }
             });
         }

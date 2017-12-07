@@ -7,8 +7,6 @@ module TacticArena.Action {
 
         static process(state: State.BaseBattle): void {
             if (!state.process) {
-                state.process = true;
-                state.selecting = false;
                 state.turnManager.endTurn().then((nextPawn) => {
                     state.signalManager.onTurnEnded.dispatch(nextPawn);
                     if(state.playMode == 'online' && !nextPawn) { // if no more playable pawns to play

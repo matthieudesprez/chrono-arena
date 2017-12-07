@@ -75,7 +75,6 @@ module TacticArena {
 
             //for (var i = 0; i < data.background.layer.data.length; i++) {
             //    for (var j = 0; j < data.background.layer.data[i].length; j++) {
-            //        console.log(data.background.layer.data[i][j]);
             //        this.map.putTile(data.background.layer.data[i][j].index, j, i, this.backgroundLayer);
             //    }
             //}

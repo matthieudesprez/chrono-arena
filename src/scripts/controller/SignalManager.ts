@@ -101,6 +101,8 @@ module TacticArena {
             });
 
             this.onTurnEnded.add( (nextPawn) => {
+                self.game.process = true;
+                self.game.selecting = false;
                 // in case of a local multiplayer, the projections can be hidden
                 if(!!nextPawn && nextPawn.team !== self.game.turnManager.currentPawn.team && self.game.hideProjections) {
                     self.game.spritesManager.destroyAllProjections();

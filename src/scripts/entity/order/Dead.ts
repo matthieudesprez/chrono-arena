@@ -6,8 +6,8 @@ module TacticArena.Order {
             super('dead', position);
         }
 
-        resolve (pawn:Champion.BaseChampion, stepUnitData:StepUnitData, previousStep:StepUnit, animate:boolean, backward:boolean, i:number, state):Promise<any> {
-            return new Animation.Die(state, pawn, this).get();
+        resolve(pawn: Champion.BaseChampion, stepUnit: StepUnit, animate: boolean, state): Promise<any> {
+            return new Animation.Die(state, pawn, this, stepUnit).get();
         }
     }
 }

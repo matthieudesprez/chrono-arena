@@ -6,7 +6,7 @@ module TacticArena.Order {
 
         constructor(action, position, targets = []) {
             this.action = action;
-            this.position = position;
+            this.position = position.clone();
             this.targets = targets;
         }
 
