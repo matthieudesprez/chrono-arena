@@ -12,27 +12,25 @@ module TacticArena.Order {
             stepUnitA.apImpact[stepUnitA.pawn._id] = -2;
             stepUnitA.order.targets = stepUnitA.order.targets || [];
             stepUnitA.hasInteractedWith.push(stepUnitB.pawn._id);
-            ordermanager.state.stageManager.getLinearPath(stepUnitA.order.position, 4).forEach( (position: Position) => {
-                if (!stepUnitA.order.targets.some(target => {return target.champion === stepUnitB.pawn._id;})) {
-                    if(stepUnitB.collidesWith(position)){
-                        let movedPosition = (stepUnitB.data.moved !== null) ? stepUnitB.data.moved.clone() : stepUnitB.order.position.clone();
-                        if (stepUnitA.order.position.d === 'E') {
-                            movedPosition.setX(movedPosition.x + 1);
-                        } else if (stepUnitA.order.position.d === 'W') {
-                            movedPosition.setX(movedPosition.x - 1);
-                        } else if (stepUnitA.order.position.d === 'S') {
-                            movedPosition.setY(movedPosition.y + 1);
-                        } else if (stepUnitA.order.position.d === 'N') {
-                            movedPosition.setY(movedPosition.y - 1);
+            ordermanager.state.stageManager.getLinearPath(stepUnitA.order.position, 4).forEach((position: Position) => {
+                if (!stepUnitA.order.targets.some(target => {return target.champion === stepUnitB.pawn._id && target.moved !== null;}) || stepUnitB.data.moveHasBeenBlocked) {
+                    if (stepUnitB.collidesWith(position)) {
+                        let movedPosition = stepUnitB.data.moveHasBeenBlocked ? stepUnitB.order.position.clone() : stepUnitB.getPosition().clone();
+                        if(stepUnitB.data.moveHasBeenBlocked) {
+                            stepUnitB.data.moved = null;
                         }
+                        movedPosition.moves(stepUnitA.order.position.d, 1);
 
                         if (!ordermanager.tileIsFree(stepUnits, movedPosition)) {
                             movedPosition = null;
-                        } else {
-                            stepUnitB.checked = false;
                         }
+                        stepUnitB.checked = false;
 
+                        // TODO maybe should directly modify stepUnitB.order.position = movedPosition
                         stepUnitB.data.moved = movedPosition;
+                        stepUnitA.order.targets = stepUnitA.order.targets.filter(target => {
+                            return target.champion !== stepUnitB.pawn._id;
+                        });
                         stepUnitA.order.targets.push({
                             champion: stepUnitB.pawn._id,
                             moved: movedPosition,

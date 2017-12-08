@@ -16,7 +16,7 @@ module TacticArena {
 
         init(steps: Step[]) {
             this.steps = steps;
-            this.manageProjectionDislay(steps[0], true);
+            this.game.spritesManager.destroyAllProjections();
             this.currentIndex = 0;
         }
 
@@ -57,11 +57,7 @@ module TacticArena {
                 stepUnit.pawn.setAp(stepUnit.data.ap); // update pawn AP
                 promisesOrders.push(stepUnit.order.resolve(stepUnit.pawn, stepUnit, animate, self.game)); // execute animation
             });
-            this.manageProjectionDislay(this.steps[index]);
             return Promise.all(promisesOrders).then(res => {
-                if (!backward) {
-                    self.manageProjectionDislay(self.steps[index]);
-                }
                 self.steps[index].stepUnits.forEach((stepUnit, i) => { // update pawn HP and its different states
                     stepUnit.pawn.setPosition(stepUnit.getPosition());
                     stepUnit.pawn.setHp(stepUnit.data.hp, true);
@@ -70,30 +66,6 @@ module TacticArena {
                         self.game.spritesManager.getReal(stepUnit.pawn).die(animate || forceAnimation);
                     }
                 });
-            });
-        }
-
-        manageProjectionDislay(step, compareActualEntity = false) {
-            step.stepUnits.forEach((stepUnit, i) => {
-                var championA = stepUnit.pawn;
-                let order = stepUnit.order;
-                let position = this.game.spritesManager.getProjectionOrReal(championA).getPosition();
-
-                if (this.game.spritesManager.getProjection(championA)) {
-                    let condition = false;
-                    if (compareActualEntity) {
-                        condition = this.game.spritesManager.getReal(championA).getPosition().equals(position);
-                    } else {
-                        condition = order.position.equals(position);
-                    }
-
-                    //if (condition || stepUnit.data.hp <= 0) { // || stepUnit.data.altered) {
-                    //    this.game.spritesManager.getProjection(championA).hide();
-                    //    this.game.spritesManager.getReal(championA).show();
-                    //} else {
-                    //    this.game.spritesManager.getProjection(championA).show(0.7);
-                    //}
-                }
             });
         }
 

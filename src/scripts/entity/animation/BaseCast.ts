@@ -1,17 +1,16 @@
 module TacticArena.Animation {
     export abstract class BaseCast extends BaseAnimation {
+        speed;
 
-        get(): Promise<any> {
-            let animation = new Promise((resolve, reject) => {
-                this.state.spritesManager.showReal(this.pawn);
-                this.state.spritesManager.getReal(this.pawn).cast(this.order.position.d).then(() => {
-                    return this.getCastCallback();
-                }).then(() => {
-                    resolve(true);
-                });
-            });
-            //return super.handleBackward(animation);
-            return animation;
+        constructor(state: State.BasePlayable, pawn: Champion.BaseChampion, order: Order.BaseOrder, stepUnit: StepUnit, speed: number = 1000) {
+            super(state, pawn, order, stepUnit);
+            this.speed = speed;
+        }
+
+        async get(): Promise<any> {
+            this.state.spritesManager.showReal(this.pawn);
+            await super.handleBackward(this.state.spritesManager.getReal(this.pawn).cast(this.order.position.d, this.speed));
+            return super.handleBackward(this.getCastCallback());
         }
 
         getCastCallback(): Promise<any> {

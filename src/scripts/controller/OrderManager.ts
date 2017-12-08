@@ -131,12 +131,8 @@ module TacticArena {
          Return true if the given position is not already used by any of the stepUnits (to avoid having 2 champions on the same tile)
          */
         tileIsFree(stepUnits: StepUnit[], position: Position): boolean {
-            return !stepUnits.some((stepUnit: StepUnit) => {
-                return (
-                    this.state.stageManager.isObstacle(position) &&
-                    ((typeof stepUnit.data.moved === 'undefined' && stepUnit.order.position.equals(position)) || // the champion is not moved and its default order position equals the given position
-                    (stepUnit.data.moved && stepUnit.data.moved.equals(position))) // the champion is moved and its movedPosition equals the given position
-                );
+            return !this.state.stageManager.isObstacle(position) && !stepUnits.some((stepUnit: StepUnit) => {
+                return stepUnit.getPosition().equals(position);
             });
         }
 
@@ -164,26 +160,35 @@ module TacticArena {
                 if (l === 0) return; // The first step represents the initial state of each Champion, they don't interact yet
                 this.alteredPawns = []; // Reset alteredPawns
                 this.movedChampions = []; // Reset movedChampions
-                let previousStepUnit = steps[l - 1].stepUnits;
+                let previousStepUnits = steps[l - 1].stepUnits;
 
                 step.stepUnits.forEach((stepUnit: StepUnit, i: number) => {
                     stepUnit.checked = false; // Activate the interaction process with other stepUnits
-                    stepUnit.data = new StepUnitData(previousStepUnit[i].data.ap, previousStepUnit[i].data.hp); // Init stepUnit.data with previous stepUnit data
+                    stepUnit.data = new StepUnitData(previousStepUnits[i].data.ap, previousStepUnits[i].data.hp); // Init stepUnit.data with previous stepUnit data
                     if (stepUnit.order == null) { // In case a pawn has less actions to play than the others
-                        stepUnit.order = new Order.Stand(previousStepUnit[i].order.position); // He gots a default one
+                        stepUnit.order = new Order.Stand(previousStepUnits[i].order.position); // He gots a default one
                     }
                 });
 
                 let count = 0;
                 while (step.stepUnits.some(stepUnit => {return !stepUnit.checked;})) { // While there are stepUnits to check
-                    step.stepUnits.forEach((stepUnitA: StepUnit, i: number) => { // Check actions for each stepUnit (champion) in current step
+                    step.stepUnits.forEach((stepUnitA: StepUnit) => { // Check actions for each stepUnit (champion) in current step
                         stepUnitA.checked = true; // Interaction is checked
                     });
 
                     step.stepUnits.forEach((stepUnitA: StepUnit, i: number) => { // Check actions for each stepUnit (champion) in current step
                         step.stepUnits.forEach((stepUnitB: StepUnit, j: number) => { // Foreach other stepUnit
                             if (stepUnitA.pawn._id === stepUnitB.pawn._id) return; // Except A, no interaction with oneself
-                            this.processStep(steps, l, i, j, stepUnitA, stepUnitB);
+                            let previousStepUnitA = previousStepUnits[i];
+                            let previousStepUnitB = previousStepUnits[j];
+                            if (previousStepUnitA.data.hp <= 0) { // If the Champion was dead in the previous step
+                                stepUnitA.order = new Order.Dead(previousStepUnitA.getPosition());
+                            }
+
+                            stepUnitA.order.process(this, steps, l, i, j); // Apply the Skill / Order on the step
+
+                            stepUnitA.data.ap = Math.max(0, previousStepUnitA.data.ap + steps[l].getAp(stepUnitA.pawn));
+                            stepUnitB.data.hp = previousStepUnitB.data.hp > 0 ? previousStepUnitB.data.hp + steps[l].getHp(stepUnitB.pawn) : 0;
                         });
                     });
 
@@ -205,21 +210,6 @@ module TacticArena {
                 }
             });
             return steps;
-        }
-
-        processStep(steps, l, i, j, stepUnitA, stepUnitB) {
-            let previousStepUnit = steps[l - 1].stepUnits;
-
-            stepUnitA.data.hp = typeof stepUnitA.data.hp !== 'undefined' ? stepUnitA.data.hp : previousStepUnit[i].data.hp;
-
-            if (previousStepUnit[i].data.hp <= 0) { // If the Champion was dead in the previous step
-                stepUnitA.order = new Order.Dead(previousStepUnit[i].order.position); // TODO check interaction ?
-            }
-
-            stepUnitA.order = stepUnitA.order.process(this, steps, l, i, j); // Apply the Skill / Order on the step
-
-            stepUnitA.data.ap = Math.max(0, previousStepUnit[i].data.ap + steps[l].getAp(stepUnitA.pawn));
-            stepUnitB.data.hp = previousStepUnit[j].data.hp + steps[l].getHp(stepUnitB.pawn);
         }
     }
 }

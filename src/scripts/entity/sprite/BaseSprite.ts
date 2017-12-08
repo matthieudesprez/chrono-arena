@@ -101,22 +101,22 @@ module TacticArena.Sprite {
             });
         }
 
-        cast(ext = this._ext) {
+        cast(ext = this._ext, speed = 1000) {
             return new Promise((resolve, reject) => {
                 this._ext = ext;
                 this.playAnimation('cast' + this._ext);
                 setTimeout(function () {
                     resolve(true);
-                }, 500);
+                }, speed);
             });
         }
 
-        blink(tintFactor = 1) {
+        blink(tintFactor = 1, alpha = 0.5, speed = 100, ease = Phaser.Easing.Exponential.Out) {
             let self = this;
             let t = this.game.add.tween(this).to({
                 tint: tintFactor * 0xffffff,
-                alpha: 0.5
-            }, 100, Phaser.Easing.Exponential.Out, true, 0, 0, true);
+                alpha: alpha
+            }, speed, ease, true, 0, 0, true);
             t.onComplete.add(function () {
                 self.tint = 0xffffff;
                 self.alpha = 1;
@@ -128,7 +128,7 @@ module TacticArena.Sprite {
         }
 
         healAnimation() {
-            this.blink();
+            this.blink(3.7, 1);
         }
 
         die(animate = true) {
@@ -157,6 +157,7 @@ module TacticArena.Sprite {
                 var tile = this.state.stageManager.map.layers[1].data[tile_y][tile_x];
                 var newX = tile.x * this.state.game.tileSize - this._size / 4;
                 var newY = tile.y * this.state.game.tileSize - this._size / 2;
+                if (this.x == newX && this.y == newY) { return resolve(true);}
                 if (animate) {
                     if (faceDirection) {
                         this.faceTo(newX, newY);

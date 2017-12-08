@@ -25,9 +25,15 @@ module TacticArena {
         //}
 
         set(position: Position) {
-            if(position.x) { this.x = position.x; }
-            if(position.y) { this.y = position.y; }
-            if(position.d) { this.d = position.d; }
+            if (position.x) {
+                this.x = position.x;
+            }
+            if (position.y) {
+                this.y = position.y;
+            }
+            if (position.d) {
+                this.d = position.d;
+            }
         }
 
         setX(x) {
@@ -42,6 +48,35 @@ module TacticArena {
             this.d = d;
         }
 
+        moves(direction, distance): void {
+            if (direction === 'E') {
+                this.setX(this.x + distance);
+            } else if (direction === 'W') {
+                this.setX(this.x - distance);
+            } else if (direction === 'S') {
+                this.setY(this.y + distance);
+            } else if (direction === 'N') {
+                this.setY(this.y - distance);
+            }
+        }
+
+        /*
+         Return 1 if this is farther than the given position when looking in the given direction
+         */
+        comparePosition(position: Position, direction): number {
+            let result = -1;
+            if (this.equals(position)) {
+                result = 0;
+            } else if (
+                (direction === 'E' && this.x > position.x) ||
+                (direction === 'W' && this.x < position.x) ||
+                (direction === 'S' && this.y < position.y) ||
+                (direction === 'N' && this.y > position.y)) {
+                result = 1;
+            }
+            return result;
+        }
+
         translate(x, y): Position {
             return new Position(this.x + x, this.y + y, this.d);
         }
@@ -50,7 +85,7 @@ module TacticArena {
             return new Position(this.x, this.y, d);
         }
 
-        equals(position: Position, withDirection=false): boolean {
+        equals(position: Position, withDirection = false): boolean {
             return this.x === position.x && this.y === position.y && (!withDirection || this.d === position.d);
         }
 

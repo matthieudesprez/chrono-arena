@@ -48,6 +48,7 @@ module TacticArena {
             if(this.projections) {
                 Object.keys(this.projections).forEach(pawnId => {
                     this.projections[pawnId].kill();
+                    this.sprites[pawnId].show();
                 });
             }
             this.projections = [];
@@ -89,17 +90,14 @@ module TacticArena {
         }
 
         update() {
-            if(this.state.selecting) {
+            if (this.state.selecting) {
                 let activePawn = this.state.turnManager.getActivePawn();
-                if(this.getProjection(activePawn)) {
-                    if (this.getReal(activePawn).getPosition().equals(this.getProjection(activePawn).getPosition())) {
-                        this.getReal(activePawn).hide();
-                    } else {
-                        this.getReal(activePawn).show();
-                    }
+                if (this.getProjection(activePawn) && this.getReal(activePawn).getPosition().equals(this.getProjection(activePawn).getPosition())) {
+                    this.getReal(activePawn).hide();
+                } else {
+                    this.getReal(activePawn).show();
                 }
             }
         }
-
     }
 }

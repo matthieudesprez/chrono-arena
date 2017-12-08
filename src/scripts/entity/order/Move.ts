@@ -14,7 +14,7 @@ module TacticArena.Order {
             let stepUnitB = stepUnits[bIndex];
             stepUnitA.apImpact[stepUnitA.pawn._id] = -1;
             // If A wants to go on a tile occupied by B (can be on multiple tiles / step)
-            if (stepUnitB.collidesWith(stepUnitA.getPosition()) && orderManager.alteredPawns.indexOf(stepUnitA.pawn._id) < 0) {
+            if (stepUnitB.collidesWith(stepUnitA.order.position) && (orderManager.alteredPawns.indexOf(stepUnitA.pawn._id) < 0 || stepUnitA.data.moved)) {
                 orderManager.blockChampion(steps, stepIndex, aIndex, new Order.Stand(steps[stepIndex - 1].stepUnits[aIndex].getPosition().turn(stepUnitA.order.position.d)));
                 stepUnitA.hasInteractedWith.push(stepUnitB.pawn._id);
             }

@@ -9,18 +9,12 @@ module TacticArena.Animation {
             this.animate = animate;
         }
 
-        get(): Promise<any> {
-            let spritePosition = this.state.spritesManager.getReal(this.pawn).getPosition();
-            if (this.animate) {
-                return this.state.spritesManager.getReal(this.pawn).moveTo(this.targetPosition.x, this.targetPosition.y).then((res) => {
-                    this.state.spritesManager.getReal(this.pawn).displayText('blocked');
-                    this.state.spritesManager.getReal(this.pawn).moveTo(spritePosition.x, spritePosition.y).then((res) => {
-                        return res;
-                    });
-                });
-            } else {
-                return new Animation.Stand(this.state, this.pawn, this.order, this.stepUnit).get();
-            }
+        async get(): Promise<any> {
+            let position = this.stepUnit.order.position;
+            await this.state.spritesManager.getReal(this.pawn).moveTo(this.targetPosition.x, this.targetPosition.y);
+            this.state.spritesManager.getReal(this.pawn).displayText('blocked');
+            await this.state.spritesManager.getReal(this.pawn).moveTo(position.x, position.y);
+            return new Animation.Stand(this.state, this.pawn, this.order, this.stepUnit).get();
         }
     }
 }

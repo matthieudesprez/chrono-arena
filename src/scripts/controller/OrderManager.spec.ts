@@ -3,7 +3,7 @@
 
 module TacticArena {
     describe("OrderManager", () => {
-        var testGame, currentState;
+        var testGame, currentState, originalTimeout;
 
         function testStepUnit(stepUnit: StepUnit, action, direction, orderPosition: Position, ap, hp) {
             expect(stepUnit.order.action).toEqual(action);
@@ -25,23 +25,25 @@ module TacticArena {
         async function playAnimation(steps) {
             initSpriteManager();
             currentState.resolveManager.init(steps);
-            for (var i = 0; i < steps.length; i++) {
+            for (let i = 0; i < steps.length; i++) {
                 await currentState.resolveManager.processStep(i);
             }
         }
 
         beforeEach(function (done) {
-            spyOn(console, 'log').and.stub();
+            //spyOn(console, 'log').and.stub();
             spyOn(console, 'info').and.stub();
             spyOn(console, 'warn').and.stub();
+            originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
+            jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
             testGame = new TestGame(true);
             testGame.state.start('testpreload');
             testGame.state.onStateChange.add(function (stateName) {
                 if (stateName === 'test') {
                     currentState = testGame.state.getCurrentState();
                     setTimeout(function () {
-                        currentState.pawns.push(new Champion.Test(currentState, currentState.map.startPositions[0][0], 1, 1));
-                        currentState.pawns.push(new Champion.Test(currentState, currentState.map.startPositions[1][0], 2, 2));
+                        currentState.pawns.push(new Champion.Test(currentState, new Position(8, 8, 'E'), 1, 1));
+                        currentState.pawns.push(new Champion.Test(currentState, new Position(10, 8, 'W'), 2, 2));
                         done();
                     }, 200);
                 }
@@ -51,6 +53,7 @@ module TacticArena {
         afterEach(function () {
             testGame.destroy();
             testGame = null;
+            jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
         });
 
         describe("methods", () => {
@@ -59,8 +62,8 @@ module TacticArena {
                 spyOn(currentState.signalManager.onOrderChange, 'dispatch').and.callThrough();
                 expect(currentState.orderManager.orders).toEqual([]);
                 let orders = [
-                    new ChampionOrders(currentState.getChampion(1), [new Order.Stand(currentState.map.startPositions[0][0])]),
-                    new ChampionOrders(currentState.getChampion(2), [new Order.Move(currentState.map.startPositions[1][0].translate(0, -1))]),
+                    new ChampionOrders(currentState.getChampion(1), [new Order.Stand(new Position(8, 8, 'E'))]),
+                    new ChampionOrders(currentState.getChampion(2), [new Order.Move(new Position(10, 7, 'W'))]),
                 ];
                 currentState.orderManager.orders = orders;
                 expect(currentState.orderManager.orders).toEqual(orders);
@@ -73,7 +76,7 @@ module TacticArena {
                 expect(currentState.orderManager.hasOrder(currentState.getChampion(1))).toBe(false);
                 expect(currentState.orderManager.hasOrder(currentState.getChampion(2))).toBe(false);
                 currentState.orderManager.orders = [
-                    new ChampionOrders(currentState.getChampion(2), [new Order.Move(currentState.map.startPositions[1][0].translate(0, -1))])
+                    new ChampionOrders(currentState.getChampion(2), [new Order.Move(new Position(10, 7, 'W'))])
                 ];
                 expect(currentState.orderManager.hasOrder(currentState.getChampion(1))).toBe(false);
                 expect(currentState.orderManager.hasOrder(currentState.getChampion(2))).toBe(true);
@@ -83,14 +86,14 @@ module TacticArena {
                 spyOn(currentState.signalManager.onOrderChange, 'dispatch').and.callThrough();
                 expect(currentState.orderManager.getOrders(currentState.getChampion(1))).toEqual([]);
 
-                currentState.orderManager.add(currentState.getChampion(1), new Order.Move(currentState.map.startPositions[1][0].translate(0, -1)), false);
-                expect(currentState.orderManager.getOrders(currentState.getChampion(1))).toEqual([new Order.Move(currentState.map.startPositions[1][0].translate(0, -1))]);
+                currentState.orderManager.add(currentState.getChampion(1), new Order.Move(new Position(10, 7, 'W')), false);
+                expect(currentState.orderManager.getOrders(currentState.getChampion(1))).toEqual([new Order.Move(new Position(10, 7, 'W'))]);
                 expect(currentState.signalManager.onOrderChange.dispatch).not.toHaveBeenCalled();
 
-                currentState.orderManager.add(currentState.getChampion(1), new Order.Move(currentState.map.startPositions[1][0].translate(-1, -1)));
+                currentState.orderManager.add(currentState.getChampion(1), new Order.Move(new Position(9, 7, 'W')));
                 expect(currentState.orderManager.getOrders(currentState.getChampion(1))).toEqual([
-                    new Order.Move(currentState.map.startPositions[1][0].translate(0, -1)),
-                    new Order.Move(currentState.map.startPositions[1][0].translate(-1, -1))
+                    new Order.Move(new Position(10, 7, 'W')),
+                    new Order.Move(new Position(9, 7, 'W'))
                 ]);
                 expect(currentState.signalManager.onOrderChange.dispatch).toHaveBeenCalledWith(currentState.getChampion(1));
             });
@@ -104,11 +107,11 @@ module TacticArena {
                 expect(steps.length).toEqual(2);
                 expect(steps[0].stepUnits.length).toEqual(2);
 
-                testStepUnit(steps[0].getStepUnit(currentState.getChampion(1)), 'stand', 'E', currentState.map.startPositions[0][0], 3, 4);
-                testStepUnit(steps[0].getStepUnit(currentState.getChampion(2)), 'stand', 'W', currentState.map.startPositions[1][0], 3, 4);
+                testStepUnit(steps[0].getStepUnit(currentState.getChampion(1)), 'stand', 'E', new Position(8, 8, 'E'), 3, 4);
+                testStepUnit(steps[0].getStepUnit(currentState.getChampion(2)), 'stand', 'W', new Position(10, 8, 'W'), 3, 4);
 
-                testStepUnit(steps[1].getStepUnit(currentState.getChampion(1)), 'stand', 'E', currentState.map.startPositions[0][0], 2, 4);
-                testStepUnit(steps[1].getStepUnit(currentState.getChampion(2)), 'stand', 'W', currentState.map.startPositions[1][0], 2, 4);
+                testStepUnit(steps[1].getStepUnit(currentState.getChampion(1)), 'stand', 'E', new Position(8, 8, 'E'), 2, 4);
+                testStepUnit(steps[1].getStepUnit(currentState.getChampion(2)), 'stand', 'W', new Position(10, 8, 'W'), 2, 4);
 
                 await playAnimation(steps);
                 done();
@@ -206,12 +209,10 @@ module TacticArena {
                 testStepUnit(steps[1].getStepUnit(currentState.getChampion(1)), 'move', 'E', new Position(9, 8), 2, 3);
                 testStepUnit(steps[1].getStepUnit(currentState.getChampion(2)), 'slash', 'W', new Position(10, 8), 2, 4);
 
-                testStepUnit(steps[2].getStepUnit(currentState.getChampion(1)), 'move', 'E', new Position(9, 8), 1, 2);
-                expect(steps[2].getStepUnit(currentState.getChampion(1)).data.moveHasBeenBlocked).toBeTruthy();
-                expect(steps[2].getStepUnit(currentState.getChampion(1)).data.positionBlocked.equals(new Position(9, 8))).toBeTruthy();
+                testStepUnit(steps[2].getStepUnit(currentState.getChampion(1)), 'move', 'E', new Position(9, 9), 1, 3);
                 testStepUnit(steps[2].getStepUnit(currentState.getChampion(2)), 'slash', 'W', new Position(10, 8), 1, 4);
 
-                testStepUnit(steps[3].getStepUnit(currentState.getChampion(1)), 'stand', 'E', new Position(9, 8), 0, 1);
+                testStepUnit(steps[3].getStepUnit(currentState.getChampion(1)), 'move', 'E', new Position(10, 9), 0, 3);
                 testStepUnit(steps[3].getStepUnit(currentState.getChampion(2)), 'slash', 'W', new Position(10, 8), 0, 4);
 
                 await playAnimation(steps);
@@ -252,43 +253,6 @@ module TacticArena {
 
                 testStepUnit(steps[3].getStepUnit(currentState.getChampion(1)), 'stand', 'E', new Position(8, 8), 0, 4);
                 testStepUnit(steps[3].getStepUnit(currentState.getChampion(2)), 'stand', 'W', new Position(10, 8), 0, 2);
-
-                await playAnimation(steps);
-                done();
-            });
-
-            it("the first one wants moves north then casts to the east while the other moves in the dmg area then comes cac", async function (done) {
-                currentState.orderManager.orders = [
-                    new ChampionOrders(currentState.getChampion(1), [
-                            new Order.Move(new Position(8, 7, 'E')),
-                            new Order.Fire(new Position(8, 7, 'E'))
-                        ]
-                    ),
-                    new ChampionOrders(currentState.getChampion(2), [
-                            new Order.Move(new Position(10, 7, 'W')),
-                            new Order.Move(new Position(9, 7, 'W')),
-                            new Order.Move(new Position(8, 7, 'W'))
-                        ]
-                    )
-                ];
-                let steps = currentState.orderManager.getSteps();
-                expect(steps.length).toEqual(4);
-                expect(steps[0].stepUnits.length).toEqual(2);
-
-                testStepUnit(steps[0].getStepUnit(currentState.getChampion(1)), 'stand', 'E', new Position(8, 8), 3, 4);
-                testStepUnit(steps[0].getStepUnit(currentState.getChampion(2)), 'stand', 'W', new Position(10, 8), 3, 4);
-
-                testStepUnit(steps[1].getStepUnit(currentState.getChampion(1)), 'move', 'E', new Position(8, 7), 2, 4);
-                testStepUnit(steps[1].getStepUnit(currentState.getChampion(2)), 'move', 'W', new Position(10, 7), 2, 4);
-
-                testStepUnit(steps[2].getStepUnit(currentState.getChampion(1)), 'cast', 'E', new Position(8, 7), 0, 4);
-                expect(steps[2].getStepUnit(currentState.getChampion(1)).order.targets).toEqual([currentState.getChampion(2)._id]);
-                testStepUnit(steps[2].getStepUnit(currentState.getChampion(2)), 'move', 'W', new Position(9, 7), 1, 2);
-
-                testStepUnit(steps[3].getStepUnit(currentState.getChampion(1)), 'stand', 'E', new Position(8, 7), 0, 4);
-                testStepUnit(steps[3].getStepUnit(currentState.getChampion(2)), 'move', 'W', new Position(9, 7), 0, 2);
-                expect(steps[3].getStepUnit(currentState.getChampion(2)).data.moveHasBeenBlocked).toBeTruthy();
-                expect(steps[3].getStepUnit(currentState.getChampion(2)).data.positionBlocked.equals(new Position(8, 7))).toBeTruthy();
 
                 await playAnimation(steps);
                 done();
@@ -366,13 +330,39 @@ module TacticArena {
                 await playAnimation(steps);
                 done();
             });
+
+            it("the second one cast_wind to the north while the other stands but doesn't get pushed cause there is an obstacle on the way", async function (done) {
+                currentState.getChampion(2).setPosition(new Position(8, 11, 'N'));
+                currentState.orderManager.orders = [
+                    new ChampionOrders(currentState.getChampion(2), [
+                            new Order.Wind(new Position(8, 11, 'N'))
+                        ]
+                    )
+                ];
+                let steps = currentState.orderManager.getSteps();
+                expect(steps.length).toEqual(2);
+                expect(steps[0].stepUnits.length).toEqual(2);
+
+                testStepUnit(steps[0].getStepUnit(currentState.getChampion(1)), 'stand', 'E', new Position(8, 8), 3, 4);
+                testStepUnit(steps[0].getStepUnit(currentState.getChampion(2)), 'stand', 'N', new Position(8, 11), 3, 4);
+
+                testStepUnit(steps[1].getStepUnit(currentState.getChampion(1)), 'stand', 'E', new Position(8, 8), 2, 3);
+                expect(steps[1].getStepUnit(currentState.getChampion(1)).data.moved).toBeNull();
+                testStepUnit(steps[1].getStepUnit(currentState.getChampion(2)), 'cast_wind', 'N', new Position(8, 11), 1, 4);
+                expect(steps[1].getStepUnit(currentState.getChampion(2)).order.targets).toEqual([
+                    {champion: currentState.getChampion(1)._id, moved: null, distance: 3}
+                ]);
+
+                await playAnimation(steps);
+                done();
+            });
         });
 
 
         describe("4 players", () => {
             beforeEach(function () {
-                currentState.pawns.push(new Champion.Test(currentState, currentState.map.startPositions[0][1], 3, 1));
-                currentState.pawns.push(new Champion.Test(currentState, currentState.map.startPositions[1][1], 4, 2));
+                currentState.pawns.push(new Champion.Test(currentState, new Position(7, 7, 'E'), 3, 1));
+                currentState.pawns.push(new Champion.Test(currentState, new Position(12, 7, 'W'), 4, 2));
             });
 
             it("with 1 dead - nothing is played", async function (done) {
@@ -478,7 +468,7 @@ module TacticArena {
                 testStepUnit(steps[0].getStepUnit(currentState.getChampion(3)), 'stand', 'E', new Position(7, 8), 3, 4);
                 testStepUnit(steps[0].getStepUnit(currentState.getChampion(4)), 'stand', 'W', new Position(10, 10), 3, 4);
 
-                testStepUnit(steps[1].getStepUnit(currentState.getChampion(1)), 'dead', 'E', new Position(6, 8), 0, -1);
+                testStepUnit(steps[1].getStepUnit(currentState.getChampion(1)), 'dead', 'E', new Position(6, 8), 0, 0);
                 expect(steps[1].getStepUnit(currentState.getChampion(1)).data.moved.equals(new Position(5, 8))).toBeTruthy(); // dead can be moved
                 testStepUnit(steps[1].getStepUnit(currentState.getChampion(2)), 'cast_wind', 'W', new Position(9, 8), 1, 4);
                 testStepUnit(steps[1].getStepUnit(currentState.getChampion(3)), 'stand', 'E', new Position(7, 8), 2, 3);
@@ -708,6 +698,121 @@ module TacticArena {
                 testStepUnit(steps[1].getStepUnit(currentState.getChampion(4)), 'cast_wind', 'N', new Position(6, 9), 1, 4);
                 expect(steps[1].getStepUnit(currentState.getChampion(4)).order.targets).toEqual([{champion: currentState.getChampion(2)._id, moved: new Position(7, 5, 'W'), distance: 3}]);
 
+                await playAnimation(steps);
+                done();
+            });
+
+            it("2 champions on each side, one casting fire while the other one is healing him", async function (done) {
+                currentState.getChampion(1)._apMax = 10;
+                currentState.getChampion(2)._apMax = 10;
+                currentState.getChampion(3)._apMax = 10;
+                currentState.getChampion(4)._apMax = 10;
+                currentState.getChampion(1).setPosition(new Position(4, 8));
+                currentState.getChampion(2).setPosition(new Position(4, 9));
+                currentState.getChampion(3).setPosition(new Position(8, 8));
+                currentState.getChampion(4).setPosition(new Position(8, 9));
+
+                currentState.orderManager.orders = [
+                    new ChampionOrders(currentState.getChampion(1), [
+                            new Order.Fire(new Position(4, 8, 'E')),
+                            new Order.Fire(new Position(4, 8, 'E')),
+                            new Order.Fire(new Position(4, 8, 'E')),
+                            new Order.Fire(new Position(4, 8, 'E')),
+                            new Order.Fire(new Position(4, 8, 'E')),
+                        ]
+                    ),
+                    new ChampionOrders(currentState.getChampion(2), [
+                            new Order.Heal(new Position(4, 9, 'N')),
+                            new Order.Heal(new Position(4, 9, 'N')),
+                            new Order.Heal(new Position(4, 9, 'N')),
+                            new Order.Heal(new Position(4, 9, 'N')),
+                            new Order.Heal(new Position(4, 9, 'N')),
+                        ]
+                    ),
+                    new ChampionOrders(currentState.getChampion(3), [
+                            new Order.Fire(new Position(8, 8, 'W')),
+                            new Order.Fire(new Position(8, 8, 'W')),
+                            new Order.Fire(new Position(8, 8, 'W')),
+                            new Order.Fire(new Position(8, 8, 'W')),
+                            new Order.Fire(new Position(8, 8, 'W')),
+                        ]
+                    ),
+                    new ChampionOrders(currentState.getChampion(4), [
+                            new Order.Heal(new Position(8, 9, 'N')),
+                            new Order.Heal(new Position(8, 9, 'N')),
+                            new Order.Heal(new Position(8, 9, 'N')),
+                            new Order.Heal(new Position(8, 9, 'N')),
+                            new Order.Heal(new Position(8, 9, 'N')),
+                        ]
+                    )
+                ];
+                let steps = currentState.orderManager.getSteps();
+                expect(steps.length).toEqual(6);
+                expect(steps[0].stepUnits.length).toEqual(4);
+
+                testStepUnit(steps[0].getStepUnit(currentState.getChampion(1)), 'stand', 'E', new Position(4, 8), 10, 4);
+                testStepUnit(steps[0].getStepUnit(currentState.getChampion(2)), 'stand', 'W', new Position(4, 9), 10, 4);
+                testStepUnit(steps[0].getStepUnit(currentState.getChampion(3)), 'stand', 'E', new Position(8, 8), 10, 4);
+                testStepUnit(steps[0].getStepUnit(currentState.getChampion(4)), 'stand', 'W', new Position(8, 9), 10, 4);
+
+                testStepUnit(steps[1].getStepUnit(currentState.getChampion(1)), 'cast', 'E', new Position(4, 8), 8, 3);
+                testStepUnit(steps[1].getStepUnit(currentState.getChampion(2)), 'heal', 'N', new Position(4, 9), 9, 4);
+                testStepUnit(steps[1].getStepUnit(currentState.getChampion(3)), 'cast', 'W', new Position(8, 8), 8, 3);
+                testStepUnit(steps[1].getStepUnit(currentState.getChampion(4)), 'heal', 'N', new Position(8, 9), 9, 4);
+
+                testStepUnit(steps[2].getStepUnit(currentState.getChampion(1)), 'cast', 'E', new Position(4, 8), 6, 2);
+                testStepUnit(steps[2].getStepUnit(currentState.getChampion(2)), 'heal', 'N', new Position(4, 9), 8, 4);
+                testStepUnit(steps[2].getStepUnit(currentState.getChampion(3)), 'cast', 'W', new Position(8, 8), 6, 2);
+                testStepUnit(steps[2].getStepUnit(currentState.getChampion(4)), 'heal', 'N', new Position(8, 9), 8, 4);
+
+                testStepUnit(steps[3].getStepUnit(currentState.getChampion(1)), 'cast', 'E', new Position(4, 8), 4, 1);
+                testStepUnit(steps[3].getStepUnit(currentState.getChampion(2)), 'heal', 'N', new Position(4, 9), 7, 4);
+                testStepUnit(steps[3].getStepUnit(currentState.getChampion(3)), 'cast', 'W', new Position(8, 8), 4, 1);
+                testStepUnit(steps[3].getStepUnit(currentState.getChampion(4)), 'heal', 'N', new Position(8, 9), 7, 4);
+
+                testStepUnit(steps[4].getStepUnit(currentState.getChampion(1)), 'cast', 'E', new Position(4, 8), 2, 0);
+                testStepUnit(steps[4].getStepUnit(currentState.getChampion(2)), 'heal', 'N', new Position(4, 9), 6, 4);
+                testStepUnit(steps[4].getStepUnit(currentState.getChampion(3)), 'cast', 'W', new Position(8, 8), 2, 0);
+                testStepUnit(steps[4].getStepUnit(currentState.getChampion(4)), 'heal', 'N', new Position(8, 9), 6, 4);
+
+                testStepUnit(steps[5].getStepUnit(currentState.getChampion(1)), 'dead', 'E', new Position(4, 8), 2, 0);
+                testStepUnit(steps[5].getStepUnit(currentState.getChampion(2)), 'heal', 'N', new Position(4, 9), 5, 4);
+                testStepUnit(steps[5].getStepUnit(currentState.getChampion(3)), 'dead', 'W', new Position(8, 8), 2, 0);
+                testStepUnit(steps[5].getStepUnit(currentState.getChampion(4)), 'heal', 'N', new Position(8, 9), 5, 4);
+
+                await playAnimation(steps);
+                done();
+            });
+
+            it("the first one cast_wind to the west while the other moves west and gets blocked by the third", async function (done) {
+                currentState.getChampion(2).setPosition(new Position(6, 8, 'W'));
+                currentState.getChampion(3).setPosition(new Position(5, 8, 'E'));
+                currentState.getChampion(4).setPosition(new Position(10, 10)); // not active
+                currentState.orderManager.orders = [
+                    new ChampionOrders(currentState.getChampion(1), [
+                            new Order.Wind(new Position(8, 8, 'W'))
+                        ]
+                    ),
+                    new ChampionOrders(currentState.getChampion(2), [
+                            new Order.Move(new Position(5, 8, 'W'))
+                        ]
+                    )
+                ];
+                let steps = currentState.orderManager.getSteps();
+                expect(steps.length).toEqual(2);
+                expect(steps[0].stepUnits.length).toEqual(4);
+
+                testStepUnit(steps[0].getStepUnit(currentState.getChampion(1)), 'stand', 'E', new Position(8, 8), 3, 4);
+                testStepUnit(steps[0].getStepUnit(currentState.getChampion(2)), 'stand', 'W', new Position(6, 8), 3, 4);
+                testStepUnit(steps[0].getStepUnit(currentState.getChampion(3)), 'stand', 'E', new Position(5, 8), 3, 4);
+                testStepUnit(steps[0].getStepUnit(currentState.getChampion(4)), 'stand', 'W', new Position(10, 10), 3, 4);
+                //
+                //testStepUnit(steps[1].getStepUnit(currentState.getChampion(1)), 'stand', 'E', new Position(8, 8), 2, 3);
+                //expect(steps[1].getStepUnit(currentState.getChampion(1)).data.moved).toBeNull();
+                //testStepUnit(steps[1].getStepUnit(currentState.getChampion(2)), 'cast_wind', 'N', new Position(8, 11), 1, 4);
+                //expect(steps[1].getStepUnit(currentState.getChampion(2)).order.targets).toEqual([
+                //    {champion: currentState.getChampion(1)._id, moved: null, distance: 3}
+                //]);
 
                 await playAnimation(steps);
                 done();

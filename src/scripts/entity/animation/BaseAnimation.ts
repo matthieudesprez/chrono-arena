@@ -16,18 +16,12 @@ module TacticArena.Animation {
             return null;
         }
 
-        handleBackward(animation: Promise<any>): Promise<any> {
-            let result;
+        async handleBackward(animation: Promise<any>): Promise<any> {
             let finalPosition = this.stepUnit.order.position;
             if (!this.state.spritesManager.getReal(this.pawn).getPosition().equals(finalPosition)) {
-                result = this.state.spritesManager.getReal(this.pawn).moveTo(finalPosition.x, finalPosition.y, null, false);
-                result.then((res) => {
-                    return animation;
-                });
-            } else {
-                result = animation;
+                await this.state.spritesManager.getReal(this.pawn).moveTo(finalPosition.x, finalPosition.y, null, false);
             }
-            return result;
+            return animation;
         }
     }
 }

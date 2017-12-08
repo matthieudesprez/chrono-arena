@@ -15,18 +15,12 @@ module TacticArena.Order {
             let stepUnitA = stepUnits[aIndex];
             let stepUnitB = stepUnits[bIndex];
             stepUnitA.apImpact[stepUnitA.pawn._id] = -1;
-            let damage = 1;
-            let positionBBeforeOrder = steps[stepIndex - 1].stepUnits[bIndex].getPosition();
-            let AWasNextToB = stepUnitA.getPosition().getDistanceFrom(positionBBeforeOrder) == 1;
-            if (stepUnitA.getPosition().faces(stepUnitB.getPosition()) || AWasNextToB) {
-                stepUnitA.hpImpact[stepUnitB.pawn._id] = -1 * damage;
-                if (AWasNextToB && orderManager.alteredPawns.indexOf(stepUnitA.pawn._id) < 0) {
-                    orderManager.blockChampion(steps, stepIndex, bIndex, new Order.Stand(positionBBeforeOrder.turn(stepUnitB.order.position.d)));
-                }
+            if (stepUnitA.getPosition().faces(stepUnitB.getPosition())) {
+                stepUnitA.hpImpact[stepUnitB.pawn._id] = -1;
                 this.targets = [{
                     championId: stepUnitB.pawn._id,
                     dodge: false,
-                    damages: damage
+                    damages: 1
                 }];
             }
             return this;

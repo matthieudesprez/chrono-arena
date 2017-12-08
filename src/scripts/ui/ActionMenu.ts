@@ -46,7 +46,7 @@ module TacticArena.UI {
             this.mpGroup.x = 273;
             this.mpGroup.y = 14;
 
-            let frame = this.game.make.sprite(this.game.world.centerX - 2, 0, 'frame-bottom');
+            let frame = this.game.make.sprite(this.game.world.centerX, 0, 'frame-bottom');
             frame.anchor.set(0.5, 0);
 
             frame.inputEnabled = true;

@@ -6,7 +6,6 @@ module TacticArena.Order {
         }
 
         process(ordermanager: OrderManager, steps: Step[], stepIndex: number, aIndex: number, bIndex: number): BaseOrder {
-            let result = this;
             let stepUnits = steps[stepIndex].stepUnits;
             let stepUnitA = stepUnits[aIndex];
             let stepUnitB = stepUnits[bIndex];
@@ -24,7 +23,7 @@ module TacticArena.Order {
                     }
                 }
             }
-            return result;
+            return this;
         }
 
         resolve(pawn: Champion.BaseChampion, stepUnit: StepUnit, animate: boolean, state): Promise<any> {

@@ -1,6 +1,10 @@
 module TacticArena.Animation {
     export class CastFire extends BaseCast {
 
+        constructor(state: State.BasePlayable, pawn: Champion.BaseChampion, order: Order.BaseOrder, stepUnit: StepUnit) {
+            super(state, pawn, order, stepUnit, 500);
+        }
+
         getCastCallback(): Promise<any> {
             let sprite = this.state.spritesManager.getReal(this.pawn);
             let fireball = this.state.pawnsSpritesGroup.add(new FX.FireBall(this.state, sprite.getRawPosition(), sprite.getDirection()));
