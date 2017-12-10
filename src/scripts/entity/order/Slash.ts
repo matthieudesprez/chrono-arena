@@ -10,10 +10,10 @@ module TacticArena.Order {
         - Champion B arrives in the dmg area (1 tile in front of A) => he takes dmg
         - Champion B was/is in the dmg area and attempts to move => he takes dmg + gets blocked
          */
-        process(orderManager: OrderManager, steps: Step[], stepIndex: number, aIndex: number, bIndex: number): BaseOrder {
-            let stepUnits = steps[stepIndex].stepUnits;
-            let stepUnitA = stepUnits[aIndex];
-            let stepUnitB = stepUnits[bIndex];
+        process(orderManager: OrderManager, steps: Step[], stepIndex: number, aIndex: number, bIndex: number): void {
+            let stepUnits: StepUnit[] = steps[stepIndex].stepUnits;
+            let stepUnitA: StepUnit = stepUnits[aIndex];
+            let stepUnitB: StepUnit = stepUnits[bIndex];
             stepUnitA.apImpact[stepUnitA.pawn._id] = -1;
             if (stepUnitA.getPosition().faces(stepUnitB.getPosition())) {
                 stepUnitA.hpImpact[stepUnitB.pawn._id] = -1;
@@ -23,7 +23,6 @@ module TacticArena.Order {
                     damages: 1
                 }];
             }
-            return this;
         }
 
         resolve(pawn: Champion.BaseChampion, stepUnit: StepUnit, animate: boolean, state): Promise<any> {

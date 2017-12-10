@@ -72,7 +72,7 @@ module TacticArena {
                         for (var j = 0; j < steps[i].length; j++) {
                             let s = {
                                 championId: steps[i].stepUnits[j].pawn._id,
-                                stepUnitState: steps[i].stepUnits[j].stepUnitData,
+                                stepUnitState: steps[i].stepUnits[j],
                                 order: steps[i].stepUnits[j].order,
                             };
                             serializedSteps[i].push(s);
@@ -87,7 +87,7 @@ module TacticArena {
                         for (var j = 0; j < serializedSteps[i].length; j++) {
                             let s = {
                                 champion: self.game.pawns.find( o => { return o._id == serializedSteps[i].stepUnits[j].championId; }),
-                                stepUnitState: serializedSteps[i].stepUnits[j].stepUnitData,
+                                stepUnitState: serializedSteps[i].stepUnits[j],
                                 order: serializedSteps[i].stepUnits[j].order,
                             };
                             steps[i].push(s);

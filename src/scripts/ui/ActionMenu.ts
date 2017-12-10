@@ -29,7 +29,7 @@ module TacticArena.UI {
             this.confirmEnabled = true;
             this.mainGroup = this.game.add.group();
             this.mainGroup.x = 0;
-            this.mainGroup.y = this.game.height - 110;
+            this.mainGroup.y = this.game.height - 100;
             this.actionGroup = this.game.add.group();
             this.actionGroup.x = 120;
             this.actionGroup.y = 60;
@@ -56,11 +56,13 @@ module TacticArena.UI {
             let avatar = this.game.make.sprite(37, 84, 'avatar-' + pawn.type);
             avatar.anchor.set(0, 1);
 
-            let name = this.game.add.text(40, 5, pawn._name, {
-                font: '20px Iceland',
+            let name = this.game.add.text(40, -30, pawn._name, {
+                font: '14px Press Start 2P',
                 fill: '#ffffff',
                 boundsAlignH: 'left',
                 boundsAlignV: 'top',
+                stroke: '#000000',
+                strokeThickness: 7
             });
             name.anchor.set(0);
             name.setTextBounds(0, 8, 96, 20);

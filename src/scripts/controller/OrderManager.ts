@@ -6,14 +6,10 @@ module TacticArena {
     export class OrderManager {
         orders: ChampionOrders[];
         state;
-        alteredPawns: number[];
-        movedChampions: Champion.BaseChampion[];
 
         constructor(state) {
             this.state = state;
             this.orders = [];
-            this.alteredPawns = [];
-            this.movedChampions = [];
         }
 
         /*
@@ -90,7 +86,8 @@ module TacticArena {
                 let champion = championOrders.champion;
                 step.stepUnits.push(new StepUnit(
                     champion,
-                    new StepUnitData((champion.isAlive() ? champion._apMax : 0), champion.getHp()),
+                    (champion.isAlive() ? champion._apMax : 0),
+                    champion.getHp(),
                     champion.isAlive() ? new Order.Stand(champion.getPosition()) : new Order.Dead(champion.getPosition())
                 ));
             });
@@ -102,19 +99,17 @@ module TacticArena {
          */
         blockChampion(steps: Step[], startI: number, j: number, order: Order.Stand): void {
             let stepUnit = steps[startI].stepUnits[j];
-            stepUnit.data.positionBlocked = stepUnit.order.position;
-            stepUnit.data.moveHasBeenBlocked = (stepUnit.order instanceof Order.Move);
+            stepUnit.blockedPosition = stepUnit.order.position.clone();
             stepUnit.checked = false;
 
             for (var i = startI; i < steps.length; i++) {
                 if (steps[i].stepUnits[j].order) {
                     if (i > startI && steps[i].stepUnits[j].order instanceof Order.Move) {
-                        steps[i].stepUnits[j].order = new Order.Stand(order.position, order.targets);
+                        steps[i].stepUnits[j].order = new Order.Stand(order.position.clone());
                     }
                     steps[i].stepUnits[j].order.position = order.position.clone();
                 }
             }
-            this.alteredPawns.push(stepUnit.pawn._id);
         }
 
         /*
@@ -124,7 +119,15 @@ module TacticArena {
             for (var i = startI; i < steps.length; i++) {
                 steps[i].stepUnits[j].order = new Order.Stand(position);
             }
-            this.alteredPawns.push(steps[0].stepUnits[j].pawn._id);
+        }
+
+        /*
+        Translate all champion steps orders with the given (x, y), from startI to the end
+         */
+        translateOrders(steps: Step[], startI: number, j: number, translate: Position): void {
+            for (var i = startI; i < steps.length; i++) {
+                steps[i].stepUnits[j].order.position = steps[i].stepUnits[j].order.position.translate(translate.x, translate.y);
+            }
         }
 
         /*
@@ -145,7 +148,8 @@ module TacticArena {
                     var pawn = this.orders[i].champion;
                     steps[j].stepUnits.push(new StepUnit(
                         pawn,
-                        new StepUnitData(),
+                        null,
+                        null,
                         this.orders[i].list[j] ? this.orders[i].list[j] : null
                     ));
                 }
@@ -158,46 +162,33 @@ module TacticArena {
         processOrders(steps: Step[]): Step[] {
             steps.forEach((step: Step, l: number) => {
                 if (l === 0) return; // The first step represents the initial state of each Champion, they don't interact yet
-                this.alteredPawns = []; // Reset alteredPawns
-                this.movedChampions = []; // Reset movedChampions
                 let previousStepUnits = steps[l - 1].stepUnits;
 
-                step.stepUnits.forEach((stepUnit: StepUnit, i: number) => {
-                    stepUnit.checked = false; // Activate the interaction process with other stepUnits
-                    stepUnit.data = new StepUnitData(previousStepUnits[i].data.ap, previousStepUnits[i].data.hp); // Init stepUnit.data with previous stepUnit data
-                    if (stepUnit.order == null) { // In case a pawn has less actions to play than the others
-                        stepUnit.order = new Order.Stand(previousStepUnits[i].order.position); // He gots a default one
+                step.stepUnits.forEach((stepUnitA: StepUnit, i: number) => {
+                    stepUnitA.ap = previousStepUnits[i].ap;
+                    stepUnitA.hp = previousStepUnits[i].hp; // Init stepUnit with previous stepUnit data
+                    if (stepUnitA.order === null) { // In case a pawn has less actions to play than the others
+                        stepUnitA.order = new Order.Stand(previousStepUnits[i].order.position); // He gots a default one
+                    }
+                    if (previousStepUnits[i].hp <= 0 && !(stepUnitA.order instanceof Order.Dead)) { // If the Champion was dead in the previous step
+                        stepUnitA.order = new Order.Dead(previousStepUnits[i].getPosition());
                     }
                 });
 
                 let count = 0;
                 while (step.stepUnits.some(stepUnit => {return !stepUnit.checked;})) { // While there are stepUnits to check
+
                     step.stepUnits.forEach((stepUnitA: StepUnit) => { // Check actions for each stepUnit (champion) in current step
                         stepUnitA.checked = true; // Interaction is checked
                     });
 
-                    step.stepUnits.forEach((stepUnitA: StepUnit, i: number) => { // Check actions for each stepUnit (champion) in current step
-                        step.stepUnits.forEach((stepUnitB: StepUnit, j: number) => { // Foreach other stepUnit
-                            if (stepUnitA.pawn._id === stepUnitB.pawn._id) return; // Except A, no interaction with oneself
-                            let previousStepUnitA = previousStepUnits[i];
-                            let previousStepUnitB = previousStepUnits[j];
-                            if (previousStepUnitA.data.hp <= 0) { // If the Champion was dead in the previous step
-                                stepUnitA.order = new Order.Dead(previousStepUnitA.getPosition());
-                            }
-
-                            stepUnitA.order.process(this, steps, l, i, j); // Apply the Skill / Order on the step
-
-                            stepUnitA.data.ap = Math.max(0, previousStepUnitA.data.ap + steps[l].getAp(stepUnitA.pawn));
-                            stepUnitB.data.hp = previousStepUnitB.data.hp > 0 ? previousStepUnitB.data.hp + steps[l].getHp(stepUnitB.pawn) : 0;
-                        });
-                    });
-
-                    /* We have to iterate again over all step.stepUnits to handle Champions who could have been moved */
-                    step.stepUnits.forEach((stepUnitA: StepUnit) => { // Check actions for each stepUnit (champion) in current step
-                        step.stepUnits.forEach((stepUnitB: StepUnit) => { // Foreach other stepUnit
-                            if (!stepUnitB.checked && stepUnitA.hasInteractedWith.indexOf(stepUnitB.pawn._id) >= 0) {
-                                stepUnitA.checked = false; // Must be checked again (in the next while iteration)
-                                stepUnitA.hasInteractedWith.splice(stepUnitA.hasInteractedWith.indexOf(stepUnitB.pawn._id), 1);
+                    [1, 0].forEach((priority: number) => { // Move Order are treated first (priority = 1), then the others
+                        step.stepUnits.forEach((stepUnitA: StepUnit, i: number) => { // Check actions for each stepUnit (champion) in current step
+                            if (stepUnitA.order.getPriority() === priority) {
+                                step.stepUnits.forEach((stepUnitB: StepUnit, j: number) => { // Foreach other stepUnit
+                                    if (stepUnitA.pawn._id === stepUnitB.pawn._id) return; // Except A => no interaction with oneself
+                                    stepUnitA.order.process(this, steps, l, i, j); // Apply the Skill / Order on the step
+                                });
                             }
                         });
                     });
@@ -208,6 +199,11 @@ module TacticArena {
                         break;
                     }
                 }
+
+                step.stepUnits.forEach((stepUnitA: StepUnit, i: number) => { // Update AP & HP
+                    stepUnitA.ap = Math.max(0, previousStepUnits[i].ap + steps[l].getAp(stepUnitA.pawn));
+                    stepUnitA.hp = previousStepUnits[i].hp > 0 ? previousStepUnits[i].hp + steps[l].getHp(stepUnitA.pawn) : 0;
+                });
             });
             return steps;
         }

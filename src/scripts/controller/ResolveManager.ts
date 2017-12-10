@@ -54,13 +54,13 @@ module TacticArena {
 
             var promisesOrders = [];
             this.steps[index].stepUnits.forEach((stepUnit, i) => {
-                stepUnit.pawn.setAp(stepUnit.data.ap); // update pawn AP
+                stepUnit.pawn.setAp(stepUnit.ap); // update pawn AP
                 promisesOrders.push(stepUnit.order.resolve(stepUnit.pawn, stepUnit, animate, self.game)); // execute animation
             });
             return Promise.all(promisesOrders).then(res => {
                 self.steps[index].stepUnits.forEach((stepUnit, i) => { // update pawn HP and its different states
                     stepUnit.pawn.setPosition(stepUnit.getPosition());
-                    stepUnit.pawn.setHp(stepUnit.data.hp, true);
+                    stepUnit.pawn.setHp(stepUnit.hp, true);
                     if (stepUnit.pawn.getHp() <= 0) {
                         let forceAnimation = previousStep !== null && !(previousStep.stepUnits[i].order instanceof Order.Dead);
                         self.game.spritesManager.getReal(stepUnit.pawn).die(animate || forceAnimation);

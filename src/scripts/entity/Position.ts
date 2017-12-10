@@ -89,6 +89,16 @@ module TacticArena {
             return this.x === position.x && this.y === position.y && (!withDirection || this.d === position.d);
         }
 
+        equalsOne(positions: Position[], withDirection = false): boolean {
+            return positions.some( (position: Position) => {
+                return position !== null && this.equals(position, withDirection);
+            });
+        }
+
+        substract(position) {
+            return new Position(this.x - position.x, this.y - position.y, this.d);
+        }
+
         faces(position: Position): boolean {
             return (
                 this.x === position.x && (

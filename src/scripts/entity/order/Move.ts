@@ -1,30 +1,26 @@
 module TacticArena.Order {
-    import StepUnitData = TacticArena.StepUnitData;
     export class Move extends BaseOrder {
-        target;
 
-        constructor(position, target?) {
+        constructor(position) {
             super('move', position);
-            this.target = target;
+            this.priority = 1;
         }
 
-        process(orderManager: OrderManager, steps: Step[], stepIndex: number, aIndex: number, bIndex: number): BaseOrder {
-            let stepUnits = steps[stepIndex].stepUnits;
-            let stepUnitA = stepUnits[aIndex];
-            let stepUnitB = stepUnits[bIndex];
+        process(orderManager: OrderManager, steps: Step[], stepIndex: number, aIndex: number, bIndex: number): void {
+            let stepUnits: StepUnit[] = steps[stepIndex].stepUnits;
+            let stepUnitA: StepUnit = stepUnits[aIndex];
+            let stepUnitB: StepUnit = stepUnits[bIndex];
             stepUnitA.apImpact[stepUnitA.pawn._id] = -1;
-            // If A wants to go on a tile occupied by B (can be on multiple tiles / step)
-            if (stepUnitB.collidesWith(stepUnitA.order.position) && (orderManager.alteredPawns.indexOf(stepUnitA.pawn._id) < 0 || stepUnitA.data.moved)) {
+            // IF A is not blocked yet AND A wants to go on a tile occupied by B (B.order.position OR B.blockedPosition)
+            if (!stepUnitA.isBlocked() && stepUnitA.order.position.equalsOne([stepUnitB.order.position, stepUnitB.blockedPosition])) {
                 orderManager.blockChampion(steps, stepIndex, aIndex, new Order.Stand(steps[stepIndex - 1].stepUnits[aIndex].getPosition().turn(stepUnitA.order.position.d)));
-                stepUnitA.hasInteractedWith.push(stepUnitB.pawn._id);
             }
-            return this;
         }
 
         resolve(pawn: Champion.BaseChampion, stepUnit: StepUnit, animate: boolean, state): Promise<any> {
             let result = null;
-            if (stepUnit.data.moveHasBeenBlocked) {
-                result = new Animation.Block(state, pawn, this, stepUnit, stepUnit.data.positionBlocked, animate).get();
+            if (stepUnit.isBlocked()) {
+                result = new Animation.Block(state, pawn, this, stepUnit, stepUnit.blockedPosition, animate).get();
             } else {
                 //if (backward && state.spritesManager.getReal(pawn).getPosition().equals(this.position)) {
                 //    //let direction = previousStep ? previousStep[i].order.position.d : pawn.getDirection();

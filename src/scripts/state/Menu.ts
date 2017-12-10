@@ -140,7 +140,7 @@ module TacticArena.State {
 
             //GENERAL
             let bottomGroup = this.game.add.group();
-            bottomGroup.y = this.game.height - 110;
+            bottomGroup.y = this.game.height - 100;
             let frame = this.game.make.sprite(this.game.world.centerX, 0, 'frame-bottom');
             frame.anchor.set(0.5, 0);
             let slideButtonsX = {

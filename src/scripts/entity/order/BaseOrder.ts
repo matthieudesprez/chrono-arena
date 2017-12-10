@@ -3,15 +3,21 @@ module TacticArena.Order {
         action: string;
         position: Position;
         targets;
+        priority;
 
         constructor(action, position, targets = []) {
             this.action = action;
             this.position = position.clone();
             this.targets = targets;
+            this.priority = 0;
         }
 
-        process(ordermanager: OrderManager, steps: Step[], stepIndex: number, aIndex: number, bIndex: number): BaseOrder {
-            return this;
+        process(ordermanager: OrderManager, steps: Step[], stepIndex: number, aIndex: number, bIndex: number): void {
+
+        }
+
+        getPriority() {
+            return this.priority;
         }
 
     }

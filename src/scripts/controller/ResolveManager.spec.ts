@@ -9,12 +9,14 @@ module TacticArena {
             return new Step([
                 new StepUnit(
                     currentState.pawns[0],
-                    new StepUnitData(3, 4),
+                    3,
+                    4,
                     new Order.Stand(currentState.map.startPositions[0][0])
                 ),
                 new StepUnit(
                     currentState.pawns[1],
-                    new StepUnitData(3, 4),
+                    3,
+                    4,
                     new Order.Stand(currentState.map.startPositions[1][0])
                 )
             ]);
@@ -62,12 +64,14 @@ module TacticArena {
                     new Step([
                         new StepUnit(
                             currentState.pawns[0],
-                            new StepUnitData(2, 4),
+                            2,
+                            4,
                             new Order.Move(currentState.map.startPositions[0][0].translate(1, 0))
                         ),
                         new StepUnit(
                             currentState.pawns[1],
-                            new StepUnitData(2, 4),
+                            2,
+                            4,
                             new Order.Stand(currentState.map.startPositions[1][0])
                         )
                     ])
@@ -89,19 +93,22 @@ module TacticArena {
                     new Step([
                         new StepUnit(
                             currentState.pawns[0],
-                            new StepUnitData(2, 4),
+                            2,
+                            4,
                             new Order.Move(currentState.map.startPositions[0][0].translate(1, 0))
                         ),
                         new StepUnit(
                             currentState.pawns[1],
-                            new StepUnitData(2, 4),
+                            2,
+                            4,
                             new Order.Stand(currentState.map.startPositions[1][0])
                         )
                     ]),
                     new Step([
                         new StepUnit(
                             currentState.pawns[0],
-                            new StepUnitData(1, 4),
+                            1,
+                            4,
                             new Order.Attack(currentState.map.startPositions[0][0].translate(1, 0), [{
                                 championId: currentState.pawns[1]._id,
                                 dodge: false
@@ -109,7 +116,8 @@ module TacticArena {
                         ),
                         new StepUnit(
                             currentState.pawns[1],
-                            new StepUnitData(1, 3),
+                            1,
+                            3,
                             new Order.Attack(currentState.map.startPositions[1][0], [{
                                 championId: currentState.pawns[0]._id,
                                 dodge: true
@@ -137,40 +145,43 @@ module TacticArena {
                     new Step([
                         new StepUnit(
                             currentState.pawns[0],
-                            new StepUnitData(2, 4),
+                            2,
+                            4,
                             new Order.Move(currentState.map.startPositions[0][0].translate(0, -1))
                         ),
                         new StepUnit(
                             currentState.pawns[1],
-                            new StepUnitData(2, 4),
+                            2,
+                            4,
                             new Order.Move(currentState.map.startPositions[1][0].translate(0, -1))
                         )
                     ]),
                     new Step([
                         new StepUnit(
                             currentState.pawns[0],
-                            new StepUnitData(0, 4),
-                            new Order.Fire(currentState.map.startPositions[0][0].translate(0, -1), [currentState.pawns[1]._id])
+                            0,
+                            4,
+                            new Order.Fire(currentState.map.startPositions[0][0].translate(0, -1), [{championId: currentState.pawns[1]._id}])
                         ),
                         new StepUnit(
                             currentState.pawns[1],
-                            new StepUnitData(1, 2),
+                            1,
+                            2,
                             new Order.Move(currentState.map.startPositions[1][0].translate(-1, -1))
                         )
                     ]),
                     new Step([
                         new StepUnit(
                             currentState.pawns[0],
-                            new StepUnitData(0, 3),
-                            new Order.Stand(currentState.map.startPositions[0][0].translate(0, -1), [currentState.pawns[1]._id])
+                            0,
+                            3,
+                            new Order.Stand(currentState.map.startPositions[0][0].translate(0, -1))
                         ),
                         new StepUnit(
                             currentState.pawns[1],
-                            new StepUnitData(0, 2),
-                            new Order.Move(currentState.map.startPositions[1][0].translate(-1, -1), {
-                                champion: currentState.pawns[0]._id,
-                                dodge: false
-                            })
+                            0,
+                            2,
+                            new Order.Move(currentState.map.startPositions[1][0].translate(-1, -1))
                         )
                     ])
                 ]

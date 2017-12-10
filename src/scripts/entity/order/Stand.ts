@@ -1,17 +1,15 @@
 module TacticArena.Order {
     export class Stand extends BaseOrder {
-        targets;
 
-        constructor(position, targets?) {
+        constructor(position) {
             super('stand', position);
-            this.targets = targets;
+            this.priority = 1;
         }
 
-        process(ordermanager: OrderManager, steps: Step[], stepIndex: number, aIndex: number, bIndex: number): BaseOrder {
+        process(ordermanager: OrderManager, steps: Step[], stepIndex: number, aIndex: number, bIndex: number): void {
             let stepUnits = steps[stepIndex].stepUnits;
             let stepUnitA = stepUnits[aIndex];
             stepUnitA.apImpact[stepUnitA.pawn._id] = -1;
-            return this;
         }
 
         resolve(pawn: Champion.BaseChampion, stepUnit: StepUnit, animate: boolean, state): Promise<any> {

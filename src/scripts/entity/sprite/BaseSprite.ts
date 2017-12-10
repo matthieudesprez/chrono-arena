@@ -64,8 +64,7 @@ module TacticArena.Sprite {
                 this._ext = 'E';
             } else if (this.position.x > x) {
                 this._ext = 'W';
-            }
-            if (this.position.y < y) {
+            } else if (this.position.y < y) {
                 this._ext = 'S';
             } else if (this.position.y > y) {
                 this._ext = 'N';

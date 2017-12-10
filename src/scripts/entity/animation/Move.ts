@@ -10,7 +10,7 @@ module TacticArena.Animation {
         }
 
         async get(): Promise<any> {
-            await this.state.spritesManager.getReal(this.pawn).moveTo(this.order.position.x, this.order.position.y, null, this.animate);
+            await this.handleBackward(this.state.spritesManager.getReal(this.pawn).moveTo(this.order.position.x, this.order.position.y, null, this.animate));
             return new Animation.Stand(this.state, this.pawn, this.order, this.stepUnit).get();
         }
     }

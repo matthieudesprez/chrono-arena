@@ -11,7 +11,7 @@ module TacticArena.Animation {
 
         async get(): Promise<any> {
             let position = this.stepUnit.order.position;
-            await this.state.spritesManager.getReal(this.pawn).moveTo(this.targetPosition.x, this.targetPosition.y);
+            await this.state.spritesManager.getReal(this.pawn).moveTo(this.targetPosition.x, this.targetPosition.y, [], true, true);
             this.state.spritesManager.getReal(this.pawn).displayText('blocked');
             await this.state.spritesManager.getReal(this.pawn).moveTo(position.x, position.y);
             return new Animation.Stand(this.state, this.pawn, this.order, this.stepUnit).get();

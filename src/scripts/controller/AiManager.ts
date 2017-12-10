@@ -50,12 +50,12 @@ module TacticArena {
                             for (var i = 0; i < (path as any).length; i++) {
                                 if(pawn.getAp() > 0) {
                                     direction = p.getDirectionTo(targetPosition);
-                                    self.game.orderManager.add(pawn, new Order.Move(new Position(path[i].x, path[i].y), direction));
+                                    self.game.orderManager.add(pawn, new Order.Move(new Position(path[i].x, path[i].y, direction)));
                                     pawn.setAp(pawn.getAp() - 1, false);
 
                                     if(lastDirection != direction || i >= path.length - 1) {
                                         lastDirection = direction;
-                                        self.game.orderManager.add(pawn, new Order.Stand(new Position(path[i].x, path[i].y), direction));
+                                        self.game.orderManager.add(pawn, new Order.Stand(new Position(path[i].x, path[i].y, direction)));
                                         pawn.setAp(pawn.getAp() - 1, false);
                                     }
                                 }
