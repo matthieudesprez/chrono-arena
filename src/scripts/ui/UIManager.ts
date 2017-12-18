@@ -5,9 +5,7 @@ module TacticArena.UI {
         ordersnotificationsUI;
         transitionUI;
         turnIndicatorUI;
-        modeIndicator;
         ingamemenuUI;
-        process;
         actionMenu;
         topMenu;
         timelineMenu;
@@ -24,14 +22,11 @@ module TacticArena.UI {
             this.modalUI = new UI.Modal(this.game);
             this.topMenu = new UI.TopMenu(this.game);
             this.turnIndicatorUI = new UI.TurnIndicator(this);
-            this.modeIndicator = new UI.ModeIndicator(this);
             this.ingamemenuUI = new UI.IngameMenu(this);
             this.keyManager = new UI.KeyManager(this);
 
             this.ordersnotificationsUI = new UI.OrdersNotifications(this);
             this.transitionUI = new UI.Transition(this);
-
-            this.process = false;
         }
 
         mouseOver() {

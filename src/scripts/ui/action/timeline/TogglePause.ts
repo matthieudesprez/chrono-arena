@@ -6,12 +6,8 @@ module TacticArena.Action.Timeline {
         }
 
         static process(state) {
-            if(state.isPaused) {
-                state.isPaused = false;
-                GoForward.process(state);
-            } else {
-                state.isPaused = true;
-            }
+            if(state.isPaused) { GoForward.process(state); }
+            state.isPaused = !state.isPaused;
         }
     }
 }

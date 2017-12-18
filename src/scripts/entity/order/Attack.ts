@@ -6,8 +6,8 @@ module TacticArena.Order {
             super('attack', position, targets);
         }
 
-        resolve(pawn: Champion.BaseChampion, stepUnit: StepUnit, animate: boolean, state): Promise<any> {
-            return new Animation.Attack(state, pawn, this, stepUnit).get();
+        resolve(stepUnit: StepUnit, previousStepUnit: StepUnit, animate: boolean, state): Promise<any> {
+            return new Animation.Attack(state, stepUnit).get();
         }
     }
 }

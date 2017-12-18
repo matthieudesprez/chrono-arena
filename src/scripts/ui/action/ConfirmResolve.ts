@@ -8,7 +8,9 @@ module TacticArena.Action {
         static process(state) {
             state.spritesManager.destroyAllProjections();
             state.resolveManager.active = false;
-            state.uiManager.timelineMenu.clean();
+            if(state.uiManager && state.uiManager.timelineMenu) {
+                state.uiManager.timelineMenu.clean();
+            }
             if(state.isOver()) {
                 state.battleOver();
             } else {

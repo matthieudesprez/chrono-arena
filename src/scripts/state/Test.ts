@@ -23,5 +23,13 @@ module TacticArena.State {
             this.resolveManager = new ResolveManager(this);
             this.turnManager = new TurnManager(this);
         }
+
+        isOver(): boolean {
+            return true;
+        }
+
+        battleOver(): void {
+
+        }
     }
 }

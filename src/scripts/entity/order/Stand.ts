@@ -12,8 +12,8 @@ module TacticArena.Order {
             stepUnitA.apImpact[stepUnitA.pawn._id] = -1;
         }
 
-        resolve(pawn: Champion.BaseChampion, stepUnit: StepUnit, animate: boolean, state): Promise<any> {
-            return new Animation.Stand(state, pawn, this, stepUnit).get();
+        resolve(stepUnit: StepUnit, previousStepUnit: StepUnit, animate: boolean, state): Promise<any> {
+            return new Animation.Stand(state, stepUnit).get();
         }
 
     }

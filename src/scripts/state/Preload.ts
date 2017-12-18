@@ -61,6 +61,9 @@ module TacticArena.State {
             this.load.image('icon-dead', 'assets/images/ui/icon-dead.png');
             this.load.image('icon-heart', 'assets/images/ui/icon-heart.png');
             this.load.image('icon-replay', 'assets/images/ui/icon-replay.png');
+            this.load.image('icon-play', 'assets/images/ui/icon-play.png');
+            this.load.image('icon-exit', 'assets/images/ui/icon-exit.png');
+            this.load.image('icon-pause', 'assets/images/ui/icon-pause.png');
             this.load.image('icon-menu4', 'assets/images/ui/icon-menu4.png');
             this.load.image('icon-cancel', 'assets/images/ui/icon-cancel.png');
             this.load.image('icon-confirm', 'assets/images/ui/icon-confirm.png');

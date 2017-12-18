@@ -22,8 +22,8 @@ module TacticArena.Order {
             }
         }
 
-        resolve(pawn: Champion.BaseChampion, stepUnit: StepUnit, animate: boolean, state): Promise<any> {
-            return new Animation.CastHeal(state, pawn, this, stepUnit).get();
+        resolve(stepUnit: StepUnit, previousStepUnit: StepUnit, animate: boolean, state): Promise<any> {
+            return new Animation.CastHeal(state, stepUnit).get();
         }
     }
 }

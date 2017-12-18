@@ -20,5 +20,11 @@ module TacticArena.Order {
             return this.priority;
         }
 
+        resolve(stepUnit: StepUnit, previousStepUnit: StepUnit, animate: boolean, state): Promise<any> {
+            return new Promise((resolve, reject) => {
+                resolve(true);
+            });
+        }
+
     }
 }

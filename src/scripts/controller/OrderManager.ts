@@ -66,14 +66,13 @@ module TacticArena {
         }
 
         /*
-         In case of a Champion having less actions than the others, fill this.orders with Stand orders
+         In case of a Champion having no actions, fill this.orders with a Stand order
          */
         formatOrders(): void {
-            let self = this;
-            this.state.pawns.forEach((champion: Champion.BaseChampion) => {
-                if (!self.hasOrder(champion)) {
-                    self.add(champion, new Order.Stand(champion.getPosition()), false);
-                }
+            this.state.pawns.filter((champion: Champion.BaseChampion) => {
+                return !this.hasOrder(champion);
+            }).forEach((champion: Champion.BaseChampion) => {
+                this.add(champion, new Order.Stand(champion.getPosition()), false);
             });
         }
 
@@ -105,28 +104,22 @@ module TacticArena {
             for (var i = startI; i < steps.length; i++) {
                 if (steps[i].stepUnits[j].order) {
                     if (i > startI && steps[i].stepUnits[j].order instanceof Order.Move) {
-                        steps[i].stepUnits[j].order = new Order.Stand(order.position.clone());
+                        steps[i].stepUnits[j].order = null;
+                    } else {
+                        steps[i].stepUnits[j].order.position = order.position.clone();
                     }
-                    steps[i].stepUnits[j].order.position = order.position.clone();
                 }
             }
         }
 
         /*
-         Replace all champion steps for a Stand order at given position, from startI to the end
-         */
-        pacifyChampion(steps, startI, j, position): void {
-            for (var i = startI; i < steps.length; i++) {
-                steps[i].stepUnits[j].order = new Order.Stand(position);
-            }
-        }
-
-        /*
-        Translate all champion steps orders with the given (x, y), from startI to the end
+         Translate all champion steps orders with the given (x, y), from startI to the end
          */
         translateOrders(steps: Step[], startI: number, j: number, translate: Position): void {
             for (var i = startI; i < steps.length; i++) {
-                steps[i].stepUnits[j].order.position = steps[i].stepUnits[j].order.position.translate(translate.x, translate.y);
+                if(steps[i].stepUnits[j].order) {
+                    steps[i].stepUnits[j].order.position = steps[i].stepUnits[j].order.position.translate(translate.x, translate.y);
+                }
             }
         }
 
@@ -135,8 +128,8 @@ module TacticArena {
          */
         tileIsFree(stepUnits: StepUnit[], position: Position): boolean {
             return !this.state.stageManager.isObstacle(position) && !stepUnits.some((stepUnit: StepUnit) => {
-                return stepUnit.getPosition().equals(position);
-            });
+                    return stepUnit.getPosition().equals(position);
+                });
         }
 
         getSteps(): Step[] {
@@ -145,9 +138,8 @@ module TacticArena {
             for (var j = 0; j < steps.length; j++) {
                 steps[j] = new Step();
                 for (var i = 0; i < this.orders.length; i++) {
-                    var pawn = this.orders[i].champion;
                     steps[j].stepUnits.push(new StepUnit(
-                        pawn,
+                        this.orders[i].champion,
                         null,
                         null,
                         this.orders[i].list[j] ? this.orders[i].list[j] : null
@@ -168,26 +160,25 @@ module TacticArena {
                     stepUnitA.ap = previousStepUnits[i].ap;
                     stepUnitA.hp = previousStepUnits[i].hp; // Init stepUnit with previous stepUnit data
                     if (stepUnitA.order === null) { // In case a pawn has less actions to play than the others
-                        stepUnitA.order = new Order.Stand(previousStepUnits[i].order.position); // He gots a default one
+                        stepUnitA.order = new Order.Stand(previousStepUnits[i].getPosition().clone()); // He gots a default one
                     }
                     if (previousStepUnits[i].hp <= 0 && !(stepUnitA.order instanceof Order.Dead)) { // If the Champion was dead in the previous step
-                        stepUnitA.order = new Order.Dead(previousStepUnits[i].getPosition());
+                        stepUnitA.order = new Order.Dead(previousStepUnits[i].getPosition().clone());
                     }
                 });
 
                 let count = 0;
-                while (step.stepUnits.some(stepUnit => {return !stepUnit.checked;})) { // While there are stepUnits to check
-
+                while (step.stepUnits.some(stepUnit => { return !stepUnit.checked; })) { // While there are stepUnits to check
                     step.stepUnits.forEach((stepUnitA: StepUnit) => { // Check actions for each stepUnit (champion) in current step
                         stepUnitA.checked = true; // Interaction is checked
                     });
 
-                    [1, 0].forEach((priority: number) => { // Move Order are treated first (priority = 1), then the others
+                    [1, 0].forEach((priority: number) => { // Move Orders are treated first (priority==1), then the others
                         step.stepUnits.forEach((stepUnitA: StepUnit, i: number) => { // Check actions for each stepUnit (champion) in current step
                             if (stepUnitA.order.getPriority() === priority) {
                                 step.stepUnits.forEach((stepUnitB: StepUnit, j: number) => { // Foreach other stepUnit
                                     if (stepUnitA.pawn._id === stepUnitB.pawn._id) return; // Except A => no interaction with oneself
-                                    stepUnitA.order.process(this, steps, l, i, j); // Apply the Skill / Order on the step
+                                    stepUnitA.order.process(this, steps, l, i, j); // Apply Order (Skill) on the Step
                                 });
                             }
                         });

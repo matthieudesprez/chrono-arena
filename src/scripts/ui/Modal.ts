@@ -43,10 +43,8 @@ module TacticArena.UI {
                         offsetY: -60,
                         contentScale: 0.7,
                         callback: function () {
-                            state.game.state.start('mainsolooffline', true, false, {
-                                players: this.state.players,
-                                map: this.state.mapClass
-                            }, null);
+                            state.uiManager.dialogUI.hideModal("battleOver");
+                            Action.PlayTurn.process(state, 0);
                         }
                     },
                     {

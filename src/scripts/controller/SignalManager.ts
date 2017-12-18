@@ -7,15 +7,10 @@ module TacticArena {
         onHpChangeAnimation:Phaser.Signal;
         onOrderChange:Phaser.Signal;
         onActionPlayed:Phaser.Signal;
-        turnInitialized:Phaser.Signal;
-        stepResolutionFinished:Phaser.Signal;
-        resolvePhaseFinished:Phaser.Signal;
         stepResolutionIndexChange:Phaser.Signal;
-        onTurnEnded:Phaser.Signal;
         onActivePawnChange:Phaser.Signal;
         onTeamChange:Phaser.Signal;
         onChatMessageReception:Phaser.Signal;
-        onProcessedOrders:Phaser.Signal;
 
         constructor(game) {
             this.game = game;
@@ -26,15 +21,10 @@ module TacticArena {
             this.onHpChangeAnimation = new Phaser.Signal();
             this.onOrderChange = new Phaser.Signal();
             this.onActionPlayed = new Phaser.Signal();
-            this.turnInitialized = new Phaser.Signal();
-            this.stepResolutionFinished = new Phaser.Signal();
-            this.resolvePhaseFinished = new Phaser.Signal();
             this.stepResolutionIndexChange = new Phaser.Signal();
-            this.onTurnEnded = new Phaser.Signal();
             this.onActivePawnChange = new Phaser.Signal();
             this.onTeamChange = new Phaser.Signal();
             this.onChatMessageReception = new Phaser.Signal();
-            this.onProcessedOrders = new Phaser.Signal();
         }
 
         init() {
@@ -66,53 +56,25 @@ module TacticArena {
 
             this.onOrderChange.add(function(pawn) {
                 self.game.uiManager.ordersnotificationsUI.update(self.game.orderManager.getOrders(pawn));
-                self.game.uiManager.actionMenu.enableConfirm();
-                if(self.game.orderManager.getOrders(pawn).length > 0) {
-                    self.game.uiManager.actionMenu.enableCancel();
-                } else {
-                    self.game.uiManager.actionMenu.disableCancel();
+                if(self.game.uiManager.actionMenu) {
+                    self.game.uiManager.actionMenu.enableConfirm();
+                    if (self.game.orderManager.getOrders(pawn).length > 0) {
+                        self.game.uiManager.actionMenu.enableCancel();
+                    } else {
+                        self.game.uiManager.actionMenu.disableCancel();
+                    }
+                    self.game.uiManager.actionMenu.update();
                 }
-                self.game.uiManager.actionMenu.update();
             });
 
             this.onActionPlayed.add(function(pawn) {
                 self.game.pointer.update();
             });
 
-            this.turnInitialized.add(function(pawn) {
-            });
-
-            this.stepResolutionFinished.add(function(stepIndex) {
-                self.game.uiManager.process = false;
-                self.game.resolveManager.processing = false; // On repasse process à false pour regagner la main sur le ResolveManager
-            });
-
-            this.resolvePhaseFinished.add(function() {
-                self.game.isGameReady().then((res) => {
-                    Action.ConfirmResolve.process(self.game);
-                });
-            });
-
             this.stepResolutionIndexChange.add(function(stepIndex) {
                 //self.game.uiManager.notificationsUI.update(stepIndex);
                 if (self.game.uiManager.timelineMenu) {
                     self.game.uiManager.timelineMenu.update(stepIndex);
-                }
-            });
-
-            this.onTurnEnded.add( (nextPawn) => {
-                self.game.process = true;
-                self.game.selecting = false;
-                // in case of a local multiplayer, the projections can be hidden
-                if(!!nextPawn && nextPawn.team !== self.game.turnManager.currentPawn.team && self.game.hideProjections) {
-                    self.game.spritesManager.destroyAllProjections();
-                }
-                self.game.stageManager.clearHelp();
-                self.game.uiManager.ordersnotificationsUI.clean();
-                self.game.uiSpritesGroup.removeAll();
-                if(self.game.uiManager.actionMenu) {
-                    self.game.uiManager.actionMenu.clean();
-                    self.game.uiManager.actionMenu = null;
                 }
             });
 
@@ -132,11 +94,6 @@ module TacticArena {
 
             this.onChatMessageReception.add(function(data) {
                 self.game.uiManager.chatUI.write(data.name + ': ' + data.message)
-            });
-
-            this.onProcessedOrders.add(function(steps) {
-                self.game.initResolvePhase(steps);
-                self.game.logManager.add(steps);
             });
         }
     }

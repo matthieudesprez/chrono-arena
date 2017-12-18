@@ -1,14 +1,10 @@
 module TacticArena.Animation {
     export abstract class BaseAnimation {
         state: State.BasePlayable; // reference to current state, BasePlayable because can be played outside a battle
-        pawn: Champion.BaseChampion; // pawn doing the animation
-        order: Order.BaseOrder; // origin of the action
         stepUnit: StepUnit;
 
-        constructor(state: State.BasePlayable, pawn: Champion.BaseChampion, order: Order.BaseOrder, stepUnit: StepUnit) {
+        constructor(state: State.BasePlayable, stepUnit: StepUnit) {
             this.state = state;
-            this.pawn = pawn;
-            this.order = order;
             this.stepUnit = stepUnit;
         }
 
@@ -18,8 +14,8 @@ module TacticArena.Animation {
 
         async handleBackward(animation: Promise<any>): Promise<any> {
             let finalPosition = this.stepUnit.order.position;
-            if (!this.state.spritesManager.getReal(this.pawn).getPosition().equals(finalPosition)) {
-                await this.state.spritesManager.getReal(this.pawn).moveTo(finalPosition.x, finalPosition.y, null, false);
+            if (!this.state.spritesManager.getReal(this.stepUnit.pawn).getPosition().equals(finalPosition)) {
+                await this.state.spritesManager.getReal(this.stepUnit.pawn).moveTo(finalPosition.x, finalPosition.y, null, false);
             }
             return animation;
         }

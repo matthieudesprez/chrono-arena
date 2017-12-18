@@ -131,14 +131,17 @@ module TacticArena.Sprite {
         }
 
         die(animate = true) {
-            if (this.frameName === 'dying6') {
-                return;
-            }
-            if (animate) {
-                this.playAnimation('dying');
-            } else {
-                this.frameName = 'dying6';
-            }
+            return new Promise((resolve, reject) => {
+                if (this.frameName === 'dying6' || !animate) {
+                    this.frameName = 'dying6';
+                    resolve(true);
+                } else {
+                    this._animationCompleteCallback = function () {
+                        resolve(true);
+                    };
+                    this.playAnimation('dying');
+                }
+            });
         }
 
         //TODO change x, y to position: Position

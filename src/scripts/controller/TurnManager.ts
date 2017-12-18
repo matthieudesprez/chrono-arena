@@ -4,13 +4,11 @@ module TacticArena {
 	 */
     export class TurnManager {
 		state: State.BaseBattle;
-		currentTurnIndex: number;
 		currentPawn: Champion.BaseChampion;
 		playedPawnsIds: number[];
 
         constructor(state) {
 			this.state = state;
-			this.currentTurnIndex = -1;
 			this.currentPawn = null;
 			this.playedPawnsIds = [];
         }
@@ -26,7 +24,6 @@ module TacticArena {
 						pawn.setAp(pawn._apMax);
 						pawn.setMp(pawn._mpMax);
 					});
-					this.currentTurnIndex++;
 				}
                 this.setActivePawn(pawn);
 	        	resolve(true);

@@ -17,17 +17,12 @@ module TacticArena.Order {
             }
         }
 
-        resolve(pawn: Champion.BaseChampion, stepUnit: StepUnit, animate: boolean, state): Promise<any> {
+        resolve(stepUnit: StepUnit, previousStepUnit: StepUnit, animate: boolean, state): Promise<any> {
             let result = null;
             if (stepUnit.isBlocked()) {
-                result = new Animation.Block(state, pawn, this, stepUnit, stepUnit.blockedPosition, animate).get();
+                result = new Animation.Block(state, stepUnit, stepUnit.blockedPosition, animate).get();
             } else {
-                //if (backward && state.spritesManager.getReal(pawn).getPosition().equals(this.position)) {
-                //    //let direction = previousStep ? previousStep[i].order.position.d : pawn.getDirection();
-                //    result = new Animation.Stand(state, pawn, this).get();
-                //} else {
-                result = new Animation.Move(state, pawn, this, stepUnit, animate, this.position.d).get();
-                //}
+                result = new Animation.Move(state, stepUnit, previousStepUnit, animate).get();
             }
             return result;
         }

@@ -49,7 +49,7 @@ module TacticArena.State {
             }
             this.turnManager.init(pawn, first).then(res => {
                 if (first) {
-                    this.uiManager.turnIndicatorUI.write(this.turnManager.currentTurnIndex + 1);
+                    this.uiManager.turnIndicatorUI.write(this.logManager.logs.length);
                     return this.uiManager.transitionUI.show('PLAN');
                 }
                 return true;
@@ -65,8 +65,8 @@ module TacticArena.State {
         /*
          Init the resolve phase which is a step by step representation of what results from the orderManager processing
          */
-        initResolvePhase(steps): void {
-            this.resolveManager.init(steps);
+        initResolvePhase(steps, turnIndex = this.logManager.logs.length - 1): void {
+            this.resolveManager.init(steps, turnIndex);
             this.uiManager.transitionUI.show('EXECUTION').then(res => {
                 return res;
             }).then(res => {
@@ -74,19 +74,6 @@ module TacticArena.State {
                 return this.uiManager.timelineMenu.init(<any>steps.length);
             }).then(res => {
                 this.resolveManager.processSteps(0);
-            });
-        }
-
-        /*
-         Return a promise, which resolve when the game is not paused
-         */
-        isGameReady(): Promise<any> {
-            var self = this;
-            return new Promise((resolve, reject) => {
-                (function isReady() {
-                    if (!self.isPaused) resolve();
-                    setTimeout(isReady, 300);
-                })();
             });
         }
 

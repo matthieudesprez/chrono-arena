@@ -2,14 +2,14 @@ module TacticArena.Animation {
     export abstract class BaseCast extends BaseAnimation {
         speed;
 
-        constructor(state: State.BasePlayable, pawn: Champion.BaseChampion, order: Order.BaseOrder, stepUnit: StepUnit, speed: number = 1000) {
-            super(state, pawn, order, stepUnit);
+        constructor(state: State.BasePlayable, stepUnit: StepUnit, speed: number = 1000) {
+            super(state, stepUnit);
             this.speed = speed;
         }
 
         async get(): Promise<any> {
-            this.state.spritesManager.showReal(this.pawn);
-            await super.handleBackward(this.state.spritesManager.getReal(this.pawn).cast(this.order.position.d, this.speed));
+            this.state.spritesManager.showReal(this.stepUnit.pawn);
+            await super.handleBackward(this.state.spritesManager.getReal(this.stepUnit.pawn).cast(this.stepUnit.order.position.d, this.speed));
             return super.handleBackward(this.getCastCallback());
         }
 

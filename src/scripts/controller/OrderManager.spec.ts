@@ -23,17 +23,15 @@ module TacticArena {
         }
 
         async function playAnimation(steps) {
-            return;
-            //initSpriteManager();
-            //currentState.resolveManager.init(steps);
-            //for (let i = 0; i < steps.length; i++) {
-            //    await currentState.resolveManager.processStep(i);
-            //}
+            //return;
+            initSpriteManager();
+            currentState.resolveManager.init(steps, 0);
+            await currentState.resolveManager.processSteps(0);
 
         }
 
         beforeEach(function (done) {
-            spyOn(console, 'log').and.stub();
+            //spyOn(console, 'log').and.stub();
             spyOn(console, 'info').and.stub();
             spyOn(console, 'warn').and.stub();
             originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
@@ -369,21 +367,24 @@ module TacticArena {
             });
 
             it("with 1 dead - nothing is played", async function (done) {
+                currentState.getChampion(1).setPosition(new Position(6, 4, 'S'));
+                currentState.getChampion(2).setPosition(new Position(2, 15, 'S'));
+                currentState.getChampion(4).setPosition(new Position(9, 15, 'S'));
                 currentState.getChampion(3).setHp(0, false, true);
 
                 let steps = currentState.orderManager.getSteps();
                 expect(steps.length).toEqual(2);
                 expect(steps[0].stepUnits.length).toEqual(4);
 
-                testStepUnit(steps[0].getStepUnit(currentState.getChampion(1)), 'stand', 'E', new Position(8, 8), 3, 4);
-                testStepUnit(steps[0].getStepUnit(currentState.getChampion(2)), 'stand', 'W', new Position(10, 8), 3, 4);
+                testStepUnit(steps[0].getStepUnit(currentState.getChampion(1)), 'stand', 'S', new Position(6, 4), 3, 4);
+                testStepUnit(steps[0].getStepUnit(currentState.getChampion(2)), 'stand', 'S', new Position(2, 15), 3, 4);
                 testStepUnit(steps[0].getStepUnit(currentState.getChampion(3)), 'dead', 'E', new Position(7, 7), 0, 0);
-                testStepUnit(steps[0].getStepUnit(currentState.getChampion(4)), 'stand', 'W', new Position(12, 7), 3, 4);
+                testStepUnit(steps[0].getStepUnit(currentState.getChampion(4)), 'stand', 'S', new Position(9, 15), 3, 4);
 
-                testStepUnit(steps[1].getStepUnit(currentState.getChampion(1)), 'stand', 'E', new Position(8, 8), 2, 4);
-                testStepUnit(steps[1].getStepUnit(currentState.getChampion(2)), 'stand', 'W', new Position(10, 8), 2, 4);
+                testStepUnit(steps[1].getStepUnit(currentState.getChampion(1)), 'stand', 'S', new Position(6, 4), 2, 4);
+                testStepUnit(steps[1].getStepUnit(currentState.getChampion(2)), 'stand', 'S', new Position(2, 15), 2, 4);
                 testStepUnit(steps[1].getStepUnit(currentState.getChampion(3)), 'dead', 'E', new Position(7, 7), 0, 0);
-                testStepUnit(steps[1].getStepUnit(currentState.getChampion(4)), 'stand', 'W', new Position(12, 7), 2, 4);
+                testStepUnit(steps[1].getStepUnit(currentState.getChampion(4)), 'stand', 'S', new Position(9, 15), 2, 4);
 
                 await playAnimation(steps);
                 done();
@@ -393,24 +394,28 @@ module TacticArena {
                 currentState.getChampion(2).setHp(2, false, true);
                 currentState.getChampion(2)._apMax = 4;
                 currentState.getChampion(4)._apMax = 4;
+                currentState.getChampion(1).setPosition(new Position(4, 9)); // 1st
+                currentState.getChampion(2).setPosition(new Position(7, 9)); // 2nd
+                currentState.getChampion(3).setPosition(new Position(3, 8)); // not active
+                currentState.getChampion(4).setPosition(new Position(8, 8)); // 4th
 
                 currentState.orderManager.orders = [
                     new ChampionOrders(currentState.getChampion(1), [
-                            new Order.Fire(new Position(8, 8, 'E')),
-                            new Order.Move(new Position(7, 8, 'E'))
+                            new Order.Fire(new Position(4, 9, 'E')),
+                            new Order.Move(new Position(3, 9, 'E'))
                         ]
                     ),
                     new ChampionOrders(currentState.getChampion(2), [
-                            new Order.Move(new Position(9, 8, 'W')),
-                            new Order.Fire(new Position(9, 8, 'W')),
-                            new Order.Move(new Position(9, 7, 'W'))
+                            new Order.Move(new Position(6, 9, 'W')),
+                            new Order.Fire(new Position(6, 9, 'W')),
+                            new Order.Move(new Position(5, 9, 'W'))
                         ]
                     ),
                     new ChampionOrders(currentState.getChampion(4), [
-                            new Order.Move(new Position(11, 7, 'W')),
-                            new Order.Move(new Position(10, 7, 'W')),
-                            new Order.Move(new Position(9, 7, 'W')),
-                            new Order.Move(new Position(9, 8, 'W'))
+                            new Order.Move(new Position(7, 8, 'W')),
+                            new Order.Move(new Position(6, 8, 'W')),
+                            new Order.Move(new Position(6, 9, 'W')),
+                            new Order.Move(new Position(5, 9, 'W'))
                         ]
                     )
                 ];
@@ -418,32 +423,32 @@ module TacticArena {
                 expect(steps.length).toEqual(5);
                 expect(steps[0].stepUnits.length).toEqual(4);
 
-                testStepUnit(steps[0].getStepUnit(currentState.getChampion(1)), 'stand', 'E', new Position(8, 8), 3, 4);
-                testStepUnit(steps[0].getStepUnit(currentState.getChampion(2)), 'stand', 'W', new Position(10, 8), 4, 2);
-                testStepUnit(steps[0].getStepUnit(currentState.getChampion(3)), 'stand', 'E', new Position(7, 7), 3, 4);
-                testStepUnit(steps[0].getStepUnit(currentState.getChampion(4)), 'stand', 'W', new Position(12, 7), 4, 4);
+                testStepUnit(steps[0].getStepUnit(currentState.getChampion(1)), 'stand', 'E', new Position(4, 9), 3, 4);
+                testStepUnit(steps[0].getStepUnit(currentState.getChampion(2)), 'stand', 'W', new Position(7, 9), 4, 2);
+                testStepUnit(steps[0].getStepUnit(currentState.getChampion(3)), 'stand', 'E', new Position(3, 8), 3, 4);
+                testStepUnit(steps[0].getStepUnit(currentState.getChampion(4)), 'stand', 'W', new Position(8, 8), 4, 4);
 
-                testStepUnit(steps[1].getStepUnit(currentState.getChampion(1)), 'cast', 'E', new Position(8, 8), 1, 4);
-                testStepUnit(steps[1].getStepUnit(currentState.getChampion(2)), 'move', 'W', new Position(9, 8), 3, 0);
-                testStepUnit(steps[1].getStepUnit(currentState.getChampion(3)), 'stand', 'E', new Position(7, 7), 2, 4);
-                testStepUnit(steps[1].getStepUnit(currentState.getChampion(4)), 'move', 'W', new Position(11, 7), 3, 4);
+                testStepUnit(steps[1].getStepUnit(currentState.getChampion(1)), 'cast', 'E', new Position(4, 9), 1, 4);
+                testStepUnit(steps[1].getStepUnit(currentState.getChampion(2)), 'move', 'W', new Position(6, 9), 3, 0);
+                testStepUnit(steps[1].getStepUnit(currentState.getChampion(3)), 'stand', 'E', new Position(3, 8), 2, 4);
+                testStepUnit(steps[1].getStepUnit(currentState.getChampion(4)), 'move', 'W', new Position(7, 8), 3, 4);
 
-                testStepUnit(steps[2].getStepUnit(currentState.getChampion(1)), 'move', 'E', new Position(7, 8), 0, 4);
-                testStepUnit(steps[2].getStepUnit(currentState.getChampion(2)), 'dead', 'W', new Position(9, 8), 3, 0);
-                testStepUnit(steps[2].getStepUnit(currentState.getChampion(3)), 'stand', 'E', new Position(7, 7), 1, 4);
-                testStepUnit(steps[2].getStepUnit(currentState.getChampion(4)), 'move', 'W', new Position(10, 7), 2, 4);
+                testStepUnit(steps[2].getStepUnit(currentState.getChampion(1)), 'move', 'E', new Position(3, 9), 0, 4);
+                testStepUnit(steps[2].getStepUnit(currentState.getChampion(2)), 'dead', 'W', new Position(6, 9), 3, 0);
+                testStepUnit(steps[2].getStepUnit(currentState.getChampion(3)), 'stand', 'E', new Position(3, 8), 1, 4);
+                testStepUnit(steps[2].getStepUnit(currentState.getChampion(4)), 'move', 'W', new Position(6, 8), 2, 4);
 
-                testStepUnit(steps[3].getStepUnit(currentState.getChampion(1)), 'stand', 'E', new Position(7, 8), 0, 4);
-                testStepUnit(steps[3].getStepUnit(currentState.getChampion(2)), 'dead', 'W', new Position(9, 8), 3, 0);
-                testStepUnit(steps[3].getStepUnit(currentState.getChampion(3)), 'stand', 'E', new Position(7, 7), 0, 4);
-                testStepUnit(steps[3].getStepUnit(currentState.getChampion(4)), 'move', 'W', new Position(9, 7), 1, 4);
+                testStepUnit(steps[3].getStepUnit(currentState.getChampion(1)), 'stand', 'E', new Position(3, 9), 0, 4);
+                testStepUnit(steps[3].getStepUnit(currentState.getChampion(2)), 'dead', 'W', new Position(6, 9), 3, 0);
+                testStepUnit(steps[3].getStepUnit(currentState.getChampion(3)), 'stand', 'E', new Position(3, 8), 0, 4);
+                testStepUnit(steps[3].getStepUnit(currentState.getChampion(4)), 'move', 'W', new Position(6, 8), 1, 4);
+                expect(steps[3].getStepUnit(currentState.getChampion(4)).isBlocked()).toBeTruthy();
+                expect(steps[3].getStepUnit(currentState.getChampion(4)).blockedPosition.equals(new Position(6, 9))).toBeTruthy();
 
-                testStepUnit(steps[4].getStepUnit(currentState.getChampion(1)), 'stand', 'E', new Position(7, 8), 0, 4);
-                testStepUnit(steps[4].getStepUnit(currentState.getChampion(2)), 'dead', 'W', new Position(9, 8), 3, 0);
-                testStepUnit(steps[4].getStepUnit(currentState.getChampion(3)), 'stand', 'E', new Position(7, 7), 0, 4);
-                testStepUnit(steps[4].getStepUnit(currentState.getChampion(4)), 'move', 'W', new Position(9, 7), 0, 4);
-                expect(steps[4].getStepUnit(currentState.getChampion(4)).isBlocked()).toBeTruthy();
-                expect(steps[4].getStepUnit(currentState.getChampion(4)).blockedPosition.equals(new Position(9, 8))).toBeTruthy();
+                testStepUnit(steps[4].getStepUnit(currentState.getChampion(1)), 'stand', 'E', new Position(3, 9), 0, 4);
+                testStepUnit(steps[4].getStepUnit(currentState.getChampion(2)), 'dead', 'W', new Position(6, 9), 3, 0);
+                testStepUnit(steps[4].getStepUnit(currentState.getChampion(3)), 'stand', 'E', new Position(3, 8), 0, 4);
+                testStepUnit(steps[4].getStepUnit(currentState.getChampion(4)), 'stand', 'W', new Position(6, 8), 0, 4);
 
                 await playAnimation(steps);
                 done();
@@ -479,7 +484,7 @@ module TacticArena {
                 testStepUnit(steps[1].getStepUnit(currentState.getChampion(4)), 'stand', 'W', new Position(10, 10), 2, 4);
 
                 initSpriteManager();
-                currentState.resolveManager.init(steps);
+                currentState.resolveManager.init(steps, 0);
                 await currentState.resolveManager.processStep(0);
                 expect(currentState.spritesManager.getReal(currentState.getChampion(1)).getPosition().equals(new Position(6, 8, 'E'))).toBeTruthy();
                 expect(currentState.spritesManager.getReal(currentState.getChampion(3)).getPosition().equals(new Position(7, 8, 'E'))).toBeTruthy();
@@ -909,16 +914,91 @@ module TacticArena {
                 testStepUnit(steps[0].getStepUnit(currentState.getChampion(3)), 'stand', 'E', new Position(5, 10), 3, 4);
                 testStepUnit(steps[0].getStepUnit(currentState.getChampion(4)), 'stand', 'E', new Position(5, 11), 3, 4);
 
-                //TODO
-                //testStepUnit(steps[1].getStepUnit(currentState.getChampion(1)), 'cast_wind', 'S', new Position(7, 8), 1, 4);
-                //expect(steps[1].getStepUnit(currentState.getChampion(1)).order.targets).toEqual([
-                //    {championId: currentState.getChampion(2)._id, moved: new Position(7, 11, 'W'), distance: 2},
-                //]);
-                //testStepUnit(steps[1].getStepUnit(currentState.getChampion(2)), 'move', 'W', new Position(7, 10), 2, 1);
-                //expect(steps[1].getStepUnit(currentState.getChampion(2)).isMoved()).toBeTruthy();
-                //expect(steps[1].getStepUnit(currentState.getChampion(2)).movedPosition.equals(new Position(7, 11, 'W'), true)).toBeTruthy();
-                //testStepUnit(steps[1].getStepUnit(currentState.getChampion(3)), 'cast', 'E', new Position(5, 10), 1, 4);
-                //testStepUnit(steps[1].getStepUnit(currentState.getChampion(4)), 'cast', 'W', new Position(9, 11), 1, 4);
+                testStepUnit(steps[1].getStepUnit(currentState.getChampion(1)), 'cast_wind', 'S', new Position(7, 8), 1, 4);
+                expect(steps[1].getStepUnit(currentState.getChampion(1)).order.targets).toEqual([
+                    {championId: currentState.getChampion(2)._id, moved: new Position(7, 11, 'W'), distance: 2},
+                ]);
+                testStepUnit(steps[1].getStepUnit(currentState.getChampion(2)), 'cast', 'W', new Position(7, 10), 1, 3);
+                expect(steps[1].getStepUnit(currentState.getChampion(2)).isMoved()).toBeTruthy();
+                expect(steps[1].getStepUnit(currentState.getChampion(2)).movedPosition.equals(new Position(7, 11, 'W'), true)).toBeTruthy();
+                testStepUnit(steps[1].getStepUnit(currentState.getChampion(3)), 'stand', 'E', new Position(5, 10), 2, 2);
+                testStepUnit(steps[1].getStepUnit(currentState.getChampion(4)), 'stand', 'E', new Position(5, 11), 2, 4);
+
+                await playAnimation(steps);
+                done();
+            });
+
+            it("the 4th one cast wind west to 2nd dead and 3rd & 4th after moving", async function (done) {
+                currentState.getChampion(1).setPosition(new Position(5, 9, 'E'));
+                currentState.getChampion(2).setPosition(new Position(7, 9, 'W'));
+                currentState.getChampion(2).setHp(0, false, true);
+                currentState.getChampion(3).setPosition(new Position(6, 9, 'E'));
+                currentState.getChampion(4).setPosition(new Position(8, 8, 'W'));
+                currentState.getChampion(4)._apMax = 4;
+                currentState.orderManager.orders = [
+                    new ChampionOrders(currentState.getChampion(1), [
+                            new Order.Move(new Position(6, 9, 'E')),
+                            new Order.Move(new Position(7, 9, 'E')),
+                            new Order.Move(new Position(7, 8, 'E')),
+                            new Order.Move(new Position(8, 8, 'E'))
+                        ]
+                    ),
+                    new ChampionOrders(currentState.getChampion(3), [
+                            new Order.Move(new Position(7, 9, 'E')),
+                            new Order.Move(new Position(7, 8, 'E')),
+                            new Order.Move(new Position(8, 8, 'E')),
+                        ]
+                    ),
+                    new ChampionOrders(currentState.getChampion(4), [
+                            new Order.Move(new Position(8, 9, 'W')),
+                            new Order.Heal(new Position(8, 9, 'W')),
+                            new Order.Wind(new Position(8, 9, 'W'))
+                        ]
+                    ),
+                ];
+                let steps = currentState.orderManager.getSteps();
+                expect(steps.length).toEqual(5);
+                expect(steps[0].stepUnits.length).toEqual(4);
+
+                testStepUnit(steps[0].getStepUnit(currentState.getChampion(1)), 'stand', 'E', new Position(5, 9), 3, 4);
+                testStepUnit(steps[0].getStepUnit(currentState.getChampion(2)), 'dead', 'W', new Position(7, 9), 0, 0);
+                testStepUnit(steps[0].getStepUnit(currentState.getChampion(3)), 'stand', 'E', new Position(6, 9), 3, 4);
+                testStepUnit(steps[0].getStepUnit(currentState.getChampion(4)), 'stand', 'W', new Position(8, 8), 4, 4);
+
+                testStepUnit(steps[1].getStepUnit(currentState.getChampion(1)), 'move', 'E', new Position(5, 9), 2, 4);
+                expect(steps[1].getStepUnit(currentState.getChampion(1)).isBlocked()).toBeTruthy();
+                expect(steps[1].getStepUnit(currentState.getChampion(1)).blockedPosition.equals(new Position(6, 9))).toBeTruthy();
+                testStepUnit(steps[1].getStepUnit(currentState.getChampion(2)), 'dead', 'W', new Position(7, 9), 0, 0);
+                testStepUnit(steps[1].getStepUnit(currentState.getChampion(3)), 'move', 'E', new Position(6, 9), 2, 4);
+                expect(steps[1].getStepUnit(currentState.getChampion(3)).isBlocked()).toBeTruthy();
+                expect(steps[1].getStepUnit(currentState.getChampion(3)).blockedPosition.equals(new Position(7, 9))).toBeTruthy();
+                testStepUnit(steps[1].getStepUnit(currentState.getChampion(4)), 'move', 'W', new Position(8, 9), 3, 4);
+
+                testStepUnit(steps[2].getStepUnit(currentState.getChampion(1)), 'stand', 'E', new Position(5, 9), 1, 4);
+                testStepUnit(steps[2].getStepUnit(currentState.getChampion(2)), 'dead', 'W', new Position(7, 9), 0, 0);
+                testStepUnit(steps[2].getStepUnit(currentState.getChampion(3)), 'stand', 'E', new Position(6, 9), 1, 4);
+                testStepUnit(steps[2].getStepUnit(currentState.getChampion(4)), 'heal', 'W', new Position(8, 9), 2, 4);
+
+                testStepUnit(steps[3].getStepUnit(currentState.getChampion(1)), 'stand', 'E', new Position(5, 9), 0, 3);
+                expect(steps[3].getStepUnit(currentState.getChampion(1)).isMoved()).toBeTruthy();
+                expect(steps[3].getStepUnit(currentState.getChampion(1)).movedPosition.equals(new Position(4, 9, 'E'), true)).toBeTruthy();
+                testStepUnit(steps[3].getStepUnit(currentState.getChampion(2)), 'dead', 'W', new Position(7, 9), 0, 0);
+                expect(steps[3].getStepUnit(currentState.getChampion(2)).isMoved()).toBeTruthy();
+                expect(steps[3].getStepUnit(currentState.getChampion(2)).movedPosition.equals(new Position(6, 9, 'W'), true)).toBeTruthy();
+                testStepUnit(steps[3].getStepUnit(currentState.getChampion(3)), 'stand', 'E', new Position(6, 9), 0, 3);
+                expect(steps[3].getStepUnit(currentState.getChampion(3)).isMoved()).toBeTruthy();
+                expect(steps[3].getStepUnit(currentState.getChampion(3)).movedPosition.equals(new Position(5, 9, 'E'), true)).toBeTruthy();
+                testStepUnit(steps[3].getStepUnit(currentState.getChampion(4)), 'cast_wind', 'W', new Position(8, 9), 0, 4);
+                expect(steps[3].getStepUnit(currentState.getChampion(4)).order.targets).toEqual([
+                    {championId: currentState.getChampion(1)._id, moved: new Position(4, 9, 'E'), distance: 3},
+                    {championId: currentState.getChampion(3)._id, moved: new Position(5, 9, 'E'), distance: 2},
+                    {championId: currentState.getChampion(2)._id, moved: new Position(6, 9, 'W'), distance: 1}
+                ]);
+
+                testStepUnit(steps[4].getStepUnit(currentState.getChampion(1)), 'stand', 'E', new Position(4, 9), 0, 3);
+                testStepUnit(steps[4].getStepUnit(currentState.getChampion(2)), 'dead', 'W', new Position(6, 9), 0, 0);
+                testStepUnit(steps[4].getStepUnit(currentState.getChampion(3)), 'stand', 'E', new Position(5, 9), 0, 3);
+                testStepUnit(steps[4].getStepUnit(currentState.getChampion(4)), 'stand', 'W', new Position(8, 9), 0, 4);
 
                 await playAnimation(steps);
                 done();

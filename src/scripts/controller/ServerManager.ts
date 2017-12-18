@@ -93,7 +93,7 @@ module TacticArena {
                             steps[i].push(s);
                         }
                     }
-                    self.game.signalManager.onProcessedOrders.dispatch(steps);
+                    self.game.initResolvePhase(steps);
                 } else {
                     self.onChatMessageReceptionCallback(data, server_msg);
                 }

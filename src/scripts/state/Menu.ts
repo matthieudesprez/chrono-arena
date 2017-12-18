@@ -132,7 +132,7 @@ module TacticArena.State {
                 frameGroup.add(sprite);
                 this.charactersGroup.add(frameGroup);
 
-                if ((this.game as Game).player.isInBattleParty(pawn._name)) {
+                if ((this.game as Game).player.isInBattleParty(character.name)) {
                     this.selectCharacter(null, null, frameGroup);
                 }
             });

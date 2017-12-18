@@ -5,9 +5,9 @@ module TacticArena.Animation {
         get(): Promise<any> {
             let self = this;
             let animation = new Promise((resolve, reject) => {
-                this.state.spritesManager.getReal(this.pawn).stand(this.order.position.d);
-                this.state.spritesManager.getReal(this.pawn).attack(this.order.position.d).then(() => {
-                    this.order.targets.forEach(target => {
+                this.state.spritesManager.getReal(this.stepUnit.pawn).stand(this.stepUnit.order.position.d);
+                this.state.spritesManager.getReal(this.stepUnit.pawn).attack(this.stepUnit.order.position.d).then(() => {
+                    this.stepUnit.order.targets.forEach(target => {
                         let champion = (this.state as State.BaseBattle).getChampion(target.championId);
                         if (target.dodge) {
                             self.state.spritesManager.getReal(champion).displayText('miss');

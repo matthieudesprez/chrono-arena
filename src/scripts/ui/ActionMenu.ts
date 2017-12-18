@@ -18,6 +18,7 @@ module TacticArena.UI {
         confirmEnabled;
         pawn;
         playable;
+        isReplaying;
 
         constructor(game, pawn) {
             let self = this;
@@ -27,6 +28,7 @@ module TacticArena.UI {
             this.playable = this.pawn._id == this.game.turnManager.getActivePawn()._id;
             this.skills = [];
             this.confirmEnabled = true;
+            this.isReplaying = false;
             this.mainGroup = this.game.add.group();
             this.mainGroup.x = 0;
             this.mainGroup.y = this.game.height - 100;
@@ -154,11 +156,12 @@ module TacticArena.UI {
                 this.disableCancel();
             }
 
-            if(this.game.resolveManager.steps.length > 0) {
-                let btnReplay = this.game.make.image(frame.width - 43, frame.y - 40, 'icon-replay');
+            if(this.game.resolveManager && this.game.resolveManager.steps.length > 0) {
+                let btnReplay = this.game.make.image(this.game.width - 32, - 32 + 4, 'icon-replay');
                 this.game.uiGroup.add(btnReplay);
                 btnReplay.inputEnabled = true;
                 btnReplay.events.onInputDown.add(this.replay, this);
+                btnReplay.anchor.set(0.5);
                 this.mainGroup.add(btnReplay);
             }
 
@@ -218,10 +221,10 @@ module TacticArena.UI {
         }
 
         replay(buttonSprite, pointer, buttonGroup) {
-            this.game.signalManager.onTurnEnded.dispatch(this.game);
-            this.game.turnManager.currentTurnIndex--;
-            this.game.uiManager.turnIndicatorUI.write(this.game.turnManager.currentTurnIndex + 1);
-            this.game.initResolvePhase(this.game.resolveManager.steps);
+            if(!this.isReplaying) {
+                this.isReplaying = true;
+                Action.PlayTurn.process(this.game, this.game.logManager.logs.length - 1);
+            }
         }
 
         buttonOver(buttonSprite, pointer, buttonGroup) {

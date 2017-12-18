@@ -1,24 +1,20 @@
 module TacticArena {
+    import BaseBattle = TacticArena.State.BaseBattle;
     export class LogManager {
-        logs;
-        game;
-        //[
-        //    turnIndex: [
-        //        stepIndex: {step}
-        //    ]
-        //]
+        logs: Step[][];
+        game: State.BaseBattle;
 
         constructor(game) {
             this.logs = [];
             this.game = game;
         }
 
-        add(steps) {
+        add(steps): void {
             this.logs.push(steps);
         }
 
-        get(turnIndex, stepIndex) {
-            return this.logs[turnIndex][stepIndex];
+        get(turnIndex): Step[] {
+            return turnIndex < this.logs.length ? this.logs[turnIndex] : null;
         }
     }
 }

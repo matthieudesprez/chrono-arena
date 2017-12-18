@@ -37,8 +37,7 @@ module TacticArena.UI {
         }
 
         enterKeyPressed(self, uiManager) {
-            if(uiManager.game.resolveManager.active && !uiManager.game.resolveManager.processing) {
-                uiManager.process = true;
+            if(uiManager.game.resolveManager && uiManager.game.resolveManager.active && !uiManager.game.resolveManager.processing) {
                 uiManager.game.isPaused = false;
                 Action.Timeline.GoForward.process(uiManager.game);
             } else if (!uiManager.game.process) {
@@ -56,6 +55,9 @@ module TacticArena.UI {
 
         pauseResolve(self, uiManager) {
             Action.Timeline.TogglePause.process(uiManager.game);
+            if(uiManager.timelineMenu) {
+                uiManager.timelineMenu.updateBtnPause();
+            }
         }
 
         /*

@@ -58,12 +58,12 @@ For creating the build folder with the compiled javascript + assets :
 npm run build
 ```
 
-For serving the project :
+For serving the project (with browser auto-reload on build change) :
 ```
 npm run serve
 ```
 
-For watching the src/*.ts files (with auto-reload) :
+For watching the src/*.ts files :
 ```
 npm run watch
 ```
@@ -77,3 +77,14 @@ To run unit tests :
 ```
 npm run test
 ```
+
+## TODO list
+* handle obstacles for Linear Casting Skill
+* mix Movement Points with Action Points
+* add Resurrection Skill
+* add Teleport Skill
+* add Bomb Drop Skill
+* add Tooltips on Skills
+* Online Mode
+
+
