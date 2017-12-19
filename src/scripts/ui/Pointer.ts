@@ -68,7 +68,7 @@ module TacticArena.UI {
                     //TODO SELECT CHARACTER
                     this.game.pawns.forEach( (p, k) => {
                         if (p.getPosition().equals(target)) {
-                            if(p.team == this.game.turnManager.getActivePlayer().team) {
+                            if(p.playerId == this.game.turnManager.getActivePlayer()._id) {
                                 this.game.turnManager.setActivePawn(p);
                             } else {
                                 this.game.uiManager.actionMenu.clean();

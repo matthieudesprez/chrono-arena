@@ -9,7 +9,7 @@ module TacticArena.Action {
             state.process = true;
             state.selecting = false;
             // in case of a local multiplayer, the projections can be hidden
-            if(!!nextPawn && nextPawn.team !== state.turnManager.currentPawn.team && state.hideProjections) {
+            if(!!nextPawn && nextPawn.playerId !== state.turnManager.currentPawn.playerId && state.hideProjections) {
                 state.spritesManager.destroyAllProjections();
             }
             state.stageManager.clearHelp();

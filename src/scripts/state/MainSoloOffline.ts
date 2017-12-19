@@ -7,9 +7,11 @@ module TacticArena.State {
             super.init(data);
             this.playMode = 'offline';
             this.players = data.players;
-            this.players.forEach( (player: Player.BasePlayer, playerId: number) => {
-                player._id = playerId;
-                if (player.isBot) { this.aiManager = new AiManager(this, player._id); }
+            if (this.players.some((player: Player.BasePlayer) => { return player.isBot; })) {
+                this.aiManager = new AiManager(this);
+            }
+            this.players.forEach((player: Player.BasePlayer, i: number) => {
+                player._id = i;
                 player.battleParty.forEach((character, characterIndex) => {
                     let champion = new character(this, this.map.startPositions[player._id][characterIndex], this.getUniqueId(), player._id);
                     this.pawns.push(champion);
@@ -17,9 +19,5 @@ module TacticArena.State {
                 });
             });
         }
-
-        //render() {
-        //    this.game.debug.spriteBounds(this.uiManager.topMenu.pawns[0].apText, 'rgba(255,0,0,0.5)');
-        //}
     }
 }

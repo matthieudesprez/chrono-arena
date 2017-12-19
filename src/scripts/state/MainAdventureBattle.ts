@@ -15,7 +15,7 @@ module TacticArena.State {
                 if (p.player) {
                     //this.playerTeam = k;
                 } else {
-                    this.aiManager = new AiManager(this, k);
+                    this.aiManager = new AiManager(this);
                 }
                 this.pawns.push(new Champion.BaseChampion(this, new Position(p.position.x, p.position.y, p.direction), p.type, this.getUniqueId(), k, p.name, p.spriteClass));
             });

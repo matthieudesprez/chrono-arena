@@ -19,10 +19,12 @@ module TacticArena.UI {
         pawn;
         playable;
         isReplaying;
+        hasSkillSelected;
 
         constructor(game, pawn) {
             let self = this;
             this.isOver = false;
+            this.hasSkillSelected = false;
             this.game = game;
             this.pawn = pawn;
             this.playable = this.pawn._id == this.game.turnManager.getActivePawn()._id;
@@ -84,7 +86,7 @@ module TacticArena.UI {
             let apIcon = self.game.make.sprite(0, -2, 'icon-power4');
             apIcon.anchor.set(0);
             this.apGroup.add(apIcon);
-            this.apText = this.game.add.text(28, 0, pawn.getAp() + ' / ' + pawn._apMax, {
+            this.apText = this.game.add.text(28, 0, (this.playable ? pawn.getAp() : pawn._apMax) + ' / ' + pawn._apMax, {
                 font: '20px Iceland',
                 fill: '#ffffff',
                 boundsAlignH: 'left',
@@ -96,7 +98,7 @@ module TacticArena.UI {
             let mpIcon = self.game.make.sprite(0, -2, 'icon-mp2');
             mpIcon.anchor.set(0);
             this.mpGroup.add(mpIcon);
-            this.mpText = this.game.add.text(28, 0, pawn.getMp() + ' / ' + pawn._mpMax, {
+            this.mpText = this.game.add.text(28, 0, (this.playable ? pawn.getMp() : pawn._mpMax) + ' / ' + pawn._mpMax, {
                 font: '20px Iceland',
                 fill: '#ffffff',
                 boundsAlignH: 'left',
@@ -119,7 +121,7 @@ module TacticArena.UI {
                 frame.inputEnabled = true;
                 frame.events.onInputOver.add(self.buttonOver, self, 0, buttonGroup);
                 frame.events.onInputOut.add(self.buttonOut, self, 0, buttonGroup);
-                frame.events.onInputDown.add(self.skillSelect, self, 0, index);
+                frame.events.onInputDown.add(self.skillClick, self, 0, index);
 
                 self.skillsGroup.add(buttonGroup);
                 self.skills.push({selected: false, group: buttonGroup, skill: skill});
@@ -127,7 +129,7 @@ module TacticArena.UI {
 
             this.buttonConfirmGroup = this.game.add.group();
             this.buttonCancelGroup = this.game.add.group();
-            if(this.playable) {
+            if (this.playable) {
                 this.buttonConfirmGroup.x = skillSpacing + pawn.skills.length * skillSpacing;
                 this.buttonConfirmGroup.y = 0;
                 let iconConfirm = self.game.make.sprite(0, 0, 'icon-confirm');
@@ -156,8 +158,8 @@ module TacticArena.UI {
                 this.disableCancel();
             }
 
-            if(this.game.resolveManager && this.game.resolveManager.steps.length > 0) {
-                let btnReplay = this.game.make.image(this.game.width - 32, - 32 + 4, 'icon-replay');
+            if (this.game.resolveManager && this.game.resolveManager.steps.length > 0) {
+                let btnReplay = this.game.make.image(this.game.width - 32, -32 + 4, 'icon-replay');
                 this.game.uiGroup.add(btnReplay);
                 btnReplay.inputEnabled = true;
                 btnReplay.events.onInputDown.add(this.replay, this);
@@ -209,7 +211,7 @@ module TacticArena.UI {
         }
 
         cancel() {
-            if(this.playable) {
+            if (this.playable) {
                 Action.Cancel.process(this.game);
             }
         }
@@ -221,7 +223,7 @@ module TacticArena.UI {
         }
 
         replay(buttonSprite, pointer, buttonGroup) {
-            if(!this.isReplaying) {
+            if (!this.isReplaying) {
                 this.isReplaying = true;
                 Action.PlayTurn.process(this.game, this.game.logManager.logs.length - 1);
             }
@@ -254,6 +256,7 @@ module TacticArena.UI {
         }
 
         skillDeselectAll(oneIsSelected = false) {
+            this.hasSkillSelected = false;
             this.skills.forEach(function (actionMenuSkill) {
                 actionMenuSkill.group.alpha = 1;
                 if (oneIsSelected) {
@@ -266,35 +269,38 @@ module TacticArena.UI {
             });
         }
 
-        skillSelect(sprite, pointer, index) {
-            if (this.playable && this.skills[index].skill.minCost <= this.pawn.getAp()) {
-                this.skillDeselectAll(true);
-                this.skills[index].skill.onSelect();
-                this.skills[index].selected = true;
-                this.skills[index].group.alpha = 1;
-                this.enableCancel();
-                this.disableConfirm();
+        skillClick(sprite, pointer, index) {
+            if (this.playable) {
+                if (this.skills[index].selected) { // in case the skill is already selected, we deselect it
+                    this.skillDeselectAll();
+                    this.update();
+                } else if (this.skills[index].skill.minCost <= this.pawn.getAp()) {
+                    this.skillDeselectAll(true);
+                    this.skills[index].skill.onSelect();
+                    this.skills[index].selected = true;
+                    this.hasSkillSelected = true;
+                    this.skills[index].group.alpha = 1;
+                    this.enableCancel();
+                    this.disableConfirm();
+                }
             }
         }
 
         getSelectedSkill() {
             let result = null;
-            try {
+            if (this.hasSkillSelected) {
                 result = this.skills.filter(skill => {
                     return skill.selected;
                 })[0].skill;
-            } catch (TypeError) {
-                //console.warn('no selected skill');
             }
             return result;
         }
 
         update() {
-            let self = this;
-            this.skills.forEach(function (actionMenuSkill) {
-                actionMenuSkill.group.alpha = 1;
-                if (actionMenuSkill.skill.minCost > self.pawn.getAp()) {
-                    actionMenuSkill.group.alpha = 0.5;
+            this.skills.forEach(actionMenuSkill => {
+                actionMenuSkill.group.alpha = 0.5;
+                if (actionMenuSkill.selected || (this.pawn.getAp() >= actionMenuSkill.skill.minCost && !this.hasSkillSelected)) {
+                    actionMenuSkill.group.alpha = 1; // => show all skills as available if no selected skill and not too expensive
                 }
             });
         }

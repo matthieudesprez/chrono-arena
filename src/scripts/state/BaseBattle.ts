@@ -83,7 +83,7 @@ module TacticArena.State {
         getRemainingPlayers(): Player.BasePlayer[] {
             return this.players.filter((player: Player.BasePlayer) => {
                 return this.pawns.filter((pawn: Champion.BaseChampion) => {
-                        return pawn.isAlive() && pawn.team === player._id
+                        return pawn.isAlive() && pawn.playerId === player._id
                     }).length > 0;
             });
         }

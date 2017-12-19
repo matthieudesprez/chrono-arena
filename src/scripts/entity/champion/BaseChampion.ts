@@ -10,10 +10,10 @@ module TacticArena.Champion {
         _hpMax: number;
         _mpMax: number;
         type: string;
-        team: number;
+        playerId: number;
         spriteClass: typeof Sprite.BaseSprite;
         skills: Skill.BaseSkill[];
-        position: Position; // during Order Phase = initial position, during Resolve Phase = current step position (TODO beware of moved -> see ResolveManager)
+        position: Position; // during Order Phase = initial position, during Resolve Phase = current step position
 
         constructor(state, position: Position, type, id, team, name = "", spriteClass: typeof Sprite.BaseSprite = Sprite.BaseSprite) {
             this.state = state;
@@ -28,7 +28,7 @@ module TacticArena.Champion {
             this._hpMax = 4;
             this._apMax = 3;
             this._mpMax = 2;
-            this.team = team;
+            this.playerId = team;
             this.skills = [];
         }
 

@@ -91,7 +91,7 @@ module TacticArena.UI {
                     return player.isBot;
                 }).forEach( (player: Player.BasePlayer) => {
                     uiManager.game.pawns.filter( (pawn: Champion.BaseChampion) => {
-                        return pawn.team === player._id;
+                        return pawn.playerId === player._id;
                     }).forEach((pawn:Champion.BaseChampion) => {
                         pawn.setHp(0, true, true);
                     });
