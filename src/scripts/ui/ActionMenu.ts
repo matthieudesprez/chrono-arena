@@ -273,6 +273,7 @@ module TacticArena.UI {
             if (this.playable) {
                 if (this.skills[index].selected) { // in case the skill is already selected, we deselect it
                     this.skillDeselectAll();
+                    this.enableConfirm();
                     this.update();
                 } else if (this.skills[index].skill.minCost <= this.pawn.getAp()) {
                     this.skillDeselectAll(true);

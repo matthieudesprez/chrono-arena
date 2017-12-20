@@ -1,11 +1,11 @@
 module TacticArena.Utils {
     export class Generator {
 
-        constructor () {
+        constructor() {
 
         }
 
-        generate (n = 5) {
+        generate(n = 5) {
             var letter = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
             var consonant = ['b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'q', 'r', 's', 't', 'v', 'w', 'x', 'y', 'z'];
             var vowel = ['a', 'e', 'i', 'o', 'u'];

@@ -12,11 +12,11 @@ module TacticArena.Player {
             this.faction = 'human';
             this.isLocalPlayer = true;
             this.isBot = false;
-            this.battleParty = [Champion.Ruairi, Champion.Blondy];
+            this.battleParty = [Champion.Ruairi, Champion.Troll];
         }
 
         getCharacters() {
-            return [Champion.Ruairi, Champion.Skeleton, Champion.Evil, Champion.Blondy];
+            return [Champion.Ruairi, Champion.Skeleton, Champion.Evil, Champion.Blondy, Champion.Troll];
         }
 
         getMaps() {

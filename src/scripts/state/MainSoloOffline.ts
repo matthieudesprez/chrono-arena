@@ -19,5 +19,14 @@ module TacticArena.State {
                 });
             });
         }
+
+
+        render() {
+            // Display
+            //this.game.debug.spriteBounds(this.spritesManager.getReal(this.pawns[2]), 'rgba(255, 0, 0, 0.5)');
+            //this.game.debug.spriteBounds(this.spritesManager.getReal(this.pawns[3]));
+            //this.game.debug.spriteBounds(this.uiSpritesGroup, 'rgba(255, 255, 0, 0.5)');
+            //this.game.debug.spriteCorners(this, true, true);
+        }
     }
 }

@@ -94,6 +94,7 @@ module TacticArena.Sprite {
             return new Promise((resolve, reject) => {
                 this._ext = ext;
                 this._animationCompleteCallback = function () {
+                    this.stand();
                     resolve(true);
                 };
                 this.playAnimation('attack' + this._ext);

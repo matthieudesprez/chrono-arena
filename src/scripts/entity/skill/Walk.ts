@@ -34,6 +34,7 @@ module TacticArena.Skill {
         }
         
         order(target) {
+            console.log(target);
             let distance = this.state.stageManager.getNbTilesBetween(target, this.state.spritesManager.getProjectionOrReal(this.pawn).getPosition());
             this.state.stageManager.canMove(this.state.spritesManager.getProjectionOrReal(this.pawn).getPosition(), target.x, target.y, this.pawn.getAp()).then((path) => {
                 this.state.process = true;
