@@ -31,58 +31,6 @@ module TacticArena.Sprite {
             this.events.onAnimationComplete.add(this.animationComplete, this);
         }
 
-        //TODO change x, y to position: Position
-        moveTo(x, y, path = [], animate = true, faceDirection = false, playWalkAnimation = true): Promise<any> {
-            return new Promise((resolve, reject) => {
-                var tile_y, tile_x;
-                if (path != undefined && path.length > 0) {
-                    tile_y = path[0].y;
-                    tile_x = path[0].x;
-                    path.shift();
-                } else {
-                    tile_y = Math.floor(y);
-                    tile_x = Math.floor(x);
-                }
-                var tile = this.state.stageManager.map.layers[1].data[tile_y][tile_x];
-                var newX = tile.x * this.state.game.tileSize;
-                var newY = tile.y * this.state.game.tileSize;
-                if (this.x == newX && this.y == newY) { return resolve(true);}
-                if (animate) {
-                    if (faceDirection) {
-                        this.faceTo(newX, newY);
-                    }
-                    if (playWalkAnimation && this.animations.currentAnim.name != 'walk' + this._ext) {
-                        this.walk();
-                    }
-                    var t = this.game.add.tween(this).to({
-                        x: newX,
-                        y: newY
-                    }, this._speed, Phaser.Easing.Linear.None, true);
-                    t.onComplete.add(function () {
-                        if (path != undefined && path.length > 0) {
-                            this.moveTo(0, 0, path, animate, faceDirection).then((res) => {
-                                resolve(res);
-                            }); // recursive
-                        } else {
-                            resolve(true);
-                        }
-                    }, this);
-                } else {
-                    this.x = newX;
-                    this.y = newY;
-                    resolve(true);
-                }
-            });
-        }
-
-        getPosition(): Position {
-            return new Position(
-                this.position.x / this.state.game.tileSize,
-                this.position.y / this.state.game.tileSize,
-                this._ext
-            );
-        }
-
         update() {
             if(this._ext === 'S') {
                 this.anchor.set(0.48, 0.45);

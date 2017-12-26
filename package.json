@@ -1,17 +1,20 @@
 {
-  "name": "typescript-phaser",
-  "version": "0.0.0",
-  "dependencies": {},
+  "name": "chrono-arena",
+  "version": "0.1.0",
   "scripts": {
-    "watch": "tsc -w --outDir build",
-    "delete_build": "rm -rf build",
-    "serve": "lite-server",
-    "serve_headless": "lite-server -c ./bs-config-gitlab-ci.json",
-    "test": "karma start spec/support/karma.conf.js",
-    "test_watch": "karma start spec/support/karma.conf.js --no-single-run",
+    "yarn_install": "(yarn install --production --modules-folder ./build/dependencies/; rm -rf ./build/vendor; mv ./build/dependencies/ ./build/vendor/; yarn install)",
     "build": "(tsc; npm run cp)",
-    "cp": "concurrent \"cp src/index.html build\" \"cp src/tests.html build\" \"cp src/favicon.png build\" \"cp -R src/vendor src/css src/assets build\"",
-    "clean_vendors": "find ./src/vendor/phaser-official/ ! -name \"phaser.js\" -type f -delete && find ./src/vendor/phaser-official/ -type d -empty -delete && find ./src/vendor/easystarjs/ ! -name \"easystar-0.2.3.min.js\" -type f -delete && find ./src/vendor/easystarjs/ -type d -empty -delete"
+    "cp": "concurrent \"cp src/index.html build\" \"cp src/tests.html build\" \"cp src/favicon.png build\" \"cp -R src/css src/assets build\"",
+    "serve": "lite-server",
+    "test": "karma start spec/support/karma.conf.js",
+    "watch": "tsc -w --outDir build",
+    "test_watch": "karma start spec/support/karma.conf.js --no-single-run"
+  },
+  "dependencies": {
+    "phaser": "2.6.2",
+    "easystarjs": "~0.2.3",
+    "jasmine-core": "2.5.2",
+    "gif.js": "^0.2.0"
   },
   "devDependencies": {
     "codecov": "~1.0",
@@ -25,6 +28,10 @@
     "phantomjs-polyfill-find": "ptim/phantomjs-polyfill-find",
     "promise-polyfill": "~6.0.2",
     "remap-istanbul": "~0.8",
-    "typescript": "^2.2.1"
-  }
+    "typescript": "2.6.2"
+  },
+  "main": "build/app.js",
+  "repository": "git@gitlab.com:Edistra/tactic-arena.git",
+  "author": "Edistra <matthieu.desprez@gmail.com>",
+  "license": "MIT"
 }

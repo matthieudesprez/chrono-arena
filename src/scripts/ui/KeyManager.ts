@@ -6,6 +6,7 @@ module TacticArena.UI {
         spacebarKey;
         dKey;
         pKey;
+        rKey;
         wKey;
         escapeKey;
 
@@ -26,6 +27,9 @@ module TacticArena.UI {
 
             this.pKey = this.menu.game.input.keyboard.addKey(Phaser.KeyCode.P);
             this.pKey.onDown.add(this.pKeyPress, this, 0, this.menu);
+
+            this.rKey = this.menu.game.input.keyboard.addKey(Phaser.KeyCode.R);
+            this.rKey.onDown.add(this.rKeyPress, this, 0, this.menu);
 
             this.wKey = this.menu.game.input.keyboard.addKey(Phaser.KeyCode.W);
             this.wKey.onDown.add(this.wKeyPress, this, 0, this.menu);
@@ -69,6 +73,13 @@ module TacticArena.UI {
             if(self.altKey) {
                 uiManager.game.hideProjections = !uiManager.game.hideProjections;
             }
+        }
+
+        rKeyPress(self, uiManager) {
+            //if(self.altKey) {
+            //
+            //}
+            console.log('record');
         }
 
         /*

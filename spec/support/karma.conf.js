@@ -20,7 +20,7 @@ module.exports = function(config) {
             'node_modules/phantomjs-polyfill-find/find-polyfill.js',
             'node_modules/promise-polyfill/promise.min.js',
             'build/vendor/easystarjs/bin/easystar-0.2.3.min.js',
-            'build/vendor/phaser-official/build/phaser.js',
+            'build/vendor/phaser/build/phaser.js',
             {pattern: 'build/app.js', watched: true, included: true, served: true, nocache: false},
             {pattern: 'build/assets/**/*.png', watched: false, included: false, served: true, nocache: false},
             {pattern: 'build/assets/**/*.jpg', watched: false, included: false, served: true, nocache: false},
