@@ -1,6 +1,6 @@
 # Chrono Arena
 
-[Demo](http://www.edistra.com/chrono_arena/)
+[Demo](https://matthieudesprez.github.io/chrono-arena/)
 
 :information_source:  this is a work in progress, please feel free to create issues or contact me if you encounter errors in the demo or if you have any question related to this project.
 

@@ -198,6 +198,7 @@ module TacticArena.State {
 
         deselectedButtons() {
             Object.values(this.slideButtons).forEach(button => {
+                // @ts-ignore
                 button.setFrames('normal', 'disabled', 'normal');
             });
         }
