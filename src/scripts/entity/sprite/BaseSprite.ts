@@ -94,6 +94,7 @@ module TacticArena.Sprite {
             return new Promise((resolve, reject) => {
                 this._ext = ext;
                 this._animationCompleteCallback = function () {
+                    this.stand();
                     resolve(true);
                 };
                 this.playAnimation('attack' + this._ext);
@@ -157,9 +158,11 @@ module TacticArena.Sprite {
                     tile_x = Math.floor(x);
                 }
                 var tile = this.state.stageManager.map.layers[1].data[tile_y][tile_x];
-                var newX = tile.x * this.state.game.tileSize - this._size / 4;
-                var newY = tile.y * this.state.game.tileSize - this._size / 2;
-                if (this.x == newX && this.y == newY) { return resolve(true);}
+                var newX = tile.x * this.state.game.tileSize; // - this._size / 4;
+                var newY = tile.y * this.state.game.tileSize; // - this._size / 2;
+                if (this.x == newX && this.y == newY) {
+                    return resolve(true);
+                }
                 if (animate) {
                     if (faceDirection) {
                         this.faceTo(newX, newY);
@@ -190,8 +193,8 @@ module TacticArena.Sprite {
 
         getPosition(): Position {
             return new Position(
-                (this.position.x + this._size / 4) / this.state.game.tileSize,
-                (this.position.y + this._size / 2) / this.state.game.tileSize,
+                this.position.x / this.state.game.tileSize,
+                this.position.y / this.state.game.tileSize,
                 this._ext
             );
         }

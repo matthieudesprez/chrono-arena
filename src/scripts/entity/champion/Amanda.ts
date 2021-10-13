@@ -3,7 +3,7 @@ module TacticArena.Champion {
     export class Amanda extends BaseChampion {
 
         constructor(state, position, id, team) {
-            super(state, position, 'amanda', id, team, "Amanda", Sprite.BaseSprite);
+            super(state, position, 'amanda', id, team, "Amanda", Sprite.LpcSprite);
             this.skills = this.skills.concat([
                 new TacticArena.Skill.Slash(this.state, this),
                 //new TacticArena.Skill.Wind(this.state, this),

@@ -13,8 +13,8 @@ module TacticArena {
         getSprite(pawn) {
             return new pawn.spriteClass(
                 this.state,
-                this.state.game.tileSize * pawn.position.x - (64 / 4),
-                this.state.game.tileSize * pawn.position.y - (64 / 2),
+                pawn.position.x * this.state.game.tileSize,
+                pawn.position.y * this.state.game.tileSize,
                 pawn.getDirection(),
                 pawn.type
             );

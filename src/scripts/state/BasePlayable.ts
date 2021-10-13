@@ -73,6 +73,15 @@ module TacticArena.State {
             //this.pathTilesGroup.sort('y', Phaser.Group.SORT_ASCENDING);
             //this.uiSpritesGroup.sort('y', Phaser.Group.SORT_ASCENDING);
             this.pawnsSpritesGroup.sort('y', Phaser.Group.SORT_ASCENDING);
+            //this.pawnsSpritesGroup.children.sort((a, b) => {
+            //    console.log(a, b);
+            //    if (a.scale.x < b.scale.x) {
+            //        return -1;
+            //    } else {
+            //        return 1;
+            //    }
+            //});
+
         }
 
         initMap() {
@@ -84,13 +93,15 @@ module TacticArena.State {
             this.stageManager.addDecorations();
         }
 
-        shutdown () {
-            if(this.pointer) { this.pointer.destroy(); }
+        shutdown() {
+            if (this.pointer) {
+                this.pointer.destroy();
+            }
             this.pointer = null;
         }
 
         getChampion(id): Champion.BaseChampion {
-            return this.pawns.find( (champion: Champion.BaseChampion) => {
+            return this.pawns.find((champion: Champion.BaseChampion) => {
                 return champion._id === id;
             });
         }

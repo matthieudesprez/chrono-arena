@@ -1,15 +1,15 @@
 module TacticArena.Champion {
-    export class Skeleton extends BaseChampion {
+    export class Troll extends BaseChampion {
 
         constructor(state, position, id, team) {
-            super(state, position, 'skeleton', id, team, "Odokuro", Sprite.LpcSprite);
+            super(state, position, 'troll', id, team, "Troll", Sprite.TrollSprite);
             this.skills = this.skills.concat([
                 new TacticArena.Skill.Slash(this.state, this),
                 //new TacticArena.Skill.Wind(this.state, this),
                 new TacticArena.Skill.Fire(this.state, this),
                 new TacticArena.Skill.Walk(this.state, this)
             ]);
-            //this._apMax = 4;
+            this._apMax = 4;
         }
     }
 }

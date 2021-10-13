@@ -78,7 +78,7 @@ module TacticArena.State {
             this.load.atlasJSONArray('fireball', 'assets/images/fireball.png', 'assets/images/fireball.json');
             this.load.atlasJSONArray('wind', 'assets/images/wind.png', 'assets/images/wind.json');
 
-            ['ruairi', 'skeleton', 'evil', 'blondy', 'amanda'].forEach(characterName => {
+            ['ruairi', 'skeleton', 'evil', 'blondy', 'amanda', 'troll'].forEach(characterName => {
                 this.load.atlasJSONArray(characterName, 'assets/images/characters/' + characterName + '/spritesheet.png', 'assets/images/characters/' + characterName + '/spritesheet.json');
                 this.load.image('avatar-' + characterName, 'assets/images/characters/' + characterName + '/avatar.png');
                 this.load.image('avatar-' + characterName + '-small', 'assets/images/characters/' + characterName + '/avatar-small.png');
