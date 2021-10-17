@@ -1,6 +1,6 @@
 # Chrono Arena
 
-[Demo](https://matthieudesprez.github.io/chrono-arena/)
+[Demo](https://chrono-arena-nxkgrf93n-matthieudesprez.vercel.app/)
 
 :information_source:  this is a work in progress, please feel free to create issues or contact me if you encounter errors in the demo or if you have any question related to this project.
 
